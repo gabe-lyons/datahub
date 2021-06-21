@@ -4485,6 +4485,60 @@
             "keyAspect": "glossaryNodeKey",
             "name": "glossaryNode"
           }
+        },
+        {
+          "type": "record",
+          "name": "SchemaSnapshot",
+          "namespace": "com.linkedin.pegasus2avro.metadata.snapshot",
+          "fields": [
+            {
+              "name": "urn",
+              "type": "string",
+              "doc": "URN for the entity the metadata snapshot is associated with.",
+              "java": {
+                "class": "com.linkedin.pegasus2avro.common.urn.Urn"
+              }
+            },
+            {
+              "name": "aspects",
+              "type": {
+                "type": "array",
+                "items": [
+                  {
+                    "type": "record",
+                    "name": "SchemaKey",
+                    "namespace": "com.linkedin.pegasus2avro.metadata.key",
+                    "doc": "Key for a Schema",
+                    "fields": [
+                      {
+                        "name": "name",
+                        "type": "string",
+                        "Searchable": {
+                          "boostScore": 10.0,
+                          "enableAutocomplete": true,
+                          "fieldType": "TEXT_PARTIAL"
+                        }
+                      }
+                    ],
+                    "Aspect": {
+                      "name": "schemaKey"
+                    }
+                  },
+                  "com.linkedin.pegasus2avro.common.Ownership",
+                  "com.linkedin.pegasus2avro.common.Status",
+                  "com.linkedin.pegasus2avro.schema.SchemaMetadata",
+                  "com.linkedin.pegasus2avro.schema.EditableSchemaMetadata",
+                  "com.linkedin.pegasus2avro.common.GlobalTags",
+                  "com.linkedin.pegasus2avro.common.GlossaryTerms"
+                ]
+              },
+              "doc": "The list of metadata aspects associated with the dataset. Depending on the use case, this can either be all, or a selection, of supported aspects."
+            }
+          ],
+          "Entity": {
+            "keyAspect": "schemaKey",
+            "name": "schema"
+          }
         }
       ],
       "doc": "Snapshot of the metadata before the update. Set to null for newly created metadata. Only the metadata aspects affected by the update are included in the snapshot.",
@@ -4508,7 +4562,8 @@
         "com.linkedin.pegasus2avro.metadata.snapshot.MLFeatureTableSnapshot",
         "com.linkedin.pegasus2avro.metadata.snapshot.TagSnapshot",
         "com.linkedin.pegasus2avro.metadata.snapshot.GlossaryTermSnapshot",
-        "com.linkedin.pegasus2avro.metadata.snapshot.GlossaryNodeSnapshot"
+        "com.linkedin.pegasus2avro.metadata.snapshot.GlossaryNodeSnapshot",
+        "com.linkedin.pegasus2avro.metadata.snapshot.SchemaSnapshot"
       ],
       "doc": "Snapshot of the metadata after the update. Only the metadata aspects affected by the update are included in the snapshot."
     }

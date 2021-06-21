@@ -4537,6 +4537,60 @@
               }
             ],
             "doc": "A metadata snapshot for a specific GlossaryNode entity."
+          },
+          {
+            "type": "record",
+            "Entity": {
+              "keyAspect": "schemaKey",
+              "name": "schema"
+            },
+            "name": "SchemaSnapshot",
+            "namespace": "com.linkedin.pegasus2avro.metadata.snapshot",
+            "fields": [
+              {
+                "java": {
+                  "class": "com.linkedin.pegasus2avro.common.urn.Urn"
+                },
+                "type": "string",
+                "name": "urn",
+                "doc": "URN for the entity the metadata snapshot is associated with."
+              },
+              {
+                "type": {
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "record",
+                      "Aspect": {
+                        "name": "schemaKey"
+                      },
+                      "name": "SchemaKey",
+                      "namespace": "com.linkedin.pegasus2avro.metadata.key",
+                      "fields": [
+                        {
+                          "Searchable": {
+                            "boostScore": 10.0,
+                            "enableAutocomplete": true,
+                            "fieldType": "TEXT_PARTIAL"
+                          },
+                          "type": "string",
+                          "name": "name"
+                        }
+                      ],
+                      "doc": "Key for a Schema"
+                    },
+                    "com.linkedin.pegasus2avro.common.Ownership",
+                    "com.linkedin.pegasus2avro.common.Status",
+                    "com.linkedin.pegasus2avro.schema.SchemaMetadata",
+                    "com.linkedin.pegasus2avro.schema.EditableSchemaMetadata",
+                    "com.linkedin.pegasus2avro.common.GlobalTags",
+                    "com.linkedin.pegasus2avro.common.GlossaryTerms"
+                  ]
+                },
+                "name": "aspects",
+                "doc": "The list of metadata aspects associated with the dataset. Depending on the use case, this can either be all, or a selection, of supported aspects."
+              }
+            ]
           }
         ],
         "name": "proposedSnapshot",
@@ -4585,7 +4639,8 @@
           "com.linkedin.pegasus2avro.metadata.snapshot.MLFeatureTableSnapshot",
           "com.linkedin.pegasus2avro.metadata.snapshot.TagSnapshot",
           "com.linkedin.pegasus2avro.metadata.snapshot.GlossaryTermSnapshot",
-          "com.linkedin.pegasus2avro.metadata.snapshot.GlossaryNodeSnapshot"
+          "com.linkedin.pegasus2avro.metadata.snapshot.GlossaryNodeSnapshot",
+          "com.linkedin.pegasus2avro.metadata.snapshot.SchemaSnapshot"
         ],
         "name": "oldSnapshot",
         "default": null,
@@ -4608,7 +4663,8 @@
           "com.linkedin.pegasus2avro.metadata.snapshot.MLFeatureTableSnapshot",
           "com.linkedin.pegasus2avro.metadata.snapshot.TagSnapshot",
           "com.linkedin.pegasus2avro.metadata.snapshot.GlossaryTermSnapshot",
-          "com.linkedin.pegasus2avro.metadata.snapshot.GlossaryNodeSnapshot"
+          "com.linkedin.pegasus2avro.metadata.snapshot.GlossaryNodeSnapshot",
+          "com.linkedin.pegasus2avro.metadata.snapshot.SchemaSnapshot"
         ],
         "name": "newSnapshot",
         "doc": "Snapshot of the metadata after the update. Only the metadata aspects affected by the update are included in the snapshot."

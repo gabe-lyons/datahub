@@ -19,6 +19,7 @@ from ......schema_classes import MLFeatureKeyClass
 from ......schema_classes import MLFeatureTableKeyClass
 from ......schema_classes import MLModelKeyClass
 from ......schema_classes import MLPrimaryKeyKeyClass
+from ......schema_classes import SchemaKeyClass
 from ......schema_classes import TagKeyClass
 
 
@@ -37,5 +38,6 @@ MLFeatureKey = MLFeatureKeyClass
 MLFeatureTableKey = MLFeatureTableKeyClass
 MLModelKey = MLModelKeyClass
 MLPrimaryKeyKey = MLPrimaryKeyKeyClass
+SchemaKey = SchemaKeyClass
 TagKey = TagKeyClass
 # fmt: on

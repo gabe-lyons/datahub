@@ -1,0 +1,22 @@
+namespace com.linkedin.metadata.aspect
+
+import com.linkedin.metadata.key.SchemaKey
+import com.linkedin.schema.SchemaMetadata
+import com.linkedin.schema.EditableSchemaMetadata
+import com.linkedin.common.Ownership
+import com.linkedin.common.Status
+import com.linkedin.common.GlobalTags
+import com.linkedin.common.GlossaryTerms
+
+/**
+ * A union of all supported metadata aspects for a Dataset
+ */
+typeref SchemaAspect = union[
+  SchemaKey,
+  Ownership,
+  Status,
+  SchemaMetadata,
+  EditableSchemaMetadata,
+  GlobalTags,
+  GlossaryTerms,
+]

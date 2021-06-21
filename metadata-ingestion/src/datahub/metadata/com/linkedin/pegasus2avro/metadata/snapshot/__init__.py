@@ -19,6 +19,7 @@ from ......schema_classes import MLFeatureSnapshotClass
 from ......schema_classes import MLFeatureTableSnapshotClass
 from ......schema_classes import MLModelSnapshotClass
 from ......schema_classes import MLPrimaryKeySnapshotClass
+from ......schema_classes import SchemaSnapshotClass
 from ......schema_classes import TagSnapshotClass
 
 
@@ -37,5 +38,6 @@ MLFeatureSnapshot = MLFeatureSnapshotClass
 MLFeatureTableSnapshot = MLFeatureTableSnapshotClass
 MLModelSnapshot = MLModelSnapshotClass
 MLPrimaryKeySnapshot = MLPrimaryKeySnapshotClass
+SchemaSnapshot = SchemaSnapshotClass
 TagSnapshot = TagSnapshotClass
 # fmt: on
