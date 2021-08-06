@@ -273,10 +273,6 @@ def quickstart(
         "Need support? Get in touch on Slack: https://slack.datahubproject.io/",
         fg="purple",
     )
-    click.secho(
-        "You can find the docs here: https://datahubproject.io/",
-        fg="purple",
-    )
 
 
 @docker.command()
