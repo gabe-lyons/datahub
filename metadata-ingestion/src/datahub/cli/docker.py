@@ -271,7 +271,7 @@ def quickstart(
     )
     click.secho(
         "Need support? Get in touch on Slack: https://slack.datahubproject.io/",
-        fg="purple",
+        fg="magenta",
     )
 
 
