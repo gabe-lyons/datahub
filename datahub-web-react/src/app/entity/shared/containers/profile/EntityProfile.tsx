@@ -39,10 +39,14 @@ const ContentContainer = styled.div`
     height: auto;
     min-height: 100%;
     align-items: stretch;
+    flex: 1;
 `;
 
 const HeaderAndTabs = styled.div`
     width: 100%;
+    justify-content: space-between;
+    display: flex;
+    flex-direction: column;
 `;
 const Sidebar = styled.div`
     width: 489px;
@@ -54,6 +58,7 @@ const Header = styled.div`
 `;
 const TabContent = styled.div`
     border: 1px solid ${REDESIGN_COLORS.GREY};
+    flex: 1;
 `;
 
 // TODO(Gabe): Refactor this to generate dynamically

@@ -12,9 +12,7 @@ type Props = {
     entityData: GenericEntityProperties | null;
 };
 
-const AffixWithHeight = styled(Affix)`
-    height: 48px;
-`;
+const AffixWithHeight = styled(Affix)``;
 
 export const ProfileNavBar = ({ urn, entityData, entityType }: Props) => {
     const { data: browseData } = useGetBrowsePathsQuery({ variables: { input: { urn, type: entityType } } });
