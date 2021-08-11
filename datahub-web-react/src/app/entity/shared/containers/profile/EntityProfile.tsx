@@ -1,16 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Alert } from 'antd';
 import { MutationHookOptions, MutationTuple, QueryHookOptions, QueryResult } from '@apollo/client/react/types/types';
 import styled from 'styled-components';
 
 import { EntityType, Exact } from '../../../../../types.generated';
 import { Message } from '../../../../shared/Message';
-import useIsLineageMode from '../../../../lineage/utils/useIsLineageMode';
 import { useEntityRegistry } from '../../../../useEntityRegistry';
 import { getDataForEntityType } from './utils';
-import { GenericEntityProperties, GenericEntityUpdate } from './types';
+import { EntityTab, GenericEntityProperties, GenericEntityUpdate } from './types';
 import { ProfileNavBar } from './nav/ProfileNavBar';
 import { REDESIGN_COLORS } from '../../constants';
+import { EntityHeader } from './header/EntityHeader';
 
 type Props<T, U> = {
     urn: string;
@@ -32,6 +32,7 @@ type Props<T, U> = {
         baseOptions?: MutationHookOptions<U, { input: GenericEntityUpdate }> | undefined,
     ) => MutationTuple<U, { input: GenericEntityUpdate }>;
     getOverrideProperties: (T) => GenericEntityProperties;
+    tabs: EntityTab[];
 };
 
 const ContentContainer = styled.div`
@@ -73,9 +74,9 @@ export const EntityProfile = <T, U>({
     useUpdateQuery,
     entityType,
     getOverrideProperties,
+    tabs,
 }: Props<T, U>): JSX.Element => {
     const entityRegistry = useEntityRegistry();
-    const isLineageMode = useIsLineageMode();
 
     const { loading, error, data } = useEntityQuery({ variables: { urn } });
 
@@ -83,9 +84,11 @@ export const EntityProfile = <T, U>({
         refetchQueries: () => [QUERY_NAME],
     });
 
+    const [selectedTab, setSelectedTab] = useState(tabs[0].name);
+
     const entityData = getDataForEntityType({ data, entityType, getOverrideProperties });
 
-    console.log({ entityRegistry, isLineageMode, updateEntity });
+    console.log({ entityRegistry, updateEntity });
 
     return (
         <>
@@ -96,7 +99,10 @@ export const EntityProfile = <T, U>({
             )}
             <ContentContainer>
                 <HeaderAndTabs>
-                    <Header>Header</Header>
+                    <Header>
+                        <EntityHeader urn={urn} entityType={entityType} entityData={entityData} />
+                        <EntityTabs />
+                    </Header>
                     <TabContent>tab content</TabContent>
                 </HeaderAndTabs>
                 <Sidebar>Sidebar</Sidebar>

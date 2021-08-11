@@ -46,7 +46,7 @@ const HoverableVscRepoForked = styled(({ isSelected: _, ...props }: IconBaseProp
 `;
 
 const BrowseRow = styled(Row)`
-    padding: 10px 100px;
+    padding: 10px;
     border-bottom: 1px solid #dcdcdc;
     background-color: ${(props) => props.theme.styles['body-background']};
     display: flex;
@@ -64,7 +64,7 @@ const LineageSummary = styled.div`
 /**
  * Responsible for rendering a clickable browse path view.
  */
-// TODO(Gabe)
+// TODO(Gabe): use this everywhere
 export const ProfileNavBrowsePath = ({ type, path, upstreams, downstreams }: Props): JSX.Element => {
     const entityRegistry = useEntityRegistry();
     const history = useHistory();

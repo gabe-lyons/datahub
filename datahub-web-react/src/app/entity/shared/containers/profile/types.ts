@@ -1,4 +1,5 @@
 import {
+    DataPlatform,
     DownstreamEntityRelationships,
     GlobalTags,
     GlobalTagsUpdate,
@@ -9,10 +10,10 @@ import {
     UpstreamEntityRelationships,
 } from '../../../../../types.generated';
 
-export type Tab = {
+export type EntityTab = {
     name: string;
     component: React.ComponentType;
-    hide?: () => boolean;
+    hide?: (GenericEntityProperties) => boolean;
 };
 
 export type GenericEntityProperties = {
@@ -24,6 +25,7 @@ export type GenericEntityProperties = {
     upstreamLineage?: Maybe<UpstreamEntityRelationships>;
     downstreamLineage?: Maybe<DownstreamEntityRelationships>;
     ownership?: Maybe<Ownership>;
+    platform?: Maybe<DataPlatform>;
 };
 
 export type GenericEntityUpdate = {
