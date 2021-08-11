@@ -6,7 +6,7 @@ import { GlobalTags, Owner, GlossaryTerms } from '../../types.generated';
 import { useEntityRegistry } from '../useEntityRegistry';
 import AvatarsGroup from '../shared/avatar/AvatarsGroup';
 import TagTermGroup from '../shared/tags/TagTermGroup';
-import MarkdownViewer from '../entity/shared/MarkdownViewer';
+import MarkdownViewer from '../entity/shared/components/MarkdownViewer';
 
 interface Props {
     name: string;

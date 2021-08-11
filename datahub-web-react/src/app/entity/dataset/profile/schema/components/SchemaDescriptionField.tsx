@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { FetchResult } from '@apollo/client';
 
 import { UpdateDatasetMutation } from '../../../../../../graphql/dataset.generated';
-import UpdateDescriptionModal from '../../../../shared/DescriptionModal';
-import MarkdownViewer from '../../../../shared/MarkdownViewer';
+import UpdateDescriptionModal from '../../../../shared/components/DescriptionModal';
+import MarkdownViewer from '../../../../shared/components/MarkdownViewer';
 
 const EditIcon = styled(EditOutlined)`
     cursor: pointer;

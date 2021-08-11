@@ -3,12 +3,14 @@ import { DatabaseFilled, DatabaseOutlined } from '@ant-design/icons';
 import { Tag, Typography } from 'antd';
 import styled from 'styled-components';
 import { Dataset, EntityType, SearchResult } from '../../../types.generated';
-import { DatasetProfile } from './profile/DatasetProfile';
 import { Entity, IconStyleType, PreviewType } from '../Entity';
 import { Preview } from './preview/Preview';
 import { FIELDS_TO_HIGHLIGHT } from './search/highlights';
 import { Direction } from '../../lineage/types';
 import getChildren from '../../lineage/utils/getChildren';
+import { EntityProfile } from '../shared/containers/profile/EntityProfile';
+import { GetDatasetQuery, useGetDatasetQuery, useUpdateDatasetMutation } from '../../../graphql/dataset.generated';
+import { GenericEntityProperties } from '../shared/containers/profile/types';
 
 const MatchTag = styled(Tag)`
     &&& {
@@ -60,7 +62,20 @@ export class DatasetEntity implements Entity<Dataset> {
 
     getCollectionName = () => 'Datasets';
 
-    renderProfile = (urn: string) => <DatasetProfile urn={urn} />;
+    renderProfile = (urn: string) => (
+        <EntityProfile
+            urn={urn}
+            entityType={EntityType.Dataset}
+            useEntityQuery={useGetDatasetQuery}
+            useUpdateQuery={useUpdateDatasetMutation}
+            getOverrideProperties={this.getOverrideProperties}
+        />
+    );
+
+    getOverrideProperties = (entity: GetDatasetQuery): GenericEntityProperties => {
+        console.log(entity);
+        return {};
+    };
 
     renderPreview = (_: PreviewType, data: Dataset) => {
         return (

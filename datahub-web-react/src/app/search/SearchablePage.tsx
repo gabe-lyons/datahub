@@ -1,5 +1,4 @@
 import React from 'react';
-import { Layout } from 'antd';
 import { useHistory } from 'react-router';
 import { useTheme } from 'styled-components';
 
@@ -68,7 +67,7 @@ export const SearchablePage = ({ initialQuery, onSearch, onAutoComplete, childre
     };
 
     return (
-        <Layout>
+        <>
             <SearchHeader
                 initialQuery={initialQuery as string}
                 placeholderText={themeConfig.content.search.searchbarMessage}
@@ -85,7 +84,7 @@ export const SearchablePage = ({ initialQuery, onSearch, onAutoComplete, childre
                 entityRegistry={entityRegistry}
             />
             <div style={styles.children}>{children}</div>
-        </Layout>
+        </>
     );
 };
 

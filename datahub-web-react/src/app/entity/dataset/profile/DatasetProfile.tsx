@@ -1,12 +1,12 @@
 import React from 'react';
 import { Alert } from 'antd';
 import { useGetDatasetQuery, useUpdateDatasetMutation } from '../../../../graphql/dataset.generated';
-import { Ownership as OwnershipView } from '../../shared/Ownership';
+import { Ownership as OwnershipView } from '../../shared/components/Ownership';
 import SchemaView from './schema/Schema';
-import { EntityProfile } from '../../../shared/EntityProfile';
+import { LegacyEntityProfile } from '../../../shared/LegacyEntityProfile';
 import { Dataset, EntityType, GlobalTags, GlossaryTerms, SchemaMetadata } from '../../../../types.generated';
 import LineageView from './Lineage';
-import { Properties as PropertiesView } from '../../shared/Properties';
+import { Properties as PropertiesView } from '../../shared/components/Properties';
 import DocumentsView from './Documentation';
 import DatasetHeader from './DatasetHeader';
 import { Message } from '../../../shared/Message';
@@ -156,7 +156,7 @@ export const DatasetProfile = ({ urn }: { urn: string }): JSX.Element => {
         <>
             {loading && <Message type="loading" content="Loading..." style={{ marginTop: '10%' }} />}
             {data && data.dataset && (
-                <EntityProfile
+                <LegacyEntityProfile
                     titleLink={`/${entityRegistry.getPathName(
                         EntityType.Dataset,
                     )}/${urn}?is_lineage_mode=${isLineageMode}`}

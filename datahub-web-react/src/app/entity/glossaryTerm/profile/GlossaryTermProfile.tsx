@@ -3,12 +3,12 @@ import React, { useMemo } from 'react';
 import { useGetGlossaryTermQuery } from '../../../../graphql/glossaryTerm.generated';
 import { EntityType, GlossaryTerm, SearchResult } from '../../../../types.generated';
 import { useGetEntitySearchResults } from '../../../../utils/customGraphQL/useGetEntitySearchResults';
-import { EntityProfile } from '../../../shared/EntityProfile';
+import { LegacyEntityProfile } from '../../../shared/LegacyEntityProfile';
 import RelatedEntityResults from '../../../shared/entitySearch/RelatedEntityResults';
 import useUserParams from '../../../shared/entitySearch/routingUtils/useUserParams';
 import { Message } from '../../../shared/Message';
 import { useEntityRegistry } from '../../../useEntityRegistry';
-import { Properties as PropertiesView } from '../../shared/Properties';
+import { Properties as PropertiesView } from '../../shared/components/Properties';
 import GlossaryTermHeader from './GlossaryTermHeader';
 
 const messageStyle = { marginTop: '10%' };
@@ -89,7 +89,7 @@ export default function GlossaryTermProfile() {
         <>
             {contentLoading && <Message type="loading" content="Loading..." style={messageStyle} />}
             {data && data.glossaryTerm && (
-                <EntityProfile
+                <LegacyEntityProfile
                     title={data.glossaryTerm.name}
                     tags={null}
                     header={getHeader(data?.glossaryTerm as GlossaryTerm)}

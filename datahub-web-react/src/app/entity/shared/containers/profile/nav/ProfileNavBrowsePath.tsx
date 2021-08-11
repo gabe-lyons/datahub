@@ -1,24 +1,22 @@
 import React from 'react';
 import { Link, useHistory, useLocation } from 'react-router-dom';
-import { Breadcrumb, Row } from 'antd';
+import { Badge, Breadcrumb, Row } from 'antd';
 import styled from 'styled-components';
 import { IconBaseProps } from 'react-icons/lib';
 import { VscRepoForked, VscPreview } from 'react-icons/vsc';
 import { blue, grey } from '@ant-design/colors';
+import { EntityType } from '../../../../../../types.generated';
+import { useEntityRegistry } from '../../../../../useEntityRegistry';
+import { PageRoutes } from '../../../../../../conf/Global';
+import { navigateToLineageUrl } from '../../../../../lineage/utils/navigateToLineageUrl';
+import useIsLineageMode from '../../../../../lineage/utils/useIsLineageMode';
 
-import { PageRoutes } from '../../conf/Global';
-import { useEntityRegistry } from '../useEntityRegistry';
-import { EntityType } from '../../types.generated';
-import { navigateToLineageUrl } from '../lineage/utils/navigateToLineageUrl';
-import useIsLineageMode from '../lineage/utils/useIsLineageMode';
-
-interface Props {
+type Props = {
     type: EntityType;
     path: Array<string>;
-    lineageSupported?: boolean;
-    isProfilePage?: boolean;
-    isBrowsable?: boolean;
-}
+    upstreams: number;
+    downstreams: number;
+};
 
 const LineageIconGroup = styled.div`
     width: 60px;
@@ -55,10 +53,19 @@ const BrowseRow = styled(Row)`
     justify-content: space-between;
 `;
 
+const LineageNavContainer = styled.div`
+    display: inline-flex;
+`;
+
+const LineageSummary = styled.div`
+    margin-left: 12px;
+`;
+
 /**
  * Responsible for rendering a clickable browse path view.
  */
-export const BrowsePath = ({ type, path, lineageSupported, isProfilePage, isBrowsable }: Props) => {
+// TODO(Gabe)
+export const ProfileNavBrowsePath = ({ type, path, upstreams, downstreams }: Props): JSX.Element => {
     const entityRegistry = useEntityRegistry();
     const history = useHistory();
     const location = useLocation();
@@ -74,9 +81,7 @@ export const BrowsePath = ({ type, path, lineageSupported, isProfilePage, isBrow
         <Breadcrumb.Item key={`${part || index}`}>
             <Link
                 to={
-                    (isProfilePage && index === path.length - 1) || !isBrowsable
-                        ? '#'
-                        : `${baseBrowsePath}/${createPartialPath(path.slice(0, index + 1))}`
+                    index === path.length - 1 ? '#' : `${baseBrowsePath}/${createPartialPath(path.slice(0, index + 1))}`
                 }
             >
                 {part}
@@ -88,23 +93,28 @@ export const BrowsePath = ({ type, path, lineageSupported, isProfilePage, isBrow
         <BrowseRow>
             <Breadcrumb style={{ fontSize: '16px' }}>
                 <Breadcrumb.Item>
-                    <Link to={isBrowsable ? baseBrowsePath : '#'}>{entityRegistry.getCollectionName(type)}</Link>
+                    <Link to={baseBrowsePath}>{entityRegistry.getCollectionName(type)}</Link>
                 </Breadcrumb.Item>
                 {pathCrumbs}
             </Breadcrumb>
-            {lineageSupported && (
-                <LineageIconGroup>
-                    <HoverableVscPreview
-                        isSelected={!isLineageMode}
-                        size={26}
-                        onClick={() => navigateToLineageUrl({ location, history, isLineageMode: false })}
-                    />
-                    <HoverableVscRepoForked
-                        size={26}
-                        isSelected={isLineageMode}
-                        onClick={() => navigateToLineageUrl({ location, history, isLineageMode: true })}
-                    />
-                </LineageIconGroup>
+            {(upstreams > 0 || downstreams > 0) && (
+                <LineageNavContainer>
+                    <LineageIconGroup>
+                        <HoverableVscPreview
+                            isSelected={!isLineageMode}
+                            size={26}
+                            onClick={() => navigateToLineageUrl({ location, history, isLineageMode: false })}
+                        />
+                        <HoverableVscRepoForked
+                            size={26}
+                            isSelected={isLineageMode}
+                            onClick={() => navigateToLineageUrl({ location, history, isLineageMode: true })}
+                        />
+                    </LineageIconGroup>
+                    <LineageSummary>
+                        <Badge count="2 upstream, 3 downstream" />
+                    </LineageSummary>
+                </LineageNavContainer>
             )}
         </BrowseRow>
     );
