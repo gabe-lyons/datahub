@@ -1,32 +1,28 @@
 import React from 'react';
+import { Space, Table, Typography } from 'antd';
+import { ColumnsType } from 'antd/es/table';
 
-type Props = {
-    urn: string;
-    entityType: EntityType;
-    entityData: GenericEntityProperties | null;
-};
+import { TabProps } from '../../types';
+import { StringMapEntry } from '../../../../../types.generated';
 
-export const PropertiesTab = ({ urn, entityData, entityType }: Props) => {
-    const entityRegistry = useEntityRegistry();
-    const platformName = capitalizeFirstLetter(entityData?.platform?.name);
-    const platformLogoUrl = entityData?.platform?.info?.logoUrl;
-    const isLineageMode = useIsLineageMode();
-    const entityTypeCased = entityType[0] + entityType.slice(1).toLowerCase();
+export const PropertiesTab = ({ entityData }: TabProps) => {
+    const propertyTableColumns: ColumnsType<StringMapEntry> = [
+        {
+            title: 'Name',
+            dataIndex: 'key',
+            sorter: (a, b) => a.key.localeCompare(b.key),
+            defaultSortOrder: 'ascend',
+        },
+        {
+            title: 'Value',
+            dataIndex: 'value',
+        },
+    ];
 
     return (
-        <div>
-            <div>
-                <span>
-                    {!!platformLogoUrl && (
-                        <PreviewImage preview={false} src={platformLogoUrl} placeholder alt={platformName} />
-                    )}
-                </span>
-                <Typography.Text style={{ fontSize: 16 }}>{platformName}</Typography.Text>|
-                <Typography.Text style={{ fontSize: 16 }}>{entityTypeCased}</Typography.Text>
-            </div>
-            <Link to={`/${entityRegistry.getPathName(entityType)}/${urn}?is_lineage_mode=${isLineageMode}`}>
-                <Typography.Text style={{ fontSize: 22 }}>{entityData?.name}</Typography.Text>
-            </Link>
-        </div>
+        <Space direction="vertical" style={{ width: '100%' }} size="large">
+            <Typography.Title level={3}>Properties</Typography.Title>
+            <Table pagination={false} columns={propertyTableColumns} dataSource={entityData.properties} />
+        </Space>
     );
 };

@@ -7,7 +7,7 @@ import { EntityType, Exact } from '../../../../../types.generated';
 import { Message } from '../../../../shared/Message';
 import { useEntityRegistry } from '../../../../useEntityRegistry';
 import { getDataForEntityType } from './utils';
-import { EntityTab, GenericEntityProperties, GenericEntityUpdate } from './types';
+import { EntityTab, GenericEntityProperties, GenericEntityUpdate } from '../../types';
 import { ProfileNavBar } from './nav/ProfileNavBar';
 import { REDESIGN_COLORS } from '../../constants';
 import { EntityHeader } from './header/EntityHeader';

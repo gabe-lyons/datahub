@@ -7,7 +7,7 @@ import { EntityType } from '../../../../../../types.generated';
 import useIsLineageMode from '../../../../../lineage/utils/useIsLineageMode';
 import { capitalizeFirstLetter } from '../../../../../shared/capitalizeFirstLetter';
 import { useEntityRegistry } from '../../../../../useEntityRegistry';
-import { GenericEntityProperties } from '../types';
+import { GenericEntityProperties } from '../../../types';
 
 type Props = {
     urn: string;

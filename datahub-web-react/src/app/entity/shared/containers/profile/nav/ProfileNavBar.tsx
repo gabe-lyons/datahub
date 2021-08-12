@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { useGetBrowsePathsQuery } from '../../../../../../graphql/browse.generated';
 import { EntityType } from '../../../../../../types.generated';
-import { GenericEntityProperties } from '../types';
+import { GenericEntityProperties } from '../../../types';
 import { ProfileNavBrowsePath } from './ProfileNavBrowsePath';
 
 type Props = {

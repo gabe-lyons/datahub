@@ -1,5 +1,5 @@
 import { EntityType } from '../../../../../types.generated';
-import { GenericEntityProperties } from './types';
+import { GenericEntityProperties } from '../../types';
 
 export function getDataForEntityType<T>({
     data,

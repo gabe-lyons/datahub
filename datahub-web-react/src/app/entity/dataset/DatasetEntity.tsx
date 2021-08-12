@@ -10,7 +10,8 @@ import { Direction } from '../../lineage/types';
 import getChildren from '../../lineage/utils/getChildren';
 import { EntityProfile } from '../shared/containers/profile/EntityProfile';
 import { GetDatasetQuery, useGetDatasetQuery, useUpdateDatasetMutation } from '../../../graphql/dataset.generated';
-import { GenericEntityProperties } from '../shared/containers/profile/types';
+import { GenericEntityProperties } from '../shared/types';
+import { PropertiesTab } from '../shared/tabs/Properties/PropertiesTab';
 
 const MatchTag = styled(Tag)`
     &&& {
@@ -69,6 +70,12 @@ export class DatasetEntity implements Entity<Dataset> {
             useEntityQuery={useGetDatasetQuery}
             useUpdateQuery={useUpdateDatasetMutation}
             getOverrideProperties={this.getOverrideProperties}
+            tabs={[
+                {
+                    name: 'properties',
+                    component: PropertiesTab,
+                },
+            ]}
         />
     );
 

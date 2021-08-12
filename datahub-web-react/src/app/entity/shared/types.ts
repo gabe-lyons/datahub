@@ -1,18 +1,20 @@
 import {
     DataPlatform,
     DownstreamEntityRelationships,
+    EntityType,
     GlobalTags,
     GlobalTagsUpdate,
     GlossaryTerms,
     Maybe,
     Ownership,
     OwnershipUpdate,
+    StringMapEntry,
     UpstreamEntityRelationships,
-} from '../../../../../types.generated';
+} from '../../../types.generated';
 
 export type EntityTab = {
     name: string;
-    component: React.ComponentType;
+    component: React.FunctionComponent<TabProps>;
     hide?: (GenericEntityProperties) => boolean;
 };
 
@@ -26,6 +28,7 @@ export type GenericEntityProperties = {
     downstreamLineage?: Maybe<DownstreamEntityRelationships>;
     ownership?: Maybe<Ownership>;
     platform?: Maybe<DataPlatform>;
+    properties: Maybe<StringMapEntry[]>;
 };
 
 export type GenericEntityUpdate = {
@@ -33,4 +36,10 @@ export type GenericEntityUpdate = {
     description?: Maybe<string>;
     globalTags?: Maybe<GlobalTagsUpdate>;
     ownership?: Maybe<OwnershipUpdate>;
+};
+
+export type TabProps = {
+    urn: string;
+    entityType: EntityType;
+    entityData: GenericEntityProperties | null;
 };
