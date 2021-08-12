@@ -35,11 +35,11 @@ export const EntityHeader = ({ urn, entityData, entityType }: Props) => {
                         <PreviewImage preview={false} src={platformLogoUrl} placeholder alt={platformName} />
                     )}
                 </span>
-                <Typography.Text style={{ fontSize: 16 }}>{platformName}</Typography.Text>|
-                <Typography.Text style={{ fontSize: 16 }}>{entityTypeCased}</Typography.Text>
+                <Typography.Text style={{ fontSize: 12 }}>{platformName}</Typography.Text>|
+                <Typography.Text style={{ fontSize: 12 }}>{entityTypeCased}</Typography.Text>
             </div>
             <Link to={entityPath}>
-                <Typography.Text style={{ fontSize: 22 }}>{entityData?.name}</Typography.Text>
+                <Typography.Text style={{ fontSize: 20 }}>{entityData?.name}</Typography.Text>
             </Link>
         </div>
     );

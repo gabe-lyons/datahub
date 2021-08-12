@@ -72,7 +72,11 @@ export class DatasetEntity implements Entity<Dataset> {
             getOverrideProperties={this.getOverrideProperties}
             tabs={[
                 {
-                    name: 'properties',
+                    name: 'Properties',
+                    component: PropertiesTab,
+                },
+                {
+                    name: 'Properties Two',
                     component: PropertiesTab,
                 },
             ]}

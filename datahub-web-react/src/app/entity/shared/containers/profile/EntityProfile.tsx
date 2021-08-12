@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Alert } from 'antd';
 import { MutationHookOptions, MutationTuple, QueryHookOptions, QueryResult } from '@apollo/client/react/types/types';
 import styled from 'styled-components';
-import { useRouteMatch, useLocation, useHistory } from 'react-router';
 
 import { EntityType, Exact } from '../../../../../types.generated';
 import { Message } from '../../../../shared/Message';
@@ -12,6 +11,7 @@ import { EntityTab, GenericEntityProperties, GenericEntityUpdate } from '../../t
 import { ProfileNavBar } from './nav/ProfileNavBar';
 import { REDESIGN_COLORS } from '../../constants';
 import { EntityHeader } from './header/EntityHeader';
+import { EntityTabs } from './header/EntityTabs';
 
 type Props<T, U> = {
     urn: string;
@@ -42,6 +42,8 @@ const ContentContainer = styled.div`
     min-height: 100%;
     align-items: stretch;
     flex: 1;
+    font-family: 'Manrope', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans',
+        'Helvetica Neue', sans-serif;
 `;
 
 const HeaderAndTabs = styled.div`
@@ -55,8 +57,9 @@ const Sidebar = styled.div`
     border: 1px solid ${REDESIGN_COLORS.GREY};
 `;
 const Header = styled.div`
-    height: 137px;
+    height: 135px;
     border: 1px solid ${REDESIGN_COLORS.GREY};
+    padding: 20px;
 `;
 const TabContent = styled.div`
     border: 1px solid ${REDESIGN_COLORS.GREY};
@@ -78,7 +81,7 @@ export const EntityProfile = <T, U>({
     tabs,
 }: Props<T, U>): JSX.Element => {
     const entityRegistry = useEntityRegistry();
-    const rotuedTab = useRoutedTab(tabs);
+    const routedTab = useRoutedTab(tabs);
 
     const { loading, error, data } = useEntityQuery({ variables: { urn } });
 
@@ -101,9 +104,11 @@ export const EntityProfile = <T, U>({
                 <HeaderAndTabs>
                     <Header>
                         <EntityHeader urn={urn} entityType={entityType} entityData={entityData} />
-                        <EntityTabs tabs={tabs} urn={urn} entityType={entityType} />
+                        <EntityTabs tabs={tabs} urn={urn} entityType={entityType} selectedTab={routedTab} />
                     </Header>
-                    <TabContent>Tabs</TabContent>
+                    <TabContent>
+                        {routedTab && <routedTab.component urn={urn} entityType={entityType} entityData={entityData} />}
+                    </TabContent>
                 </HeaderAndTabs>
                 <Sidebar>Sidebar</Sidebar>
             </ContentContainer>

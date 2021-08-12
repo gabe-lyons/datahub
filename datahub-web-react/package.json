@@ -132,6 +132,6 @@
         "prettier": "^2.3.0"
     },
     "resolutions": {
-        "@ant-design/colors": "5.0.0"
+        "@ant-design/colors": "6.0.0"
     }
 }
