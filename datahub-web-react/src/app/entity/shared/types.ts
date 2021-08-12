@@ -28,7 +28,7 @@ export type GenericEntityProperties = {
     downstreamLineage?: Maybe<DownstreamEntityRelationships>;
     ownership?: Maybe<Ownership>;
     platform?: Maybe<DataPlatform>;
-    properties: Maybe<StringMapEntry[]>;
+    properties?: Maybe<StringMapEntry[]>;
 };
 
 export type GenericEntityUpdate = {

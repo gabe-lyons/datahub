@@ -4,10 +4,9 @@ import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { EntityType } from '../../../../../../types.generated';
-import useIsLineageMode from '../../../../../lineage/utils/useIsLineageMode';
 import { capitalizeFirstLetter } from '../../../../../shared/capitalizeFirstLetter';
-import { useEntityRegistry } from '../../../../../useEntityRegistry';
 import { GenericEntityProperties } from '../../../types';
+import { useEntityPath } from '../utils';
 
 type Props = {
     urn: string;
@@ -23,11 +22,10 @@ const PreviewImage = styled(Image)`
 `;
 
 export const EntityHeader = ({ urn, entityData, entityType }: Props) => {
-    const entityRegistry = useEntityRegistry();
     const platformName = capitalizeFirstLetter(entityData?.platform?.name);
     const platformLogoUrl = entityData?.platform?.info?.logoUrl;
-    const isLineageMode = useIsLineageMode();
     const entityTypeCased = entityType[0] + entityType.slice(1).toLowerCase();
+    const entityPath = useEntityPath(entityType, urn);
 
     return (
         <div>
@@ -40,7 +38,7 @@ export const EntityHeader = ({ urn, entityData, entityType }: Props) => {
                 <Typography.Text style={{ fontSize: 16 }}>{platformName}</Typography.Text>|
                 <Typography.Text style={{ fontSize: 16 }}>{entityTypeCased}</Typography.Text>
             </div>
-            <Link to={`/${entityRegistry.getPathName(entityType)}/${urn}?is_lineage_mode=${isLineageMode}`}>
+            <Link to={entityPath}>
                 <Typography.Text style={{ fontSize: 22 }}>{entityData?.name}</Typography.Text>
             </Link>
         </div>

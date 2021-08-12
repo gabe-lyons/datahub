@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { Alert } from 'antd';
 import { MutationHookOptions, MutationTuple, QueryHookOptions, QueryResult } from '@apollo/client/react/types/types';
 import styled from 'styled-components';
+import { useRouteMatch, useLocation, useHistory } from 'react-router';
 
 import { EntityType, Exact } from '../../../../../types.generated';
 import { Message } from '../../../../shared/Message';
 import { useEntityRegistry } from '../../../../useEntityRegistry';
-import { getDataForEntityType } from './utils';
+import { getDataForEntityType, useRoutedTab } from './utils';
 import { EntityTab, GenericEntityProperties, GenericEntityUpdate } from '../../types';
 import { ProfileNavBar } from './nav/ProfileNavBar';
 import { REDESIGN_COLORS } from '../../constants';
@@ -77,14 +78,13 @@ export const EntityProfile = <T, U>({
     tabs,
 }: Props<T, U>): JSX.Element => {
     const entityRegistry = useEntityRegistry();
+    const rotuedTab = useRoutedTab(tabs);
 
     const { loading, error, data } = useEntityQuery({ variables: { urn } });
 
     const [updateEntity] = useUpdateQuery({
         refetchQueries: () => [QUERY_NAME],
     });
-
-    const [selectedTab, setSelectedTab] = useState(tabs[0].name);
 
     const entityData = getDataForEntityType({ data, entityType, getOverrideProperties });
 
@@ -101,9 +101,9 @@ export const EntityProfile = <T, U>({
                 <HeaderAndTabs>
                     <Header>
                         <EntityHeader urn={urn} entityType={entityType} entityData={entityData} />
-                        <EntityTabs />
+                        <EntityTabs tabs={tabs} urn={urn} entityType={entityType} />
                     </Header>
-                    <TabContent>tab content</TabContent>
+                    <TabContent>Tabs</TabContent>
                 </HeaderAndTabs>
                 <Sidebar>Sidebar</Sidebar>
             </ContentContainer>
