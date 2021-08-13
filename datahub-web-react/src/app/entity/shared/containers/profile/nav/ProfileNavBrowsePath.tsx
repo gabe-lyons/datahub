@@ -91,7 +91,7 @@ export const ProfileNavBrowsePath = ({ type, path, upstreams, downstreams }: Pro
 
     return (
         <BrowseRow>
-            <Breadcrumb style={{ fontSize: '16px' }}>
+            <Breadcrumb style={{ fontSize: '16px' }} separator=">">
                 <Breadcrumb.Item>
                     <Link to={baseBrowsePath}>{entityRegistry.getCollectionName(type)}</Link>
                 </Breadcrumb.Item>

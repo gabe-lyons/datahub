@@ -5,6 +5,8 @@ import {
     GlobalTags,
     GlobalTagsUpdate,
     GlossaryTerms,
+    InstitutionalMemory,
+    InstitutionalMemoryUpdate,
     Maybe,
     Ownership,
     OwnershipUpdate,
@@ -29,6 +31,7 @@ export type GenericEntityProperties = {
     ownership?: Maybe<Ownership>;
     platform?: Maybe<DataPlatform>;
     properties?: Maybe<StringMapEntry[]>;
+    institutionalMemory?: Maybe<InstitutionalMemory>;
 };
 
 export type GenericEntityUpdate = {
@@ -36,6 +39,7 @@ export type GenericEntityUpdate = {
     description?: Maybe<string>;
     globalTags?: Maybe<GlobalTagsUpdate>;
     ownership?: Maybe<OwnershipUpdate>;
+    institutionalMemory?: Maybe<InstitutionalMemoryUpdate>;
 };
 
 export type TabProps = {

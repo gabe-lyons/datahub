@@ -12,6 +12,7 @@ import { ProfileNavBar } from './nav/ProfileNavBar';
 import { REDESIGN_COLORS } from '../../constants';
 import { EntityHeader } from './header/EntityHeader';
 import { EntityTabs } from './header/EntityTabs';
+import { EntitySidebar } from './sidebar/EntitySidebar';
 
 type Props<T, U> = {
     urn: string;
@@ -110,10 +111,15 @@ export const EntityProfile = <T, U>({
                         {routedTab && <routedTab.component urn={urn} entityType={entityType} entityData={entityData} />}
                     </TabContent>
                 </HeaderAndTabs>
-                <Sidebar>Sidebar</Sidebar>
+                <Sidebar>
+                    <EntitySidebar
+                        urn={urn}
+                        entityData={entityData}
+                        entityType={entityType}
+                        updateEntity={updateEntity}
+                    />
+                </Sidebar>
             </ContentContainer>
-
-            {/* entityData && <div>hi</div> */}
         </>
     );
 };
