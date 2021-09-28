@@ -29,6 +29,9 @@ const MatchTag = styled(Tag)`
     }
 `;
 
+const FORWARD_RELATIONSHIPS = ['DownstreamOf', 'Consumes'];
+const INVERSE_RELATIONSHIPS = ['Consumes'];
+
 /**
  * Definition of the DataHub Dataset entity.
  */
