@@ -20,6 +20,7 @@ import { SidebarTagsSection } from '../shared/containers/profile/sidebar/Sidebar
 import { SidebarStatsSection } from '../shared/containers/profile/sidebar/Dataset/StatsSidebarSection';
 import StatsTab from '../shared/tabs/Dataset/Stats/StatsTab';
 import { LineageTab } from '../shared/tabs/Lineage/LineageTab';
+import { EntityAndType } from '../../lineage/types';
 
 const MatchTag = styled(Tag)`
     &&& {
@@ -199,7 +200,9 @@ export class DatasetEntity implements Entity<Dataset> {
                 // eslint-disable-next-line @typescript-eslint/dot-notation
                 outgoingRelationships: entity?.['outgoing'],
                 direction: RelationshipDirection.Incoming,
-            }).map((relationship) => relationship.entity.urn),
+            }).map(
+                (relationship) => ({ entity: relationship.entity, type: relationship.entity.type } as EntityAndType),
+            ),
             upstreamChildren: getChildrenFromRelationships({
                 forwardRelationshipTypes: FORWARD_RELATIONSHIPS,
                 inverseRelationshipTypes: INVERSE_RELATIONSHIPS,
@@ -208,7 +211,9 @@ export class DatasetEntity implements Entity<Dataset> {
                 // eslint-disable-next-line @typescript-eslint/dot-notation
                 outgoingRelationships: entity?.['outgoing'],
                 direction: RelationshipDirection.Outgoing,
-            }).map((relationship) => relationship.entity.urn),
+            }).map(
+                (relationship) => ({ entity: relationship.entity, type: relationship.entity.type } as EntityAndType),
+            ),
             icon: entity?.platform?.info?.logoUrl || undefined,
             platform: entity?.platform?.name,
         };
