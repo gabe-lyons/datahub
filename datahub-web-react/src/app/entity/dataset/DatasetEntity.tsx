@@ -20,8 +20,6 @@ import { SidebarTagsSection } from '../shared/containers/profile/sidebar/Sidebar
 import { SidebarStatsSection } from '../shared/containers/profile/sidebar/Dataset/StatsSidebarSection';
 import StatsTab from '../shared/tabs/Dataset/Stats/StatsTab';
 import { LineageTab } from '../shared/tabs/Lineage/LineageTab';
-import { EntityAndType } from '../../lineage/types';
-import { FORWARD_RELATIONSHIPS, INVERSE_RELATIONSHIPS } from '../../lineage/constants';
 
 const MatchTag = styled(Tag)`
     &&& {
@@ -191,27 +189,19 @@ export class DatasetEntity implements Entity<Dataset> {
             name: entity?.name,
             type: EntityType.Dataset,
             downstreamChildren: getChildrenFromRelationships({
-                forwardRelationshipTypes: FORWARD_RELATIONSHIPS,
-                inverseRelationshipTypes: INVERSE_RELATIONSHIPS,
                 // eslint-disable-next-line @typescript-eslint/dot-notation
                 incomingRelationships: entity?.['incoming'],
                 // eslint-disable-next-line @typescript-eslint/dot-notation
                 outgoingRelationships: entity?.['outgoing'],
                 direction: RelationshipDirection.Incoming,
-            }).map(
-                (relationship) => ({ entity: relationship.entity, type: relationship.entity.type } as EntityAndType),
-            ),
+            }),
             upstreamChildren: getChildrenFromRelationships({
-                forwardRelationshipTypes: FORWARD_RELATIONSHIPS,
-                inverseRelationshipTypes: INVERSE_RELATIONSHIPS,
                 // eslint-disable-next-line @typescript-eslint/dot-notation
                 incomingRelationships: entity?.['incoming'],
                 // eslint-disable-next-line @typescript-eslint/dot-notation
                 outgoingRelationships: entity?.['outgoing'],
                 direction: RelationshipDirection.Outgoing,
-            }).map(
-                (relationship) => ({ entity: relationship.entity, type: relationship.entity.type } as EntityAndType),
-            ),
+            }),
             icon: entity?.platform?.info?.logoUrl || undefined,
             platform: entity?.platform?.name,
         };
