@@ -96,6 +96,7 @@ import com.linkedin.datahub.graphql.types.glossary.GlossaryTermType;
 
 import com.linkedin.datahub.graphql.types.usage.UsageType;
 import com.linkedin.metadata.entity.EntityService;
+import com.linkedin.metadata.graph.GraphService;
 import graphql.execution.DataFetcherResult;
 import graphql.schema.idl.RuntimeWiring;
 import java.util.ArrayList;
@@ -132,6 +133,7 @@ public class GmsGraphQLEngine {
 
     private final AnalyticsService analyticsService;
     private final EntityService entityService;
+    private final GraphService graphService;
 
     private final DatasetType datasetType;
     private final CorpUserType corpUserType;
@@ -183,14 +185,19 @@ public class GmsGraphQLEngine {
     public final List<BrowsableEntityType<?>> browsableTypes;
 
     public GmsGraphQLEngine() {
-        this(null, null);
+        this(null, null, null);
     }
 
-    public GmsGraphQLEngine(final AnalyticsService analyticsService, final EntityService entityService) {
+    public GmsGraphQLEngine(
+        final AnalyticsService analyticsService,
+        final EntityService entityService,
+        final GraphService graphService
+    ) {
         this.analyticsService = analyticsService;
         this.entityService = entityService;
+        this.graphService = graphService;
 
-        this.datasetType = new DatasetType(GmsClientFactory.getEntitiesClient());
+        this.datasetType = new DatasetType(GmsClientFactory.getEntitiesClient(), entityService);
         this.corpUserType = new CorpUserType(GmsClientFactory.getEntitiesClient());
         this.corpGroupType = new CorpGroupType(GmsClientFactory.getEntitiesClient());
         this.chartType = new ChartType(GmsClientFactory.getEntitiesClient());
@@ -459,7 +466,7 @@ public class GmsGraphQLEngine {
         builder
             .type("Dataset", typeWiring -> typeWiring
                 .dataFetcher("relationships", new AuthenticatedResolver<>(
-                    new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                    new EntityRelationshipsResultResolver(graphService)
                 ))
                 .dataFetcher("platform", new AuthenticatedResolver<>(
                         new LoadableTypeResolver<>(dataPlatformType,
@@ -510,7 +517,7 @@ public class GmsGraphQLEngine {
     private void configureCorpUserResolvers(final RuntimeWiring.Builder builder) {
         builder.type("CorpUser", typeWiring -> typeWiring
             .dataFetcher("relationships", new AuthenticatedResolver<>(
-                new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                new EntityRelationshipsResultResolver(graphService)
             ))
         );
         builder.type("CorpUserInfo", typeWiring -> typeWiring
@@ -527,7 +534,7 @@ public class GmsGraphQLEngine {
     private void configureCorpGroupResolvers(final RuntimeWiring.Builder builder) {
         builder.type("CorpGroup", typeWiring -> typeWiring
             .dataFetcher("relationships", new AuthenticatedResolver<>(
-                new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                new EntityRelationshipsResultResolver(graphService)
             ))
         );
         builder.type("CorpGroupInfo", typeWiring -> typeWiring
@@ -549,7 +556,7 @@ public class GmsGraphQLEngine {
     private void configureTagAssociationResolver(final RuntimeWiring.Builder builder) {
         builder.type("Tag", typeWiring -> typeWiring
             .dataFetcher("relationships", new AuthenticatedResolver<>(
-                new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                new EntityRelationshipsResultResolver(graphService)
             ))
         );
         builder.type("TagAssociation", typeWiring -> typeWiring
@@ -566,7 +573,7 @@ public class GmsGraphQLEngine {
     private void configureDashboardResolvers(final RuntimeWiring.Builder builder) {
         builder.type("Dashboard", typeWiring -> typeWiring
             .dataFetcher("relationships", new AuthenticatedResolver<>(
-                new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                new EntityRelationshipsResultResolver(graphService)
             ))
         );
         builder.type("DashboardInfo", typeWiring -> typeWiring
@@ -585,7 +592,7 @@ public class GmsGraphQLEngine {
     private void configureChartResolvers(final RuntimeWiring.Builder builder) {
         builder.type("Chart", typeWiring -> typeWiring
             .dataFetcher("relationships", new AuthenticatedResolver<>(
-                new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                new EntityRelationshipsResultResolver(graphService)
             ))
         );
         builder.type("ChartInfo", typeWiring -> typeWiring
@@ -647,7 +654,7 @@ public class GmsGraphQLEngine {
         builder
             .type("DataJob", typeWiring -> typeWiring
                 .dataFetcher("relationships", new AuthenticatedResolver<>(
-                    new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                    new EntityRelationshipsResultResolver(graphService)
                 ))
                 .dataFetcher("dataFlow", new AuthenticatedResolver<>(
                     new LoadableTypeResolver<>(dataFlowType,
@@ -688,7 +695,7 @@ public class GmsGraphQLEngine {
                     )
                 )
                 .dataFetcher("relationships", new AuthenticatedResolver<>(
-                    new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                    new EntityRelationshipsResultResolver(graphService)
                 ))
             );
     }
@@ -700,7 +707,7 @@ public class GmsGraphQLEngine {
         builder
             .type("MLFeatureTable", typeWiring -> typeWiring
                 .dataFetcher("relationships", new AuthenticatedResolver<>(
-                    new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                    new EntityRelationshipsResultResolver(graphService)
                 ))
                 .dataFetcher("platform", new AuthenticatedResolver<>(
                         new LoadableTypeResolver<>(dataPlatformType,
@@ -739,7 +746,7 @@ public class GmsGraphQLEngine {
             )
             .type("MLModel", typeWiring -> typeWiring
                 .dataFetcher("relationships", new AuthenticatedResolver<>(
-                    new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                    new EntityRelationshipsResultResolver(graphService)
                 ))
                 .dataFetcher("platform", new AuthenticatedResolver<>(
                         new LoadableTypeResolver<>(dataPlatformType,
@@ -762,7 +769,7 @@ public class GmsGraphQLEngine {
             )
             .type("MLModelGroup", typeWiring -> typeWiring
                 .dataFetcher("relationships", new AuthenticatedResolver<>(
-                    new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                    new EntityRelationshipsResultResolver(graphService)
                 ))
                 .dataFetcher("platform", new AuthenticatedResolver<>(
                         new LoadableTypeResolver<>(dataPlatformType,
@@ -771,10 +778,10 @@ public class GmsGraphQLEngine {
             );
     }
 
-    private static void configureGlossaryRelationshipResolvers(final RuntimeWiring.Builder builder) {
+    private void configureGlossaryRelationshipResolvers(final RuntimeWiring.Builder builder) {
         builder.type("GlossaryTerm", typeWiring -> typeWiring
             .dataFetcher("relationships", new AuthenticatedResolver<>(
-                new EntityRelationshipsResultResolver(GmsClientFactory.getRelationshipsClient())
+                new EntityRelationshipsResultResolver(graphService)
             ))
         );
     }
