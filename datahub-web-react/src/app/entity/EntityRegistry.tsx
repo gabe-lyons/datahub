@@ -119,7 +119,6 @@ export default class EntityRegistry {
         const genericEntityProperties = this.getGenericEntityProperties(type, data);
         return (
             ({
-                ...entity.getLineageVizConfig?.(data),
                 downstreamChildren: genericEntityProperties?.downstream?.relationships
                     ?.filter((relationship) => relationship.entity)
                     ?.map((relationship) => ({
@@ -133,6 +132,7 @@ export default class EntityRegistry {
                         type: (relationship.entity as EntityInterface).type,
                     })),
                 status: genericEntityProperties?.status,
+                ...entity.getLineageVizConfig?.(data),
             } as FetchedEntity) || undefined
         );
     }
