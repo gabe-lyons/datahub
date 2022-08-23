@@ -4,10 +4,12 @@ import com.codahale.metrics.Timer;
 import com.datahub.util.exception.ESQueryException;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.common.urn.UrnUtils;
+import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.datahubusage.DataHubUsageEventConstants;
 import com.linkedin.metadata.datahubusage.DataHubUsageEventType;
 import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.entity.EntityUtils;
+import com.linkedin.metadata.key.RecommendationModuleKey;
 import com.linkedin.metadata.recommendation.EntityProfileParams;
 import com.linkedin.metadata.recommendation.RecommendationContent;
 import com.linkedin.metadata.recommendation.RecommendationParams;
@@ -15,6 +17,7 @@ import com.linkedin.metadata.recommendation.RecommendationRenderType;
 import com.linkedin.metadata.recommendation.RecommendationRequestContext;
 import com.linkedin.metadata.recommendation.ScenarioType;
 import com.linkedin.metadata.search.utils.ESUtils;
+import com.linkedin.metadata.utils.EntityKeyUtils;
 import com.linkedin.metadata.utils.elasticsearch.IndexConvention;
 import com.linkedin.metadata.utils.metrics.MetricUtils;
 import io.opentelemetry.extension.annotations.WithSpan;
@@ -40,14 +43,20 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 
 @Slf4j
 @RequiredArgsConstructor
-public class MostPopularSource implements RecommendationSource {
+public class MostPopularSource implements RecommendationSourceWithOffline {
   private final RestHighLevelClient _searchClient;
   private final IndexConvention _indexConvention;
   private final EntityService _entityService;
+  private final boolean _fetchOffline;
 
   private static final String DATAHUB_USAGE_INDEX = "datahub_usage_event";
   private static final String ENTITY_AGG_NAME = "entity";
   private static final int MAX_CONTENT = 5;
+
+  private static final String MODULE_ID = "HighUsageEntities";
+  private static final Urn MODULE_URN =
+      EntityKeyUtils.convertEntityKeyToUrn(new RecommendationModuleKey().setModuleId(MODULE_ID).setIdentifier("GLOBAL"),
+          Constants.RECOMMENDATION_MODULE_ENTITY_NAME);
 
   @Override
   public String getTitle() {
@@ -56,7 +65,7 @@ public class MostPopularSource implements RecommendationSource {
 
   @Override
   public String getModuleId() {
-    return "HighUsageEntities";
+    return MODULE_ID;
   }
 
   @Override
@@ -128,5 +137,20 @@ public class MostPopularSource implements RecommendationSource {
     return Optional.of(new RecommendationContent().setEntity(entity)
         .setValue(entityUrn)
         .setParams(new RecommendationParams().setEntityProfileParams(new EntityProfileParams().setUrn(entity))));
+  }
+
+  @Override
+  public EntityService getEntityService() {
+    return _entityService;
+  }
+
+  @Override
+  public boolean shouldFetchFromOffline() {
+    return _fetchOffline;
+  }
+
+  @Override
+  public Urn getRecommendationModuleUrn(@Nonnull Urn userUrn, @Nonnull RecommendationRequestContext requestContext) {
+    return MODULE_URN;
   }
 }

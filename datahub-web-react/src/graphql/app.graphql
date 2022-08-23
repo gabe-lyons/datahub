@@ -25,6 +25,9 @@ query appConfig {
         authConfig {
             tokenAuthEnabled
         }
+        actionRequestsConfig {
+            enabled
+        }
         identityManagementConfig {
             enabled
         }

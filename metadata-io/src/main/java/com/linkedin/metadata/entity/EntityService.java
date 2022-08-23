@@ -47,6 +47,7 @@ import com.linkedin.mxe.MetadataChangeLog;
 import com.linkedin.mxe.MetadataChangeProposal;
 import com.linkedin.mxe.SystemMetadata;
 import com.linkedin.util.Pair;
+import io.opentelemetry.extension.annotations.WithSpan;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -256,6 +257,7 @@ public class EntityService {
    * @param aspectNames set of aspects to fetch
    * @return a map of {@link Urn} to {@link Entity} object
    */
+  @WithSpan
   public Map<Urn, EntityResponse> getEntitiesV2(
       @Nonnull final String entityName,
       @Nonnull final Set<Urn> urns,

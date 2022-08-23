@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Popover, Tooltip } from 'antd';
+import { Popover, Tooltip, Typography } from 'antd';
 import {
     ClockCircleOutlined,
     ConsoleSqlOutlined,
@@ -12,6 +12,7 @@ import { formatNumberWithoutAbbreviation } from '../../../shared/formatNumber';
 import { ANTD_GRAY } from '../../shared/constants';
 import { toLocalDateTimeString, toRelativeTimeString } from '../../../shared/time/timeUtils';
 import { StatsSummary } from '../../shared/components/styled/StatsSummary';
+import { PercentileLabel } from '../../shared/stats/PercentileLabel';
 
 const StatText = styled.span`
     color: ${ANTD_GRAY[8]};
@@ -25,14 +26,18 @@ const HelpIcon = styled(QuestionCircleOutlined)`
 type Props = {
     rowCount?: number | null;
     queryCountLast30Days?: number | null;
+    queryCountPercentileLast30Days?: number | null;
     uniqueUserCountLast30Days?: number | null;
+    uniqueUserPercentileLast30Days?: number | null;
     lastUpdatedMs?: number | null;
 };
 
 export const DatasetStatsSummary = ({
     rowCount,
     queryCountLast30Days,
+    queryCountPercentileLast30Days,
     uniqueUserCountLast30Days,
+    uniqueUserPercentileLast30Days,
     lastUpdatedMs,
 }: Props) => {
     const statsViews = [
@@ -47,6 +52,15 @@ export const DatasetStatsSummary = ({
             <StatText>
                 <ConsoleSqlOutlined style={{ marginRight: 8, color: ANTD_GRAY[7] }} />
                 <b>{formatNumberWithoutAbbreviation(queryCountLast30Days)}</b> queries last month
+                {!!queryCountPercentileLast30Days && (
+                    <Typography.Text type="secondary">
+                        -{' '}
+                        <PercentileLabel
+                            percentile={queryCountPercentileLast30Days}
+                            description={`This dataset has been queried more often than ${queryCountPercentileLast30Days}% of similar datasets in the past 30 days.`}
+                        />
+                    </Typography.Text>
+                )}
             </StatText>
         )) ||
             undefined,
@@ -54,6 +68,15 @@ export const DatasetStatsSummary = ({
             <StatText>
                 <TeamOutlined style={{ marginRight: 8, color: ANTD_GRAY[7] }} />
                 <b>{formatNumberWithoutAbbreviation(uniqueUserCountLast30Days)}</b> unique users
+                {!!uniqueUserPercentileLast30Days && (
+                    <Typography.Text type="secondary">
+                        -{' '}
+                        <PercentileLabel
+                            percentile={uniqueUserPercentileLast30Days}
+                            description={`This dataset has had more unique users than ${uniqueUserPercentileLast30Days}% of similar datasets in the past 30 days.`}
+                        />
+                    </Typography.Text>
+                )}
             </StatText>
         )) ||
             undefined,

@@ -346,6 +346,41 @@ type Mutation {
     updateDescription(input: DescriptionUpdateInput!): Boolean
 
     """
+    Accepts a proposal for a given entity or subresource
+    """
+    acceptProposal(urn: String!): Boolean
+
+    """
+    Rejects a proposal for a given entity or subresource
+    """
+    rejectProposal(urn: String!): Boolean
+
+    """
+    Adds a term proposal for a given entity or subresource
+    """
+    proposeTerm(input: TermAssociationInput!): Boolean
+
+    """
+    Adds a term proposal for a given entity or subresource
+    """
+    proposeTag(input: TagAssociationInput!): Boolean
+
+    """
+    Adds a proposal to create a new Glossary Term
+    """
+    proposeCreateGlossaryTerm(input: CreateGlossaryEntityInput!): Boolean
+
+    """
+    Adds a proposal to create a new Glossary Node
+    """
+    proposeCreateGlossaryNode(input: CreateGlossaryEntityInput!): Boolean
+
+    """
+    Adds a proposal to update a Description
+    """
+    proposeUpdateDescription(input: DescriptionUpdateInput!): Boolean
+
+    """
     Remove a user. Requires Manage Users & Groups Platform Privilege
     """
     removeUser(urn: String!): Boolean
@@ -493,6 +528,29 @@ type Mutation {
     Updates the soft deleted status for a batch of assets
     """
     batchUpdateSoftDeleted(input: BatchUpdateSoftDeletedInput!): Boolean
+
+    """
+    Create a new incident for a resource (asset)
+    """
+    raiseIncident(
+      """
+      Input required to create a new incident
+      """
+      input: RaiseIncidentInput!): String
+
+    """
+    Update an existing incident for a resource (asset)
+    """
+    updateIncidentStatus(
+      """
+      The urn for an existing incident
+      """
+      urn: String!
+
+      """
+      Input required to update the state of an existing incident
+      """
+      input: UpdateIncidentStatusInput!): Boolean
 }
 
 """
@@ -1016,6 +1074,23 @@ type Dataset implements EntityWithRelationships & Entity & BrowsableEntity {
     assertions(start: Int, count: Int): EntityAssertionsResult
 
     """
+    Incidents associated with the Dataset
+    """
+    incidents(
+      """
+      Optional incident state to filter by, defaults to any state.
+      """
+      state: IncidentState,
+      """
+      Optional start offset, defaults to 0.
+      """
+      start: Int,
+      """
+      Optional start offset, defaults to 20.
+      """
+      count: Int): EntityIncidentsResult
+
+    """
     Edges extending from this entity
     """
     relationships(input: RelationshipsInput!): EntityRelationshipsResult
@@ -1113,6 +1188,7 @@ type SiblingProperties {
     If this entity is the primary sibling among the sibling set
     """
     isPrimary: Boolean
+
     """
     The sibling entities
     """
@@ -1899,6 +1975,23 @@ type Container implements Entity {
     The Domain associated with the Dataset
     """
     domain: DomainAssociation
+
+    """
+    Incidents associated with the Dataset
+    """
+    incidents(
+      """
+      Optional incident state to filter by, defaults to any state.
+      """
+      state: IncidentState,
+      """
+      Optional start offset, defaults to 0.
+      """
+      start: Int,
+      """
+      Optional start offset, defaults to 20.
+      """
+      count: Int): EntityIncidentsResult
 
     """
     The deprecation status of the container
@@ -3471,6 +3564,11 @@ type GlossaryTermAssociation {
     term: GlossaryTerm!
 
     """
+    The actor who is responsible for the term being added"
+    """
+    actor: CorpUser
+
+    """
     Reference back to the associated urn for tracking purposes e.g. when sibling nodes are merged together
     """
     associatedUrn: String!
@@ -4872,6 +4970,23 @@ type DataFlow implements EntityWithRelationships & Entity & BrowsableEntity {
     dataPlatformInstance: DataPlatformInstance
 
     """
+    Incidents associated with the Data Flow
+    """
+    incidents(
+      """
+      Optional incident state to filter by, defaults to any state.
+      """
+      state: IncidentState,
+      """
+      Optional start offset, defaults to 0.
+      """
+      start: Int,
+      """
+      Optional start offset, defaults to 20.
+      """
+      count: Int): EntityIncidentsResult
+
+    """
     Granular API for querying edges extending from this entity
     """
     relationships(input: RelationshipsInput!): EntityRelationshipsResult
@@ -5053,6 +5168,23 @@ type DataJob implements EntityWithRelationships & Entity & BrowsableEntity {
     domain: DomainAssociation
 
     """
+    Incidents associated with the Data Job
+    """
+    incidents(
+      """
+      Optional incident state to filter by, defaults to any state.
+      """
+      state: IncidentState,
+      """
+      Optional start offset, defaults to 0.
+      """
+      start: Int,
+      """
+      Optional start offset, defaults to 20.
+      """
+      count: Int): EntityIncidentsResult
+
+    """
     Granular API for querying edges extending from this entity
     """
     relationships(input: RelationshipsInput!): EntityRelationshipsResult
@@ -5212,6 +5344,11 @@ enum DataProcessInstanceRunResultType {
     The run was skipped
     """
     SKIPPED
+
+    """
+    The run failed and is up for retry
+    """
+    UP_FOR_RETRY
 }
 
 
@@ -5432,9 +5569,29 @@ type DatasetStatsSummary {
     queryCountLast30Days: Int
 
     """
+    The relative percentile for query count in the past 30 days
+    """
+    queryCountPercentileLast30Days: Int
+
+    """
+    The relative rank for query count in the past 30 days
+    """
+    queryCountRankLast30Days: Int
+
+    """
     The unique user count in the past 30 days
     """
     uniqueUserCountLast30Days: Int
+
+    """
+    The relative percentile for number of unique users in the last 30 days
+    """
+    uniqueUserPercentileLast30Days: Int
+
+    """
+    The relative rank for number of unique users in the last 30 days
+    """
+    uniqueUserRankLast30Days: Int
 
     """
     The top users in the past 30 days
@@ -5609,9 +5766,24 @@ type DashboardStatsSummary {
     viewCountLast30Days: Int
 
     """
+    The relative percentile for view count in the past 30 days
+    """
+    viewCountPercentileLast30Days: Int
+
+    """
     The unique user count in the past 30 days
     """
     uniqueUserCountLast30Days: Int
+
+    """
+    The relative percentile for number of unique users in the last 30 days
+    """
+    uniqueUserPercentileLast30Days: Int
+
+    """
+    The relative rank for number of unique users in the last 30 days
+    """
+    uniqueUserRankLast30Days: Int
 
     """
     The top users in the past 30 days
@@ -5635,9 +5807,24 @@ type ChartStatsSummary {
     viewCountLast30Days: Int
 
     """
+    The relative percentile for view count in the past 30 days
+    """
+    viewCountPercentileLast30Days: Int
+
+    """
     The unique user count in the past 30 days
     """
     uniqueUserCountLast30Days: Int
+
+    """
+    The relative percentile for number of unique users in the last 30 days
+    """
+    uniqueUserPercentileLast30Days: Int
+
+    """
+    The relative rank for number of unique users in the last 30 days
+    """
+    uniqueUserRankLast30Days: Int
 
     """
     The top users in the past 30 days
@@ -8652,6 +8839,22 @@ enum CostType {
     ORG_COST_TYPE
 }
 
+
+"""
+Audit stamp containing a resolved actor
+"""
+type ResolvedAuditStamp {
+    """
+    When the audited action took place
+    """
+    time: Long!
+
+    """
+    Who performed the audited action
+    """
+    actor: CorpUser
+}
+
 type SubTypes {
    """
     The sub-types that this entity implements. e.g. Datasets that are views will implement the "view" subtype
@@ -8715,10 +8918,6 @@ type Domain implements Entity {
     """
     relationships(input: RelationshipsInput!): EntityRelationshipsResult
 }
-
-
-
-
 
 """
 Properties about a domain
@@ -8940,6 +9139,16 @@ enum HealthStatusType {
   Assertions status
   """
   ASSERTIONS
+
+  """
+  Incidents status
+  """
+  INCIDENTS
+
+  """
+  Tests status
+  """
+  TESTS
 }
 
 """
@@ -8980,6 +9189,254 @@ input StringMapEntryInput {
   The value fo the map entry
   """
   value: String
+}
+
+"""
+A list of Incidents Associated with an Entity
+"""
+type EntityIncidentsResult {
+  """
+  The starting offset of the result set returned
+  """
+  start: Int!
+
+  """
+  The number of assertions in the returned result set
+  """
+  count: Int!
+
+  """
+  The total number of assertions in the result set
+  """
+  total: Int!
+
+  """
+  The incidents themselves
+  """
+  incidents: [Incident!]!
+}
+
+"""
+An incident represents an active issue on a data asset.
+"""
+type Incident {
+  """
+  The primary key of the Incident
+  """
+  urn: String!
+
+  """
+  The type of incident
+  """
+  type: IncidentType!
+
+  """
+  A custom type of incident. Present only if type is 'CUSTOM'
+  """
+  customType: String
+
+  """
+  An optional title associated with the incident
+  """
+  title: String
+
+  """
+  An optional description associated with the incident
+  """
+  description: String
+
+  """
+  The status of an incident
+  """
+  status: IncidentStatus!
+
+  """
+  The entity that the incident is associated with.
+  """
+  entity: Entity!
+
+  """
+  The source of the incident, i.e. how it was generated
+  """
+  source: IncidentSource
+
+  """
+  The time at which the incident was initially created
+  """
+  created: AuditStamp!
+}
+
+"""
+The state of an incident.
+"""
+enum IncidentState {
+  """
+  The incident is ongoing, or active.
+  """
+  ACTIVE
+  """
+  The incident is resolved.
+  """
+  RESOLVED
+}
+
+"""
+A specific type of incident
+"""
+enum IncidentType {
+  """
+  An operational incident, e.g. failure to materialize a dataset, or failure to execute a task / pipeline.
+  """
+  OPERATIONAL
+  """
+  A custom type of incident
+  """
+  CUSTOM
+}
+
+"""
+Details about the status of an asset incident
+"""
+type IncidentStatus {
+  """
+  The state of the incident
+  """
+  state: IncidentState!
+  """
+  An optional message associated with the status
+  """
+  message: String
+  """
+  The time that the status last changed
+  """
+  lastUpdated: AuditStamp!
+}
+
+"""
+The source type of an incident, implying how it was created.
+"""
+enum IncidentSourceType {
+  """
+  The incident was created manually, from either the API or the UI.
+  """
+  MANUAL
+}
+
+"""
+Details about the source of an incident, e.g. how it was created.
+"""
+type IncidentSource {
+  """
+  The type of the incident source
+  """
+  type: IncidentSourceType!
+}
+
+"""
+Input required to create a new incident in the 'Active' state.
+"""
+input RaiseIncidentInput {
+  """
+  The type of incident
+  """
+  type: IncidentType!
+  """
+  A custom type of incident. Present only if type is 'CUSTOM'
+  """
+  customType: String
+  """
+  An optional title associated with the incident
+  """
+  title: String
+  """
+  An optional description associated with the incident
+  """
+  description: String
+  """
+  The resource (dataset, dashboard, chart, dataFlow, etc) that the incident is associated with.
+  """
+  resourceUrn: String!
+
+  """
+  The source of the incident, i.e. how it was generated
+  """
+  source: IncidentSourceInput
+}
+
+"""
+Input required to create an incident source
+"""
+input IncidentSourceInput {
+  """
+  The type of the incident source
+  """
+  type: IncidentSourceType!
+}
+
+"""
+Input required to update status of an existing incident
+"""
+input UpdateIncidentStatusInput {
+  """
+  The new state of the incident
+  """
+  state: IncidentState!
+  """
+  An optional message associated with the new state
+  """
+  message: String
+}
+
+"""
+Information about an individual subscription association
+"""
+type SubscriptionAssociation {
+  """
+  The entity being referenced
+  """
+  entity: Entity!
+  """
+  When the subscription was created
+  """
+  created: AuditStamp!
+}
+
+"""
+A set of asset subscriptions
+"""
+type Subscriptions {
+  """
+  A set of asset subscriptions
+  """
+  subscriptions: [SubscriptionAssociation!]!
+}
+
+"""
+Input provided when creating a subscription between an actor and an asset / resource
+"""
+input AddSubscriptionInput {
+    """
+    Actor urn that is subscribing, currently only users are supported.
+    """
+    actorUrn: String!
+    """
+    The urn of the resource (asset) to subscribe to, e.g. a dataset, chart, dashboard, data flow, or data job.
+    """
+    resourceUrn: String!
+}
+
+"""
+Input provided when removing an existing subscription between an actor and an asset / resource
+"""
+input RemoveSubscriptionInput {
+    """
+    Actor urn that is subscribed, currently only users are supported.
+    """
+    actorUrn: String!
+    """
+    The urn of the resource (asset) that is subscribed to, e.g. a dataset, chart, dashboard, data flow, or data job.
+    """
+    resourceUrn: String!
 }
 
 """

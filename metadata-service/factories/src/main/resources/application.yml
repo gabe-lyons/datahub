@@ -1,3 +1,6 @@
+# The base URL where DataHub is accessible to users. This is used for crafting notifications, among other things.
+baseUrl: ${DATAHUB_BASE_URL:http://localhost:9002}
+
 # App Layer
 authentication:
   # Enable if you want all requests to the Metadata Service to be authenticated. Disabled by default.
@@ -11,6 +14,10 @@ authentication:
         # Key used to validate incoming tokens. Should typically be the same as authentication.tokenService.signingKey
         signingKey: ${DATAHUB_TOKEN_SERVICE_SIGNING_KEY:WnEdIeTG/VVCLQqGwC/BAkqyY0k+H8NEAtWGejrBI94=}
         salt: ${DATAHUB_TOKEN_SERVICE_SALT:ohDVbJBvHHVJh9S/UA4BYF9COuNnqqVhr9MLKEGXk1O=}
+    - type: com.datahub.authentication.authenticator.LegacyTokenAuthenticator
+      configs:
+        # Key used to validate incoming tokens. Should typically be the same as authentication.tokenService.signingKey
+        signingKey: ${DATAHUB_TOKEN_SERVICE_SIGNING_KEY:WnEdIeTG/VVCLQqGwC/BAkqyY0k+H8NEAtWGejrBI94=}
 
   # Required separately from the DataHubTokenAuthenticator as this is used by the AuthServiceController to authorize token generation
   # at user login time.
@@ -81,6 +88,16 @@ graphService:
 searchService:
   resultBatchSize: ${SEARCH_SERVICE_BATCH_SIZE:100}
   enableCache: ${SEARCH_SERVICE_ENABLE_CACHE:false}
+  ranker:
+    type: ${SEARCH_SERVICE_RANKER_TYPE:}
+
+recommendationService:
+  mostPopular:
+    offline: ${MOST_POPULAR_RECOMMENDATIONS_OFFLINE:false}
+  topTags:
+    offline: ${TOP_TAGS_RECOMMENDATIONS_OFFLINE:false}
+  topTerms:
+    offline: ${TOP_TERMS_RECOMMENDATIONS_OFFLINE:false}
 
 configEntityRegistry:
   # TODO: Change to read from resources on classpath.
@@ -91,7 +108,7 @@ platformAnalytics:
 
 visualConfig:
   assets:
-    logoUrl: ${REACT_APP_LOGO_URL:/assets/platforms/datahublogo.png}
+    logoUrl: ${REACT_APP_LOGO_URL:/assets/logos/acryl-dark-mark.svg}
 
 # Storage Layer
 
@@ -191,7 +208,40 @@ springdoc:
     disabled: true
 
 metadataTests:
-  enabled: ${METADATA_TESTS_ENABLED:true}
+  # Enable metadata tests feature
+  enabled: ${METADATA_TESTS_ENABLED:false}
+  cacheRefreshIntervalSecs: ${METADATA_TESTS_CACHE_REFRESH_INTERVAL_SECONDS:120}
+  # Flags to enable bootstrap ingestion of default policies
+  bootstrap:
+    enabled: ${METADATA_TESTS_BOOTSTRAP_ENABLED:false}
 
+# Notifications config
+notifications:
+  # Enable if you want to enable creation of the Notification Manager.
+  enabled: ${METADATA_SERVICE_NOTIFICATIONS_ENABLED:true} # Enable to turn on notifications.
+
+  # Required if enabled is true! The set of notification sinks to use.
+  sinks:
+    - type: com.datahub.notification.slack.SlackNotificationSink
+      # This simply determines whether we try to instantiate and register this sink. Note that it does not control
+      # app-layer configurations as to whether notifications are actually sent to slack.
+      enabled: ${SLACK_SINK_ENABLED:true}
+      configs:
+        botToken: ${SLACK_BOT_TOKEN}
+        defaultChannel: ${SLACK_DEFAULT_CHANNEL:datahub-slack-notifications}
+
+# Mirroring events to external systems (e.g. Event Bridge)
+eventSinks:
+  entityChangeEvent:
+    # Set of optional change event sinks.
+    sinks:
+      - type: "com.linkedin.metadata.event.change.aws.AwsEventBridgeChangeEventSink"
+        enabled: ${AWS_EVENT_BRIDGE_EVENT_SYNC_ENABLED:false}
+        configs:
+          # URL to which event bridge instance should be sinked.
+          eventBus: ${AWS_EVENT_BRIDGE_BUS_ARN}
+          region: ${AWS_EVENT_BRIDGE_BUS_REGION}
+
+# experimental siblings config
 siblings:
   enabled: ${ENABLE_SIBLING_HOOK:true} # enable to turn on automatic sibling associations for dbt

@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-
 import { useDataNotCombinedWithSiblings, useEntityData } from '../../../EntityContext';
 import { SidebarHeader } from './SidebarHeader';
 import { CompactEntityNameList } from '../../../../../recommendations/renderer/component/CompactEntityNameList';
@@ -14,6 +13,7 @@ const EntityListContainer = styled.div`
 
 export const SidebarSiblingsSection = () => {
     const { entityData } = useEntityData();
+
     const dataNotCombinedWithSiblings = useDataNotCombinedWithSiblings<GetDatasetQuery>();
 
     const isHideSiblingMode = useIsSeparateSiblingsMode();

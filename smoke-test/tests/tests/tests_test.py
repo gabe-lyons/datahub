@@ -22,7 +22,9 @@ test_id = "test id"
 test_name = "test name"
 test_category = "test category"
 test_description = "test description"
-test_description = "test description"
+test_definition_json = "{\"on\":{\"types\":[\"dataset\"]},\"rules\":{\"or\":[{" \
+                       "\"query\":\"editableDatasetProperties.description\",\"operation\":\"exists\"}," \
+                       "{\"query\":\"datasetProperties.description\",\"operation\":\"exists\"}]}} "
 
 
 def create_test(frontend_session):
@@ -33,14 +35,16 @@ def create_test(frontend_session):
             createTest(input: $input)
         }""",
         "variables": {
-            "input": {
-                "id": test_id,
-                "name": test_name,
-                "category": test_category,
-                "description": test_description,
-                "definition": {"json": "{}"},
-            }
-        },
+          "input": {
+              "id": test_id,
+              "name": test_name,
+              "category": test_category,
+              "description": test_description,
+              "definition": {
+                "json": test_definition_json
+              }
+          }
+        }
     }
 
     response = frontend_session.post(
@@ -100,13 +104,13 @@ def test_create_test(frontend_session, wait_for_healthchecks):
     assert res_data
     assert res_data["data"]
     assert res_data["data"]["test"] == {
-        "urn": test_urn,
-        "name": test_name,
-        "category": test_category,
-        "description": test_description,
-        "definition": {
-            "json": "{}",
-        },
+      "urn": test_urn,
+      "name": test_name,
+      "category": test_category,
+      "description": test_description,
+      "definition": {
+        "json": test_definition_json
+      }
     }
     assert "errors" not in res_data
 
@@ -138,14 +142,16 @@ def test_update_test(frontend_session, wait_for_healthchecks):
             updateTest(urn: $urn, input: $input)
         }""",
         "variables": {
-            "urn": test_urn,
-            "input": {
-                "name": test_name,
-                "category": test_category,
-                "description": test_description,
-                "definition": {"json": "{}"},
-            },
-        },
+          "urn": test_urn,
+          "input": {
+              "name": test_name,
+              "category": test_category,
+              "description": test_description,
+              "definition": {
+                "json": test_definition_json
+              }
+          }
+        }
     }
 
     response = frontend_session.post(
@@ -183,13 +189,13 @@ def test_update_test(frontend_session, wait_for_healthchecks):
     assert res_data
     assert res_data["data"]
     assert res_data["data"]["test"] == {
-        "urn": test_urn,
-        "name": test_name,
-        "category": test_category,
-        "description": test_description,
-        "definition": {
-            "json": "{}",
-        },
+      "urn": test_urn,
+      "name": test_name,
+      "category": test_category,
+      "description": test_description,
+      "definition": {
+        "json": test_definition_json,
+      }
     }
     assert "errors" not in res_data
 

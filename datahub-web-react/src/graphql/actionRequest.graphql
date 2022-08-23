@@ -1,0 +1,224 @@
+query listActionRequests($input: ListActionRequestsInput!) {
+    listActionRequests(input: $input) {
+        start
+        count
+        total
+        actionRequests {
+            urn
+            type
+            status
+            result
+            entity {
+                urn
+                type
+                ... on Dataset {
+                    name
+                    properties {
+                        description
+                    }
+                    editableProperties {
+                        description
+                    }
+                    platform {
+                        name
+                        info {
+                            logoUrl
+                        }
+                    }
+                }
+                ... on Dashboard {
+                    tool
+                    info {
+                        name
+                    }
+                    properties {
+                        description
+                    }
+                    editableProperties {
+                        description
+                    }
+                }
+                ... on Chart {
+                    tool
+                    info {
+                        name
+                    }
+                    properties {
+                        description
+                    }
+                    editableProperties {
+                        description
+                    }
+                }
+                ... on DataJob {
+                    info {
+                        name
+                    }
+                    properties {
+                        description
+                    }
+                    editableProperties {
+                        description
+                    }
+                }
+                ... on DataFlow {
+                    orchestrator
+                    info {
+                        name
+                    }
+                    properties {
+                        description
+                    }
+                    editableProperties {
+                        description
+                    }
+                }
+                ... on MLFeatureTable {
+                    name
+                    platform {
+                        name
+                        info {
+                            logoUrl
+                        }
+                    }
+                    properties {
+                        description
+                    }
+                    editableProperties {
+                        description
+                    }
+                }
+                ... on MLModel {
+                    name
+                    platform {
+                        name
+                        info {
+                            logoUrl
+                        }
+                    }
+                    properties {
+                        description
+                    }
+                    editableProperties {
+                        description
+                    }
+                }
+                ... on MLModelGroup {
+                    name
+                    platform {
+                        name
+                        info {
+                            logoUrl
+                        }
+                    }
+                    properties {
+                        description
+                    }
+                    editableProperties {
+                        description
+                    }
+                }
+                ... on GlossaryNode {
+                    properties {
+                        name
+                        description
+                    }
+                }
+                ... on GlossaryTerm {
+                    properties {
+                        name
+                        description
+                    }
+                }
+            }
+            subResourceType
+            subResource
+            params {
+                glossaryTermProposal {
+                    glossaryTerm {
+                        urn
+                        type
+                        name
+                        properties {
+                            name
+                        }
+                    }
+                }
+                tagProposal {
+                    tag {
+                        urn
+                        type
+                        name
+                    }
+                }
+                createGlossaryTermProposal {
+                    glossaryTerm {
+                        name
+                        parentNode {
+                            urn
+                            properties {
+                                name
+                            }
+                        }
+                    }
+                }
+                createGlossaryNodeProposal {
+                    glossaryNode {
+                        name
+                        parentNode {
+                            urn
+                            properties {
+                                name
+                            }
+                        }
+                    }
+                }
+                updateDescriptionProposal {
+                    description
+                }
+            }
+            created {
+                time
+                actor {
+                    urn
+                    type
+                    username
+                    info {
+                        displayName
+                        firstName
+                        lastName
+                        fullName
+                    }
+                    editableInfo {
+                        pictureLink
+                    }
+                }
+            }
+            lastModified {
+                time
+                actor {
+                    urn
+                    type
+                    username
+                    info {
+                        displayName
+                        firstName
+                        lastName
+                        fullName
+                    }
+                    editableInfo {
+                        pictureLink
+                    }
+                }
+            }
+        }
+    }
+}
+
+mutation acceptProposal($urn: String!) {
+    acceptProposal(urn: $urn)
+}
+
+mutation rejectProposal($urn: String!) {
+    rejectProposal(urn: $urn)
+}

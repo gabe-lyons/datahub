@@ -6,12 +6,11 @@ import com.google.common.collect.ImmutableSet;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.exception.ValidationException;
 import com.linkedin.datahub.graphql.generated.FacetFilterInput;
-
+import com.linkedin.metadata.query.filter.ConjunctiveCriterion;
+import com.linkedin.metadata.query.filter.ConjunctiveCriterionArray;
 import com.linkedin.metadata.query.filter.Criterion;
 import com.linkedin.metadata.query.filter.CriterionArray;
 import com.linkedin.metadata.query.filter.Filter;
-import com.linkedin.metadata.query.filter.ConjunctiveCriterion;
-import com.linkedin.metadata.query.filter.ConjunctiveCriterionArray;
 import com.linkedin.metadata.search.utils.ESUtils;
 import graphql.schema.DataFetchingEnvironment;
 import java.util.stream.Collectors;

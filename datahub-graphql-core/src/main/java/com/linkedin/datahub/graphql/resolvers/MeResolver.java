@@ -57,6 +57,7 @@ public class MeResolver implements DataFetcher<CompletableFuture<AuthenticatedUs
         final PlatformPrivileges platformPrivileges = new PlatformPrivileges();
         platformPrivileges.setViewAnalytics(canViewAnalytics(context));
         platformPrivileges.setManagePolicies(canManagePolicies(context));
+        platformPrivileges.setViewMetadataProposals(canViewMetadataProposals(context));
         platformPrivileges.setManageIdentities(canManageUsersGroups(context));
         platformPrivileges.setGeneratePersonalAccessTokens(canGeneratePersonalAccessToken(context));
         platformPrivileges.setManageDomains(canManageDomains(context));
@@ -69,6 +70,9 @@ public class MeResolver implements DataFetcher<CompletableFuture<AuthenticatedUs
         platformPrivileges.setCreateDomains(AuthorizationUtils.canCreateDomains(context));
         platformPrivileges.setCreateTags(AuthorizationUtils.canCreateTags(context));
         platformPrivileges.setManageTags(AuthorizationUtils.canManageTags(context));
+
+        // Settings not in OSS (yet)
+        platformPrivileges.setManageGlobalSettings(canManageGlobalSettings(context)); // SaaS-Only.
 
         // Construct and return authenticated user object.
         final AuthenticatedUser authUser = new AuthenticatedUser();
@@ -93,6 +97,13 @@ public class MeResolver implements DataFetcher<CompletableFuture<AuthenticatedUs
    */
   private boolean canManagePolicies(final QueryContext context) {
     return isAuthorized(context.getAuthorizer(), context.getActorUrn(), PoliciesConfig.MANAGE_POLICIES_PRIVILEGE);
+  }
+
+  /**
+   * Returns true if the authenticated user has privileges to view metadata proposals.
+   */
+  private boolean canViewMetadataProposals(final QueryContext context) {
+    return isAuthorized(context.getAuthorizer(), context.getActorUrn(), PoliciesConfig.VIEW_METADATA_PROPOSALS_PRIVILEGE);
   }
 
   /**
@@ -135,6 +146,13 @@ public class MeResolver implements DataFetcher<CompletableFuture<AuthenticatedUs
    */
   private boolean canManageGlossaries(final QueryContext context) {
     return isAuthorized(context.getAuthorizer(), context.getActorUrn(), PoliciesConfig.MANAGE_GLOSSARIES_PRIVILEGE);
+  }
+
+  /**
+   * Returns true if the authenticated user has privileges to manage global access tokens
+   */
+  private boolean canManageGlobalSettings(final QueryContext context) {
+    return isAuthorized(context.getAuthorizer(), context.getActorUrn(), PoliciesConfig.MANAGE_GLOBAL_SETTINGS);
   }
 
   /**

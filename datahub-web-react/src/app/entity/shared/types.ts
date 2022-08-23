@@ -88,11 +88,11 @@ export type GenericEntityProperties = {
     health?: Maybe<Array<Health>>;
     status?: Maybe<Status>;
     deprecation?: Maybe<Deprecation>;
+    siblings?: Maybe<SiblingProperties>;
     parentContainers?: Maybe<ParentContainersResult>;
     children?: Maybe<EntityRelationshipsResult>;
     parentNodes?: Maybe<ParentNodesResult>;
     isAChildren?: Maybe<EntityRelationshipsResult>;
-    siblings?: Maybe<SiblingProperties>;
     siblingPlatforms?: Maybe<DataPlatform[]>;
     lastIngested?: Maybe<number>;
 };

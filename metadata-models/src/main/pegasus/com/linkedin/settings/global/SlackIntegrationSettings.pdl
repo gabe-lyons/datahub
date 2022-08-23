@@ -1,0 +1,23 @@
+namespace com.linkedin.settings.global
+
+import com.linkedin.common.Urn
+
+/**
+ * Slack integration settings.
+ */
+record SlackIntegrationSettings {
+  /**
+   * Whether the slack integration is enabled or not.
+   */
+  enabled: boolean
+
+  /**
+   * An encrypted bot token.
+   */
+  encryptedBotToken: optional string
+
+  /**
+   * A default slack channel to use.
+   */
+  defaultChannelName: optional string
+}

@@ -9,8 +9,9 @@ import {
     LinkOutlined,
     MoreOutlined,
     PlusOutlined,
+    WarningOutlined,
 } from '@ant-design/icons';
-import { Redirect } from 'react-router';
+import { Redirect, useHistory } from 'react-router';
 import { EntityType, PlatformPrivileges } from '../../../../types.generated';
 import CreateGlossaryEntityModal from './CreateGlossaryEntityModal';
 import { UpdateDeprecationModal } from './UpdateDeprecationModal';
@@ -19,8 +20,11 @@ import MoveGlossaryEntityModal from './MoveGlossaryEntityModal';
 import { ANTD_GRAY } from '../constants';
 import { useEntityRegistry } from '../../../useEntityRegistry';
 import { useGetAuthenticatedUser } from '../../../useGetAuthenticatedUser';
+import { AddIncidentModal } from '../tabs/Incident/components/AddIncidentModal';
+import { getEntityPath } from '../containers/profile/utils';
 import useDeleteEntity from './useDeleteEntity';
 import { getEntityProfileDeleteRedirectPath } from '../../../shared/deleteUtils';
+import { useIsSeparateSiblingsMode } from '../siblingUtils';
 
 export enum EntityMenuItems {
     COPY_URL,
@@ -29,6 +33,8 @@ export enum EntityMenuItems {
     ADD_TERM_GROUP,
     DELETE,
     MOVE,
+    // acryl-main only
+    RAISE_INCIDENT,
 }
 
 const MenuIcon = styled(MoreOutlined)<{ fontSize?: number }>`
@@ -46,7 +52,7 @@ const MenuItem = styled.div`
     color: #262626;
 `;
 
-const StyledMenuItem = styled(Menu.Item)<{ disabled: boolean }>`
+const StyledMenuItem = styled(Menu.Item)<{ disabled?: boolean }>`
     ${(props) =>
         props.disabled
             ? `
@@ -72,6 +78,8 @@ interface Props {
 }
 
 function EntityDropdown(props: Props) {
+    const history = useHistory();
+
     const {
         urn,
         entityData,
@@ -89,12 +97,15 @@ function EntityDropdown(props: Props) {
     const entityRegistry = useEntityRegistry();
     const me = useGetAuthenticatedUser(!!platformPrivileges);
     const [updateDeprecation] = useUpdateDeprecationMutation();
+    const isHideSiblingMode = useIsSeparateSiblingsMode();
     const { onDeleteEntity, hasBeenDeleted } = useDeleteEntity(urn, entityType, entityData, onDelete);
 
     const [isCreateTermModalVisible, setIsCreateTermModalVisible] = useState(false);
     const [isCreateNodeModalVisible, setIsCreateNodeModalVisible] = useState(false);
     const [isDeprecationModalVisible, setIsDeprecationModalVisible] = useState(false);
     const [isMoveModalVisible, setIsMoveModalVisible] = useState(false);
+    // acryl-main only
+    const [isRaiseIncidentModalVisible, setIsRaiseIncidentModalVisible] = useState(false);
 
     const handleUpdateDeprecation = async (deprecatedStatus: boolean) => {
         message.loading({ content: 'Updating...' });
@@ -162,22 +173,14 @@ function EntityDropdown(props: Props) {
                             </Menu.Item>
                         )}
                         {menuItems.has(EntityMenuItems.ADD_TERM) && (
-                            <StyledMenuItem
-                                key="2"
-                                disabled={!canManageGlossaries}
-                                onClick={() => setIsCreateTermModalVisible(true)}
-                            >
+                            <StyledMenuItem key="2" onClick={() => setIsCreateTermModalVisible(true)}>
                                 <MenuItem>
                                     <PlusOutlined /> &nbsp;Add Term
                                 </MenuItem>
                             </StyledMenuItem>
                         )}
                         {menuItems.has(EntityMenuItems.ADD_TERM_GROUP) && (
-                            <StyledMenuItem
-                                key="3"
-                                disabled={!canManageGlossaries}
-                                onClick={() => setIsCreateNodeModalVisible(true)}
-                            >
+                            <StyledMenuItem key="3" onClick={() => setIsCreateNodeModalVisible(true)}>
                                 <MenuItem>
                                     <FolderAddOutlined /> &nbsp;Add Term Group
                                 </MenuItem>
@@ -212,6 +215,14 @@ function EntityDropdown(props: Props) {
                                 </Tooltip>
                             </StyledMenuItem>
                         )}
+                        {/** acryl-main only */}
+                        {menuItems.has(EntityMenuItems.RAISE_INCIDENT) && (
+                            <StyledMenuItem key="6" disabled={false}>
+                                <MenuItem onClick={() => setIsRaiseIncidentModalVisible(true)}>
+                                    <WarningOutlined /> &nbsp;Raise Incident
+                                </MenuItem>
+                            </StyledMenuItem>
+                        )}
                     </Menu>
                 }
                 trigger={['click']}
@@ -223,6 +234,7 @@ function EntityDropdown(props: Props) {
                     entityType={EntityType.GlossaryTerm}
                     onClose={() => setIsCreateTermModalVisible(false)}
                     refetchData={refetchForTerms}
+                    canManageGlossaries={!!canManageGlossaries}
                 />
             )}
             {isCreateNodeModalVisible && (
@@ -230,6 +242,7 @@ function EntityDropdown(props: Props) {
                     entityType={EntityType.GlossaryNode}
                     onClose={() => setIsCreateNodeModalVisible(false)}
                     refetchData={refetchForNodes}
+                    canManageGlossaries={!!canManageGlossaries}
                 />
             )}
             {isDeprecationModalVisible && (
@@ -243,6 +256,28 @@ function EntityDropdown(props: Props) {
                 <MoveGlossaryEntityModal onClose={() => setIsMoveModalVisible(false)} refetchData={refreshBrowser} />
             )}
             {hasBeenDeleted && !onDelete && deleteRedirectPath && <Redirect to={deleteRedirectPath} />}
+            {/* acryl-main only */}
+            {isRaiseIncidentModalVisible && (
+                <AddIncidentModal
+                    visible={isRaiseIncidentModalVisible}
+                    onClose={() => setIsRaiseIncidentModalVisible(false)}
+                    refetch={
+                        (() => {
+                            refetchForEntity?.();
+                            history.push(
+                                `${getEntityPath(
+                                    entityType,
+                                    urn,
+                                    entityRegistry,
+                                    false,
+                                    isHideSiblingMode,
+                                    'Incidents',
+                                )}`,
+                            );
+                        }) as any
+                    }
+                />
+            )}
         </>
     );
 }

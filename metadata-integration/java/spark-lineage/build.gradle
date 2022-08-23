@@ -116,10 +116,6 @@ dependencies {
   testImplementation(externalDependency.testContainersPostgresql)
 }
 
-task checkShadowJar(type: Exec) {
-   commandLine 'sh', '-c', 'scripts/check_jar.sh'
-}
-
 shadowJar {
   zip64=true
   classifier=''
@@ -149,11 +145,6 @@ shadowJar {
   relocate 'com.typesafe','datahub.spark2.shaded.typesafe'
   relocate 'io.opentracing','datahub.spark2.shaded.io.opentracing'
   relocate 'io.netty','datahub.spark2.shaded.io.netty'
-  finalizedBy checkShadowJar
-}
-
-checkShadowJar {
-   dependsOn shadowJar
 }
 
 
@@ -161,19 +152,19 @@ jacocoTestReport {
     dependsOn test // tests are required to run before generating the report
 }
 
-test {
-  forkEvery = 1
-  useJUnit()
-  finalizedBy jacocoTestReport
-}
+// test {
+//   forkEvery = 1
+//   useJUnit()
+//   finalizedBy jacocoTestReport
+// }
 
 assemble {
     dependsOn shadowJar
 }
 
-task integrationTest(type: Exec ) {
-  commandLine "spark-smoke-test/smoke.sh"
-}
+// task integrationTest(type: Exec ) {
+//   commandLine "spark-smoke-test/smoke.sh"
+// }
 
 task sourcesJar(type: Jar) {
     classifier 'sources'

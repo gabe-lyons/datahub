@@ -18,11 +18,13 @@ export enum PageRoutes {
     ASSETS = '/assets',
     ANALYTICS = '/analytics',
     POLICIES = '/policies',
+    ACTION_REQUESTS = '/requests',
     IDENTITIES = '/identities',
     INGESTION = '/ingestion',
     SETTINGS = '/settings',
     DOMAINS = '/domains',
     GLOSSARY = '/glossary',
+    TESTS = '/tests',
 }
 
 /**

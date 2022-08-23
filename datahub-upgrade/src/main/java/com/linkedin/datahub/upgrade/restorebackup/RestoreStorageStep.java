@@ -1,6 +1,6 @@
 package com.linkedin.datahub.upgrade.restorebackup;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableBiMap;
 import com.linkedin.common.AuditStamp;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.data.template.RecordTemplate;
@@ -9,15 +9,19 @@ import com.linkedin.datahub.upgrade.UpgradeStep;
 import com.linkedin.datahub.upgrade.UpgradeStepResult;
 import com.linkedin.datahub.upgrade.impl.DefaultUpgradeStepResult;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.BackupReader;
+import com.linkedin.datahub.upgrade.restorebackup.backupreader.BackupReaderArgs;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.EbeanAspectBackupIterator;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.LocalParquetReader;
+import com.linkedin.datahub.upgrade.restorebackup.backupreader.S3BackupReader;
 import com.linkedin.metadata.entity.EntityService;
-import com.linkedin.metadata.entity.ebean.EbeanAspectV2;
 import com.linkedin.metadata.entity.EntityUtils;
+import com.linkedin.metadata.entity.ebean.EbeanAspectV2;
 import com.linkedin.metadata.models.AspectSpec;
 import com.linkedin.metadata.models.EntitySpec;
 import com.linkedin.metadata.models.registry.EntityRegistry;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -30,14 +34,13 @@ public class RestoreStorageStep implements UpgradeStep {
 
   private final EntityService _entityService;
   private final EntityRegistry _entityRegistry;
-  private final Map<String, BackupReader> _backupReaders;
+  private final Map<String, Class<? extends BackupReader>> _backupReaders;
 
   public RestoreStorageStep(final EntityService entityService, final EntityRegistry entityRegistry) {
     _entityService = entityService;
     _entityRegistry = entityRegistry;
-    _backupReaders = ImmutableList.of(new LocalParquetReader())
-        .stream()
-        .collect(Collectors.toMap(BackupReader::getName, Function.identity()));
+    _backupReaders = ImmutableBiMap.of(LocalParquetReader.READER_NAME, LocalParquetReader.class,
+        S3BackupReader.READER_NAME, S3BackupReader.class);
   }
 
   @Override
@@ -62,7 +65,18 @@ public class RestoreStorageStep implements UpgradeStep {
         return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
       }
 
-      EbeanAspectBackupIterator iterator = _backupReaders.get(backupReaderName.get()).getBackupIterator(context);
+      Class<? extends BackupReader> clazz = _backupReaders.get(backupReaderName.get());
+      List<String> argNames = BackupReaderArgs.getArgNames(clazz);
+      List<Optional<String>> args = argNames.stream().map(argName -> context.parsedArgs().get(argName)).collect(
+          Collectors.toList());
+      BackupReader backupReader;
+      try {
+        backupReader = clazz.getConstructor(List.class).newInstance(args);
+      } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
+        context.report().addLine("Invalid BackupReader, not able to construct instance of " + clazz.getSimpleName());
+        throw new IllegalArgumentException("Invalid BackupReader: " + clazz.getSimpleName() + ", need to implement proper constructor.");
+      }
+      EbeanAspectBackupIterator iterator = backupReader.getBackupIterator(context);
       EbeanAspectV2 aspect;
       while ((aspect = iterator.next()) != null) {
         numRows++;
@@ -75,7 +89,7 @@ public class RestoreStorageStep implements UpgradeStep {
           context.report()
               .addLine(
                   String.format("Failed to bind Urn with value %s into Urn object: %s", aspect.getKey().getUrn(), e));
-          return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
+          continue;
         }
 
         // 2. Verify that the entity associated with the aspect is found in the registry.
@@ -86,13 +100,21 @@ public class RestoreStorageStep implements UpgradeStep {
         } catch (Exception e) {
           context.report()
               .addLine(String.format("Failed to find Entity with name %s in Entity Registry: %s", entityName, e));
-          return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
+          continue;
         }
         final String aspectName = aspect.getKey().getAspect();
 
         // 3. Create record from json aspect
-        final RecordTemplate aspectRecord =
-            EntityUtils.toAspectRecord(entityName, aspectName, aspect.getMetadata(), _entityRegistry);
+        final RecordTemplate aspectRecord;
+        try {
+          aspectRecord =
+              EntityUtils.toAspectRecord(entityName, aspectName, aspect.getMetadata(), _entityRegistry);
+        } catch (Exception e) {
+          context.report()
+              .addLine(String.format("Failed to create aspect record with name %s associated with entity named %s: %s",
+                  aspectName, entityName, e));
+          continue;
+        }
 
         // 4. Verify that the aspect is a valid aspect associated with the entity
         AspectSpec aspectSpec;
@@ -102,7 +124,7 @@ public class RestoreStorageStep implements UpgradeStep {
           context.report()
               .addLine(String.format("Failed to find aspect spec with name %s associated with entity named %s: %s",
                   aspectName, entityName, e));
-          return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
+          continue;
         }
 
         // 5. Write the row back using the EntityService

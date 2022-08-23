@@ -2,13 +2,13 @@ name: Unified Docker Workflow
 on:
   push:
     branches:
-      - master
+      - acryl-main
     paths-ignore:
       - 'docs/**'
       - '**.md'
   pull_request:
     branches:
-      - master
+      - acryl-main
     paths-ignore:
       - 'docs/**'
       - '**.md'
@@ -23,14 +23,14 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DATAHUB_GMS_IMAGE: 'linkedin/datahub-gms'
-  DATAHUB_FRONTEND_IMAGE: 'linkedin/datahub-frontend-react'
-  DATAHUB_MAE_CONSUMER_IMAGE: 'linkedin/datahub-mae-consumer'
-  DATAHUB_MCE_CONSUMER_IMAGE: 'linkedin/datahub-mce-consumer'
-  DATAHUB_KAFKA_SETUP_IMAGE: 'linkedin/datahub-kafka-setup'
-  DATAHUB_ELASTIC_SETUP_IMAGE: 'linkedin/datahub-elasticsearch-setup'
-  DATAHUB_MYSQL_SETUP_IMAGE: 'acryldata/datahub-mysql-setup'
-  DATAHUB_UPGRADE_IMAGE: 'acryldata/datahub-upgrade'
+  DATAHUB_GMS_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-gms'
+  DATAHUB_FRONTEND_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-frontend-react'
+  DATAHUB_MAE_CONSUMER_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-mae-consumer'
+  DATAHUB_MCE_CONSUMER_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-mce-consumer'
+  DATAHUB_KAFKA_SETUP_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-kafka-setup'
+  DATAHUB_ELASTIC_SETUP_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-elasticsearch-setup'
+  DATAHUB_MYSQL_SETUP_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-mysql-setup'
+  DATAHUB_UPGRADE_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-upgrade'
   
 
 jobs:
@@ -48,8 +48,8 @@ jobs:
         run: |
           echo "GITHUB_REF: $GITHUB_REF"
           SHORT_SHA=$(git rev-parse --short "$GITHUB_SHA")
-          TAG=$(echo ${GITHUB_REF} | sed -e "s,refs/heads/master,head\,${SHORT_SHA},g" -e 's,refs/tags/,,g' -e 's,refs/pull/\([0-9]*\).*,pr\1,g')
-          UNIQUE_TAG=$(echo ${GITHUB_REF} | sed -e "s,refs/heads/master,${SHORT_SHA},g" -e 's,refs/tags/,,g' -e 's,refs/pull/\([0-9]*\).*,pr\1,g')
+          TAG=$(echo ${GITHUB_REF} | sed -e "s,refs/heads/acryl-main,head\,${SHORT_SHA},g" -e 's,refs/tags/,,g' -e 's,refs/pull/\([0-9]*\).*,pr\1,g')
+          UNIQUE_TAG=$(echo ${GITHUB_REF} | sed -e "s,refs/heads/acryl-main,${SHORT_SHA},g" -e 's,refs/tags/,,g' -e 's,refs/pull/\([0-9]*\).*,pr\1,g')
           echo "tag=$TAG"
           echo "unique_tag=$UNIQUE_TAG"
           echo "::set-output name=tag::$TAG"
@@ -57,7 +57,7 @@ jobs:
       - name: Check whether publishing enabled
         id: publish
         env:
-          ENABLE_PUBLISH: ${{ secrets.DOCKER_PASSWORD }}
+          ENABLE_PUBLISH: true
         run: |
           echo "Enable publish: ${{ env.ENABLE_PUBLISH != '' }}"
           echo "::set-output name=publish::${{ env.ENABLE_PUBLISH != '' }}"
@@ -80,8 +80,8 @@ jobs:
           images: |
             ${{ env.DATAHUB_GMS_IMAGE }}
           tags: ${{ needs.setup.outputs.tag }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
           publish: ${{ needs.setup.outputs.publish }}
           context: .
           file: ./docker/datahub-gms/Dockerfile
@@ -104,6 +104,10 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
 
   mae_consumer_build:
     name: Build and Push DataHub MAE Consumer Docker Image
@@ -123,8 +127,8 @@ jobs:
           images: |
             ${{ env.DATAHUB_MAE_CONSUMER_IMAGE }}
           tags: ${{ needs.setup.outputs.tag }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
           publish: ${{ needs.setup.outputs.publish }}
           context: .
           file: ./docker/datahub-mae-consumer/Dockerfile
@@ -147,6 +151,10 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
 
   mce_consumer_build:
     name: Build and Push DataHub MCE Consumer Docker Image
@@ -166,8 +174,8 @@ jobs:
           images: |
             ${{ env.DATAHUB_MCE_CONSUMER_IMAGE }}
           tags: ${{ needs.setup.outputs.tag }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
           publish: ${{ needs.setup.outputs.publish }}
           context: .
           file: ./docker/datahub-mce-consumer/Dockerfile
@@ -190,6 +198,10 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
 
   datahub_upgrade_build:
     name: Build and Push DataHub Upgrade Docker Image
@@ -209,8 +221,8 @@ jobs:
           images: |
             ${{ env.DATAHUB_UPGRADE_IMAGE }}
           tags: ${{ needs.setup.outputs.tag }}
-          username: ${{ secrets.ACRYL_DOCKER_USERNAME }}
-          password: ${{ secrets.ACRYL_DOCKER_PASSWORD }}
+          username: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
           publish: ${{ needs.setup.outputs.publish }}
           context: .
           file: ./docker/datahub-upgrade/Dockerfile
@@ -233,6 +245,10 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
 
   frontend_build:
     name: Build and Push DataHub Frontend Docker Image
@@ -252,8 +268,8 @@ jobs:
           images: |
             ${{ env.DATAHUB_FRONTEND_IMAGE }}
           tags: ${{ needs.setup.outputs.tag }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
           publish: ${{ needs.setup.outputs.publish }}
           context: .
           file: ./docker/datahub-frontend/Dockerfile
@@ -276,6 +292,10 @@ jobs:
           ignore-unfixed: true
           vuln-type: 'os,library'
           severity: 'CRITICAL,HIGH'
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
 
   kafka_setup_build:
     name: Build and Push DataHub Kafka Setup Docker Image
@@ -295,8 +315,8 @@ jobs:
           images: |
             ${{ env.DATAHUB_KAFKA_SETUP_IMAGE }}
           tags: ${{ needs.setup.outputs.tag }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
           publish: ${{ needs.setup.outputs.publish }}
           context: ./docker/kafka-setup
           file: ./docker/kafka-setup/Dockerfile
@@ -320,8 +340,8 @@ jobs:
           images: |
             ${{ env.DATAHUB_MYSQL_SETUP_IMAGE }}
           tags: ${{ needs.setup.outputs.tag }}
-          username: ${{ secrets.ACRYL_DOCKER_USERNAME }}
-          password: ${{ secrets.ACRYL_DOCKER_PASSWORD }}
+          username: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
           publish: ${{ needs.setup.outputs.publish }}
           context: .
           file: ./docker/mysql-setup/Dockerfile
@@ -345,8 +365,8 @@ jobs:
           images: |
             ${{ env.DATAHUB_ELASTIC_SETUP_IMAGE }}
           tags: ${{ needs.setup.outputs.tag }}
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
           publish: ${{ needs.setup.outputs.publish }}
           context: .
           file: ./docker/elasticsearch-setup/Dockerfile
@@ -371,6 +391,13 @@ jobs:
       - name: Build datahub cli
         run: |
           ./gradlew :metadata-ingestion:install
+      - name: Login to AWS ECR
+        uses: docker/login-action@v1
+        if: ${{ needs.setup.outputs.publish == 'true' }}
+        with:
+            registry: 795586375822.dkr.ecr.us-west-2.amazonaws.com
+            username: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+            password: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
       - name: Download GMS image
         uses: ishworkh/docker-image-artifact-download@v1
         if: ${{ needs.setup.outputs.publish != 'true' }}
@@ -399,7 +426,7 @@ jobs:
       - name: Smoke test
         env:
           DATAHUB_VERSION: ${{ needs.setup.outputs.unique_tag }}
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          CYPRESS_RECORD_KEY: ${{ secrets.ACRYL_CYPRESS_RECORD_KEY}}
         run: |
           echo "$DATAHUB_VERSION"
           ./smoke-test/smoke.sh

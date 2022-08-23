@@ -1,6 +1,13 @@
 import React from 'react';
 import { Menu, Typography, Divider } from 'antd';
-import { BankOutlined, SafetyCertificateOutlined, UsergroupAddOutlined } from '@ant-design/icons';
+import {
+    BankOutlined,
+    SafetyCertificateOutlined,
+    UsergroupAddOutlined,
+    AppstoreOutlined,
+    BellOutlined,
+    LoginOutlined,
+} from '@ant-design/icons';
 import { Redirect, Route, useHistory, useLocation, useRouteMatch, Switch } from 'react-router';
 import styled from 'styled-components';
 import { ANTD_GRAY } from '../entity/shared/constants';
@@ -9,6 +16,9 @@ import { ManagePolicies } from '../policy/ManagePolicies';
 import { useAppConfig } from '../useAppConfig';
 import { useGetAuthenticatedUser } from '../useGetAuthenticatedUser';
 import { AccessTokens } from './AccessTokens';
+import { PlatformIntegrations } from './platform/PlatformIntegrations';
+import { PlatformNotifications } from './platform/PlatformNotifications';
+import { PlatformSsoIntegrations } from './platform/PlatformSsoIntegrations';
 
 const PageContainer = styled.div`
     display: flex;
@@ -42,6 +52,12 @@ const ItemTitle = styled.span`
     margin-left: 8px;
 `;
 
+const ACRYL_PATHS = [
+    { path: 'integrations', content: <PlatformIntegrations /> },
+    { path: 'notifications', content: <PlatformNotifications /> },
+    { path: 'sso', content: <PlatformSsoIntegrations /> },
+];
+
 /**
  * URL Paths for each settings page.
  */
@@ -49,6 +65,8 @@ const PATHS = [
     { path: 'tokens', content: <AccessTokens /> },
     { path: 'identities', content: <ManageIdentities /> },
     { path: 'policies', content: <ManagePolicies /> },
+    /* acryl-main only */
+    ...ACRYL_PATHS,
 ];
 
 /**
@@ -75,6 +93,7 @@ export const SettingsPage = () => {
 
     const showPolicies = (isPoliciesEnabled && me && me.platformPrivileges.managePolicies) || false;
     const showUsersGroups = (isIdentityManagementEnabled && me && me.platformPrivileges.manageIdentities) || false;
+    const showGlobalSettings = (me && me.platformPrivileges.manageGlobalSettings) || false;
 
     return (
         <PageContainer>
@@ -115,6 +134,24 @@ export const SettingsPage = () => {
                             )}
                         </Menu.ItemGroup>
                     )}
+                    {
+                        /* acryl-main only */ showGlobalSettings && (
+                            <Menu.ItemGroup title="Platform">
+                                <Menu.Item key="sso">
+                                    <LoginOutlined />
+                                    <ItemTitle>SSO</ItemTitle>
+                                </Menu.Item>
+                                <Menu.Item key="integrations">
+                                    <AppstoreOutlined />
+                                    <ItemTitle>Integrations</ItemTitle>
+                                </Menu.Item>
+                                <Menu.Item key="notifications">
+                                    <BellOutlined />
+                                    <ItemTitle>Notifications</ItemTitle>
+                                </Menu.Item>
+                            </Menu.ItemGroup>
+                        )
+                    }
                 </Menu>
             </SettingsBarContainer>
             <Switch>

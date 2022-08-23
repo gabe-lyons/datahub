@@ -153,6 +153,8 @@ export const EntityActionType = {
     UpdateSchemaTags: 'UpdateSchemaTags',
     UpdateSchemaTerms: 'UpdateSchemaTerms',
     ClickExternalUrl: 'ClickExternalUrl',
+    AddIncident: 'AddIncident',
+    ResolvedIncident: 'ResolvedIncident',
 };
 export interface EntityActionEvent extends BaseEvent {
     type: EventType.EntityActionEvent;

@@ -20,14 +20,19 @@ export const DatasetStatsSummarySubHeader = () => {
 
     const rowCount = maybeLastProfile?.rowCount;
     const queryCountLast30Days = maybeStatsSummary?.queryCountLast30Days;
+    const queryCountPercentileLast30Days = maybeStatsSummary?.queryCountPercentileLast30Days;
     const uniqueUserCountLast30Days = maybeStatsSummary?.uniqueUserCountLast30Days;
+    const uniqueUserPercentileLast30Days = maybeStatsSummary?.uniqueUserPercentileLast30Days;
+
     const lastUpdatedMs = maybeLastOperation?.lastUpdatedTimestamp;
 
     return (
         <DatasetStatsSummary
             rowCount={rowCount}
             queryCountLast30Days={queryCountLast30Days}
+            queryCountPercentileLast30Days={queryCountPercentileLast30Days}
             uniqueUserCountLast30Days={uniqueUserCountLast30Days}
+            uniqueUserPercentileLast30Days={uniqueUserPercentileLast30Days}
             lastUpdatedMs={lastUpdatedMs}
         />
     );

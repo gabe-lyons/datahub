@@ -18,9 +18,9 @@ import { useGetSearchResultsForMultipleQuery } from '../../graphql/search.genera
 import analytics, { EventType, EntityActionType } from '../analytics';
 import { GetSearchResultsParams, SearchResultInterface } from '../entity/shared/components/styled/search/types';
 import { EditOwnersModal } from '../entity/shared/containers/profile/sidebar/Ownership/EditOwnersModal';
-import CopyUrn from './CopyUrn';
 import EntityDropdown from '../entity/shared/EntityDropdown';
 import { EntityMenuItems } from '../entity/shared/EntityDropdown/EntityDropdown';
+import CopyUrn from './CopyUrn';
 
 function useWrappedSearchResults(params: GetSearchResultsParams) {
     const { data, loading, error } = useGetSearchResultsForMultipleQuery(params);

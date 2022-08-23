@@ -15,10 +15,13 @@ entities:
       - datasetUsageStatistics
       - operation
       - domains
+      - proposals
+      - schemaProposals
       - schemaMetadata
       - status
       - container
       - deprecation
+      - usageFeatures
       - testResults
       - siblings
   - name: dataHubPolicy
@@ -58,6 +61,8 @@ entities:
       - container
       - deprecation
       - inputFields
+      - testResults
+      - usageFeatures
   - name: dashboard
     keyAspect: dashboardKey
     aspects:
@@ -66,6 +71,8 @@ entities:
       - deprecation
       - dashboardUsageStatistics
       - inputFields
+      - usageFeatures
+      - testResults
   - name: notebook
     doc: Notebook represents a combination of query, text, chart and etc. This is in BETA version
     keyAspect: notebookKey
@@ -128,12 +135,14 @@ entities:
       - browsePaths # unclear if this will be used
       - status
       - domains
+      - testResults
   - name: tag
     keyAspect: tagKey
     aspects:
       - tagProperties
       - ownership
       - deprecation
+      - testResults
   - name: glossaryTerm
     keyAspect: glossaryTermKey
     aspects:
@@ -142,12 +151,14 @@ entities:
       - schemaMetadata
       - ownership
       - deprecation
+      - testResults
   - name: glossaryNode
     keyAspect: glossaryNodeKey
     aspects:
       - glossaryNodeInfo
       - ownership
       - status
+      - testResults
   - name: dataHubIngestionSource
     category: internal
     keyAspect: dataHubIngestionSourceKey
@@ -191,6 +202,7 @@ entities:
       - glossaryTerms
       - editableMlModelProperties
       - domains
+      - testResults
   - name: mlModelGroup
     category: core
     keyAspect: mlModelGroupKey
@@ -198,6 +210,7 @@ entities:
       - glossaryTerms
       - editableMlModelGroupProperties
       - domains
+      - testResults
   - name: mlFeatureTable
     category: core
     keyAspect: mlFeatureTableKey
@@ -205,6 +218,7 @@ entities:
       - glossaryTerms
       - editableMlFeatureTableProperties
       - domains
+      - testResults
   - name: mlFeature
     category: core
     keyAspect: mlFeatureKey
@@ -212,6 +226,7 @@ entities:
       - glossaryTerms
       - editableMlFeatureProperties
       - domains
+      - testResults
   - name: mlPrimaryKey
     category: core
     keyAspect: mlPrimaryKeyKey
@@ -219,6 +234,7 @@ entities:
       - glossaryTerms
       - editableMlPrimaryKeyProperties
       - domains
+      - testResults
   - name: telemetry
     category: internal
     keyAspect: telemetryKey
@@ -250,4 +266,31 @@ entities:
     category: core
     keyAspect: schemaFieldKey
     aspects: []
+  ## Not in OSS
+  - name: constraint
+    keyAspect: constraintKey
+    aspects:
+      - constraintInfo
+  - name: recommendationModule
+    keyAspect: recommendationModuleKey
+    aspects:
+      - recommendationModule
+  - name: incident
+    doc: An incident for an asset.
+    category: core
+    keyAspect: incidentKey
+    aspects:
+      - incidentInfo
+  - name: globalSettings
+    doc: Global settings for an the platform
+    category: internal
+    keyAspect: globalSettingsKey
+    aspects:
+      - globalSettingsInfo
+  - name: telemetry
+    category: internal
+    keyAspect: telemetryKey
+    aspects:
+      - telemetryClientId
 events:
+  - name: notificationRequest

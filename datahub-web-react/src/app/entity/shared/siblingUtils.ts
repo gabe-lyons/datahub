@@ -63,6 +63,10 @@ const mergeAssertions = (destinationArray, sourceArray, _options) => {
     return unionBy(destinationArray, sourceArray, 'urn');
 };
 
+const mergeIncidents = (destinationArray, sourceArray, _options) => {
+    return unionBy(destinationArray, sourceArray, 'urn');
+};
+
 const mergeProperties = (destinationArray, sourceArray, _options) => {
     return unionBy(destinationArray, sourceArray, 'key');
 };
@@ -83,6 +87,8 @@ function getArrayMergeFunction(key) {
             return mergeProperties;
         case 'owners':
             return mergeOwners;
+        case 'incidents':
+            return mergeIncidents;
         default:
             return undefined;
     }
@@ -95,7 +101,20 @@ const customMerge = (isPrimary, key) => {
     if (key === 'platform') {
         return (secondary, primary) => (isPrimary ? primary : secondary);
     }
-    if (key === 'tags' || key === 'terms' || key === 'assertions' || key === 'customProperties' || key === 'owners') {
+    if (key === 'testResults') {
+        return (_secondary, primary) => primary;
+    }
+    if (key === 'totalIncidents') {
+        return (secondary, primary) => ({ ...primary, total: primary.total + secondary.total });
+    }
+    if (
+        key === 'tags' ||
+        key === 'terms' ||
+        key === 'assertions' ||
+        key === 'customProperties' ||
+        key === 'owners' ||
+        key === 'incidents'
+    ) {
         return (secondary, primary) => {
             return merge(secondary, primary, {
                 arrayMerge: getArrayMergeFunction(key),

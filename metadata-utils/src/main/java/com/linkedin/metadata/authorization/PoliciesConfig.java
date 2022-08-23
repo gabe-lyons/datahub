@@ -52,6 +52,16 @@ public class PoliciesConfig {
       "Generate Personal Access Tokens",
       "Generate personal access tokens for use with DataHub APIs.");
 
+  public static final Privilege VIEW_METADATA_PROPOSALS_PRIVILEGE = Privilege.of(
+      "VIEW_METADATA_PROPOSALS",
+      "View Metadata Proposals",
+      "View the requests tab for viewing metadata proposals.");
+
+  public static final Privilege CREATE_CONSTRAINTS_PRIVILEGE = Privilege.of(
+      "CREATE_CONSTRAINTS",
+      "Create metadata constraints",
+      "Create metadata constraints.");
+
   public static final Privilege MANAGE_ACCESS_TOKENS = Privilege.of(
       "MANAGE_ACCESS_TOKENS",
       "Manage All Access Tokens",
@@ -93,13 +103,20 @@ public class PoliciesConfig {
       "Create Domains",
       "Create new Domains.");
 
+  public static final Privilege MANAGE_GLOBAL_SETTINGS = Privilege.of(
+      "MANAGE_GLOBAL_SETTINGS",
+      "Manage Platform Settings",
+      "View and change platform-level settings, like integrations & notifications.");
+
   public static final List<Privilege> PLATFORM_PRIVILEGES = ImmutableList.of(
       MANAGE_POLICIES_PRIVILEGE,
       MANAGE_USERS_AND_GROUPS_PRIVILEGE,
       VIEW_ANALYTICS_PRIVILEGE,
-      MANAGE_DOMAINS_PRIVILEGE,
+      VIEW_METADATA_PROPOSALS_PRIVILEGE,
+      CREATE_CONSTRAINTS_PRIVILEGE,
       MANAGE_INGESTION_PRIVILEGE,
       MANAGE_SECRETS_PRIVILEGE,
+      MANAGE_DOMAINS_PRIVILEGE,
       GENERATE_PERSONAL_ACCESS_TOKENS_PRIVILEGE,
       MANAGE_ACCESS_TOKENS,
       MANAGE_TESTS_PRIVILEGE,
@@ -107,7 +124,8 @@ public class PoliciesConfig {
       MANAGE_USER_CREDENTIALS_PRIVILEGE,
       MANAGE_TAGS_PRIVILEGE,
       CREATE_TAGS_PRIVILEGE,
-      CREATE_DOMAINS_PRIVILEGE
+      CREATE_DOMAINS_PRIVILEGE,
+      MANAGE_GLOBAL_SETTINGS
   );
 
   // Resource Privileges //
@@ -122,10 +140,30 @@ public class PoliciesConfig {
       "Edit Tags",
       "The ability to add and remove tags to an asset.");
 
+  public static final Privilege PROPOSE_ENTITY_TAGS_PRIVILEGE = Privilege.of(
+      "PROPOSE_ENTITY_TAGS",
+      "Propose Tags",
+      "The ability to propose adding a tag to an asset.");
+
+  public static final Privilege MANAGE_ENTITY_TAGS_PRIVILEGE = Privilege.of(
+      "MANAGE_ENTITY_TAGS",
+      "Manage Tag Proposals",
+      "The ability to manage a proposal to add a tag to an asset.");
+
   public static final Privilege EDIT_ENTITY_GLOSSARY_TERMS_PRIVILEGE = Privilege.of(
       "EDIT_ENTITY_GLOSSARY_TERMS",
       "Edit Glossary Terms",
       "The ability to add and remove glossary terms to an asset.");
+
+  public static final Privilege PROPOSE_ENTITY_GLOSSARY_TERMS_PRIVILEGE = Privilege.of(
+      "PROPOSE_ENTITY_GLOSSARY_TERMS",
+      "Propose Glossary Terms",
+      "The ability to propose adding a glossary term to an asset.");
+
+  public static final Privilege MANAGE_ENTITY_GLOSSARY_TERMS_PRIVILEGE = Privilege.of(
+      "MANAGE_ENTITY_GLOSSARY_TERMS",
+      "Manage Glossary Term Proposals",
+      "The ability to manage a proposal to add a glossary term to an asset.");
 
   public static final Privilege EDIT_ENTITY_OWNERS_PRIVILEGE = Privilege.of(
       "EDIT_ENTITY_OWNERS",
@@ -167,6 +205,11 @@ public class PoliciesConfig {
       "Edit Operations",
       "The ability to report or edit operations information about an entity.");
 
+  public static final Privilege EDIT_ENTITY_INCIDENTS_PRIVILEGE = Privilege.of(
+      "EDIT_ENTITY_INCIDENTS",
+      "Edit Incidents",
+      "The ability to create and remove incidents for an entity.");
+
   public static final Privilege EDIT_ENTITY_PRIVILEGE = Privilege.of(
       "EDIT_ENTITY",
       "Edit All",
@@ -180,6 +223,8 @@ public class PoliciesConfig {
   public static final List<Privilege> COMMON_ENTITY_PRIVILEGES = ImmutableList.of(
       VIEW_ENTITY_PAGE_PRIVILEGE,
       EDIT_ENTITY_TAGS_PRIVILEGE,
+      PROPOSE_ENTITY_TAGS_PRIVILEGE,
+      PROPOSE_ENTITY_GLOSSARY_TERMS_PRIVILEGE, MANAGE_ENTITY_TAGS_PRIVILEGE, MANAGE_ENTITY_GLOSSARY_TERMS_PRIVILEGE,
       EDIT_ENTITY_GLOSSARY_TERMS_PRIVILEGE,
       EDIT_ENTITY_OWNERS_PRIVILEGE,
       EDIT_ENTITY_DOCS_PRIVILEGE,
@@ -187,6 +232,7 @@ public class PoliciesConfig {
       EDIT_ENTITY_STATUS_PRIVILEGE,
       EDIT_ENTITY_DOMAINS_PRIVILEGE,
       EDIT_ENTITY_DEPRECATION_PRIVILEGE,
+      EDIT_ENTITY_INCIDENTS_PRIVILEGE,
       EDIT_ENTITY_PRIVILEGE,
       DELETE_ENTITY_PRIVILEGE
   );
@@ -198,10 +244,34 @@ public class PoliciesConfig {
       "The ability to edit the column (field) tags associated with a dataset schema."
   );
 
+  public static final Privilege PROPOSE_DATASET_COL_TAGS_PRIVILEGE = Privilege.of(
+      "PROPOSE_DATASET_COL_TAGS",
+      "Propose Dataset Column Tags",
+      "The ability to propose new column (field) tags associated with a dataset schema."
+  );
+
+  public static final Privilege MANAGE_DATASET_COL_TAGS_PRIVILEGE = Privilege.of(
+      "MANAGE_DATASET_COL_TAGS",
+      "Manage Dataset Column Tag Proposals",
+      "The ability to manage column (field) tag proposals associated with a dataset schema."
+  );
+
   public static final Privilege EDIT_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE = Privilege.of(
       "EDIT_DATASET_COL_GLOSSARY_TERMS",
       "Edit Dataset Column Glossary Terms",
       "The ability to edit the column (field) glossary terms associated with a dataset schema."
+  );
+
+  public static final Privilege PROPOSE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE = Privilege.of(
+      "PROPOSE_DATASET_COL_GLOSSARY_TERMS",
+      "Propose Dataset Column Glossary Terms",
+      "The ability to propose column (field) glossary terms associated with a dataset schema."
+  );
+
+  public static final Privilege MANAGE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE = Privilege.of(
+      "MANAGE_DATASET_COL_GLOSSARY_TERMS",
+      "Manage Dataset Column Glossary Terms",
+      "The ability to manage column (field) glossary term proposals associated with a dataset schema."
   );
 
   public static final Privilege EDIT_DATASET_COL_DESCRIPTION_PRIVILEGE = Privilege.of(
@@ -255,7 +325,12 @@ public class PoliciesConfig {
               EDIT_DATASET_COL_DESCRIPTION_PRIVILEGE,
               EDIT_DATASET_COL_TAGS_PRIVILEGE,
               EDIT_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE,
-              EDIT_ENTITY_ASSERTIONS_PRIVILEGE))
+              PROPOSE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE,
+              PROPOSE_DATASET_COL_TAGS_PRIVILEGE,
+              MANAGE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE,
+              MANAGE_DATASET_COL_TAGS_PRIVILEGE,
+              EDIT_ENTITY_ASSERTIONS_PRIVILEGE
+              ))
           .flatMap(Collection::stream)
           .collect(Collectors.toList())
   );

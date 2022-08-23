@@ -98,7 +98,9 @@ export const Preview = ({
                 <DatasetStatsSummaryView
                     rowCount={rowCount}
                     queryCountLast30Days={statsSummary?.queryCountLast30Days}
+                    queryCountPercentileLast30Days={statsSummary?.queryCountPercentileLast30Days}
                     uniqueUserCountLast30Days={statsSummary?.uniqueUserCountLast30Days}
+                    uniqueUserPercentileLast30Days={statsSummary?.uniqueUserPercentileLast30Days}
                     lastUpdatedMs={lastUpdatedMs}
                 />
             }

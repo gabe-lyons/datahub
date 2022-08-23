@@ -42,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
-
 import com.linkedin.metadata.query.filter.Condition;
 import com.linkedin.metadata.query.filter.ConjunctiveCriterion;
 import com.linkedin.metadata.query.filter.ConjunctiveCriterionArray;
@@ -276,7 +275,6 @@ public class SiblingAssociationHook implements MetadataChangeLogHook {
     }
   }
 
-
   /**
    * Returns true if the event should be processed, which is only true if the event represents a dataset for now
    */
@@ -438,5 +436,4 @@ public class SiblingAssociationHook implements MetadataChangeLogHook {
       throw new RuntimeException("Failed to retrieve UpstreamLineage", e);
     }
   }
-
 }

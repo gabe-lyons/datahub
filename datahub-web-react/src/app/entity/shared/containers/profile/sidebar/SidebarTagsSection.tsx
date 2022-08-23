@@ -3,7 +3,10 @@ import styled from 'styled-components';
 
 import TagTermGroup from '../../../../../shared/tags/TagTermGroup';
 import { SidebarHeader } from './SidebarHeader';
-import { useEntityData, useMutationUrn, useRefetch } from '../../../EntityContext';
+import { useBaseEntity, useEntityData, useMutationUrn, useRefetch } from '../../../EntityContext';
+import { findTopLevelProposals } from '../../../../../shared/tags/utils/proposalUtils';
+import { GetDatasetQuery } from '../../../../../../graphql/dataset.generated';
+import ConstraintGroup from '../../../../../shared/constraints/ConstraintGroup';
 
 const TermSection = styled.div`
     margin-top: 20px;
@@ -16,6 +19,7 @@ export const SidebarTagsSection = ({ properties }: { properties?: any }) => {
     const mutationUrn = useMutationUrn();
 
     const { entityType, entityData } = useEntityData();
+    const baseEntity = useBaseEntity<GetDatasetQuery>();
 
     const refetch = useRefetch();
 
@@ -30,9 +34,14 @@ export const SidebarTagsSection = ({ properties }: { properties?: any }) => {
                 entityUrn={mutationUrn}
                 entityType={entityType}
                 refetch={refetch}
+                // eslint-disable-next-line
+                // @ts-ignore
+                // eslint-disable-next-line
+                proposedTags={findTopLevelProposals(baseEntity?.['dataset']?.['tagProposals'] || [])}
             />
             <TermSection>
                 <SidebarHeader title="Glossary Terms" />
+                <ConstraintGroup constraints={baseEntity?.dataset?.constraints || []} />
                 <TagTermGroup
                     editableGlossaryTerms={entityData?.glossaryTerms}
                     canAddTerm={canAddTerm}
@@ -41,6 +50,10 @@ export const SidebarTagsSection = ({ properties }: { properties?: any }) => {
                     entityUrn={mutationUrn}
                     entityType={entityType}
                     refetch={refetch}
+                    // eslint-disable-next-line
+                    // @ts-ignore
+                    // eslint-disable-next-line
+                    proposedGlossaryTerms={findTopLevelProposals(baseEntity?.dataset?.termProposals || [])}
                 />
             </TermSection>
         </div>

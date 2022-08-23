@@ -8,6 +8,9 @@ import com.linkedin.gms.factory.search.SearchDocumentTransformerFactory;
 import com.linkedin.metadata.boot.BootstrapManager;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformInstancesStep;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformsStep;
+import com.linkedin.metadata.boot.steps.IngestDefaultGlobalSettingsStep;
+import com.linkedin.metadata.boot.steps.IngestMetadataTestsStep;
+import com.linkedin.metadata.boot.steps.IngestGroupsStep;
 import com.linkedin.metadata.boot.steps.IngestPoliciesStep;
 import com.linkedin.metadata.boot.steps.IngestRetentionPoliciesStep;
 import com.linkedin.metadata.boot.steps.IngestRootUserStep;
@@ -57,11 +60,16 @@ public class BootstrapManagerFactory {
   @Qualifier("ingestRetentionPoliciesStep")
   private IngestRetentionPoliciesStep _ingestRetentionPoliciesStep;
 
+  @Autowired
+  @Qualifier("ingestMetadataTestsStep")
+  private IngestMetadataTestsStep _ingestMetadataTestsStep;
+
   @Bean(name = "bootstrapManager")
   @Scope("singleton")
   @Nonnull
   protected BootstrapManager createInstance() {
     final IngestRootUserStep ingestRootUserStep = new IngestRootUserStep(_entityService);
+    final IngestGroupsStep ingestGroupsStep = new IngestGroupsStep(_entityService);
     final IngestPoliciesStep ingestPoliciesStep =
         new IngestPoliciesStep(_entityRegistry, _entityService, _entitySearchService, _searchDocumentTransformer);
     final IngestDataPlatformsStep ingestDataPlatformsStep = new IngestDataPlatformsStep(_entityService);
@@ -72,9 +80,19 @@ public class BootstrapManagerFactory {
     final RestoreDbtSiblingsIndices restoreDbtSiblingsIndices =
         new RestoreDbtSiblingsIndices(_entityService, _entityRegistry);
     final RemoveClientIdAspectStep removeClientIdAspectStep = new RemoveClientIdAspectStep(_entityService);
-    return new BootstrapManager(
-        ImmutableList.of(ingestRootUserStep, ingestPoliciesStep, ingestDataPlatformsStep,
-            ingestDataPlatformInstancesStep, _ingestRetentionPoliciesStep, restoreGlossaryIndicesStep,
-            removeClientIdAspectStep, restoreDbtSiblingsIndices));
+    // acryl-main only
+    final IngestDefaultGlobalSettingsStep ingestSettingsStep = new IngestDefaultGlobalSettingsStep(_entityService);
+    return new BootstrapManager(ImmutableList.of(
+        ingestRootUserStep,
+        ingestGroupsStep,
+        ingestPoliciesStep,
+        ingestDataPlatformsStep,
+        ingestDataPlatformInstancesStep,
+        _ingestRetentionPoliciesStep,
+        ingestSettingsStep,
+        _ingestMetadataTestsStep,
+        restoreGlossaryIndicesStep,
+        removeClientIdAspectStep,
+        restoreDbtSiblingsIndices));
   }
 }

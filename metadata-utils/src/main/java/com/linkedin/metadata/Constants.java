@@ -1,5 +1,8 @@
 package com.linkedin.metadata;
 
+import com.linkedin.common.urn.Urn;
+
+
 /**
  * Static class containing commonly-used constants across DataHub services.
  */
@@ -22,6 +25,8 @@ public class Constants {
    */
   public static final String CORP_USER_ENTITY_NAME = "corpuser";
   public static final String CORP_GROUP_ENTITY_NAME = "corpGroup";
+  public static final String ACTION_REQUEST_ENTITY_NAME = "actionRequest";
+  public static final String CONSTRAINT_ENTITY_NAME = "constraint";
   public static final String DATASET_ENTITY_NAME = "dataset";
   public static final String CHART_ENTITY_NAME = "chart";
   public static final String DASHBOARD_ENTITY_NAME = "dashboard";
@@ -39,7 +44,9 @@ public class Constants {
   public static final String TAG_ENTITY_NAME = "tag";
   public static final String CONTAINER_ENTITY_NAME = "container";
   public static final String DOMAIN_ENTITY_NAME = "domain";
+  public static final String RECOMMENDATION_MODULE_ENTITY_NAME = "recommendationModule";
   public static final String ASSERTION_ENTITY_NAME = "assertion";
+  public static final String INCIDENT_ENTITY_NAME = "incident";
   public static final String INGESTION_SOURCE_ENTITY_NAME = "dataHubIngestionSource";
   public static final String SECRETS_ENTITY_NAME = "dataHubSecret";
   public static final String EXECUTION_REQUEST_ENTITY_NAME = "dataHubExecutionRequest";
@@ -63,8 +70,8 @@ public class Constants {
   public static final String STATUS_ASPECT_NAME = "status";
   public static final String SUB_TYPES_ASPECT_NAME = "subTypes";
   public static final String DEPRECATION_ASPECT_NAME = "deprecation";
-  public static final String OPERATION_ASPECT_NAME = "operation";
   public static final String SIBLINGS_ASPECT_NAME = "siblings";
+  public static final String OPERATION_ASPECT_NAME = "operation";
   public static final String ORIGIN_ASPECT_NAME = "origin";
 
   // User
@@ -193,6 +200,9 @@ public class Constants {
   public static final String DOMAIN_PROPERTIES_ASPECT_NAME = "domainProperties";
   public static final String DOMAINS_ASPECT_NAME = "domains";
 
+  // Recommendation module
+  public static final String RECOMMENDATION_MODULE_ASPECT_NAME = "recommendationModule";
+
   // Assertion
   public static final String ASSERTION_KEY_ASPECT_NAME = "assertionKey";
   public static final String ASSERTION_INFO_ASPECT_NAME = "assertionInfo";
@@ -205,6 +215,10 @@ public class Constants {
   public static final String TEST_INFO_ASPECT_NAME = "testInfo";
   public static final String TEST_RESULTS_ASPECT_NAME = "testResults";
 
+  // Incident
+  public static final String INCIDENT_KEY_ASPECT_NAME = "incidentKey";
+  public static final String INCIDENT_INFO_ASPECT_NAME = "incidentInfo";
+
   // DataHub Ingestion Source
   public static final String INGESTION_SOURCE_KEY_ASPECT_NAME = "dataHubIngestionSourceKey";
   public static final String INGESTION_INFO_ASPECT_NAME = "dataHubIngestionSourceInfo";
@@ -216,6 +230,13 @@ public class Constants {
   public static final String EXECUTION_REQUEST_INPUT_ASPECT_NAME = "dataHubExecutionRequestInput";
   public static final String EXECUTION_REQUEST_SIGNAL_ASPECT_NAME = "dataHubExecutionRequestSignal";
   public static final String EXECUTION_REQUEST_RESULT_ASPECT_NAME = "dataHubExecutionRequestResult";
+  public static final String EXECUTION_REQUEST_STATUS_RUNNING = "RUNNING";
+  public static final String EXECUTION_REQUEST_STATUS_FAILURE = "FAILURE";
+  public static final String EXECUTION_REQUEST_STATUS_SUCCESS = "SUCCESS";
+  public static final String EXECUTION_REQUEST_STATUS_TIMEOUT = "TIMEOUT";
+  public static final String EXECUTION_REQUEST_STATUS_CANCELLED = "CANCELLED";
+  public static final String EXECUTION_REQUEST_SOURCE_MANUAL_INGESTION_SOURCE = "MANUAL_INGESTION_SOURCE";
+  public static final String EXECUTION_REQUEST_SOURCE_SCHEDULED_INGESTION_SOURCE = "SCHEDULED_INGESTION_SOURCE";
 
   // DataHub Access Token
   public static final String ACCESS_TOKEN_KEY_ASPECT_NAME = "dataHubAccessTokenKey";
@@ -229,6 +250,31 @@ public class Constants {
 
   // Invite Token
   public static final String INVITE_TOKEN_ASPECT_NAME = "inviteToken";
+
+  /* SaaS-Only */
+
+  // Search
+  public static final String USAGE_FEATURES_ASPECT_NAME = "usageFeatures";
+
+  // Constraints
+  public static final String CONSTRAINT_INFO_ASPECT_NAME = "constraintInfo";
+
+  // Settings
+  public static final String GLOBAL_SETTINGS_ENTITY_NAME = "globalSettings";
+  public static final String GLOBAL_SETTINGS_INFO_ASPECT_NAME = "globalSettingsInfo";
+  public static final Urn GLOBAL_SETTINGS_URN = Urn.createFromTuple(GLOBAL_SETTINGS_ENTITY_NAME, 0);
+
+  // Events
+  public static final String NOTIFICATION_REQUEST_EVENT_NAME = "notificationRequest";
+
+  // Action Request
+  public static final String ACTION_REQUEST_INFO_ASPECT_NAME = "actionRequestInfo";
+  public static final String ACTION_REQUEST_STATUS_ASPECT_NAME = "actionRequestStatus";
+
+  /**
+   * Relationships
+   */
+  public static final String GROUP_MEMBERSHIP_RELATIONSHIP_NAME = "IsMemberOfGroup";
 
   // Relationships
   public static final String IS_MEMBER_OF_GROUP_RELATIONSHIP_NAME = "IsMemberOfGroup";

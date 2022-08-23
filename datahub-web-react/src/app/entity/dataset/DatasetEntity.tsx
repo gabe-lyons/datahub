@@ -25,6 +25,7 @@ import { getDataForEntityType } from '../shared/containers/profile/utils';
 import { SidebarDomainSection } from '../shared/containers/profile/sidebar/Domain/SidebarDomainSection';
 import { ValidationsTab } from '../shared/tabs/Dataset/Validations/ValidationsTab';
 import { OperationsTab } from './profile/OperationsTab';
+import { IncidentTab } from '../shared/tabs/Incident/IncidentTab';
 import { EntityMenuItems } from '../shared/EntityDropdown/EntityDropdown';
 import { SidebarSiblingsSection } from '../shared/containers/profile/sidebar/SidebarSiblingsSection';
 import { DatasetStatsSummarySubHeader } from './profile/stats/stats/DatasetStatsSummarySubHeader';
@@ -85,7 +86,9 @@ export class DatasetEntity implements Entity<Dataset> {
             useEntityQuery={useGetDatasetQuery}
             useUpdateQuery={useUpdateDatasetMutation}
             getOverrideProperties={this.getOverridePropertiesFromEntity}
-            headerDropdownItems={new Set([EntityMenuItems.COPY_URL, EntityMenuItems.UPDATE_DEPRECATION])}
+            headerDropdownItems={
+                new Set([EntityMenuItems.COPY_URL, EntityMenuItems.UPDATE_DEPRECATION, EntityMenuItems.RAISE_INCIDENT])
+            }
             subHeader={{
                 component: DatasetStatsSummarySubHeader,
             }}
@@ -173,11 +176,30 @@ export class DatasetEntity implements Entity<Dataset> {
                         },
                     },
                 },
+                {
+                    name: 'Incidents',
+                    component: IncidentTab,
+                    display: {
+                        visible: (_, dataset: GetDatasetQuery) => {
+                            return (dataset?.dataset?.totalIncidents?.total || 0) > 0;
+                        },
+                        enabled: (_, dataset: GetDatasetQuery) => {
+                            return (dataset?.dataset?.totalIncidents?.total || 0) > 0;
+                        },
+                    },
+                },
             ]}
             sidebarSections={[
                 {
                     component: SidebarAboutSection,
                 },
+                // {
+                //     component: SidebarSiblingsSection,
+                //     display: {
+                //         visible: (_, dataset: GetDatasetQuery) =>
+                //             (dataset?.dataset?.siblings?.siblings?.length || 0) > 0,
+                //     },
+                // },
                 {
                     component: SidebarOwnerSection,
                     properties: {

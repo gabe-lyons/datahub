@@ -99,7 +99,7 @@ def test_frontend_policy_operations(frontend_session):
                 "resources": {"type": "dataset", "allResources": True},
                 "privileges": ["EDIT_ENTITY_TAGS"],
                 "actors": {
-                    "users": ["urn:li:corpuser:datahub"],
+                    "users": ["urn:li:corpuser:admin"],
                     "resourceOwners": False,
                     "allUsers": False,
                     "allGroups": False,

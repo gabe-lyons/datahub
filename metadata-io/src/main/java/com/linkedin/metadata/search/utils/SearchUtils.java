@@ -9,6 +9,7 @@ import com.linkedin.metadata.query.filter.CriterionArray;
 import com.linkedin.metadata.query.filter.Filter;
 import com.linkedin.metadata.search.AggregationMetadata;
 import com.linkedin.metadata.search.FilterValueArray;
+import com.linkedin.metadata.search.ScrollResult;
 import com.linkedin.metadata.search.SearchEntityArray;
 import com.linkedin.metadata.search.SearchResult;
 import com.linkedin.metadata.search.SearchResultMetadata;
@@ -37,6 +38,12 @@ public class SearchUtils {
       new SearchResult().setEntities(new SearchEntityArray(Collections.emptyList()))
           .setMetadata(new SearchResultMetadata())
           .setFrom(0)
+          .setPageSize(0)
+          .setNumEntities(0);
+
+  public static final ScrollResult EMPTY_SCROLL_RESULT =
+      new ScrollResult().setEntities(new SearchEntityArray(Collections.emptyList()))
+          .setMetadata(new SearchResultMetadata())
           .setPageSize(0)
           .setNumEntities(0);
 
@@ -83,7 +90,7 @@ public class SearchUtils {
   }
 
   static boolean isUrn(@Nonnull String value) {
-    // TODO(https://github.com/datahub-project/datahub-gma/issues/51): This method is a bit of a hack to support searching for
+    // TODO(https://github.com/linkedin/datahub-gma/issues/51): This method is a bit of a hack to support searching for
     // URNs that have commas in them, while also using commas a delimiter for search. We should stop supporting commas
     // as delimiter, and then we can stop using this hack.
     return value.startsWith("urn:li:");

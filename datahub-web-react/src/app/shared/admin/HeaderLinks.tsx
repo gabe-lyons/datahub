@@ -3,9 +3,11 @@ import * as React from 'react';
 import {
     ApiOutlined,
     BarChartOutlined,
+    InboxOutlined,
     BookOutlined,
     SettingOutlined,
     FolderOutlined,
+    FileDoneOutlined,
     SolutionOutlined,
     DownOutlined,
 } from '@ant-design/icons';
@@ -47,11 +49,20 @@ export function HeaderLinks(props: Props) {
 
     const isAnalyticsEnabled = config?.analyticsConfig.enabled;
     const isIngestionEnabled = config?.managedIngestionConfig.enabled;
+    // SaaS Only
+    // Currently we only have a flag for metadata proposals.
+    // In the future, we may add configs for alerts, announcements, etc.
+    const isActionRequestsEnabled = config?.actionRequestsConfig.enabled;
+    const isTestsEnabled = config?.testsConfig.enabled;
 
     const showAnalytics = (isAnalyticsEnabled && me && me.platformPrivileges.viewAnalytics) || false;
     const showSettings = true;
     const showIngestion =
         isIngestionEnabled && me && me.platformPrivileges.manageIngestion && me.platformPrivileges.manageSecrets;
+
+    // SaaS only
+    const showActionRequests = (isActionRequestsEnabled && me && me.platformPrivileges.viewMetadataProposals) || false;
+    const showTests = (isTestsEnabled && me?.platformPrivileges?.manageTests) || false;
 
     return (
         <LinksWrapper areLinksHidden={areLinksHidden}>
@@ -60,6 +71,15 @@ export function HeaderLinks(props: Props) {
                     <Link to="/analytics">
                         <Button type="text">
                             <BarChartOutlined /> Analytics
+                        </Button>
+                    </Link>
+                </LinkWrapper>
+            )}
+            {showActionRequests && (
+                <LinkWrapper>
+                    <Link to="/requests">
+                        <Button type="text">
+                            <InboxOutlined /> Inbox
                         </Button>
                     </Link>
                 </LinkWrapper>
@@ -87,6 +107,13 @@ export function HeaderLinks(props: Props) {
                                 <FolderOutlined style={{ fontSize: '14px', fontWeight: 'bold' }} /> Domains
                             </Link>
                         </MenuItem>
+                        {showTests && (
+                            <MenuItem key="2">
+                                <Link to="/tests">
+                                    <FileDoneOutlined style={{ fontSize: '14px', fontWeight: 'bold' }} /> Tests
+                                </Link>
+                            </MenuItem>
+                        )}
                     </Menu>
                 }
             >

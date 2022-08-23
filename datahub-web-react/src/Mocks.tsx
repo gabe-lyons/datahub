@@ -25,6 +25,7 @@ import {
     ScenarioType,
     RecommendationRenderType,
     RelationshipDirection,
+    FabricType,
     Container,
     PlatformPrivileges,
 } from './types.generated';
@@ -95,6 +96,16 @@ const user2 = {
         pictureLink: null,
         teams: [],
         skills: [],
+    },
+    groups: {
+        relationships: [
+            {
+                entity: {
+                    urn: 'urn:li:corpgroup:group1',
+                    name: 'group1',
+                },
+            },
+        ],
     },
     globalTags: {
         tags: [
@@ -227,6 +238,9 @@ export const dataset1 = {
     deprecation: null,
     testResults: null,
     statsSummary: null,
+    incidents: null,
+    totalIncidents: null,
+    siblings: null,
 };
 
 export const dataset2 = {
@@ -313,6 +327,9 @@ export const dataset2 = {
     deprecation: null,
     testResults: null,
     statsSummary: null,
+    incidents: null,
+    totalIncidents: null,
+    siblings: null,
 };
 
 export const dataset3 = {
@@ -339,7 +356,7 @@ export const dataset3 = {
     properties: {
         name: 'Yet Another Dataset',
         description: 'This and here we have yet another Dataset (YAN). Are there more?',
-        origin: 'PROD',
+        origin: 'PROD' as FabricType,
         customProperties: [{ key: 'propertyAKey', value: 'propertyAValue', associatedUrn: 'urn:li:dataset:3' }],
         externalUrl: 'https://data.hub',
     },
@@ -482,6 +499,9 @@ export const dataset3 = {
     editableSchemaMetadata: null,
     deprecation: null,
     usageStats: null,
+    tagProposals: null,
+    termProposals: null,
+    constraints: null,
     operations: null,
     datasetProfiles: [
         {
@@ -530,6 +550,8 @@ export const dataset3 = {
     testResults: null,
     siblings: null,
     statsSummary: null,
+    incidents: null,
+    totalIncidents: null,
 } as Dataset;
 
 export const dataset4 = {
@@ -539,7 +561,7 @@ export const dataset4 = {
     properties: {
         name: 'Fourth Test Dataset',
         description: 'This and here we have yet another Dataset (YAN). Are there more?',
-        origin: 'PROD',
+        origin: 'PROD' as FabricType,
         customProperties: [{ key: 'propertyAKey', value: 'propertyAValue' }],
         externalUrl: 'https://data.hub',
     },
@@ -3142,6 +3164,7 @@ export const mocks = [
                     platformPrivileges: {
                         viewAnalytics: true,
                         managePolicies: true,
+                        viewMetadataProposals: true,
                         manageIdentities: true,
                         manageDomains: true,
                         manageTags: true,
@@ -3154,6 +3177,7 @@ export const mocks = [
                         manageSecrets: true,
                         manageIngestion: true,
                         generatePersonalAccessTokens: true,
+                        manageGlobalSettings: true,
                     },
                 },
             },
@@ -3376,4 +3400,6 @@ export const platformPrivileges: PlatformPrivileges = {
     manageTags: true,
     createTags: true,
     createDomains: true,
+    manageGlobalSettings: true,
+    viewMetadataProposals: true,
 };

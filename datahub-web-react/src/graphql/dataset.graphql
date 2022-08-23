@@ -189,7 +189,11 @@ fragment nonSiblingDatasetFields on Dataset {
     }
     statsSummary {
         queryCountLast30Days
+        queryCountPercentileLast30Days
+        queryCountRankLast30Days
         uniqueUserCountLast30Days
+        uniqueUserPercentileLast30Days
+        uniqueUserRankLast30Days
         topUsersLast30Days {
             urn
             type
@@ -204,6 +208,237 @@ fragment nonSiblingDatasetFields on Dataset {
                 displayName
                 pictureLink
             }
+        }
+    }
+    termProposals: proposals(type: TERM_ASSOCIATION) {
+        urn
+        type
+        status
+        result
+        subResourceType
+        subResource
+        params {
+            glossaryTermProposal {
+                glossaryTerm {
+                    urn
+                    type
+                    name
+                }
+            }
+        }
+        created {
+            time
+            actor {
+                urn
+                type
+                username
+                info {
+                    displayName
+                    firstName
+                    lastName
+                    fullName
+                }
+                editableInfo {
+                    pictureLink
+                }
+            }
+        }
+        lastModified {
+            time
+            actor {
+                urn
+                type
+                username
+                info {
+                    displayName
+                    firstName
+                    lastName
+                    fullName
+                }
+                editableInfo {
+                    pictureLink
+                }
+            }
+        }
+    }
+    tagProposals: proposals(type: TAG_ASSOCIATION) {
+        urn
+        type
+        status
+        result
+        subResourceType
+        subResource
+        params {
+            tagProposal {
+                tag {
+                    urn
+                    type
+                    name
+                }
+            }
+        }
+        created {
+            time
+            actor {
+                urn
+                type
+                username
+                info {
+                    displayName
+                    firstName
+                    lastName
+                    fullName
+                }
+                editableInfo {
+                    pictureLink
+                }
+            }
+        }
+        lastModified {
+            time
+            actor {
+                urn
+                type
+                username
+                info {
+                    displayName
+                    firstName
+                    lastName
+                    fullName
+                }
+                editableInfo {
+                    pictureLink
+                }
+            }
+        }
+    }
+    constraints {
+        displayName
+        description
+        type
+        isSatisfied
+        reason
+        params {
+            hasGlossaryTermInNodeParams {
+                nodeName
+            }
+        }
+    }
+    totalIncidents: incidents(start: 0, count: 1) {
+        total
+    }
+}
+
+fragment siblingFields on Dataset {
+    ...nonRecursiveDatasetFields
+    schemaMetadata(version: 0) {
+        ...schemaMetadataFields
+    }
+    editableSchemaMetadata {
+        editableSchemaFieldInfo {
+            fieldPath
+            description
+            globalTags {
+                ...globalTagsFields
+            }
+            glossaryTerms {
+                ...glossaryTerms
+            }
+        }
+    }
+    deprecation {
+        actor
+        deprecated
+        note
+        decommissionTime
+    }
+    globalTags {
+        ...globalTagsFields
+    }
+    glossaryTerms {
+        ...glossaryTerms
+    }
+    subTypes {
+        typeNames
+    }
+    domain {
+        ...entityDomain
+    }
+    upstream: lineage(input: { direction: UPSTREAM, start: 0, count: 100 }) {
+        ...fullLineageResults
+    }
+    downstream: lineage(input: { direction: DOWNSTREAM, start: 0, count: 100 }) {
+        ...fullLineageResults
+    }
+    usageStats(resource: $urn, range: MONTH) {
+        buckets {
+            bucket
+            duration
+            resource
+            metrics {
+                uniqueUserCount
+                totalSqlQueries
+                topSqlQueries
+            }
+        }
+        aggregations {
+            uniqueUserCount
+            totalSqlQueries
+            users {
+                user {
+                    urn
+                    username
+                }
+                count
+                userEmail
+            }
+            fields {
+                fieldName
+                count
+            }
+        }
+    }
+    datasetProfiles(limit: 1) {
+        rowCount
+        columnCount
+        timestampMillis
+        fieldProfiles {
+            fieldPath
+            uniqueCount
+            uniqueProportion
+            nullCount
+            nullProportion
+            min
+            max
+            mean
+            median
+            stdev
+            sampleValues
+        }
+    }
+    parentContainers {
+        ...parentContainersFields
+    }
+    ...viewProperties
+    assertions(start: 0, count: 1) {
+        total
+    }
+    operations(limit: 1) {
+        timestampMillis
+        lastUpdatedTimestamp
+    }
+    testResults {
+        passing {
+            test {
+                ...testFields
+            }
+            type
+        }
+        failing {
+            test {
+                ...testFields
+            }
+            type
         }
     }
 }
@@ -259,6 +494,26 @@ query getDatasetRuns($urn: String!, $start: Int!, $count: Int!, $direction: Rela
     dataset(urn: $urn) {
         runs(start: $start, count: $count, direction: $direction) {
             ...runResults
+        }
+    }
+}
+
+query getIncidents($urn: String!, $start: Int!, $count: Int!, $state: IncidentState) {
+    dataset(urn: $urn) {
+        incidents(start: $start, count: $count, state: $state) {
+            ...incidentsFields
+        }
+        siblings {
+            isPrimary
+            siblings {
+                urn
+                type
+                ... on Dataset {
+                    incidents(start: $start, count: $count, state: $state) {
+                        ...incidentsFields
+                    }
+                }
+            }
         }
     }
 }

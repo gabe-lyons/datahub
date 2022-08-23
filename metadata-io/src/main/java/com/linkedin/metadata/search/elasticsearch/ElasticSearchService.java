@@ -6,6 +6,7 @@ import com.linkedin.metadata.query.AutoCompleteResult;
 import com.linkedin.metadata.query.filter.Filter;
 import com.linkedin.metadata.query.filter.SortCriterion;
 import com.linkedin.metadata.search.EntitySearchService;
+import com.linkedin.metadata.search.ScrollResult;
 import com.linkedin.metadata.search.SearchResult;
 import com.linkedin.metadata.search.elasticsearch.indexbuilder.EntityIndexBuilders;
 import com.linkedin.metadata.search.elasticsearch.query.ESBrowseDAO;
@@ -105,6 +106,15 @@ public class ElasticSearchService implements EntitySearchService {
         String.format("Filtering Search documents entityName: %s, filters: %s, sortCriterion: %s, from: %s, size: %s",
             entityName, filters, sortCriterion, from, size));
     return esSearchDAO.filter(entityName, filters, sortCriterion, from, size);
+  }
+
+  @Nonnull
+  @Override
+  public ScrollResult scroll(@Nonnull String entityName, @Nullable Filter filters,
+      @Nullable SortCriterion sortCriterion, int size, @Nullable String scrollId, @Nonnull String keepAliveDuration) {
+    log.debug("Filtering Search documents entityName: {}, filters: {}, sortCriterion: {}, size: {}, scrollId: {}",
+            entityName, filters, sortCriterion, size, scrollId);
+    return esSearchDAO.scroll(entityName, filters, sortCriterion, size, scrollId, keepAliveDuration);
   }
 
   @Nonnull

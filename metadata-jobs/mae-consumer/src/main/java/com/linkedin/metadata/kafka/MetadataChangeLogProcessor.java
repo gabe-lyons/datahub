@@ -11,7 +11,9 @@ import com.linkedin.metadata.kafka.hook.MetadataChangeLogHook;
 import com.linkedin.metadata.kafka.hook.UpdateIndicesHook;
 import com.linkedin.metadata.kafka.hook.event.EntityChangeEventGeneratorHook;
 import com.linkedin.metadata.kafka.hook.ingestion.IngestionSchedulerHook;
+import com.linkedin.metadata.kafka.hook.notification.NotificationGeneratorHook;
 import com.linkedin.metadata.kafka.hook.siblings.SiblingAssociationHook;
+import com.linkedin.metadata.kafka.hook.test.MetadataTestHook;
 import com.linkedin.metadata.utils.metrics.MetricUtils;
 import com.linkedin.mxe.MetadataChangeLog;
 import com.linkedin.mxe.Topics;
@@ -36,7 +38,9 @@ import org.springframework.stereotype.Component;
     IngestionSchedulerHook.class,
     EntityChangeEventGeneratorHook.class,
     KafkaEventConsumerFactory.class,
-    SiblingAssociationHook.class
+    SiblingAssociationHook.class,
+    MetadataTestHook.class,
+    NotificationGeneratorHook.class
 })
 @EnableKafka
 public class MetadataChangeLogProcessor {
@@ -45,13 +49,14 @@ public class MetadataChangeLogProcessor {
   private final Histogram kafkaLagStats = MetricUtils.get().histogram(MetricRegistry.name(this.getClass(), "kafkaLag"));
 
   @Autowired
-  public MetadataChangeLogProcessor(
-      @Nonnull final UpdateIndicesHook updateIndicesHook,
+  public MetadataChangeLogProcessor(@Nonnull final UpdateIndicesHook updateIndicesHook,
       @Nonnull final IngestionSchedulerHook ingestionSchedulerHook,
+      @Nonnull final NotificationGeneratorHook notificationGeneratorHook,
       @Nonnull final EntityChangeEventGeneratorHook entityChangeEventHook,
-      @Nonnull final SiblingAssociationHook siblingAssociationHook
-  ) {
-    this.hooks = ImmutableList.of(updateIndicesHook, ingestionSchedulerHook, entityChangeEventHook, siblingAssociationHook);
+      @Nonnull final SiblingAssociationHook siblingAssociationHook, @Nonnull final MetadataTestHook metadataTestHook) {
+    this.hooks =
+        ImmutableList.of(updateIndicesHook, ingestionSchedulerHook, notificationGeneratorHook, entityChangeEventHook,
+            siblingAssociationHook, metadataTestHook);
     this.hooks.forEach(MetadataChangeLogHook::init);
   }
 
@@ -62,7 +67,8 @@ public class MetadataChangeLogProcessor {
   public void consume(final ConsumerRecord<String, GenericRecord> consumerRecord) {
     kafkaLagStats.update(System.currentTimeMillis() - consumerRecord.timestamp());
     final GenericRecord record = consumerRecord.value();
-    log.debug("Got Generic MCL on topic: {}, partition: {}, offset: {}", consumerRecord.topic(), consumerRecord.partition(), consumerRecord.offset());
+    log.debug("Got Generic MCL on topic: {}, partition: {}, offset: {}", consumerRecord.topic(),
+        consumerRecord.partition(), consumerRecord.offset());
     MetricUtils.counter(this.getClass(), "received_mcl_count").inc();
 
     MetadataChangeLog event;
@@ -81,6 +87,9 @@ public class MetadataChangeLogProcessor {
 
     // Here - plug in additional "custom processor hooks"
     for (MetadataChangeLogHook hook : this.hooks) {
+      if (!hook.isEnabled()) {
+        continue;
+      }
       try (Timer.Context ignored = MetricUtils.timer(this.getClass(), hook.getClass().getSimpleName() + "_latency")
           .time()) {
         hook.invoke(event);

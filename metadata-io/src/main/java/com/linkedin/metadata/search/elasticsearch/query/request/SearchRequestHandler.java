@@ -70,13 +70,16 @@ public class SearchRequestHandler {
   private static final Map<EntitySpec, SearchRequestHandler> REQUEST_HANDLER_BY_ENTITY_NAME = new ConcurrentHashMap<>();
   private static final String REMOVED = "removed";
   private static final int DEFAULT_MAX_TERM_BUCKET_SIZE = 20;
+  private static final String[] FIELDS_TO_FETCH = new String[]{"urn", "usageCountLast30Days"};
+  private static final String[] URN_FIELD = new String[]{"urn"};
 
   private final EntitySpec _entitySpec;
   private final Set<String> _facetFields;
   private final Set<String> _defaultQueryFieldNames;
   private final Map<String, String> _filtersToDisplayName;
-  private final Configs _configs;
+  private final int _maxTermBucketSize = 100;
 
+  private final Configs _configs;
 
   @Data
   @AllArgsConstructor
@@ -132,9 +135,9 @@ public class SearchRequestHandler {
 
     boolean removedInOrFilter = false;
     if (filter != null) {
-      removedInOrFilter = filter.getOr().stream().anyMatch(
-              or -> or.getAnd().stream().anyMatch(criterion -> criterion.getField().equals(REMOVED))
-      );
+      removedInOrFilter = filter.getOr()
+          .stream()
+          .anyMatch(or -> or.getAnd().stream().anyMatch(criterion -> criterion.getField().equals(REMOVED)));
     }
     // Filter out entities that are marked "removed" if and only if filter does not contain a criterion referencing it.
     if (!removedInOrFilter) {
@@ -164,7 +167,7 @@ public class SearchRequestHandler {
 
     searchSourceBuilder.from(from);
     searchSourceBuilder.size(size);
-    searchSourceBuilder.fetchSource("urn", null);
+    searchSourceBuilder.fetchSource(FIELDS_TO_FETCH, null);
 
     BoolQueryBuilder filterQuery = getFilterQuery(filter);
     searchSourceBuilder.query(QueryBuilders.boolQuery().must(getQuery(input)).must(filterQuery));
@@ -196,11 +199,40 @@ public class SearchRequestHandler {
     final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
     searchSourceBuilder.query(filterQuery);
     searchSourceBuilder.from(from).size(size);
+    searchSourceBuilder.fetchSource(URN_FIELD, null);
     ESUtils.buildSortOrder(searchSourceBuilder, sortCriterion);
     searchRequest.source(searchSourceBuilder);
 
     return searchRequest;
   }
+
+  /**
+   * Returns a {@link SearchRequest} given filters to be applied to search query and sort criterion to be applied to
+   * search results with scrolling capabilities
+   *
+   * @param filters {@link Filter} list of conditions with fields and values
+   * @param sortCriterion {@link SortCriterion} to be applied to the search results
+   * @param size the number of search hits to return
+   * @param keepAliveDuration duration the search context should be kept alive i.e. 10s, 1m
+   * @return {@link SearchRequest} that contains the filtered query
+   */
+  @Nonnull
+  public SearchRequest getScrollRequest(@Nullable Filter filters, @Nullable SortCriterion sortCriterion,
+      int size, String keepAliveDuration) {
+    SearchRequest searchRequest = new SearchRequest();
+
+    BoolQueryBuilder filterQuery = getFilterQuery(filters);
+    final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    searchSourceBuilder.query(filterQuery);
+    searchSourceBuilder.size(size);
+    searchSourceBuilder.fetchSource(URN_FIELD, null);
+    ESUtils.buildSortOrder(searchSourceBuilder, sortCriterion);
+    searchRequest.source(searchSourceBuilder);
+    searchRequest.scroll(keepAliveDuration);
+
+    return searchRequest;
+  }
+
 
   /**
    * Get search request to aggregate and get document counts per field value
@@ -292,7 +324,11 @@ public class SearchRequestHandler {
   }
 
   private Map<String, Double> extractFeatures(@Nonnull SearchHit searchHit) {
-    return ImmutableMap.of(Features.Name.SEARCH_BACKEND_SCORE.toString(), (double) searchHit.getScore());
+    Map<String, Double> features = new HashMap<>();
+    features.put(Features.Name.SEARCH_BACKEND_SCORE.toString(), (double) searchHit.getScore());
+    Optional.ofNullable(searchHit.getSourceAsMap().get("usageCountLast30Days"))
+        .ifPresent(value -> features.put(Features.Name.QUERY_COUNT.toString(), ((Number) value).doubleValue()));
+    return features;
   }
 
   private SearchEntity getResult(@Nonnull SearchHit hit) {

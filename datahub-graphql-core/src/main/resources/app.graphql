@@ -1,16 +1,30 @@
 # DataHub UI Application-Specific GraphQL Types
 
 extend type Query {
-    """
-    Fetch details associated with the authenticated user, provided via an auth cookie or header
-    """
-    me: AuthenticatedUser
+  """
+  Fetch details associated with the authenticated user, provided via an auth cookie or header
+  """
+  me: AuthenticatedUser
 
-    """
-    Fetch configurations
-    Used by DataHub UI
-    """
-    appConfig: AppConfig
+  """
+  Fetch configurations
+  Used by DataHub UI
+  """
+  appConfig: AppConfig
+
+  """
+  Global (platform-level) settings for DataHub.
+  Requires the 'Manage Platform Settings' Platform Privilege.
+  """
+  globalSettings: GlobalSettings
+}
+
+extend type Mutation {
+  """
+  Update the Global Settings for the Platform.
+  Requires the 'Manage Platform Settings' Platform Privilege.
+  """
+  updateGlobalSettings(input: UpdateGlobalSettingsInput!): Boolean!
 }
 
 """
@@ -41,6 +55,11 @@ type PlatformPrivileges {
   Whether the user should be able to manage policies
   """
   managePolicies: Boolean!
+
+  """
+  Whether the user should be able to view metadata proposals.
+  """
+  viewMetadataProposals: Boolean!
 
   """
   Whether the user should be able to manage users & groups
@@ -93,6 +112,11 @@ type PlatformPrivileges {
   manageUserCredentials: Boolean!
 
   """
+  SaaS-only: Whether the user is able to manage global platform settings
+  """
+  manageGlobalSettings: Boolean!
+
+  """
   Whether the user should be able to create new Tags
   """
   createTags: Boolean!
@@ -127,6 +151,8 @@ type AppConfig {
   Configurations related to the Policies Feature
   """
   policiesConfig: PoliciesConfig!
+
+  actionRequestsConfig: ActionRequestsConfig!
 
   """
   Configurations related to the User & Group management
@@ -208,7 +234,6 @@ type AuthConfig {
   """
   tokenAuthEnabled: Boolean!
 }
-
 
 """
 Configurations related to the Policies Feature
@@ -304,4 +329,431 @@ type TestsConfig {
   Whether Tests feature is enabled
   """
   enabled: Boolean!
+}
+
+"""
+Global (platform-level) settings.
+"""
+type GlobalSettings {
+  """
+  Global Integration Settings
+  """
+  integrationSettings: GlobalIntegrationSettings!
+
+  """
+  Global Notification Settings
+  """
+  notificationSettings: GlobalNotificationSettings!
+
+  """
+  Global SSO Settings
+  """
+  ssoSettings: SsoSettings
+}
+
+"""
+Global (platform-level) integrations settings.
+"""
+type GlobalIntegrationSettings {
+  """
+  Slack-related settings.
+  """
+  slackSettings: SlackIntegrationSettings
+}
+
+"""
+Slack integration settings.
+"""
+type SlackIntegrationSettings {
+  """
+  Whether the slack integration is enabled or not.
+  """
+  enabled: Boolean!
+
+  """
+  A bot token used for sending notifications
+  """
+  botToken: String
+
+  """
+  A default slack channel to route to.
+  """
+  defaultChannelName: String
+}
+
+"""
+Global (platform-level) notification settings.
+"""
+type GlobalNotificationSettings {
+  """
+  The notification settings themselves.
+  """
+  settings: [NotificationSetting!]!
+}
+
+"""
+Global (platform-level) SSO settings.
+"""
+type SsoSettings {
+  """
+  OIDC settings. May or may not be filled in
+  """
+  oidcSettings: OidcSettings
+}
+
+type OidcSettings {
+  """
+  Whether OIDC SSO is enabled.
+  """
+  enabled: Boolean!
+
+  """
+  Unique client id issued by the identity provider.
+  """
+  clientId: String!
+
+  """
+  Unique client secret issued by the identity provider.
+  """
+  clientSecret: String!
+
+  """
+  The IdP OIDC discovery url.
+  """
+  discoveryUri: String!
+
+  """
+  ADVANCED. The attribute / claim used to derive the DataHub username. Defaults to "preferred_username".
+  """
+  userNameClaim: String
+
+  """
+  ADVANCED. String representing the requested scope from the IdP. Defaults to "oidc email profile"
+  """
+  scope: String
+
+  """
+  ADVANCED. Which authentication method to use to pass credentials (clientId and clientSecret) to the token endpoint: Defaults to "client_secret_basic".
+  """
+  clientAuthenticationMethod: String
+
+  """
+  ADVANCED. Whether DataHub users should be provisioned on login if they do not exist. Defaults to true.
+  """
+  jitProvisioningEnabled: Boolean
+
+  """
+  ADVANCED. Whether the user should already exist in DataHub on login, failing login if they are not. Defaults to false.
+  """
+  preProvisioningRequired: Boolean
+
+  """
+  ADVANCED. Whether groups should be extracted from a claim in the OIDC profile. Only applies if JIT provisioning is enabled. Groups will be created if they do not exist. Defaults to true.
+  """
+  extractGroupsEnabled: Boolean
+
+  """
+  ADVANCED. The OIDC claim to extract groups information from. Defaults to 'groups'
+  """
+  groupsClaim: String
+
+  """
+  ADVANCED. Response type.
+  """
+  responseType: String
+
+  """
+  ADVANCED. Response mode.
+  """
+  responseMode: String
+
+  """
+  ADVANCED. Use Nonce
+  """
+  useNonce: Boolean
+
+  """
+  ADVANCED. Read timeout.
+  """
+  readTimeout: Long
+
+  """
+  ADVANCED. Whether to extract claims from JWT access token. Defaults to false.
+  """
+  extractJwtAccessTokenClaims: Boolean
+
+}
+
+"""
+A setting for a single notification type.
+"""
+type NotificationSetting {
+  """
+  The type of notification that the setting is for.
+  """
+  type: NotificationScenarioType!
+
+  """
+  The setting value: enabled or disabled.
+  """
+  value: NotificationSettingValue!
+
+  """
+  A set of option params, e.g. slack.channel, slack.enabled.
+  """
+  params: [StringMapEntry!]
+}
+
+"""
+A single scenario type for a notification
+"""
+enum NotificationScenarioType {
+  """
+  Notification when an entity tag changes.
+  """
+  ENTITY_TAG_CHANGE
+
+  """
+  Notification when an entity glossary term changes.
+  """
+  ENTITY_GLOSSARY_TERM_CHANGE
+
+  """
+  Notification when an entity owner changes.
+  """
+  ENTITY_OWNER_CHANGE
+
+  """
+  Notification when an entity domain changes.
+  """
+  ENTITY_DOMAIN_CHANGE
+
+  """
+  Notification when an entity deprecation changes.
+  """
+  ENTITY_DEPRECATION_CHANGE
+
+  """
+  Notification when an dataset schema changes.
+  """
+  DATASET_SCHEMA_CHANGE
+
+  """
+  Notification when a new incident is raised.
+  """
+  NEW_INCIDENT
+
+  """
+  Notification when an incident's status changes.
+  """
+  INCIDENT_STATUS_CHANGE
+
+  """
+  Notification when a new proposal is raised.
+  """
+  NEW_PROPOSAL
+
+  """
+  Notification when a proposal's status changes.
+  """
+  PROPOSAL_STATUS_CHANGE
+
+  """
+  Notification when an ingestion run changes.
+  """
+  INGESTION_RUN_CHANGE
+}
+
+"""
+A single scenario type for a notification
+"""
+enum NotificationSettingValue {
+  """
+  Setting is enabled.
+  """
+  ENABLED
+
+  """
+  Setting is disabled.
+  """
+  DISABLED
+}
+
+"""
+Input required to update Global Settings.
+"""
+input UpdateGlobalSettingsInput {
+  """
+  Input required to update integration settings
+  """
+  integrationSettings: UpdateGlobalIntegrationSettingsInput
+
+  """
+  Input required to update notifications settings
+  """
+  notificationSettings: UpdateGlobalNotificationSettingsInput
+  """
+  Input required to update SSO settings
+  """
+  ssoSettings: UpdateSsoSettingsInput
+}
+
+"""
+Input required to update Integration Settings.
+"""
+input UpdateGlobalIntegrationSettingsInput {
+  """
+  Input required to update Slack Integration Settings
+  """
+  slackSettings: UpdateSlackIntegrationSettingsInput
+}
+
+"""
+Input required to update Slack settings.
+"""
+input UpdateSlackIntegrationSettingsInput {
+  """
+  Whether the slack integration is enabled or not.
+  """
+  enabled: Boolean!
+
+  """
+  A default slack channel to route to.
+  """
+  defaultChannelName: String
+
+  """
+  Optional - a bot token to use. This will be encrypted on DataHub backend.
+  """
+  botToken: String
+}
+
+"""
+Input required to update Notification Settings.
+"""
+input UpdateGlobalNotificationSettingsInput {
+  """
+  Update all integration settings
+  """
+  settings: [NotificationSettingInput!]!
+}
+
+"""
+Input required to update a single notification setting.
+"""
+input NotificationSettingInput {
+  """
+  The type of notification that the setting is for.
+  """
+  type: NotificationScenarioType!
+
+  """
+  The setting value: enabled or disabled.
+  """
+  value: NotificationSettingValue!
+
+  """
+  A set of option params, e.g. slack.channel, slack.enabled.
+  """
+  params: [StringMapEntryInput!]
+}
+
+"""
+Input required to update SSO Settings.
+"""
+input UpdateSsoSettingsInput {
+  """
+  Auth base URL.
+  """
+  baseUrl: String!
+
+  """
+  Input required to update OIDC SSO Settings
+  """
+  oidcSettings: UpdateOidcSettingsInput
+}
+
+"""
+Input required to OIDC SSO settings.
+"""
+input UpdateOidcSettingsInput {
+  """
+  Whether OIDC SSO is enabled.
+  """
+  enabled: Boolean!
+
+  """
+  Unique client id issued by the identity provider.
+  """
+  clientId: String!
+
+  """
+  Unique client secret issued by the identity provider.
+  """
+  clientSecret: String!
+
+  """
+  The IdP OIDC discovery url.
+  """
+  discoveryUri: String!
+
+  """
+  ADVANCED. The attribute / claim used to derive the DataHub username. Defaults to "preferred_username".
+  """
+  userNameClaim: String
+
+  """
+  ADVANCED. String representing the requested scope from the IdP. Defaults to "oidc email profile"
+  """
+  scope: String
+
+  """
+  ADVANCED. Which authentication method to use to pass credentials (clientId and clientSecret) to the token endpoint: Defaults to "client_secret_basic".
+  """
+  clientAuthenticationMethod: String
+
+  """
+  ADVANCED. Whether DataHub users should be provisioned on login if they do not exist. Defaults to true.
+  """
+  jitProvisioningEnabled: Boolean
+
+  """
+  ADVANCED. Whether the user should already exist in DataHub on login, failing login if they are not. Defaults to false.
+  """
+  preProvisioningRequired: Boolean
+
+  """
+  ADVANCED. Whether groups should be extracted from a claim in the OIDC profile. Only applies if JIT provisioning is enabled. Groups will be created if they do not exist. Defaults to true.
+  """
+  extractGroupsEnabled: Boolean
+
+  """
+  ADVANCED. The OIDC claim to extract groups information from. Defaults to 'groups'
+  """
+  groupsClaim: String
+
+  """
+  ADVANCED. Response type.
+  """
+  responseType: String
+
+  """
+  ADVANCED. Response mode.
+  """
+  responseMode: String
+
+  """
+  ADVANCED. Use Nonce
+  """
+  useNonce: Boolean
+
+  """
+  ADVANCED. Read timeout.
+  """
+  readTimeout: Long
+
+  """
+  ADVANCED. Whether to extract claims from JWT access token. Defaults to false.
+  """
+  extractJwtAccessTokenClaims: Boolean
 }

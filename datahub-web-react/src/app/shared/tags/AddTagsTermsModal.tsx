@@ -3,7 +3,7 @@ import { message, Button, Modal, Select, Typography, Tag as CustomTag } from 'an
 import styled from 'styled-components';
 
 import { useGetSearchResultsLazyQuery } from '../../../graphql/search.generated';
-import { EntityType, Tag, Entity, ResourceRefInput } from '../../../types.generated';
+import { EntityType, Tag, Entity, ResourceRefInput, SubResourceType } from '../../../types.generated';
 import CreateTagModal from './CreateTagModal';
 import {
     useBatchAddTagsMutation,
@@ -18,6 +18,7 @@ import GlossaryBrowser from '../../glossary/GlossaryBrowser/GlossaryBrowser';
 import ClickOutside from '../ClickOutside';
 import { useEntityRegistry } from '../../useEntityRegistry';
 import { useGetRecommendations } from '../recommendation';
+import { useProposeTagMutation, useProposeTermMutation } from '../../../graphql/proposals.generated';
 import { FORBIDDEN_URN_CHARS_REGEX } from '../../entity/shared/utils';
 
 export enum OperationType {
@@ -33,6 +34,7 @@ type EditTagsModalProps = {
     entityType: EntityType;
     type?: EntityType;
     operationType?: OperationType;
+    showPropose?: boolean;
 };
 
 const TagSelect = styled(Select)`
@@ -80,6 +82,7 @@ export default function EditTagTermsModal({
     resources,
     type = EntityType.Tag,
     operationType = OperationType.ADD,
+    showPropose = false,
 }: EditTagsModalProps) {
     const entityRegistry = useEntityRegistry();
     const [inputValue, setInputValue] = useState('');
@@ -94,6 +97,10 @@ export default function EditTagTermsModal({
     const [batchRemoveTagsMutation] = useBatchRemoveTagsMutation();
     const [batchAddTermsMutation] = useBatchAddTermsMutation();
     const [batchRemoveTermsMutation] = useBatchRemoveTermsMutation();
+
+    // Saas-only
+    const [proposeTagMutation] = useProposeTagMutation();
+    const [proposeTermMutation] = useProposeTermMutation();
 
     const [tagTermSearch, { data: tagTermSearchData }] = useGetSearchResultsLazyQuery();
     const tagSearchResults = tagTermSearchData?.search?.searchResults?.map((searchResult) => searchResult.entity) || [];
@@ -236,6 +243,71 @@ export default function EditTagTermsModal({
         setIsFocusedOnInput(true);
         setSelectedTerms(selectedTerms.filter((term) => term.urn !== urn));
         setSelectedTags(selectedTags.filter((term) => term.urn !== urn));
+    };
+
+    // SaaS-only: Propose tag or term.
+    const onOkProposal = () => {
+        let mutation: ((input: any) => Promise<any>) | null = null;
+
+        if (type === EntityType.Tag) {
+            mutation = proposeTagMutation;
+        }
+        if (type === EntityType.GlossaryTerm) {
+            mutation = proposeTermMutation;
+        }
+
+        // Proposals only supported on a single entity as of today.
+        if (resources.length !== 1 || !mutation) {
+            onCloseModal();
+            return;
+        }
+
+        setDisableAction(true);
+
+        let input = {};
+        if (type === EntityType.Tag) {
+            input = {
+                tagUrn: urns[0],
+                resourceUrn: resources[0].resourceUrn,
+                subResource: resources[0].subResource,
+                subResourceType: resources[0].subResource ? SubResourceType.DatasetField : null,
+            };
+        }
+        if (type === EntityType.GlossaryTerm) {
+            input = {
+                termUrn: urns[0],
+                resourceUrn: resources[0].resourceUrn,
+                subResource: resources[0].subResource,
+                subResourceType: resources[0].subResource ? SubResourceType.DatasetField : null,
+            };
+        }
+
+        // TODO: Add proper analytics.
+
+        mutation({
+            variables: {
+                input,
+            },
+        })
+            .then(({ errors }) => {
+                if (!errors) {
+                    message.success({
+                        content: `${'Proposed'} ${type === EntityType.GlossaryTerm ? 'Term' : 'Tag'}!`,
+                        duration: 2,
+                    });
+                }
+            })
+            .catch((e) => {
+                message.destroy();
+                message.error({
+                    content: `Failed to propose: \n ${e.message || ''}`,
+                    duration: 3,
+                });
+            })
+            .finally(() => {
+                setDisableAction(false);
+                onCloseModal();
+            });
     };
 
     const batchAddTags = () => {
@@ -409,6 +481,15 @@ export default function EditTagTermsModal({
                     <Button onClick={onCloseModal} type="text">
                         Cancel
                     </Button>
+                    {showPropose && (
+                        <Button
+                            onClick={() => onOkProposal()}
+                            disabled={urns.length === 0 || urns.length > 1 || disableAction}
+                            data-testid="create-proposal-btn"
+                        >
+                            Propose
+                        </Button>
+                    )}
                     <Button
                         id="addTagButton"
                         data-testid="add-tag-term-from-modal-btn"

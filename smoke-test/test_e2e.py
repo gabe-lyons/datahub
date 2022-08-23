@@ -703,7 +703,7 @@ def test_frontend_me_query(frontend_session):
 
     assert res_data
     assert res_data["data"]
-    assert res_data["data"]["me"]["corpUser"]["urn"] == "urn:li:corpuser:datahub"
+    assert res_data["data"]["me"]["corpUser"]["urn"] == "urn:li:corpuser:admin"
     assert res_data["data"]["me"]["platformPrivileges"]["viewAnalytics"] is True
     assert res_data["data"]["me"]["platformPrivileges"]["managePolicies"] is True
     assert res_data["data"]["me"]["platformPrivileges"]["manageUserCredentials"] is True
@@ -1191,7 +1191,7 @@ def test_generate_personal_access_token(frontend_session):
         "variables": {
             "input": {
                 "type": "PERSONAL",
-                "actorUrn": "urn:li:corpuser:datahub",
+                "actorUrn": "urn:li:corpuser:admin",
                 "duration": "ONE_MONTH",
             }
         },
@@ -1356,7 +1356,7 @@ def test_native_user_endpoints(frontend_session):
 
     # Test that only a native user can reset their password
     jaas_user_reset_credentials_json = {
-        "email": "datahub",
+        "email": "admin",
         "password": "password",
         "resetToken": reset_token,
     }

@@ -15,8 +15,8 @@ Cypress.Commands.add('login', () => {
       method: 'POST',
       url: '/logIn',
       body: {
-        username: 'datahub',
-        password: 'datahub',
+        username: 'admin',
+        password: 'mypass',
       },
       retryOnStatusCodeFailure: true,
     });
@@ -29,6 +29,13 @@ Cypress.Commands.add('deleteUrn', (urn) => {
         "X-RestLi-Protocol-Version": "2.0.0",
         "Content-Type": "application/json",
     }})
+})
+
+Cypress.Commands.add('typeSearchDisableCache', {prevSubject: 'element'}, (subject, input) => {
+    const randomStrGenerator = () => Cypress._.random(0, 1e9);
+    const randomStr = randomStrGenerator();
+    const combinedStr = `${input} OR ${randomStr}{enter}`
+    cy.get(subject.selector).type(combinedStr);
 })
 //
 //
