@@ -89,9 +89,9 @@ public class S3BackupReader implements BackupReader {
         .map(filePath -> {
         try {
           log.error("Trying to read {}", filePath);
-          ParquetReader<GenericRecord> build = AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build();
-          log.error("Output: {}", build);
-          return build;
+          GenericRecord read = AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build().read();
+          log.error("Output: {}", read);
+          return AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build();
         } catch (IOException e) {
           log.warn("Unable to read {} as parquet, this may or may not be important.", filePath);
           return null;
