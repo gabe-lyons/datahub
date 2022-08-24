@@ -60,6 +60,7 @@ entities:
       - domains
       - container
       - deprecation
+      - inputFields
       - testResults
       - usageFeatures
   - name: dashboard
@@ -69,6 +70,7 @@ entities:
       - container
       - deprecation
       - dashboardUsageStatistics
+      - inputFields
       - usageFeatures
       - testResults
   - name: notebook
@@ -260,6 +262,10 @@ entities:
     keyAspect: inviteTokenKey
     aspects:
       - inviteToken
+  - name: schemaField
+    category: core
+    keyAspect: schemaFieldKey
+    aspects: []
   ## Not in OSS
   - name: constraint
     keyAspect: constraintKey
