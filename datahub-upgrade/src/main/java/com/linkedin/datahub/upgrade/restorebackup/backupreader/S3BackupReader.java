@@ -95,6 +95,9 @@ public class S3BackupReader implements BackupReader {
         } catch (IOException e) {
           log.warn("Unable to read {} as parquet, this may or may not be important.", filePath);
           return null;
+        } catch (RuntimeException e) {
+          log.warn("Unable to read {} as parquet, this may or may not be important: {}", filePath, e.getCause());
+          return null;
         }
       }).filter(Objects::nonNull).collect(Collectors.toList());
 
