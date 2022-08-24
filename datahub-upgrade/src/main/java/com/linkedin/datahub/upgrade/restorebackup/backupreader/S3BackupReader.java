@@ -81,13 +81,17 @@ public class S3BackupReader implements BackupReader {
           "BACKUP_S3_BUCKET and BACKUP_S3_PATH must be set to run RestoreBackup through S3");
     }
     List<String> s3Keys = getFileKey(bucket.get(), path.get());
+
     final List<ParquetReader<GenericRecord>> readers = s3Keys.stream()
         .map(key -> saveFile(bucket.get(), key))
         .filter(Optional::isPresent)
         .map(Optional::get)
         .map(filePath -> {
         try {
-          return AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build();
+          log.error("Trying to read {}", filePath);
+          ParquetReader<GenericRecord> build = AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build();
+          log.error("Output: {}", build);
+          return build;
         } catch (IOException e) {
           log.warn("Unable to read {} as parquet, this may or may not be important.", filePath);
           return null;
