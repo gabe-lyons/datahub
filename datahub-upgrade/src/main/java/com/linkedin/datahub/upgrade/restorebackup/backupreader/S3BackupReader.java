@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
@@ -80,22 +81,30 @@ public class S3BackupReader implements BackupReader {
           "BACKUP_S3_BUCKET and BACKUP_S3_PATH must be set to run RestoreBackup through S3");
     }
     List<String> s3Keys = getFileKey(bucket.get(), path.get());
-    List<String> localFilePaths = s3Keys.stream()
+
+    final List<ParquetReader<GenericRecord>> readers = s3Keys.stream()
         .map(key -> saveFile(bucket.get(), key))
         .filter(Optional::isPresent)
         .map(Optional::get)
-        .collect(Collectors.toList());
-    if (localFilePaths.isEmpty()) {
-      throw new RuntimeException(
-          String.format("Backup file on path %s in bucket %s is not found", path.get(), bucket.get()));
+        .map(filePath -> {
+        try {
+          // Try to read a record, only way to check if it is indeed a Parquet file
+          AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build().read();
+          return AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build();
+        } catch (IOException e) {
+          log.warn("Unable to read {} as parquet, this may or may not be important.", filePath);
+          return null;
+        } catch (RuntimeException e) {
+          log.warn("Unable to read {} as parquet, this may or may not be important: {}", filePath, e.getCause());
+          return null;
+        }
+      }).filter(Objects::nonNull).collect(Collectors.toList());
+
+    if (readers.isEmpty()) {
+      log.error("No backup files on path {} in bucket {} were found. Did you mis-configure something?", path.get(),
+          bucket.get());
     }
-    List<ParquetReader<GenericRecord>> readers = localFilePaths.stream().map(filePath -> {
-      try {
-        return AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build();
-      } catch (IOException e) {
-        throw new RuntimeException("Failed to build ParquetReader");
-      }
-    }).collect(Collectors.toList());
+
     return new ParquetEbeanAspectBackupIterator(readers);
   }
 
