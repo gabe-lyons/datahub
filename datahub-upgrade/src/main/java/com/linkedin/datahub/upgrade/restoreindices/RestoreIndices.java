@@ -45,6 +45,7 @@ public class RestoreIndices implements Upgrade {
     steps.add(new ClearSearchServiceStep(entitySearchService, false));
     steps.add(new ClearGraphServiceStep(graphService, false));
     steps.add(new SendMAEStep(server, entityService, entityRegistry));
+    steps.add(new RestoreFromParquetStep(entityService, entityRegistry));
     return steps;
   }
 
