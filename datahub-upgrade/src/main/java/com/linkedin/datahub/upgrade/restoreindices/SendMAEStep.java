@@ -8,7 +8,6 @@ import com.linkedin.datahub.upgrade.UpgradeContext;
 import com.linkedin.datahub.upgrade.UpgradeStep;
 import com.linkedin.datahub.upgrade.UpgradeStepResult;
 import com.linkedin.datahub.upgrade.impl.DefaultUpgradeStepResult;
-import com.linkedin.datahub.upgrade.nocode.NoCodeUpgrade;
 import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.entity.EntityUtils;
@@ -19,9 +18,9 @@ import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.mxe.SystemMetadata;
 import io.ebean.EbeanServer;
 import io.ebean.PagedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static com.linkedin.metadata.Constants.ASPECT_LATEST_VERSION;
@@ -31,7 +30,6 @@ import static com.linkedin.metadata.Constants.SYSTEM_ACTOR;
 public class SendMAEStep implements UpgradeStep {
 
   private static final int DEFAULT_BATCH_SIZE = 1000;
-  private static final long DEFAULT_BATCH_DELAY_MS = 250;
 
   private final EbeanServer _server;
   private final EntityService _entityService;
@@ -54,6 +52,15 @@ public class SendMAEStep implements UpgradeStep {
   }
 
   @Override
+  public boolean skip(UpgradeContext context) {
+    if (context.parsedArgs().containsKey(RestoreIndices.RESTORE_FROM_PARQUET)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  @Override
   public Function<UpgradeContext, UpgradeStepResult> executable() {
     return (context) -> {
 
@@ -69,9 +76,13 @@ public class SendMAEStep implements UpgradeStep {
 
         context.report()
             .addLine(String.format("Reading rows %s through %s from the aspects table.", start, start + count));
+        long startTime = System.currentTimeMillis();
         PagedList<EbeanAspectV2> rows = getPagedAspects(start, count);
+        context.report().addLine(String.format("Took %s ms to query paged list.", System.currentTimeMillis() - startTime));
 
-        for (EbeanAspectV2 aspect : rows.getList()) {
+        startTime = System.currentTimeMillis();
+        List<EbeanAspectV2> aspects = rows.getList();
+        for (EbeanAspectV2 aspect : aspects) {
           // 1. Extract an Entity type from the entity Urn
           Urn urn;
           try {
@@ -126,16 +137,12 @@ public class SendMAEStep implements UpgradeStep {
 
           totalRowsMigrated++;
         }
-        context.report().addLine(String.format("Successfully sent MAEs for %s rows", totalRowsMigrated));
+        context.report().addLine(String.format("Successfully sent MCLs for %s rows in %s ms", totalRowsMigrated,
+            System.currentTimeMillis() - startTime));
         start = start + count;
-        try {
-          TimeUnit.MILLISECONDS.sleep(getBatchDelayMs(context.parsedArgs()));
-        } catch (InterruptedException e) {
-          throw new RuntimeException("Thread interrupted while sleeping after successful batch migration.");
-        }
       }
       if (totalRowsMigrated != rowCount) {
-        context.report().addLine(String.format("Failed to send MAEs for %d rows...", rowCount - totalRowsMigrated));
+        context.report().addLine(String.format("Failed to send MCLs for %d rows...", rowCount - totalRowsMigrated));
       }
       return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.SUCCEEDED);
     };
@@ -157,19 +164,11 @@ public class SendMAEStep implements UpgradeStep {
 
   private int getBatchSize(final Map<String, Optional<String>> parsedArgs) {
     int resolvedBatchSize = DEFAULT_BATCH_SIZE;
-    if (parsedArgs.containsKey(RestoreIndices.BATCH_SIZE_ARG_NAME) && parsedArgs.get(NoCodeUpgrade.BATCH_SIZE_ARG_NAME)
+    if (parsedArgs.containsKey(RestoreIndices.BATCH_SIZE_ARG_NAME) && parsedArgs.get(RestoreIndices.BATCH_SIZE_ARG_NAME)
         .isPresent()) {
       resolvedBatchSize = Integer.parseInt(parsedArgs.get(RestoreIndices.BATCH_SIZE_ARG_NAME).get());
     }
     return resolvedBatchSize;
   }
 
-  private long getBatchDelayMs(final Map<String, Optional<String>> parsedArgs) {
-    long resolvedBatchDelayMs = DEFAULT_BATCH_DELAY_MS;
-    if (parsedArgs.containsKey(RestoreIndices.BATCH_DELAY_MS_ARG_NAME) && parsedArgs.get(
-        NoCodeUpgrade.BATCH_DELAY_MS_ARG_NAME).isPresent()) {
-      resolvedBatchDelayMs = Long.parseLong(parsedArgs.get(RestoreIndices.BATCH_DELAY_MS_ARG_NAME).get());
-    }
-    return resolvedBatchDelayMs;
-  }
 }
