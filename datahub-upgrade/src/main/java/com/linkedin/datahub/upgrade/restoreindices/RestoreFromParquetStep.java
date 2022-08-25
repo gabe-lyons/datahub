@@ -26,6 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -61,7 +62,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
 
   @Override
   public boolean skip(UpgradeContext context) {
-    if (context.parsedArgs().containsKey(RestoreIndices.RESTORE_FROM_PARQUET)) {
+    if (Boolean.parseBoolean(System.getenv(RestoreIndices.RESTORE_FROM_PARQUET))) {
       return false;
     }
 
@@ -74,16 +75,16 @@ public class RestoreFromParquetStep implements UpgradeStep {
 
       context.report().addLine("Reading backup from parquet file...");
       int numRows = 0;
-      int batchSize = getBatchSize(context.parsedArgs());
-      Optional<String> backupReaderName = context.parsedArgs().get("BACKUP_READER");
-      if (!backupReaderName.isPresent() || !_backupReaders.containsKey(backupReaderName.get())) {
+      int batchSize = getBatchSize();
+      String backupReaderName = System.getenv("BACKUP_READER");
+      if (!(backupReaderName == null) || !_backupReaders.containsKey(backupReaderName)) {
         context.report().addLine("BACKUP_READER is not set or is not valid");
         return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
       }
 
-      Class<? extends BackupReader> clazz = _backupReaders.get(backupReaderName.get());
+      Class<? extends BackupReader> clazz = _backupReaders.get(backupReaderName);
       List<String> argNames = BackupReaderArgs.getArgNames(clazz);
-      List<Optional<String>> args = argNames.stream().map(argName -> context.parsedArgs().get(argName)).collect(
+      List<String> args = argNames.stream().map(System::getenv).filter(Objects::nonNull).collect(
           Collectors.toList());
       BackupReader backupReader;
       try {
@@ -101,7 +102,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
         }
         numRows++;
 
-        if (context.parsedArgs().containsKey(DRY_RUN)) {
+        if (Boolean.parseBoolean(System.getenv(DRY_RUN))) {
           if (numRows % batchSize == 0) {
             context.report()
                 .addLine(String.format("Dry run enabled, continuing. Took %s ms to read %s aspects from parquet.",
@@ -172,11 +173,11 @@ public class RestoreFromParquetStep implements UpgradeStep {
     };
   }
 
-  private int getBatchSize(final Map<String, Optional<String>> parsedArgs) {
+  private int getBatchSize() {
     int resolvedBatchSize = DEFAULT_BATCH_SIZE;
-    if (parsedArgs.containsKey(RestoreIndices.BATCH_SIZE_ARG_NAME) && parsedArgs.get(RestoreIndices.BATCH_SIZE_ARG_NAME)
-        .isPresent()) {
-      resolvedBatchSize = Integer.parseInt(parsedArgs.get(RestoreIndices.BATCH_SIZE_ARG_NAME).get());
+    String batchSize = System.getenv(RestoreIndices.BATCH_SIZE_ARG_NAME);
+    if (batchSize != null) {
+      resolvedBatchSize = Integer.parseInt(batchSize);
     }
     return resolvedBatchSize;
   }

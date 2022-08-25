@@ -53,7 +53,7 @@ public class SendMAEStep implements UpgradeStep {
 
   @Override
   public boolean skip(UpgradeContext context) {
-    if (context.parsedArgs().containsKey(RestoreIndices.RESTORE_FROM_PARQUET)) {
+    if (Boolean.parseBoolean(System.getenv(RestoreIndices.RESTORE_FROM_PARQUET))) {
       return true;
     }
 
