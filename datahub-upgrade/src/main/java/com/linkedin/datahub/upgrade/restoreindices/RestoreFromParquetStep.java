@@ -34,7 +34,7 @@ import static com.linkedin.metadata.Constants.*;
 
 public class RestoreFromParquetStep implements UpgradeStep {
 
-  public static final String DRY_RUN = "dry_run";
+  public static final String DRY_RUN = "DRY_RUN";
   private static final int DEFAULT_BATCH_SIZE = 1000;
 
   private final EntityService _entityService;
