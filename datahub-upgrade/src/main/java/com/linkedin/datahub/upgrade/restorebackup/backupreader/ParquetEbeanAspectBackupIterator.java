@@ -25,6 +25,7 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
   private long lastTimeLogged = 0L;
   private int recordsSkipped = 0;
   private int recordsFailed = 0;
+  private int recordsProcessed = 0;
   private long totalTimeSpentInConvert = 0L;
 
   @Override
@@ -57,6 +58,7 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
       final EbeanAspectV2 ebeanAspectV2 = convertRecord(record);
       long convertEnd = System.nanoTime();
       this.totalTimeSpentInConvert += convertEnd - convertStart;
+      this.recordsProcessed ++;
       return ebeanAspectV2;
     } catch (Exception e) {
       log.error("Error while reading backed up aspect", e);
@@ -66,7 +68,7 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
   }
 
   private void printStat(String prefix) {
-    log.info("{} Reader {} of {}. Stats: Total millis spent in reading: {}, records skipped: {}, records failed: {}", prefix, currentReaderIndex, _parquetReaders.size(), totalTimeSpentInRead / 1000 / 1000, recordsSkipped, recordsFailed);
+    log.info("{} Reader {} of {}. Stats: records processed: {}, Total millis spent in reading: {}, records skipped: {}, records failed: {}", prefix, currentReaderIndex, _parquetReaders.size(), recordsProcessed, totalTimeSpentInRead / 1000 / 1000, recordsSkipped, recordsFailed);
   }
 
   @Override
