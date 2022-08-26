@@ -41,10 +41,10 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
         currentReaderIndex++;
         return next();
       }
-      long convert_start = System.currentTimeMillis();
+      long convertStart = System.currentTimeMillis();
       final EbeanAspectV2 ebeanAspectV2 = convertRecord(record);
-      long convert_end = System.currentTimeMillis();
-      log.warn("Convert time: {}", convert_end - convert_start);
+      long convertEnd = System.currentTimeMillis();
+      log.warn("Convert time: {}", convertEnd - convertStart);
       return ebeanAspectV2;
     } catch (IOException e) {
       log.error("Error while reading backed up aspect", e);
