@@ -81,6 +81,8 @@ public class RestoreFromParquetStep implements UpgradeStep {
 
       Class<? extends BackupReader> clazz = _backupReaders.get(backupReaderName);
       List<String> argNames = BackupReaderArgs.getArgNames(clazz);
+      context.report().addLine("Arg names: " + argNames);
+      context.report().addLine("Env for S3_REGION: " + System.getenv(S3BackupReader.S3_REGION));
       List<String> args = argNames.stream().map(System::getenv).filter(Objects::nonNull).collect(
           Collectors.toList());
       BackupReader backupReader;
@@ -88,7 +90,8 @@ public class RestoreFromParquetStep implements UpgradeStep {
         backupReader = clazz.getConstructor(List.class).newInstance(args);
       } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
         context.report().addLine("Invalid BackupReader, not able to construct instance of " + clazz.getSimpleName());
-        throw new IllegalArgumentException("Invalid BackupReader: " + clazz.getSimpleName() + ", need to implement proper constructor.");
+        throw new IllegalArgumentException("Invalid BackupReader: " + clazz.getSimpleName()
+            + ", need to implement proper constructor: " + args);
       }
       EbeanAspectBackupIterator iterator = backupReader.getBackupIterator(context);
       EbeanAspectV2 aspect;
