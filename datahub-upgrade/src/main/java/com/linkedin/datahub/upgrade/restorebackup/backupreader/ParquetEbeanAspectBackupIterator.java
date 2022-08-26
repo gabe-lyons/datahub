@@ -31,10 +31,10 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
     ParquetReader<GenericRecord> parquetReader = _parquetReaders.get(currentReaderIndex);
 
     try {
-      long read_start = System.currentTimeMillis();
+      long readStart = System.currentTimeMillis();
       GenericRecord record = parquetReader.read();
-      long read_end = System.currentTimeMillis();
-      log.warn("Reading time: {}", read_end - read_start);
+      long readEnd = System.currentTimeMillis();
+      log.warn("Reading time: {}", readEnd - readStart);
       if (record == null) {
         log.info("Record is null, moving to next reader {} {}", currentReaderIndex, _parquetReaders.size());
         parquetReader.close();
