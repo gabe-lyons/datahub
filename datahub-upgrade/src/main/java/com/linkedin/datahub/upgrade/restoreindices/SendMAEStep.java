@@ -129,6 +129,13 @@ public class SendMAEStep implements UpgradeStep {
 
           SystemMetadata latestSystemMetadata = EntityUtils.parseSystemMetadata(aspect.getSystemMetadata());
 
+          if (Boolean.parseBoolean(System.getenv(RestoreIndices.DRY_RUN))) {
+            context.report()
+                .addLine(String.format("Dry run enabled, continuing. Took %s ms to preprocess record.",
+                    System.currentTimeMillis() - startTime));
+              startTime = System.currentTimeMillis();
+          }
+
           // 5. Produce MAE events for the aspect record
           _entityService.produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, null, aspectRecord, null,
               latestSystemMetadata,

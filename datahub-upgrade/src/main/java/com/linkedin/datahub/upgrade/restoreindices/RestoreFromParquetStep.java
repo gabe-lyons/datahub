@@ -72,6 +72,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
 
       context.report().addLine("Restoring indices from parquet file...");
       int numRows = 0;
+      long initialStartTime = System.currentTimeMillis();
       int batchSize = getBatchSize();
       String backupReaderName = System.getenv("BACKUP_READER");
       if (backupReaderName == null || !_backupReaders.containsKey(backupReaderName)) {
@@ -166,7 +167,8 @@ public class RestoreFromParquetStep implements UpgradeStep {
         }
       }
 
-      context.report().addLine(String.format("Added %d rows to the aspect v2 table", numRows));
+      context.report().addLine(String.format("Added %d rows to the aspect v2 table, took %s ms", numRows,
+          System.currentTimeMillis() - initialStartTime));
       return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.SUCCEEDED);
     };
   }
