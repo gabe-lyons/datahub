@@ -31,6 +31,8 @@ import org.apache.parquet.hadoop.ParquetReader;
 public class S3BackupReader implements BackupReader {
 
   public static final String READER_NAME = "S3_PARQUET";
+  public static final String BACKUP_S3_BUCKET = "BACKUP_S3_BUCKET";
+  public static final String BACKUP_S3_PATH = "BACKUP_S3_PATH";
   public static final String S3_REGION = "S3_REGION";
 
   private final AmazonS3 _client;
@@ -68,22 +70,22 @@ public class S3BackupReader implements BackupReader {
 
   @Override
   public String getName() {
-    return "S3_PARQUET";
+    return READER_NAME;
   }
 
   @Nonnull
   @Override
   public EbeanAspectBackupIterator getBackupIterator(UpgradeContext context) {
-    Optional<String> bucket = context.parsedArgs().get("BACKUP_S3_BUCKET");
-    Optional<String> path = context.parsedArgs().get("BACKUP_S3_PATH");
-    if (!bucket.isPresent() || !path.isPresent()) {
+    String bucket = System.getenv(BACKUP_S3_BUCKET);
+    String path = System.getenv(BACKUP_S3_PATH);
+    if (bucket == null || path == null) {
       throw new IllegalArgumentException(
           "BACKUP_S3_BUCKET and BACKUP_S3_PATH must be set to run RestoreBackup through S3");
     }
-    List<String> s3Keys = getFileKey(bucket.get(), path.get());
+    List<String> s3Keys = getFileKey(bucket, path);
 
     final List<ParquetReader<GenericRecord>> readers = s3Keys.stream()
-        .map(key -> saveFile(bucket.get(), key))
+        .map(key -> saveFile(bucket, key))
         .filter(Optional::isPresent)
         .map(Optional::get)
         .map(filePath -> {
@@ -101,8 +103,7 @@ public class S3BackupReader implements BackupReader {
       }).filter(Objects::nonNull).collect(Collectors.toList());
 
     if (readers.isEmpty()) {
-      log.error("No backup files on path {} in bucket {} were found. Did you mis-configure something?", path.get(),
-          bucket.get());
+      log.error("No backup files on path {} in bucket {} were found. Did you mis-configure something?", path, bucket);
     }
 
     return new ParquetEbeanAspectBackupIterator(readers);

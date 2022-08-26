@@ -18,6 +18,7 @@ import java.util.List;
 public class RestoreIndices implements Upgrade {
   public static final String BATCH_SIZE_ARG_NAME = "BATCH_SIZE";
   public static final String RESTORE_FROM_PARQUET = "RESTORE_FROM_PARQUET";
+  public static final String DRY_RUN = "DRY_RUN";
 
   private final List<UpgradeStep> _steps;
 

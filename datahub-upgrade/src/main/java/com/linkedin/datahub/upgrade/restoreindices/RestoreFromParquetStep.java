@@ -34,7 +34,6 @@ import static com.linkedin.metadata.Constants.*;
 
 public class RestoreFromParquetStep implements UpgradeStep {
 
-  public static final String DRY_RUN = "DRY_RUN";
   private static final int DEFAULT_BATCH_SIZE = 1000;
 
   private final EntityService _entityService;
@@ -100,7 +99,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
         }
         numRows++;
 
-        if (Boolean.parseBoolean(System.getenv(DRY_RUN))) {
+        if (Boolean.parseBoolean(System.getenv(RestoreIndices.DRY_RUN))) {
           if (numRows % batchSize == 0) {
             context.report()
                 .addLine(String.format("Dry run enabled, continuing. Took %s ms to read %s aspects from parquet.",
