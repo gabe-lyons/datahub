@@ -21,29 +21,52 @@ import org.apache.parquet.hadoop.ParquetReader;
 public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterator<ParquetReader<GenericRecord>> {
   private final List<ParquetReader<GenericRecord>> _parquetReaders;
   private int currentReaderIndex = 0;
+  private long totalTimeSpentInRead = 0L;
+  private long lastTimeLogged = 0L;
+  private int recordsSkipped = 0;
+  private int recordsFailed = 0;
+  private long totalTimeSpentInConvert = 0L;
 
   @Override
   public EbeanAspectV2 next(ParquetReader<GenericRecord> parquetReader) {
 
     try {
-      long readStart = System.currentTimeMillis();
+      long readStart = System.nanoTime();
       GenericRecord record = parquetReader.read();
-      long readEnd = System.currentTimeMillis();
-      //log.warn("Reading time: {}", readEnd - readStart);
+      long readEnd = System.nanoTime();
+      totalTimeSpentInRead += readEnd - readStart;
+
+      while ((record != null) && ((Long) record.get("version") !=0L)) {
+        recordsSkipped +=1;
+        readStart = System.nanoTime();
+        record = parquetReader.read();
+        readEnd = System.nanoTime();
+        totalTimeSpentInRead += readEnd - readStart;
+      }
+      if ((readEnd - lastTimeLogged) > 1000*1000*1000*5) {
+        // print every 5 seconds
+        printStat("Running: ");
+        lastTimeLogged = readEnd;
+      }
       if (record == null) {
-        log.info("Record is null, closing reader {} of {}", currentReaderIndex, _parquetReaders.size());
+        printStat("Closing: ");
         parquetReader.close();
         return null;
       }
-      long convertStart = System.currentTimeMillis();
+      long convertStart = System.nanoTime();
       final EbeanAspectV2 ebeanAspectV2 = convertRecord(record);
-      long convertEnd = System.currentTimeMillis();
-      //log.warn("Convert time: {}", convertEnd - convertStart);
+      long convertEnd = System.nanoTime();
+      this.totalTimeSpentInConvert = convertEnd - convertStart;
       return ebeanAspectV2;
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.error("Error while reading backed up aspect", e);
+      this.recordsFailed ++;
       return null;
     }
+  }
+
+  private void printStat(String prefix) {
+    log.info("{} Reader {} of {}. Stats: Total millis spent in reading: {}, records skipped: {}, records failed: {}", prefix, currentReaderIndex, _parquetReaders.size(), totalTimeSpentInRead / 1000 / 1000, recordsSkipped, recordsFailed);
   }
 
   @Override
