@@ -81,8 +81,6 @@ public class RestoreFromParquetStep implements UpgradeStep {
 
       Class<? extends BackupReader> clazz = _backupReaders.get(backupReaderName);
       List<String> argNames = BackupReaderArgs.getArgNames(clazz);
-      context.report().addLine("Arg names: " + argNames);
-      context.report().addLine("Env for S3_REGION: " + System.getenv(S3BackupReader.S3_REGION));
       List<String> args = argNames.stream().map(System::getenv).filter(Objects::nonNull).collect(
           Collectors.toList());
       BackupReader backupReader;

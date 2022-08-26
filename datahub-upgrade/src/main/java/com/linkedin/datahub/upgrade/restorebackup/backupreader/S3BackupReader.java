@@ -39,18 +39,43 @@ public class S3BackupReader implements BackupReader {
 
   private static final String TEMP_DIR = "/tmp/";
 
-  public S3BackupReader(@Nonnull List<Optional<String>> args) {
+//  public S3BackupReader(@Nonnull List<Optional<String>> args) {
+//    if (args.size() != argNames().size()) {
+//      throw new IllegalArgumentException("Incorrect number of arguments for S3BackupReader.");
+//    }
+//    Regions region;
+//    String s3Region;
+//    Optional<String> arg = args.get(0);
+//    if (!arg.isPresent()) {
+//      log.warn("Region not provided, defaulting to us-west-2");
+//      s3Region = Regions.US_WEST_2.getName();
+//    } else {
+//      s3Region = arg.get();
+//    }
+//    try {
+//      region = Regions.fromName(s3Region);
+//    } catch (Exception e) {
+//      log.warn("Invalid region: {}, defaulting to us-west-2", s3Region);
+//      region = Regions.US_WEST_2;
+//    }
+//    _client = AmazonS3ClientBuilder.standard().withRegion(region).build();
+//    // Need below to solve issue with hadoop path class not working in linux systems
+//    // https://stackoverflow.com/questions/41864985/hadoop-ioexception-failure-to-login
+//    UserGroupInformation.setLoginUser(UserGroupInformation.createRemoteUser("hduser"));
+//  }
+
+  public S3BackupReader(@Nonnull List<String> args) {
     if (args.size() != argNames().size()) {
       throw new IllegalArgumentException("Incorrect number of arguments for S3BackupReader.");
     }
     Regions region;
     String s3Region;
-    Optional<String> arg = args.get(0);
-    if (!arg.isPresent()) {
+    String arg = args.get(0);
+    if (arg == null) {
       log.warn("Region not provided, defaulting to us-west-2");
       s3Region = Regions.US_WEST_2.getName();
     } else {
-      s3Region = arg.get();
+      s3Region = arg;
     }
     try {
       region = Regions.fromName(s3Region);
