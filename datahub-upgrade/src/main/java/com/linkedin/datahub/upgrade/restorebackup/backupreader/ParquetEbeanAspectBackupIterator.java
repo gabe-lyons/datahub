@@ -37,8 +37,8 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
       long readEnd = System.nanoTime();
       totalTimeSpentInRead += readEnd - readStart;
 
-      while ((record != null) && ((Long) record.get("version") !=0L)) {
-        recordsSkipped +=1;
+      while ((record != null) && ((Long) record.get("version") != 0L)) {
+        recordsSkipped += 1;
         readStart = System.nanoTime();
         record = parquetReader.read();
         readEnd = System.nanoTime();
@@ -58,11 +58,11 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
       final EbeanAspectV2 ebeanAspectV2 = convertRecord(record);
       long convertEnd = System.nanoTime();
       this.totalTimeSpentInConvert += convertEnd - convertStart;
-      this.recordsProcessed ++;
+      this.recordsProcessed++;
       return ebeanAspectV2;
     } catch (Exception e) {
       log.error("Error while reading backed up aspect", e);
-      this.recordsFailed ++;
+      this.recordsFailed++;
       return null;
     }
   }
