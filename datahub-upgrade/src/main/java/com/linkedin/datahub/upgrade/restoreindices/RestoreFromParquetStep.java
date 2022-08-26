@@ -275,9 +275,9 @@ public class RestoreFromParquetStep implements UpgradeStep {
           latestSystemMetadata,
           new AuditStamp().setActor(UrnUtils.getUrn(SYSTEM_ACTOR)).setTime(System.currentTimeMillis()),
           ChangeType.RESTATE);
-      if (numRows % batchSize == 0) {
-        context.report().addLine(String.format("Took %s ms to produce %s MCLs.",
-            System.currentTimeMillis() - startTime, batchSize));
+      if (numRows % 100 == 0) {
+        context.report().addLine(String.format("Took %s ms to produce %s MCLs. Last urn produced: %s",
+            System.currentTimeMillis() - startTime, 100, urn));
       }
     }
     _numRows.addAndGet(numRows);
