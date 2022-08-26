@@ -216,10 +216,10 @@ public class RestoreFromParquetStep implements UpgradeStep {
       numRows++;
 
       if (Boolean.parseBoolean(System.getenv(RestoreIndices.DRY_RUN))) {
-        if (numRows % batchSize == 0) {
+        if (numRows % 100 == 0) {
           context.report()
               .addLine(String.format("Dry run enabled, continuing. Took %s ms to read %s aspects from parquet.",
-                  System.currentTimeMillis() - startTime, batchSize));
+                  System.currentTimeMillis() - startTime, 100));
           startTime = System.currentTimeMillis();
         }
       }

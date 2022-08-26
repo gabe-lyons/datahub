@@ -68,7 +68,9 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
   }
 
   private void printStat(String prefix) {
-    log.info("{} Reader {} of {}. Stats: records processed: {}, Total millis spent in reading: {}, records skipped: {}, records failed: {}", prefix, currentReaderIndex, _parquetReaders.size(), recordsProcessed, totalTimeSpentInRead / 1000 / 1000, recordsSkipped, recordsFailed);
+    log.info("{} Reader {} of {}. Stats: records processed: {}, Total millis spent in reading: {}, records skipped: {},"
+        + " records failed: {}", prefix, currentReaderIndex, _parquetReaders.size(),
+        recordsProcessed, totalTimeSpentInRead / 1000 / 1000, recordsSkipped, recordsFailed);
   }
 
   @Override
