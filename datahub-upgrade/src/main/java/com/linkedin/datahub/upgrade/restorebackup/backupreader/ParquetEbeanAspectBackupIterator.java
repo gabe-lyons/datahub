@@ -44,7 +44,7 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
         readEnd = System.nanoTime();
         totalTimeSpentInRead += readEnd - readStart;
       }
-      if ((readEnd - lastTimeLogged) > 1000*1000*1000*5) {
+      if ((readEnd - lastTimeLogged) > 1000 * 1000 * 1000 * 5) {
         // print every 5 seconds
         printStat("Running: ");
         lastTimeLogged = readEnd;
