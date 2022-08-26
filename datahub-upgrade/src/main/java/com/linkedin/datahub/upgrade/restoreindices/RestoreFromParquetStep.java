@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.apache.avro.generic.GenericRecord;
@@ -48,6 +49,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
   private final EntityRegistry _entityRegistry;
   private final Map<String, Class<? extends BackupReader>> _backupReaders;
   private final ExecutorService _fileReaderThreadPool;
+  private AtomicInteger _numRows = new AtomicInteger(0);
 
   public RestoreFromParquetStep(final EntityService entityService, final EntityRegistry entityRegistry) {
     _entityService = entityService;
@@ -278,6 +280,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
             System.currentTimeMillis() - startTime, batchSize));
       }
     }
+    _numRows.addAndGet(numRows);
   }
 
   private int getBatchSize() {
