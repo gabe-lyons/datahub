@@ -19,7 +19,7 @@ import org.apache.parquet.hadoop.ParquetReader;
  * BackupReader for retrieving EbeanAspectV2 objects from a local parquet file
  */
 @Slf4j
-public class LocalParquetReader implements BackupReader {
+public class LocalParquetReader implements BackupReader<ParquetReader<GenericRecord>> {
 
   public static final String READER_NAME = "LOCAL_PARQUET";
 
@@ -43,7 +43,7 @@ public class LocalParquetReader implements BackupReader {
 
   @Nonnull
   @Override
-  public EbeanAspectBackupIterator getBackupIterator(UpgradeContext context) {
+  public EbeanAspectBackupIterator<ParquetReader<GenericRecord>> getBackupIterator(UpgradeContext context) {
     Optional<String> path = context.parsedArgs().get("BACKUP_FILE_PATH");
     if (!path.isPresent()) {
       context.report().addLine("BACKUP_FILE_PATH must be set to run RestoreBackup through local parquet file");

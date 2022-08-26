@@ -18,17 +18,12 @@ import org.apache.parquet.hadoop.ParquetReader;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterator {
+public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterator<ParquetReader<GenericRecord>> {
   private final List<ParquetReader<GenericRecord>> _parquetReaders;
   private int currentReaderIndex = 0;
 
   @Override
-  public EbeanAspectV2 next() {
-
-    if (currentReaderIndex >= _parquetReaders.size()) {
-      return null;
-    }
-    ParquetReader<GenericRecord> parquetReader = _parquetReaders.get(currentReaderIndex);
+  public EbeanAspectV2 next(ParquetReader<GenericRecord> parquetReader) {
 
     try {
       long readStart = System.currentTimeMillis();
@@ -36,10 +31,9 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
       long readEnd = System.currentTimeMillis();
       log.warn("Reading time: {}", readEnd - readStart);
       if (record == null) {
-        log.info("Record is null, moving to next reader {} {}", currentReaderIndex, _parquetReaders.size());
+        log.info("Record is null, closing reader {} of {}", currentReaderIndex, _parquetReaders.size());
         parquetReader.close();
-        currentReaderIndex++;
-        return next();
+        return null;
       }
       long convertStart = System.currentTimeMillis();
       final EbeanAspectV2 ebeanAspectV2 = convertRecord(record);
@@ -50,6 +44,16 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
       log.error("Error while reading backed up aspect", e);
       return null;
     }
+  }
+
+  @Override
+  public ParquetReader<GenericRecord> getNextReader() {
+    if (currentReaderIndex >= _parquetReaders.size()) {
+      return null;
+    }
+    ParquetReader<GenericRecord> parquetReader = _parquetReaders.get(currentReaderIndex);
+    currentReaderIndex++;
+    return parquetReader;
   }
 
   @Override

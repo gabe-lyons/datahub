@@ -72,15 +72,15 @@ public class SendMAEStep implements UpgradeStep {
       int totalRowsMigrated = 0;
       int start = 0;
       int count = getBatchSize(context.parsedArgs());
+      long initialStartTime = System.currentTimeMillis();
       while (start < rowCount) {
 
         context.report()
             .addLine(String.format("Reading rows %s through %s from the aspects table.", start, start + count));
-        long startTime = System.currentTimeMillis();
         PagedList<EbeanAspectV2> rows = getPagedAspects(start, count);
-        context.report().addLine(String.format("Took %s ms to query paged list.", System.currentTimeMillis() - startTime));
+        context.report().addLine(String.format("Took %s ms to query paged list.", System.currentTimeMillis() - initialStartTime));
 
-        startTime = System.currentTimeMillis();
+        long startTime = System.currentTimeMillis();
         List<EbeanAspectV2> aspects = rows.getList();
         for (EbeanAspectV2 aspect : aspects) {
           // 1. Extract an Entity type from the entity Urn
@@ -130,10 +130,12 @@ public class SendMAEStep implements UpgradeStep {
           SystemMetadata latestSystemMetadata = EntityUtils.parseSystemMetadata(aspect.getSystemMetadata());
 
           if (Boolean.parseBoolean(System.getenv(RestoreIndices.DRY_RUN))) {
-            context.report()
-                .addLine(String.format("Dry run enabled, continuing. Took %s ms to preprocess record.",
-                    System.currentTimeMillis() - startTime));
+            if (totalRowsMigrated % count == 0) {
+              context.report()
+                  .addLine(String.format("Dry run enabled, continuing. Took %s ms to preprocess %s records.",
+                      System.currentTimeMillis() - startTime, count));
               startTime = System.currentTimeMillis();
+            }
           }
 
           // 5. Produce MAE events for the aspect record
@@ -145,12 +147,14 @@ public class SendMAEStep implements UpgradeStep {
           totalRowsMigrated++;
         }
         context.report().addLine(String.format("Successfully sent MCLs for %s rows in %s ms", totalRowsMigrated,
-            System.currentTimeMillis() - startTime));
+            System.currentTimeMillis() - initialStartTime));
         start = start + count;
       }
       if (totalRowsMigrated != rowCount) {
         context.report().addLine(String.format("Failed to send MCLs for %d rows...", rowCount - totalRowsMigrated));
       }
+      context.report().addLine(String.format("Successfully sent MCLs for %s rows in %s ms", totalRowsMigrated,
+          System.currentTimeMillis() - initialStartTime));
       return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.SUCCEEDED);
     };
   }

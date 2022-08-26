@@ -23,11 +23,18 @@ import com.linkedin.metadata.models.EntitySpec;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.mxe.SystemMetadata;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.apache.avro.generic.GenericRecord;
+import org.apache.parquet.hadoop.ParquetReader;
 
 import static com.linkedin.metadata.Constants.*;
 
@@ -35,16 +42,26 @@ import static com.linkedin.metadata.Constants.*;
 public class RestoreFromParquetStep implements UpgradeStep {
 
   private static final int DEFAULT_BATCH_SIZE = 1000;
+  private static final int DEFAULT_THREAD_POOL = 4;
 
   private final EntityService _entityService;
   private final EntityRegistry _entityRegistry;
   private final Map<String, Class<? extends BackupReader>> _backupReaders;
+  private final ExecutorService _fileReaderThreadPool;
 
   public RestoreFromParquetStep(final EntityService entityService, final EntityRegistry entityRegistry) {
     _entityService = entityService;
     _entityRegistry = entityRegistry;
     _backupReaders = ImmutableBiMap.of(LocalParquetReader.READER_NAME, LocalParquetReader.class,
         S3BackupReader.READER_NAME, S3BackupReader.class);
+    String poolSize = System.getenv(RestoreIndices.READER_POOL_SIZE);
+    int intPoolSize;
+    try {
+      intPoolSize = Integer.parseInt(poolSize);
+    } catch (NumberFormatException e) {
+      intPoolSize = DEFAULT_THREAD_POOL;
+    }
+    _fileReaderThreadPool = Executors.newFixedThreadPool(intPoolSize);
   }
 
   @Override
@@ -84,7 +101,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
       List<String> argNames = BackupReaderArgs.getArgNames(clazz);
       List<String> args = argNames.stream().map(System::getenv).filter(Objects::nonNull).collect(
           Collectors.toList());
-      BackupReader backupReader;
+      BackupReader<ParquetReader<GenericRecord>> backupReader;
       try {
         backupReader = clazz.getConstructor(List.class).newInstance(args);
       } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
@@ -92,85 +109,175 @@ public class RestoreFromParquetStep implements UpgradeStep {
         throw new IllegalArgumentException("Invalid BackupReader: " + clazz.getSimpleName()
             + ", need to implement proper constructor: " + args);
       }
-      EbeanAspectBackupIterator iterator = backupReader.getBackupIterator(context);
-      EbeanAspectV2 aspect;
-      long startTime = System.currentTimeMillis();
-      while ((aspect = iterator.next()) != null) {
-        if (aspect.getVersion() != 0) {
-          continue;
-        }
-        numRows++;
-
-        if (Boolean.parseBoolean(System.getenv(RestoreIndices.DRY_RUN))) {
-          if (numRows % batchSize == 0) {
-            context.report()
-                .addLine(String.format("Dry run enabled, continuing. Took %s ms to read %s aspects from parquet.",
-                    System.currentTimeMillis() - startTime, batchSize));
-            startTime = System.currentTimeMillis();
-          }
-        }
-
-        // 1. Extract an Entity type from the entity Urn
-        Urn urn;
+      EbeanAspectBackupIterator<ParquetReader<GenericRecord>> iterator = backupReader.getBackupIterator(context);
+      ParquetReader<GenericRecord> reader;
+      List<Future<?>> futureList = new ArrayList<>();
+      while ((reader = iterator.getNextReader()) != null) {
+        final ParquetReader<GenericRecord> readerRef = reader;
+        futureList.add(_fileReaderThreadPool.submit(() -> readerExecutable(iterator, readerRef, context, batchSize)));
+      }
+      for (Future<?> future : futureList) {
         try {
-          urn = Urn.createFromString(aspect.getKey().getUrn());
-        } catch (Exception e) {
-          context.report()
-              .addLine(String.format("Failed to bind Urn with value %s into Urn object: %s. Ignoring row.",
-                  aspect.getKey().getUrn(), e));
-          continue;
-        }
-
-        // 2. Verify that the entity associated with the aspect is found in the registry.
-        final String entityName = urn.getEntityType();
-        final EntitySpec entitySpec;
-        try {
-          entitySpec = _entityRegistry.getEntitySpec(entityName);
-        } catch (Exception e) {
-          context.report()
-              .addLine(String.format("Failed to find entity with name %s in Entity Registry: %s. Ignoring row.",
-                  entityName, e));
-          continue;
-        }
-        final String aspectName = aspect.getKey().getAspect();
-
-        // 3. Verify that the aspect is a valid aspect associated with the entity
-        AspectSpec aspectSpec = entitySpec.getAspectSpec(aspectName);
-        if (aspectSpec == null) {
-          context.report()
-              .addLine(String.format("Failed to find aspect with name %s associated with entity named %s", aspectName,
-                  entityName));
-          continue;
-        }
-
-        // 4. Create record from json aspect
-        final RecordTemplate aspectRecord;
-        try {
-          aspectRecord = EntityUtils.toAspectRecord(entityName, aspectName, aspect.getMetadata(), _entityRegistry);
-        } catch (Exception e) {
-          context.report()
-              .addLine(String.format("Failed to deserialize row %s for entity %s, aspect %s: %s. Ignoring row.",
-                  aspect.getMetadata(), entityName, aspectName, e));
-          continue;
-        }
-
-        SystemMetadata latestSystemMetadata = EntityUtils.parseSystemMetadata(aspect.getSystemMetadata());
-
-        // 5. Produce MAE events for the aspect record
-        _entityService.produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, null, aspectRecord, null,
-            latestSystemMetadata,
-            new AuditStamp().setActor(UrnUtils.getUrn(SYSTEM_ACTOR)).setTime(System.currentTimeMillis()),
-            ChangeType.RESTATE);
-        if (numRows % batchSize == 0) {
-          context.report().addLine(String.format("Took %s ms to produce %s MCLs.",
-              System.currentTimeMillis() - startTime, batchSize));
+         future.get();
+        } catch (InterruptedException | ExecutionException e) {
+          context.report().addLine("Reading interrupted, not able to finish processing.");
+          throw new RuntimeException(e);
         }
       }
+//      while ((aspect = iterator.next()) != null) {
+//        if (aspect.getVersion() != 0) {
+//          continue;
+//        }
+//        numRows++;
+//
+//        if (Boolean.parseBoolean(System.getenv(RestoreIndices.DRY_RUN))) {
+//          if (numRows % batchSize == 0) {
+//            context.report()
+//                .addLine(String.format("Dry run enabled, continuing. Took %s ms to read %s aspects from parquet.",
+//                    System.currentTimeMillis() - startTime, batchSize));
+//            startTime = System.currentTimeMillis();
+//          }
+//        }
+//
+//        // 1. Extract an Entity type from the entity Urn
+//        Urn urn;
+//        try {
+//          urn = Urn.createFromString(aspect.getKey().getUrn());
+//        } catch (Exception e) {
+//          context.report()
+//              .addLine(String.format("Failed to bind Urn with value %s into Urn object: %s. Ignoring row.",
+//                  aspect.getKey().getUrn(), e));
+//          continue;
+//        }
+//
+//        // 2. Verify that the entity associated with the aspect is found in the registry.
+//        final String entityName = urn.getEntityType();
+//        final EntitySpec entitySpec;
+//        try {
+//          entitySpec = _entityRegistry.getEntitySpec(entityName);
+//        } catch (Exception e) {
+//          context.report()
+//              .addLine(String.format("Failed to find entity with name %s in Entity Registry: %s. Ignoring row.",
+//                  entityName, e));
+//          continue;
+//        }
+//        final String aspectName = aspect.getKey().getAspect();
+//
+//        // 3. Verify that the aspect is a valid aspect associated with the entity
+//        AspectSpec aspectSpec = entitySpec.getAspectSpec(aspectName);
+//        if (aspectSpec == null) {
+//          context.report()
+//              .addLine(String.format("Failed to find aspect with name %s associated with entity named %s", aspectName,
+//                  entityName));
+//          continue;
+//        }
+//
+//        // 4. Create record from json aspect
+//        final RecordTemplate aspectRecord;
+//        try {
+//          aspectRecord = EntityUtils.toAspectRecord(entityName, aspectName, aspect.getMetadata(), _entityRegistry);
+//        } catch (Exception e) {
+//          context.report()
+//              .addLine(String.format("Failed to deserialize row %s for entity %s, aspect %s: %s. Ignoring row.",
+//                  aspect.getMetadata(), entityName, aspectName, e));
+//          continue;
+//        }
+//
+//        SystemMetadata latestSystemMetadata = EntityUtils.parseSystemMetadata(aspect.getSystemMetadata());
+//
+//        // 5. Produce MAE events for the aspect record
+//        _entityService.produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, null, aspectRecord, null,
+//            latestSystemMetadata,
+//            new AuditStamp().setActor(UrnUtils.getUrn(SYSTEM_ACTOR)).setTime(System.currentTimeMillis()),
+//            ChangeType.RESTATE);
+//        if (numRows % batchSize == 0) {
+//          context.report().addLine(String.format("Took %s ms to produce %s MCLs.",
+//              System.currentTimeMillis() - startTime, batchSize));
+//        }
+//      }
 
       context.report().addLine(String.format("Added %d rows to the aspect v2 table, took %s ms", numRows,
           System.currentTimeMillis() - initialStartTime));
       return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.SUCCEEDED);
     };
+  }
+
+  private void readerExecutable(EbeanAspectBackupIterator<ParquetReader<GenericRecord>> iterator,
+      ParquetReader<GenericRecord> reader, UpgradeContext context, int batchSize) {
+    EbeanAspectV2 aspect;
+    long startTime = System.currentTimeMillis();
+    int numRows = 0;
+    while ((aspect = iterator.next(reader)) != null) {
+      if (aspect.getVersion() != 0) {
+        continue;
+      }
+      numRows++;
+
+      if (Boolean.parseBoolean(System.getenv(RestoreIndices.DRY_RUN))) {
+        if (numRows % batchSize == 0) {
+          context.report()
+              .addLine(String.format("Dry run enabled, continuing. Took %s ms to read %s aspects from parquet.",
+                  System.currentTimeMillis() - startTime, batchSize));
+          startTime = System.currentTimeMillis();
+        }
+      }
+
+      // 1. Extract an Entity type from the entity Urn
+      Urn urn;
+      try {
+        urn = Urn.createFromString(aspect.getKey().getUrn());
+      } catch (Exception e) {
+        context.report()
+            .addLine(String.format("Failed to bind Urn with value %s into Urn object: %s. Ignoring row.",
+                aspect.getKey().getUrn(), e));
+        continue;
+      }
+
+      // 2. Verify that the entity associated with the aspect is found in the registry.
+      final String entityName = urn.getEntityType();
+      final EntitySpec entitySpec;
+      try {
+        entitySpec = _entityRegistry.getEntitySpec(entityName);
+      } catch (Exception e) {
+        context.report()
+            .addLine(String.format("Failed to find entity with name %s in Entity Registry: %s. Ignoring row.",
+                entityName, e));
+        continue;
+      }
+      final String aspectName = aspect.getKey().getAspect();
+
+      // 3. Verify that the aspect is a valid aspect associated with the entity
+      AspectSpec aspectSpec = entitySpec.getAspectSpec(aspectName);
+      if (aspectSpec == null) {
+        context.report()
+            .addLine(String.format("Failed to find aspect with name %s associated with entity named %s", aspectName,
+                entityName));
+        continue;
+      }
+
+      // 4. Create record from json aspect
+      final RecordTemplate aspectRecord;
+      try {
+        aspectRecord = EntityUtils.toAspectRecord(entityName, aspectName, aspect.getMetadata(), _entityRegistry);
+      } catch (Exception e) {
+        context.report()
+            .addLine(String.format("Failed to deserialize row %s for entity %s, aspect %s: %s. Ignoring row.",
+                aspect.getMetadata(), entityName, aspectName, e));
+        continue;
+      }
+
+      SystemMetadata latestSystemMetadata = EntityUtils.parseSystemMetadata(aspect.getSystemMetadata());
+
+      // 5. Produce MAE events for the aspect record
+      _entityService.produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, null, aspectRecord, null,
+          latestSystemMetadata,
+          new AuditStamp().setActor(UrnUtils.getUrn(SYSTEM_ACTOR)).setTime(System.currentTimeMillis()),
+          ChangeType.RESTATE);
+      if (numRows % batchSize == 0) {
+        context.report().addLine(String.format("Took %s ms to produce %s MCLs.",
+            System.currentTimeMillis() - startTime, batchSize));
+      }
+    }
   }
 
   private int getBatchSize() {
