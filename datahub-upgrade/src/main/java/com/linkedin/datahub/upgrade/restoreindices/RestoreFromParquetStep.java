@@ -49,7 +49,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
 
   @Override
   public String id() {
-    return "RestoreStorageStep";
+    return "RestoreFromParquetStep";
   }
 
   @Override
@@ -70,7 +70,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
   public Function<UpgradeContext, UpgradeStepResult> executable() {
     return (context) -> {
 
-      context.report().addLine("Reading backup from parquet file...");
+      context.report().addLine("Restoring indices from parquet file...");
       int numRows = 0;
       int batchSize = getBatchSize();
       String backupReaderName = System.getenv("BACKUP_READER");
