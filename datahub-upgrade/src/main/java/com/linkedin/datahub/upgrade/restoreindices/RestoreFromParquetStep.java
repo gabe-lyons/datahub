@@ -74,7 +74,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
       int numRows = 0;
       int batchSize = getBatchSize();
       String backupReaderName = System.getenv("BACKUP_READER");
-      if ( backupReaderName == null || !_backupReaders.containsKey(backupReaderName)) {
+      if (backupReaderName == null || !_backupReaders.containsKey(backupReaderName)) {
         context.report().addLine("BACKUP_READER is not set or is not valid: " + backupReaderName);
         return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
       }
