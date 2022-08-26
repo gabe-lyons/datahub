@@ -31,14 +31,21 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
     ParquetReader<GenericRecord> parquetReader = _parquetReaders.get(currentReaderIndex);
 
     try {
+      long read_start = System.currentTimeMillis();
       GenericRecord record = parquetReader.read();
+      long read_end = System.currentTimeMillis();
+      log.warn("Reading time: {}", read_end - read_start);
       if (record == null) {
         log.info("Record is null, moving to next reader {} {}", currentReaderIndex, _parquetReaders.size());
         parquetReader.close();
         currentReaderIndex++;
         return next();
       }
-      return convertRecord(record);
+      long convert_start = System.currentTimeMillis();
+      final EbeanAspectV2 ebeanAspectV2 = convertRecord(record);
+      long convert_end = System.currentTimeMillis();
+      log.warn("Convert time: {}", convert_end - convert_start);
+      return ebeanAspectV2;
     } catch (IOException e) {
       log.error("Error while reading backed up aspect", e);
       return null;
