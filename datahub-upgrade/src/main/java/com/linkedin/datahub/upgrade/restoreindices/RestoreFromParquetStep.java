@@ -110,7 +110,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
       } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
         context.report().addLine("Invalid BackupReader, not able to construct instance of " + clazz.getSimpleName());
         throw new IllegalArgumentException("Invalid BackupReader: " + clazz.getSimpleName()
-            + ", need to implement proper constructor: " + args);
+            + ", need to implement proper constructor: " + args, e);
       }
       EbeanAspectBackupIterator<ParquetReaderWrapper> iterator = backupReader.getBackupIterator(context);
       ParquetReaderWrapper reader;
