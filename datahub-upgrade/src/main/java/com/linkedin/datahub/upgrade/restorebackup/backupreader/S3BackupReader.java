@@ -2,12 +2,6 @@ package com.linkedin.datahub.upgrade.restorebackup.backupreader;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.linkedin.datahub.upgrade.UpgradeContext;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,6 +19,14 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.parquet.avro.AvroParquetReader;
 import org.apache.parquet.hadoop.ParquetReader;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 
 
 @Slf4j
@@ -35,7 +37,7 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
   public static final String BACKUP_S3_PATH = "BACKUP_S3_PATH";
   public static final String S3_REGION = "S3_REGION";
 
-  private final AmazonS3 _client;
+  private final S3Client _client;
 
   private static final String TEMP_DIR = "/tmp/";
 
@@ -68,7 +70,7 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
     if (args.size() != argNames().size()) {
       throw new IllegalArgumentException("Incorrect number of arguments for S3BackupReader.");
     }
-    Regions region;
+    Region region;
     String s3Region;
     String arg = args.get(0);
     if (arg == null) {
@@ -78,12 +80,12 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
       s3Region = arg;
     }
     try {
-      region = Regions.fromName(s3Region);
+      region = Region.of(s3Region);
     } catch (Exception e) {
       log.warn("Invalid region: {}, defaulting to us-west-2", s3Region);
-      region = Regions.US_WEST_2;
+      region = Region.of(Regions.US_WEST_2.getName());
     }
-    _client = AmazonS3ClientBuilder.standard().withRegion(region).build();
+    _client = S3Client.builder().region(region).build();
     // Need below to solve issue with hadoop path class not working in linux systems
     // https://stackoverflow.com/questions/41864985/hadoop-ioexception-failure-to-login
     UserGroupInformation.setLoginUser(UserGroupInformation.createRemoteUser("hduser"));
@@ -135,10 +137,11 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
   }
 
   private List<String> getFileKey(String bucket, String path) {
-    ListObjectsV2Result objectListResult = _client.listObjectsV2(bucket, path);
-    return objectListResult.getObjectSummaries()
+    ListObjectsV2Request request = ListObjectsV2Request.builder().bucket(bucket).prefix(path).build();
+    ListObjectsV2Iterable objectListResult = _client.listObjectsV2Paginator(request);
+    return objectListResult.contents()
         .stream()
-        .map(S3ObjectSummary::getKey)
+        .map(S3Object::key)
         .collect(Collectors.toList());
   }
 
@@ -152,12 +155,12 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
       localFilePath = "backup.gz.parquet";
     }
 
-    try (S3Object o = _client.getObject(bucket, key);
-        S3ObjectInputStream s3is = o.getObjectContent();
+    try (ResponseInputStream<GetObjectResponse> o =
+        _client.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build());
         FileOutputStream fos = FileUtils.openOutputStream(new File(localFilePath))) {
       byte[] readBuf = new byte[1024];
       int readLen = 0;
-      while ((readLen = s3is.read(readBuf)) > 0) {
+      while ((readLen = o.read(readBuf)) > 0) {
         fos.write(readBuf, 0, readLen);
       }
       return Optional.of(localFilePath);
