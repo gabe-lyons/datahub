@@ -25,6 +25,7 @@ import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.mxe.SystemMetadata;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,10 +37,11 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 
 import static com.linkedin.metadata.Constants.*;
 
-
+@Slf4j
 public class RestoreFromParquetStep implements UpgradeStep {
 
   private static final int DEFAULT_BATCH_SIZE = 1000;
@@ -50,7 +52,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
   private final Map<String, Class<? extends BackupReader<ParquetReaderWrapper>>> _backupReaders;
   private final ExecutorService _fileReaderThreadPool;
   private AtomicInteger _numRows = new AtomicInteger(0);
-  private Map<String, AtomicInteger> _entityCounts = new ConcurrentHashMap<>();
+  private ConcurrentHashMap<String, AtomicInteger> _entityCounts = new ConcurrentHashMap<>();
 
   public RestoreFromParquetStep(final EntityService entityService, final EntityRegistry entityRegistry) {
     _entityService = entityService;
@@ -93,7 +95,6 @@ public class RestoreFromParquetStep implements UpgradeStep {
       context.report().addLine("Restoring indices from parquet file...");
       int numRows = 0;
       long initialStartTime = System.currentTimeMillis();
-      int batchSize = getBatchSize();
       String backupReaderName = System.getenv("BACKUP_READER");
       if (backupReaderName == null || !_backupReaders.containsKey(backupReaderName)) {
         context.report().addLine("BACKUP_READER is not set or is not valid: " + backupReaderName);
@@ -114,14 +115,14 @@ public class RestoreFromParquetStep implements UpgradeStep {
       }
       EbeanAspectBackupIterator<ParquetReaderWrapper> iterator = backupReader.getBackupIterator(context);
       ParquetReaderWrapper reader;
-      List<Future<?>> futureList = new ArrayList<>();
+      List<Future<Integer>> futureList = new ArrayList<>();
       while ((reader = iterator.getNextReader()) != null) {
         final ParquetReaderWrapper readerRef = reader;
-        futureList.add(_fileReaderThreadPool.submit(() -> readerExecutable(readerRef, context, batchSize)));
+        futureList.add(_fileReaderThreadPool.submit(() -> readerExecutable(readerRef, context)));
       }
-      for (Future<?> future : futureList) {
+      for (Future<Integer> future : futureList) {
         try {
-         future.get();
+         numRows = numRows + future.get();
         } catch (InterruptedException | ExecutionException e) {
           context.report().addLine("Reading interrupted, not able to finish processing.");
           throw new RuntimeException(e);
@@ -201,14 +202,22 @@ public class RestoreFromParquetStep implements UpgradeStep {
 
       context.report().addLine(String.format("Added %d rows to the aspect v2 table, took %s ms", numRows,
           System.currentTimeMillis() - initialStartTime));
+      context.report().addLine("Entity counts: " + _entityCounts
+          .entrySet()
+          .stream()
+          .map(entry -> entry.getKey() + "->" + entry.getValue().get())
+          .collect(Collectors.joining("\n\t")));
       return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.SUCCEEDED);
     };
   }
 
-  private void readerExecutable(ParquetReaderWrapper reader, UpgradeContext context, int batchSize) {
+  private Integer readerExecutable(ParquetReaderWrapper reader, UpgradeContext context) {
+
     EbeanAspectV2 aspect;
     long startTime = System.currentTimeMillis();
+    log.info("Processing file {}", reader.getFileName());
     int numRows = 0;
+    Map<String, String> entityUrnMap = new HashMap<>();
     while ((aspect = reader.next()) != null) {
       if (aspect.getVersion() != 0) {
         continue;
@@ -278,12 +287,33 @@ public class RestoreFromParquetStep implements UpgradeStep {
           latestSystemMetadata,
           new AuditStamp().setActor(UrnUtils.getUrn(SYSTEM_ACTOR)).setTime(System.currentTimeMillis()),
           ChangeType.RESTATE);
-      if (numRows % 100 == 0) {
-        context.report().addLine(String.format("Took %s ms to produce %s MCLs. Last urn produced: %s",
-            System.currentTimeMillis() - startTime, 100, urn));
+
+      try {
+        this._entityCounts.compute(entityName, (key, count) -> {
+          if (count == null) {
+            return new AtomicInteger(1);
+          } else {
+            //Update data, this part its ok!
+            count.incrementAndGet();
+            return count;
+          }
+        });
+      } catch (Exception e) {
+
       }
+      entityUrnMap.put(entityName, urn.toString());
     }
     _numRows.addAndGet(numRows);
+    String entityUrnString = entityUrnMap.entrySet()
+        .stream()
+        .map(entry -> entry.getKey() + "->" + entry.getValue())
+        .collect(Collectors.joining(","));
+    context.report()
+        .addLine(String.format("Took %s ms to produce %s MCLs.",
+            System.currentTimeMillis() - startTime, numRows));
+    log.info("Latest urns: {}", entityUrnString);
+
+    return numRows;
   }
 
   private int getBatchSize() {

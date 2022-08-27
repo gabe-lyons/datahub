@@ -1,6 +1,7 @@
 package com.linkedin.datahub.upgrade.restorebackup.backupreader;
 
 import com.linkedin.metadata.entity.ebean.EbeanAspectV2;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
@@ -12,7 +13,7 @@ import org.apache.parquet.hadoop.ParquetReader;
 public class ParquetReaderWrapper {
 
   private final ParquetReader<GenericRecord> _parquetReader;
-  private final int _index;
+  private final String _fileName;
   private long totalTimeSpentInRead = 0L;
   private long lastTimeLogged = 0L;
   private int recordsSkipped = 0;
@@ -20,9 +21,9 @@ public class ParquetReaderWrapper {
   private int recordsProcessed = 0;
   private long totalTimeSpentInConvert = 0L;
 
-  public ParquetReaderWrapper(ParquetReader<GenericRecord> parquetReader, int index) {
+  public ParquetReaderWrapper(ParquetReader<GenericRecord> parquetReader, String fileName) {
     _parquetReader = parquetReader;
-    _index = index;
+    _fileName = fileName;
   }
 
   public EbeanAspectV2 next() {
@@ -73,7 +74,16 @@ public class ParquetReaderWrapper {
 
   private void printStat(String prefix) {
     log.info("{} Reader {}. Stats: records processed: {}, Total millis spent in reading: {}, records skipped: {},"
-            + " records failed: {}", prefix, _index,
-        recordsProcessed, totalTimeSpentInRead / 1000 / 1000, recordsSkipped, recordsFailed);
+            + " records failed: {}, Total millis in convert: {}", prefix, _fileName,
+        recordsProcessed, totalTimeSpentInRead / 1000 / 1000, recordsSkipped, recordsFailed,
+        totalTimeSpentInConvert / 1000 / 1000);
+  }
+
+  public String getFileName() {
+    return this._fileName;
+  }
+
+  public void close() throws IOException {
+      _parquetReader.close();
   }
 }

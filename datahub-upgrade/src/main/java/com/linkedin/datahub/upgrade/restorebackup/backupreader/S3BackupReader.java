@@ -10,6 +10,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +22,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.parquet.avro.AvroParquetReader;
-import org.apache.parquet.hadoop.ParquetReader;
 import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.http.SdkHttpClient;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -36,10 +41,14 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
   public static final String BACKUP_S3_BUCKET = "BACKUP_S3_BUCKET";
   public static final String BACKUP_S3_PATH = "BACKUP_S3_PATH";
   public static final String S3_REGION = "S3_REGION";
+  public static final String DOWNLOAD_POOL_SIZE = "DOWNLOAD_POOL_SIZE";
+  private static final int DEFAULT_DOWNLOAD_POOL_SIZE = 20;
 
   private final S3Client _client;
 
   private static final String TEMP_DIR = "/tmp/";
+  private final ExecutorService downloaderThreadPool;
+
 
 //  public S3BackupReader(@Nonnull List<Optional<String>> args) {
 //    if (args.size() != argNames().size()) {
@@ -73,6 +82,18 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
     Region region;
     String s3Region;
     String arg = args.get(0);
+    int downloadPoolSize = DEFAULT_DOWNLOAD_POOL_SIZE;
+    String envDownloadPoolSize = System.getenv(DOWNLOAD_POOL_SIZE);
+    if (envDownloadPoolSize != null) {
+        try {
+          downloadPoolSize = Integer.parseInt(envDownloadPoolSize);
+        } catch (Exception e) {
+          downloadPoolSize = DEFAULT_DOWNLOAD_POOL_SIZE;
+        }
+    }
+    downloaderThreadPool = Executors.newFixedThreadPool(downloadPoolSize);
+
+
     if (arg == null) {
       log.warn("Region not provided, defaulting to us-west-2");
       s3Region = Regions.US_WEST_2.getName();
@@ -85,7 +106,13 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
       log.warn("Invalid region: {}, defaulting to us-west-2", s3Region);
       region = Region.of(Regions.US_WEST_2.getName());
     }
-    _client = S3Client.builder().region(region).build();
+
+    SdkHttpClient httpClient = ApacheHttpClient.builder().build();
+
+    _client = S3Client.builder()
+        .region(region)
+        .httpClient(httpClient)
+        .build();
     // Need below to solve issue with hadoop path class not working in linux systems
     // https://stackoverflow.com/questions/41864985/hadoop-ioexception-failure-to-login
     UserGroupInformation.setLoginUser(UserGroupInformation.createRemoteUser("hduser"));
@@ -103,6 +130,7 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
   @Nonnull
   @Override
   public EbeanAspectBackupIterator<ParquetReaderWrapper> getBackupIterator(UpgradeContext context) {
+    long downloadStartTime = System.currentTimeMillis();
     String bucket = System.getenv(BACKUP_S3_BUCKET);
     String path = System.getenv(BACKUP_S3_PATH);
     if (bucket == null || path == null) {
@@ -110,16 +138,37 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
           "BACKUP_S3_BUCKET and BACKUP_S3_PATH must be set to run RestoreBackup through S3");
     }
     List<String> s3Keys = getFileKey(bucket, path);
+    List<Future<Optional<String>>> s3Downloads = s3Keys
+        .stream()
+        .filter(key -> !key.endsWith("_SUCCESS"))
+        .map(key -> this.downloaderThreadPool.submit(() -> saveFile(bucket, key)))
+        .collect(Collectors.toList());
 
-    final List<ParquetReader<GenericRecord>> readers = s3Keys.stream()
-        .map(key -> saveFile(bucket, key))
+    final List<String> localFiles = s3Downloads.stream()
+        .map(key -> {
+          try {
+            return key.get();
+          } catch (InterruptedException e) {
+            return null;
+          } catch (ExecutionException e) {
+            return null;
+          }
+        })
+        .filter(Objects::nonNull)
         .filter(Optional::isPresent)
         .map(Optional::get)
+        .collect(Collectors.toList());
+    long downloadEndTime = System.currentTimeMillis();
+    log.info("Download time: {} milli-seconds", downloadEndTime - downloadStartTime);
+    final List<ParquetReaderWrapper> readers = localFiles
+        .stream()
         .map(filePath -> {
         try {
           // Try to read a record, only way to check if it is indeed a Parquet file
-          AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build().read();
-          return AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build();
+          AvroParquetReader.<GenericRecord>builder(new Path((String) filePath)).build().read();
+          return new ParquetReaderWrapper(
+              AvroParquetReader.<GenericRecord>builder(new Path((String) filePath)).build(),
+              (String) filePath);
         } catch (IOException e) {
           log.warn("Unable to read {} as parquet, this may or may not be important.", filePath);
           return null;
@@ -147,10 +196,11 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
 
   private Optional<String> saveFile(String bucket, String key) {
     log.info("Downloading {} from S3 bucket {}...", key, bucket);
-    String[] path = key.split("/");
     String localFilePath;
-    if (path.length > 0) {
-      localFilePath = TEMP_DIR + path[path.length - 1];
+    if (key.contains("/")) {
+      String localFileName = key.replace("/", "_");
+      localFileName = localFileName.replace("=", "_");
+      localFilePath = TEMP_DIR + localFileName;
     } else {
       localFilePath = "backup.gz.parquet";
     }

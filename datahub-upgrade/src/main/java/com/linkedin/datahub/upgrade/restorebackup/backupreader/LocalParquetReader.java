@@ -53,7 +53,7 @@ public class LocalParquetReader implements BackupReader<ParquetReaderWrapper> {
 
     try {
       ParquetReader<GenericRecord> reader = AvroParquetReader.<GenericRecord>builder(new Path(path.get())).build();
-      return new ParquetEbeanAspectBackupIterator(ImmutableList.of(reader));
+      return new ParquetEbeanAspectBackupIterator(ImmutableList.of(new ParquetReaderWrapper(reader, path.get())));
     } catch (IOException e) {
       throw new RuntimeException(String.format("Failed to build ParquetReader: %s", e));
     }

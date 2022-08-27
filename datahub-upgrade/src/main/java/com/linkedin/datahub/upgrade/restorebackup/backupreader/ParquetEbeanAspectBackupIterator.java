@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.parquet.hadoop.ParquetReader;
 
 
 /**
@@ -15,14 +13,8 @@ import org.apache.parquet.hadoop.ParquetReader;
 @Slf4j
 @RequiredArgsConstructor
 public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterator<ParquetReaderWrapper> {
-  private final List<ParquetReader<GenericRecord>> _parquetReaders;
+  private final List<ParquetReaderWrapper> _parquetReaders;
   private int currentReaderIndex = 0;
-  private long totalTimeSpentInRead = 0L;
-  private long lastTimeLogged = 0L;
-  private int recordsSkipped = 0;
-  private int recordsFailed = 0;
-  private int recordsProcessed = 0;
-  private long totalTimeSpentInConvert = 0L;
 
 //  @Override
 //  public EbeanAspectV2 next(ParquetReader<GenericRecord> parquetReader) {
@@ -65,12 +57,14 @@ public class ParquetEbeanAspectBackupIterator implements EbeanAspectBackupIterat
 
   @Override
   public ParquetReaderWrapper getNextReader() {
-    if (currentReaderIndex >= _parquetReaders.size()) {
-      return null;
+      if (currentReaderIndex >= _parquetReaders.size()) {
+        return null;
+      }
+      try {
+      return _parquetReaders.get(currentReaderIndex);
+      } finally {
+      currentReaderIndex++;
     }
-    ParquetReaderWrapper parquetReader = new ParquetReaderWrapper(_parquetReaders.get(currentReaderIndex), currentReaderIndex);
-    currentReaderIndex++;
-    return parquetReader;
   }
 
   @Override
