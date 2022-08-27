@@ -108,16 +108,12 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
       region = Region.of(Regions.US_WEST_2.getName());
     }
 
-    SdkHttpClient httpClient = ApacheHttpClient.builder()
-        .build();
-
     System.setProperty("software.amazon.awssdk.http.service.impl",
         "software.amazon.awssdk.http.apache.ApacheSdkHttpService");
 
     _client = S3Client.builder()
         .region(region)
         .credentialsProvider(WebIdentityTokenFileCredentialsProvider.create())
-        .httpClient(httpClient)
         .build();
     // Need below to solve issue with hadoop path class not working in linux systems
     // https://stackoverflow.com/questions/41864985/hadoop-ioexception-failure-to-login
