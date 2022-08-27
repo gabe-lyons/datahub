@@ -42,7 +42,7 @@ public class RestoreStorageStep implements UpgradeStep {
 
   private final EntityService _entityService;
   private final EntityRegistry _entityRegistry;
-  private final Map<String, Class<? extends BackupReader>> _backupReaders;
+  private final Map<String, Class<? extends BackupReader<ParquetReaderWrapper>>> _backupReaders;
   private final ExecutorService _fileReaderThreadPool;
 
   public RestoreStorageStep(final EntityService entityService, final EntityRegistry entityRegistry) {
@@ -82,7 +82,7 @@ public class RestoreStorageStep implements UpgradeStep {
         return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
       }
 
-      Class<? extends BackupReader> clazz = _backupReaders.get(backupReaderName.get());
+      Class<? extends BackupReader<ParquetReaderWrapper>> clazz = _backupReaders.get(backupReaderName.get());
       List<String> argNames = BackupReaderArgs.getArgNames(clazz);
       List<Optional<String>> args = argNames.stream().map(argName -> context.parsedArgs().get(argName)).collect(
           Collectors.toList());

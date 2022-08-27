@@ -47,7 +47,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
 
   private final EntityService _entityService;
   private final EntityRegistry _entityRegistry;
-  private final Map<String, Class<? extends BackupReader>> _backupReaders;
+  private final Map<String, Class<? extends BackupReader<ParquetReaderWrapper>>> _backupReaders;
   private final ExecutorService _fileReaderThreadPool;
   private AtomicInteger _numRows = new AtomicInteger(0);
   private Map<String, AtomicInteger> _entityCounts = new ConcurrentHashMap<>();
@@ -100,7 +100,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
         return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
       }
 
-      Class<? extends BackupReader> clazz = _backupReaders.get(backupReaderName);
+      Class<? extends BackupReader<ParquetReaderWrapper>> clazz = _backupReaders.get(backupReaderName);
       List<String> argNames = BackupReaderArgs.getArgNames(clazz);
       List<String> args = argNames.stream().map(System::getenv).filter(Objects::nonNull).collect(
           Collectors.toList());
