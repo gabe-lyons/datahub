@@ -8,6 +8,7 @@ import com.linkedin.datahub.upgrade.UpgradeStep;
 import com.linkedin.datahub.upgrade.UpgradeStepResult;
 import com.linkedin.datahub.upgrade.impl.DefaultUpgradeStepResult;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.EbeanAspectBackupIterator;
+import com.linkedin.datahub.upgrade.restorebackup.backupreader.ParquetReaderWrapper;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.S3BackupReader;
 import com.linkedin.datahub.upgrade.restoreindices.RestoreIndices;
 import com.linkedin.metadata.entity.EntityService;
@@ -26,8 +27,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.parquet.hadoop.ParquetReader;
 
 
 public class RestoreAspectStep implements UpgradeStep {
@@ -78,13 +77,13 @@ public class RestoreAspectStep implements UpgradeStep {
       }
 
       Optional<String> s3Region = context.parsedArgs().get(S3BackupReader.S3_REGION);
-      EbeanAspectBackupIterator<ParquetReader<GenericRecord>> iterator =
+      EbeanAspectBackupIterator<ParquetReaderWrapper> iterator =
           new S3BackupReader(Collections.singletonList(s3Region.orElse(null))).getBackupIterator(context);
-      ParquetReader<GenericRecord> reader;
+      ParquetReaderWrapper reader;
       List<Future<UpgradeStepResult>> futureList = new ArrayList<>();
       while ((reader = iterator.getNextReader()) != null) {
-        final ParquetReader<GenericRecord> readerRef = reader;
-        futureList.add(_fileReaderThreadPool.submit(() -> readerExecutable(iterator, readerRef, context, urnToRestore, aspectToRestore)));
+        final ParquetReaderWrapper readerRef = reader;
+        futureList.add(_fileReaderThreadPool.submit(() -> readerExecutable(readerRef, context, urnToRestore, aspectToRestore)));
       }
 
       for (Future<UpgradeStepResult> future : futureList) {
@@ -163,10 +162,10 @@ public class RestoreAspectStep implements UpgradeStep {
     };
   }
 
-  private UpgradeStepResult readerExecutable(EbeanAspectBackupIterator<ParquetReader<GenericRecord>> iterator,
-      ParquetReader<GenericRecord> reader, UpgradeContext context, Optional<String> urnToRestore, Optional<String> aspectToRestore) {
+  private UpgradeStepResult readerExecutable(ParquetReaderWrapper reader, UpgradeContext context,
+      Optional<String> urnToRestore, Optional<String> aspectToRestore) {
     EbeanAspectV2 aspect;
-    while ((aspect = iterator.next(reader)) != null) {
+    while ((aspect = reader.next()) != null) {
 
       Urn urn;
       try {

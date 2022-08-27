@@ -13,6 +13,7 @@ import com.linkedin.datahub.upgrade.restorebackup.backupreader.BackupReader;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.BackupReaderArgs;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.EbeanAspectBackupIterator;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.LocalParquetReader;
+import com.linkedin.datahub.upgrade.restorebackup.backupreader.ParquetReaderWrapper;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.S3BackupReader;
 import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.metadata.entity.EntityService;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,8 +36,6 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.parquet.hadoop.ParquetReader;
 
 import static com.linkedin.metadata.Constants.*;
 
@@ -50,6 +50,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
   private final Map<String, Class<? extends BackupReader>> _backupReaders;
   private final ExecutorService _fileReaderThreadPool;
   private AtomicInteger _numRows = new AtomicInteger(0);
+  private Map<String, AtomicInteger> _entityCounts = new ConcurrentHashMap<>();
 
   public RestoreFromParquetStep(final EntityService entityService, final EntityRegistry entityRegistry) {
     _entityService = entityService;
@@ -103,7 +104,7 @@ public class RestoreFromParquetStep implements UpgradeStep {
       List<String> argNames = BackupReaderArgs.getArgNames(clazz);
       List<String> args = argNames.stream().map(System::getenv).filter(Objects::nonNull).collect(
           Collectors.toList());
-      BackupReader<ParquetReader<GenericRecord>> backupReader;
+      BackupReader<ParquetReaderWrapper> backupReader;
       try {
         backupReader = clazz.getConstructor(List.class).newInstance(args);
       } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
@@ -111,12 +112,12 @@ public class RestoreFromParquetStep implements UpgradeStep {
         throw new IllegalArgumentException("Invalid BackupReader: " + clazz.getSimpleName()
             + ", need to implement proper constructor: " + args);
       }
-      EbeanAspectBackupIterator<ParquetReader<GenericRecord>> iterator = backupReader.getBackupIterator(context);
-      ParquetReader<GenericRecord> reader;
+      EbeanAspectBackupIterator<ParquetReaderWrapper> iterator = backupReader.getBackupIterator(context);
+      ParquetReaderWrapper reader;
       List<Future<?>> futureList = new ArrayList<>();
       while ((reader = iterator.getNextReader()) != null) {
-        final ParquetReader<GenericRecord> readerRef = reader;
-        futureList.add(_fileReaderThreadPool.submit(() -> readerExecutable(iterator, readerRef, context, batchSize)));
+        final ParquetReaderWrapper readerRef = reader;
+        futureList.add(_fileReaderThreadPool.submit(() -> readerExecutable(readerRef, context, batchSize)));
       }
       for (Future<?> future : futureList) {
         try {
@@ -204,12 +205,11 @@ public class RestoreFromParquetStep implements UpgradeStep {
     };
   }
 
-  private void readerExecutable(EbeanAspectBackupIterator<ParquetReader<GenericRecord>> iterator,
-      ParquetReader<GenericRecord> reader, UpgradeContext context, int batchSize) {
+  private void readerExecutable(ParquetReaderWrapper reader, UpgradeContext context, int batchSize) {
     EbeanAspectV2 aspect;
     long startTime = System.currentTimeMillis();
     int numRows = 0;
-    while ((aspect = iterator.next(reader)) != null) {
+    while ((aspect = reader.next()) != null) {
       if (aspect.getVersion() != 0) {
         continue;
       }
@@ -271,6 +271,9 @@ public class RestoreFromParquetStep implements UpgradeStep {
       SystemMetadata latestSystemMetadata = EntityUtils.parseSystemMetadata(aspect.getSystemMetadata());
 
       // 5. Produce MAE events for the aspect record
+      if (urn.toString().equals("urn:li:dataset:(urn:li:dataPlatform:hive,core_metrics_v2.aum,PROD)")) {
+        context.report().addLine("!!!!!\n!!!!!\n!!!!!\n!!!!!!!!!!!!PARTICULAR URN FOUND!!!!!!!!!!!!!!\n!!!!!\n!!!!!\n");
+      }
       _entityService.produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, null, aspectRecord, null,
           latestSystemMetadata,
           new AuditStamp().setActor(UrnUtils.getUrn(SYSTEM_ACTOR)).setTime(System.currentTimeMillis()),

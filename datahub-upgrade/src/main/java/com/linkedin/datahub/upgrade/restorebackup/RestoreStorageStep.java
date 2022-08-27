@@ -12,6 +12,7 @@ import com.linkedin.datahub.upgrade.restorebackup.backupreader.BackupReader;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.BackupReaderArgs;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.EbeanAspectBackupIterator;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.LocalParquetReader;
+import com.linkedin.datahub.upgrade.restorebackup.backupreader.ParquetReaderWrapper;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.S3BackupReader;
 import com.linkedin.datahub.upgrade.restoreindices.RestoreIndices;
 import com.linkedin.metadata.entity.EntityService;
@@ -32,8 +33,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import org.apache.avro.generic.GenericRecord;
-import org.apache.parquet.hadoop.ParquetReader;
 
 
 public class RestoreStorageStep implements UpgradeStep {
@@ -87,19 +86,19 @@ public class RestoreStorageStep implements UpgradeStep {
       List<String> argNames = BackupReaderArgs.getArgNames(clazz);
       List<Optional<String>> args = argNames.stream().map(argName -> context.parsedArgs().get(argName)).collect(
           Collectors.toList());
-      BackupReader<ParquetReader<GenericRecord>> backupReader;
+      BackupReader<ParquetReaderWrapper> backupReader;
       try {
         backupReader = clazz.getConstructor(List.class).newInstance(args);
       } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
         context.report().addLine("Invalid BackupReader, not able to construct instance of " + clazz.getSimpleName());
         throw new IllegalArgumentException("Invalid BackupReader: " + clazz.getSimpleName() + ", need to implement proper constructor.");
       }
-      EbeanAspectBackupIterator<ParquetReader<GenericRecord>> iterator = backupReader.getBackupIterator(context);
-      ParquetReader<GenericRecord> reader;
+      EbeanAspectBackupIterator<ParquetReaderWrapper> iterator = backupReader.getBackupIterator(context);
+      ParquetReaderWrapper reader;
       List<Future<?>> futureList = new ArrayList<>();
       while ((reader = iterator.getNextReader()) != null) {
-        final ParquetReader<GenericRecord> readerRef = reader;
-        futureList.add(_fileReaderThreadPool.submit(() -> readerExecutable(iterator, readerRef, context)));
+        final ParquetReaderWrapper readerRef = reader;
+        futureList.add(_fileReaderThreadPool.submit(() -> readerExecutable(readerRef, context)));
       }
       for (Future<?> future : futureList) {
         try {
@@ -173,11 +172,10 @@ public class RestoreStorageStep implements UpgradeStep {
     };
   }
 
-  private void readerExecutable(EbeanAspectBackupIterator<ParquetReader<GenericRecord>> iterator,
-      ParquetReader<GenericRecord> reader, UpgradeContext context) {
+  private void readerExecutable(ParquetReaderWrapper reader, UpgradeContext context) {
     EbeanAspectV2 aspect;
     int numRows = 0;
-    while ((aspect = iterator.next(reader)) != null) {
+    while ((aspect = reader.next()) != null) {
       numRows++;
 
       // 1. Extract an Entity type from the entity Urn

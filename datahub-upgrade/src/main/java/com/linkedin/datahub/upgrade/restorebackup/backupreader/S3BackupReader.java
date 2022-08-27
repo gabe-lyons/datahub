@@ -28,7 +28,7 @@ import org.apache.parquet.hadoop.ParquetReader;
 
 
 @Slf4j
-public class S3BackupReader implements BackupReader<ParquetReader<GenericRecord>> {
+public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
 
   public static final String READER_NAME = "S3_PARQUET";
   public static final String BACKUP_S3_BUCKET = "BACKUP_S3_BUCKET";
@@ -100,7 +100,7 @@ public class S3BackupReader implements BackupReader<ParquetReader<GenericRecord>
 
   @Nonnull
   @Override
-  public EbeanAspectBackupIterator<ParquetReader<GenericRecord>> getBackupIterator(UpgradeContext context) {
+  public EbeanAspectBackupIterator<ParquetReaderWrapper> getBackupIterator(UpgradeContext context) {
     String bucket = System.getenv(BACKUP_S3_BUCKET);
     String path = System.getenv(BACKUP_S3_PATH);
     if (bucket == null || path == null) {

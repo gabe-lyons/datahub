@@ -1,6 +1,5 @@
 package com.linkedin.datahub.upgrade.restorebackup.backupreader;
 
-import com.linkedin.metadata.entity.ebean.EbeanAspectV2;
 import java.io.Closeable;
 
 
@@ -9,8 +8,6 @@ import java.io.Closeable;
  * This allows us to restore from backups of various format
  */
 public interface EbeanAspectBackupIterator<T> extends Closeable {
-  // Get the next row in backup. Return null if finished.
-  EbeanAspectV2 next(T backupReader);
 
   T getNextReader();
 }
