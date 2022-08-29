@@ -34,7 +34,7 @@ function ChildrenTab() {
         );
     }
 
-    return <EmptyGlossarySection description="No Terms or Term Groups" canManageGlossaries={{{canManageGlossaries}} />;
+    return <EmptyGlossarySection description="No Terms or Term Groups" canManageGlossaries={!!canManageGlossaries} />;
 }
 
 export default ChildrenTab;
