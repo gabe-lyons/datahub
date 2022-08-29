@@ -99,64 +99,6 @@ public class RestoreAspectStep implements UpgradeStep {
           _fileReaderThreadPool.shutdown();
         }
       }
-//      while ((aspect = iterator.next()) != null) {
-//
-//        Urn urn;
-//        try {
-//          urn = Urn.createFromString(aspect.getKey().getUrn());
-//        } catch (Exception e) {
-//          context.report()
-//              .addLine(
-//                  String.format("Failed to bind Urn with value %s into Urn object: %s", aspect.getKey().getUrn(), e));
-//          return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
-//        }
-//
-//        final String aspectName = aspect.getKey().getAspect();
-//
-//        // If we've found the matching URN + aspect, proceed.
-//        if (urn.toString().equals(urnToRestore.get()) && aspectName.equals(aspectToRestore.get())) {
-//
-//          // 2. Verify that the entity associated with the aspect is found in the registry.
-//          final String entityName = urn.getEntityType();
-//          final EntitySpec entitySpec;
-//          try {
-//            entitySpec = _entityRegistry.getEntitySpec(entityName);
-//          } catch (Exception e) {
-//            context.report()
-//                .addLine(String.format("Failed to find Entity with name %s in Entity Registry: %s", entityName, e));
-//            return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
-//          }
-//
-//          // 3. Create record from json aspect
-//          final RecordTemplate aspectRecord =
-//              EntityUtils.toAspectRecord(entityName, aspectName, aspect.getMetadata(), _entityRegistry);
-//
-//          // 4. Verify that the aspect is a valid aspect associated with the entity
-//          AspectSpec aspectSpec;
-//          try {
-//            aspectSpec = entitySpec.getAspectSpec(aspectName);
-//          } catch (Exception e) {
-//            context.report()
-//                .addLine(String.format("Failed to find aspect spec with name %s associated with entity named %s: %s",
-//                    aspectName, entityName, e));
-//            return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
-//          }
-//
-//          // 5. Write the row back using the EntityService
-//          context.report().addLine(String.format("Found aspect to restore with version %s. Restoring..", aspect.getKey().getVersion()));
-//
-//          boolean emitMae = aspect.getKey().getVersion() == 0L;
-//          _entityService.updateAspect(
-//              urn,
-//              entityName,
-//              aspectName,
-//              aspectSpec,
-//              aspectRecord,
-//              toAuditStamp(aspect),
-//              aspect.getKey().getVersion(),
-//              emitMae);
-//        }
-//      }
 
       return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.SUCCEEDED);
     };

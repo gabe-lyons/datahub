@@ -128,77 +128,6 @@ public class RestoreFromParquetStep implements UpgradeStep {
           throw new RuntimeException(e);
         }
       }
-//      while ((aspect = iterator.next()) != null) {
-//        if (aspect.getVersion() != 0) {
-//          continue;
-//        }
-//        numRows++;
-//
-//        if (Boolean.parseBoolean(System.getenv(RestoreIndices.DRY_RUN))) {
-//          if (numRows % batchSize == 0) {
-//            context.report()
-//                .addLine(String.format("Dry run enabled, continuing. Took %s ms to read %s aspects from parquet.",
-//                    System.currentTimeMillis() - startTime, batchSize));
-//            startTime = System.currentTimeMillis();
-//          }
-//        }
-//
-//        // 1. Extract an Entity type from the entity Urn
-//        Urn urn;
-//        try {
-//          urn = Urn.createFromString(aspect.getKey().getUrn());
-//        } catch (Exception e) {
-//          context.report()
-//              .addLine(String.format("Failed to bind Urn with value %s into Urn object: %s. Ignoring row.",
-//                  aspect.getKey().getUrn(), e));
-//          continue;
-//        }
-//
-//        // 2. Verify that the entity associated with the aspect is found in the registry.
-//        final String entityName = urn.getEntityType();
-//        final EntitySpec entitySpec;
-//        try {
-//          entitySpec = _entityRegistry.getEntitySpec(entityName);
-//        } catch (Exception e) {
-//          context.report()
-//              .addLine(String.format("Failed to find entity with name %s in Entity Registry: %s. Ignoring row.",
-//                  entityName, e));
-//          continue;
-//        }
-//        final String aspectName = aspect.getKey().getAspect();
-//
-//        // 3. Verify that the aspect is a valid aspect associated with the entity
-//        AspectSpec aspectSpec = entitySpec.getAspectSpec(aspectName);
-//        if (aspectSpec == null) {
-//          context.report()
-//              .addLine(String.format("Failed to find aspect with name %s associated with entity named %s", aspectName,
-//                  entityName));
-//          continue;
-//        }
-//
-//        // 4. Create record from json aspect
-//        final RecordTemplate aspectRecord;
-//        try {
-//          aspectRecord = EntityUtils.toAspectRecord(entityName, aspectName, aspect.getMetadata(), _entityRegistry);
-//        } catch (Exception e) {
-//          context.report()
-//              .addLine(String.format("Failed to deserialize row %s for entity %s, aspect %s: %s. Ignoring row.",
-//                  aspect.getMetadata(), entityName, aspectName, e));
-//          continue;
-//        }
-//
-//        SystemMetadata latestSystemMetadata = EntityUtils.parseSystemMetadata(aspect.getSystemMetadata());
-//
-//        // 5. Produce MAE events for the aspect record
-//        _entityService.produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, null, aspectRecord, null,
-//            latestSystemMetadata,
-//            new AuditStamp().setActor(UrnUtils.getUrn(SYSTEM_ACTOR)).setTime(System.currentTimeMillis()),
-//            ChangeType.RESTATE);
-//        if (numRows % batchSize == 0) {
-//          context.report().addLine(String.format("Took %s ms to produce %s MCLs.",
-//              System.currentTimeMillis() - startTime, batchSize));
-//        }
-//      }
 
       context.report().addLine(String.format("Added %d rows to the aspect v2 table, took %s ms", numRows,
           System.currentTimeMillis() - initialStartTime));
@@ -280,9 +209,6 @@ public class RestoreFromParquetStep implements UpgradeStep {
       SystemMetadata latestSystemMetadata = EntityUtils.parseSystemMetadata(aspect.getSystemMetadata());
 
       // 5. Produce MAE events for the aspect record
-      if (urn.toString().equals("urn:li:dataset:(urn:li:dataPlatform:hive,core_metrics_v2.aum,PROD)")) {
-        context.report().addLine("!!!!!\n!!!!!\n!!!!!\n!!!!!!!!!!!!PARTICULAR URN FOUND!!!!!!!!!!!!!!\n!!!!!\n!!!!!\n");
-      }
       _entityService.produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, null, aspectRecord, null,
           latestSystemMetadata,
           new AuditStamp().setActor(UrnUtils.getUrn(SYSTEM_ACTOR)).setTime(System.currentTimeMillis()),
@@ -316,12 +242,4 @@ public class RestoreFromParquetStep implements UpgradeStep {
     return numRows;
   }
 
-  private int getBatchSize() {
-    int resolvedBatchSize = DEFAULT_BATCH_SIZE;
-    String batchSize = System.getenv(RestoreIndices.BATCH_SIZE_ARG_NAME);
-    if (batchSize != null) {
-      resolvedBatchSize = Integer.parseInt(batchSize);
-    }
-    return resolvedBatchSize;
-  }
 }

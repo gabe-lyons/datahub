@@ -48,32 +48,6 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
   private static final String TEMP_DIR = "/tmp/";
   private final ExecutorService downloaderThreadPool;
 
-
-//  public S3BackupReader(@Nonnull List<Optional<String>> args) {
-//    if (args.size() != argNames().size()) {
-//      throw new IllegalArgumentException("Incorrect number of arguments for S3BackupReader.");
-//    }
-//    Regions region;
-//    String s3Region;
-//    Optional<String> arg = args.get(0);
-//    if (!arg.isPresent()) {
-//      log.warn("Region not provided, defaulting to us-west-2");
-//      s3Region = Regions.US_WEST_2.getName();
-//    } else {
-//      s3Region = arg.get();
-//    }
-//    try {
-//      region = Regions.fromName(s3Region);
-//    } catch (Exception e) {
-//      log.warn("Invalid region: {}, defaulting to us-west-2", s3Region);
-//      region = Regions.US_WEST_2;
-//    }
-//    _client = AmazonS3ClientBuilder.standard().withRegion(region).build();
-//    // Need below to solve issue with hadoop path class not working in linux systems
-//    // https://stackoverflow.com/questions/41864985/hadoop-ioexception-failure-to-login
-//    UserGroupInformation.setLoginUser(UserGroupInformation.createRemoteUser("hduser"));
-//  }
-
   public S3BackupReader(@Nonnull List<String> args) {
     if (args.size() != argNames().size()) {
       throw new IllegalArgumentException("Incorrect number of arguments for S3BackupReader.");
@@ -87,7 +61,7 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
         try {
           downloadPoolSize = Integer.parseInt(envDownloadPoolSize);
         } catch (Exception e) {
-          downloadPoolSize = DEFAULT_DOWNLOAD_POOL_SIZE;
+          log.warn("DOWNLOAD_POOL_SIZE improperly set, falling back to default.");
         }
     }
     downloaderThreadPool = Executors.newFixedThreadPool(downloadPoolSize);
@@ -148,13 +122,10 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
         .map(key -> {
           try {
             return key.get();
-          } catch (InterruptedException e) {
-            return null;
-          } catch (ExecutionException e) {
-            return null;
+          } catch (InterruptedException | ExecutionException e) {
+            return Optional.<String>empty();
           }
         })
-        .filter(Objects::nonNull)
         .filter(Optional::isPresent)
         .map(Optional::get)
         .collect(Collectors.toList());
@@ -165,10 +136,9 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
         .map(filePath -> {
         try {
           // Try to read a record, only way to check if it is indeed a Parquet file
-          AvroParquetReader.<GenericRecord>builder(new Path((String) filePath)).build().read();
+          AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build().read();
           return new ParquetReaderWrapper(
-              AvroParquetReader.<GenericRecord>builder(new Path((String) filePath)).build(),
-              (String) filePath);
+              AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build(), filePath);
         } catch (IOException e) {
           log.warn("Unable to read {} as parquet, this may or may not be important.", filePath);
           return null;
@@ -215,10 +185,10 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
       }
       return Optional.of(localFilePath);
     } catch (AmazonServiceException e) {
-      System.err.println(e.getErrorMessage());
+      log.error(e.getErrorMessage());
       return Optional.empty();
     } catch (IOException e) {
-      System.err.println(e.getMessage());
+      log.error(e.getMessage());
       return Optional.empty();
     }
   }
