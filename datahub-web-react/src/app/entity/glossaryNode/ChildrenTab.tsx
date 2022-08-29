@@ -6,7 +6,7 @@ import { useEntityRegistry } from '../../useEntityRegistry';
 import { sortGlossaryTerms } from '../glossaryTerm/utils';
 import { useEntityData } from '../shared/EntityContext';
 import { sortGlossaryNodes } from './utils';
-import { useGetAuthenticatedUser } from '../useGetAuthenticatedUser';
+import { useGetAuthenticatedUser } from '../../useGetAuthenticatedUser';
 
 function ChildrenTab() {
     const { entityData } = useEntityData();
