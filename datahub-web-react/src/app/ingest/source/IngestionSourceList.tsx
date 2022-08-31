@@ -22,6 +22,7 @@ import { useEntityRegistry } from '../../useEntityRegistry';
 import { ExecutionDetailsModal } from './ExecutionRequestDetailsModal';
 import RecipeViewerModal from './RecipeViewerModal';
 import IngestionSourceTable from './IngestionSourceTable';
+import { scrollToTop } from '../../shared/searchUtils';
 
 const SourceContainer = styled.div``;
 
@@ -223,6 +224,7 @@ export const IngestionSourceList = () => {
     };
 
     const onChangePage = (newPage: number) => {
+        scrollToTop();
         setPage(newPage);
     };
 
@@ -319,8 +321,9 @@ export const IngestionSourceList = () => {
     return (
         <>
             {!data && loading && <Message type="loading" content="Loading ingestion sources..." />}
-            {error &&
-                message.error({ content: `Failed to load ingestion sources! \n ${error.message || ''}`, duration: 3 })}
+            {error && (
+                <Message type="error" content="Failed to load ingestion sources! An unexpected error occurred." />
+            )}
             <SourceContainer>
                 <TabToolbar>
                     <div>

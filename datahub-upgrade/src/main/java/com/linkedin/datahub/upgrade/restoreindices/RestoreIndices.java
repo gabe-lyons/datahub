@@ -20,6 +20,10 @@ public class RestoreIndices implements Upgrade {
   public static final String RESTORE_FROM_PARQUET = "RESTORE_FROM_PARQUET";
   public static final String DRY_RUN = "DRY_RUN";
   public static final String READER_POOL_SIZE = "READER_POOL_SIZE";
+  public static final String SQL_READER_POOL_SIZE = "SQL_READER_POOL_SIZE";
+  public static final String ASPECT_NAME_ARG_NAME = "ASPECT_NAME";
+  public static final String URN_LIKE_ARG_NAME = "URN_LIKE";
+  public static final String URN_ARG_NAME = "URN";
 
   private final List<UpgradeStep> _steps;
 

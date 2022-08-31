@@ -63,6 +63,7 @@ entities:
       - inputFields
       - testResults
       - usageFeatures
+      - chartUsageStatistics
   - name: dashboard
     keyAspect: dashboardKey
     aspects:

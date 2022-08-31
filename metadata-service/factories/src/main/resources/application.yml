@@ -80,7 +80,7 @@ datahub:
 entityService:
   impl: ${ENTITY_SERVICE_IMPL:ebean}
   retention:
-    enabled: ${ENTITY_SERVICE_ENABLE_RETENTION:false}
+    enabled: ${ENTITY_SERVICE_ENABLE_RETENTION:true}
 
 graphService:
   type: ${GRAPH_SERVICE_IMPL:elasticsearch}
@@ -243,5 +243,7 @@ eventSinks:
           region: ${AWS_EVENT_BRIDGE_BUS_REGION}
 
 # experimental siblings config
+  enabled: ${METADATA_TESTS_ENABLED:false}
+
 siblings:
   enabled: ${ENABLE_SIBLING_HOOK:true} # enable to turn on automatic sibling associations for dbt

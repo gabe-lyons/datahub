@@ -20,12 +20,14 @@ const StyledButton = styled(Button)`
 
 interface Props {
     canManageGlossaries: boolean;
+    title?: string;
+    description?: string;
     refetchForTerms?: () => void;
     refetchForNodes?: () => void;
 }
 
 function EmptyGlossarySection(props: Props) {
-    const { canManageGlossaries, refetchForTerms, refetchForNodes } = props;
+    const { canManageGlossaries, title, description, refetchForTerms, refetchForNodes } = props;
 
     const [isCreateTermModalVisible, setIsCreateTermModalVisible] = useState(false);
     const [isCreateNodeModalVisible, setIsCreateNodeModalVisible] = useState(false);
@@ -35,10 +37,8 @@ function EmptyGlossarySection(props: Props) {
             <StyledEmpty
                 description={
                     <>
-                        <Typography.Title level={4}>Empty Glossary</Typography.Title>
-                        <Typography.Paragraph type="secondary">
-                            Create Terms and Term Groups to organize data assets using a shared vocabulary.
-                        </Typography.Paragraph>
+                        <Typography.Title level={4}>{title}</Typography.Title>
+                        <Typography.Paragraph type="secondary">{description}</Typography.Paragraph>
                     </>
                 }
             >
