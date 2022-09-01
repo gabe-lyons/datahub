@@ -7,18 +7,20 @@ import {
     AppstoreOutlined,
     BellOutlined,
     LoginOutlined,
+    ToolOutlined
 } from '@ant-design/icons';
 import { Redirect, Route, useHistory, useLocation, useRouteMatch, Switch } from 'react-router';
 import styled from 'styled-components';
 import { ANTD_GRAY } from '../entity/shared/constants';
 import { ManageIdentities } from '../identity/ManageIdentities';
-import { ManagePolicies } from '../policy/ManagePolicies';
+import { ManagePermissions } from '../permissions/ManagePermissions';
 import { useAppConfig } from '../useAppConfig';
 import { useGetAuthenticatedUser } from '../useGetAuthenticatedUser';
 import { AccessTokens } from './AccessTokens';
 import { PlatformIntegrations } from './platform/PlatformIntegrations';
 import { PlatformNotifications } from './platform/PlatformNotifications';
 import { PlatformSsoIntegrations } from './platform/PlatformSsoIntegrations';
+import { Preferences } from './Preferences';
 
 const PageContainer = styled.div`
     display: flex;
@@ -65,8 +67,10 @@ const PATHS = [
     { path: 'tokens', content: <AccessTokens /> },
     { path: 'identities', content: <ManageIdentities /> },
     { path: 'policies', content: <ManagePolicies /> },
+    { path: 'preferences', content: <Preferences /> },
     /* acryl-main only */
     ...ACRYL_PATHS,
+    { path: 'permissions', content: <ManagePermissions /> },
 ];
 
 /**
@@ -127,9 +131,9 @@ export const SettingsPage = () => {
                                 </Menu.Item>
                             )}
                             {showPolicies && (
-                                <Menu.Item key="policies">
+                                <Menu.Item key="permissions">
                                     <BankOutlined />
-                                    <ItemTitle>Privileges</ItemTitle>
+                                    <ItemTitle>Permissions</ItemTitle>
                                 </Menu.Item>
                             )}
                         </Menu.ItemGroup>
@@ -152,6 +156,12 @@ export const SettingsPage = () => {
                             </Menu.ItemGroup>
                         )
                     }
+                    <Menu.ItemGroup title="Preferences">
+                        <Menu.Item key="preferences">
+                            <ToolOutlined />
+                            <ItemTitle>Appearance</ItemTitle>
+                        </Menu.Item>
+                    </Menu.ItemGroup>
                 </Menu>
             </SettingsBarContainer>
             <Switch>

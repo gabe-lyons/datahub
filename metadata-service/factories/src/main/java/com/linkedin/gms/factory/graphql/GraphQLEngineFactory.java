@@ -134,6 +134,7 @@ public class GraphQLEngineFactory {
   @Value("${platformAnalytics.enabled}") // TODO: Migrate to DATAHUB_ANALYTICS_ENABLED
   private Boolean isAnalyticsEnabled;
 
+
   @Bean(name = "graphQLEngine")
   @Nonnull
   protected GraphQLEngine getInstance() {
@@ -165,6 +166,7 @@ public class GraphQLEngineFactory {
           _configProvider.getDatahub(),
           _siblingGraphService,
           _groupService,
+          _configProvider.getFeatureFlags()
           // Saas only
           _proposalService
           ).builder().build();
@@ -195,6 +197,7 @@ public class GraphQLEngineFactory {
         _configProvider.getDatahub(),
         _siblingGraphService,
         _groupService,
+        _configProvider.getFeatureFlags()
         // SaaS only
         _proposalService
     ).builder().build();
