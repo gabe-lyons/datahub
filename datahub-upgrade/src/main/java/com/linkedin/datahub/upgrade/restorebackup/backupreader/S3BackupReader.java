@@ -2,12 +2,6 @@ package com.linkedin.datahub.upgrade.restorebackup.backupreader;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.ListObjectsV2Result;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.linkedin.datahub.upgrade.UpgradeContext;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -16,6 +10,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
@@ -24,39 +22,71 @@ import org.apache.commons.io.FileUtils;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.parquet.avro.AvroParquetReader;
-import org.apache.parquet.hadoop.ParquetReader;
+import software.amazon.awssdk.auth.credentials.WebIdentityTokenFileCredentialsProvider;
+import software.amazon.awssdk.core.ResponseInputStream;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.S3Object;
+import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 
 
 @Slf4j
-public class S3BackupReader implements BackupReader {
+public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
 
   public static final String READER_NAME = "S3_PARQUET";
+  public static final String BACKUP_S3_BUCKET = "BACKUP_S3_BUCKET";
+  public static final String BACKUP_S3_PATH = "BACKUP_S3_PATH";
   public static final String S3_REGION = "S3_REGION";
+  public static final String DOWNLOAD_POOL_SIZE = "DOWNLOAD_POOL_SIZE";
+  private static final int DEFAULT_DOWNLOAD_POOL_SIZE = 20;
 
-  private final AmazonS3 _client;
+  private final S3Client _client;
 
   private static final String TEMP_DIR = "/tmp/";
+  private final ExecutorService downloaderThreadPool;
 
-  public S3BackupReader(@Nonnull List<Optional<String>> args) {
+  public S3BackupReader(@Nonnull List<String> args) {
     if (args.size() != argNames().size()) {
       throw new IllegalArgumentException("Incorrect number of arguments for S3BackupReader.");
     }
-    Regions region;
+    Region region;
     String s3Region;
-    Optional<String> arg = args.get(0);
-    if (!arg.isPresent()) {
+    String arg = args.get(0);
+    int downloadPoolSize = DEFAULT_DOWNLOAD_POOL_SIZE;
+    String envDownloadPoolSize = System.getenv(DOWNLOAD_POOL_SIZE);
+    if (envDownloadPoolSize != null) {
+        try {
+          downloadPoolSize = Integer.parseInt(envDownloadPoolSize);
+        } catch (Exception e) {
+          log.warn("DOWNLOAD_POOL_SIZE improperly set, falling back to default.");
+        }
+    }
+    downloaderThreadPool = Executors.newFixedThreadPool(downloadPoolSize);
+
+
+    if (arg == null) {
       log.warn("Region not provided, defaulting to us-west-2");
       s3Region = Regions.US_WEST_2.getName();
     } else {
-      s3Region = arg.get();
+      s3Region = arg;
     }
     try {
-      region = Regions.fromName(s3Region);
+      region = Region.of(s3Region);
     } catch (Exception e) {
       log.warn("Invalid region: {}, defaulting to us-west-2", s3Region);
-      region = Regions.US_WEST_2;
+      region = Region.of(Regions.US_WEST_2.getName());
     }
-    _client = AmazonS3ClientBuilder.standard().withRegion(region).build();
+
+    System.setProperty("software.amazon.awssdk.http.service.impl",
+        "software.amazon.awssdk.http.apache.ApacheSdkHttpService");
+
+    _client = S3Client.builder()
+        .region(region)
+        .credentialsProvider(WebIdentityTokenFileCredentialsProvider.create())
+        .build();
     // Need below to solve issue with hadoop path class not working in linux systems
     // https://stackoverflow.com/questions/41864985/hadoop-ioexception-failure-to-login
     UserGroupInformation.setLoginUser(UserGroupInformation.createRemoteUser("hduser"));
@@ -68,29 +98,47 @@ public class S3BackupReader implements BackupReader {
 
   @Override
   public String getName() {
-    return "S3_PARQUET";
+    return READER_NAME;
   }
 
   @Nonnull
   @Override
-  public EbeanAspectBackupIterator getBackupIterator(UpgradeContext context) {
-    Optional<String> bucket = context.parsedArgs().get("BACKUP_S3_BUCKET");
-    Optional<String> path = context.parsedArgs().get("BACKUP_S3_PATH");
-    if (!bucket.isPresent() || !path.isPresent()) {
+  public EbeanAspectBackupIterator<ParquetReaderWrapper> getBackupIterator(UpgradeContext context) {
+    long downloadStartTime = System.currentTimeMillis();
+    String bucket = System.getenv(BACKUP_S3_BUCKET);
+    String path = System.getenv(BACKUP_S3_PATH);
+    if (bucket == null || path == null) {
       throw new IllegalArgumentException(
           "BACKUP_S3_BUCKET and BACKUP_S3_PATH must be set to run RestoreBackup through S3");
     }
-    List<String> s3Keys = getFileKey(bucket.get(), path.get());
+    List<String> s3Keys = getFileKey(bucket, path);
+    List<Future<Optional<String>>> s3Downloads = s3Keys
+        .stream()
+        .filter(key -> !key.endsWith("_SUCCESS"))
+        .map(key -> this.downloaderThreadPool.submit(() -> saveFile(bucket, key)))
+        .collect(Collectors.toList());
 
-    final List<ParquetReader<GenericRecord>> readers = s3Keys.stream()
-        .map(key -> saveFile(bucket.get(), key))
+    final List<String> localFiles = s3Downloads.stream()
+        .map(key -> {
+          try {
+            return key.get();
+          } catch (InterruptedException | ExecutionException e) {
+            return Optional.<String>empty();
+          }
+        })
         .filter(Optional::isPresent)
         .map(Optional::get)
+        .collect(Collectors.toList());
+    long downloadEndTime = System.currentTimeMillis();
+    log.info("Download time: {} milli-seconds", downloadEndTime - downloadStartTime);
+    final List<ParquetReaderWrapper> readers = localFiles
+        .stream()
         .map(filePath -> {
         try {
           // Try to read a record, only way to check if it is indeed a Parquet file
           AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build().read();
-          return AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build();
+          return new ParquetReaderWrapper(
+              AvroParquetReader.<GenericRecord>builder(new Path(filePath)).build(), filePath);
         } catch (IOException e) {
           log.warn("Unable to read {} as parquet, this may or may not be important.", filePath);
           return null;
@@ -101,45 +149,46 @@ public class S3BackupReader implements BackupReader {
       }).filter(Objects::nonNull).collect(Collectors.toList());
 
     if (readers.isEmpty()) {
-      log.error("No backup files on path {} in bucket {} were found. Did you mis-configure something?", path.get(),
-          bucket.get());
+      log.error("No backup files on path {} in bucket {} were found. Did you mis-configure something?", path, bucket);
     }
 
     return new ParquetEbeanAspectBackupIterator(readers);
   }
 
   private List<String> getFileKey(String bucket, String path) {
-    ListObjectsV2Result objectListResult = _client.listObjectsV2(bucket, path);
-    return objectListResult.getObjectSummaries()
+    ListObjectsV2Request request = ListObjectsV2Request.builder().bucket(bucket).prefix(path).build();
+    ListObjectsV2Iterable objectListResult = _client.listObjectsV2Paginator(request);
+    return objectListResult.contents()
         .stream()
-        .map(S3ObjectSummary::getKey)
+        .map(S3Object::key)
         .collect(Collectors.toList());
   }
 
   private Optional<String> saveFile(String bucket, String key) {
     log.info("Downloading {} from S3 bucket {}...", key, bucket);
-    String[] path = key.split("/");
     String localFilePath;
-    if (path.length > 0) {
-      localFilePath = TEMP_DIR + path[path.length - 1];
+    if (key.contains("/")) {
+      String localFileName = key.replace("/", "_");
+      localFileName = localFileName.replace("=", "_");
+      localFilePath = TEMP_DIR + localFileName;
     } else {
       localFilePath = "backup.gz.parquet";
     }
 
-    try (S3Object o = _client.getObject(bucket, key);
-        S3ObjectInputStream s3is = o.getObjectContent();
+    try (ResponseInputStream<GetObjectResponse> o =
+        _client.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build());
         FileOutputStream fos = FileUtils.openOutputStream(new File(localFilePath))) {
       byte[] readBuf = new byte[1024];
       int readLen = 0;
-      while ((readLen = s3is.read(readBuf)) > 0) {
+      while ((readLen = o.read(readBuf)) > 0) {
         fos.write(readBuf, 0, readLen);
       }
       return Optional.of(localFilePath);
     } catch (AmazonServiceException e) {
-      System.err.println(e.getErrorMessage());
+      log.error(e.getErrorMessage());
       return Optional.empty();
     } catch (IOException e) {
-      System.err.println(e.getMessage());
+      log.error(e.getMessage());
       return Optional.empty();
     }
   }

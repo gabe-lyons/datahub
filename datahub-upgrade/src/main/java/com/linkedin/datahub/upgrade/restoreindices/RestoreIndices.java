@@ -16,12 +16,14 @@ import java.util.List;
 
 
 public class RestoreIndices implements Upgrade {
-  public static final String BATCH_SIZE_ARG_NAME = "batchSize";
-  public static final String BATCH_DELAY_MS_ARG_NAME = "batchDelayMs";
-  public static final String NUM_THREADS_ARG_NAME = "numThreads";
-  public static final String ASPECT_NAME_ARG_NAME = "aspectName";
-  public static final String URN_ARG_NAME = "urn";
-  public static final String URN_LIKE_ARG_NAME = "urnLike";
+  public static final String BATCH_SIZE_ARG_NAME = "BATCH_SIZE";
+  public static final String RESTORE_FROM_PARQUET = "RESTORE_FROM_PARQUET";
+  public static final String DRY_RUN = "DRY_RUN";
+  public static final String READER_POOL_SIZE = "READER_POOL_SIZE";
+  public static final String SQL_READER_POOL_SIZE = "SQL_READER_POOL_SIZE";
+  public static final String ASPECT_NAME_ARG_NAME = "ASPECT_NAME";
+  public static final String URN_LIKE_ARG_NAME = "URN_LIKE";
+  public static final String URN_ARG_NAME = "URN";
 
   private final List<UpgradeStep> _steps;
 
@@ -48,6 +50,7 @@ public class RestoreIndices implements Upgrade {
     steps.add(new ClearSearchServiceStep(entitySearchService, false));
     steps.add(new ClearGraphServiceStep(graphService, false));
     steps.add(new SendMAEStep(server, entityService, entityRegistry));
+    steps.add(new RestoreFromParquetStep(entityService, entityRegistry));
     return steps;
   }
 
