@@ -151,8 +151,6 @@ public class SendMAEStep implements UpgradeStep {
         }
 
         // 5. Produce MAE events for the aspect record
-        result.createRecordMs += System.currentTimeMillis() - startTime;
-        startTime = System.currentTimeMillis();
 
         _entityService.produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, null, aspectRecord, null,
             latestSystemMetadata,
