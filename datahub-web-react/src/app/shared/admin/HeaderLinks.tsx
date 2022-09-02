@@ -64,6 +64,10 @@ export function HeaderLinks(props: Props) {
     // SaaS only
     const showActionRequests = (isActionRequestsEnabled && me && me.platformPrivileges.viewMetadataProposals) || false;
     const showTests = (isTestsEnabled && me?.platformPrivileges?.manageTests) || false;
+    console.log({
+        isTestsEnabled,
+        pp: me?.platformPrivileges?.manageTests,
+    });
 
     return (
         <LinksWrapper areLinksHidden={areLinksHidden}>
@@ -101,11 +105,6 @@ export function HeaderLinks(props: Props) {
                         <MenuItem key="0">
                             <Link to="/glossary">
                                 <BookOutlined style={{ fontSize: '14px', fontWeight: 'bold' }} /> Glossary
-                            </Link>
-                        </MenuItem>
-                        <MenuItem key="1">
-                            <Link to="/domains">
-                                <FolderOutlined style={{ fontSize: '14px', fontWeight: 'bold' }} /> Domains
                             </Link>
                         </MenuItem>
                         {showTests && (

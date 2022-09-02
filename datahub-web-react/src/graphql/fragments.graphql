@@ -875,7 +875,6 @@ fragment entityDomain on DomainAssociation {
     associatedUrn
 }
 
-<<<<<<< HEAD
 fragment incidentsFields on EntityIncidentsResult {
     count
     start

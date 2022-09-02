@@ -287,20 +287,23 @@ export default function TagTermGroup({
                             {entityRegistry.getDisplayName(EntityType.GlossaryTerm, term.term)}
                             {term.actor?.urn === PROPAGATOR_URN && <PropagateThunderbolt />}
                         </Tag>
-								    </TermLink>
-								</HoverEntityTooltip>
+                    </TermLink>
+                </HoverEntityTooltip>
             ))}
             {proposedGlossaryTerms?.map((actionRequest) => (
-                <HoverEntityTooltip entity={term.term}>
+                <Tooltip overlay="Pending approval from owners">
                     <ProposedTerm
                         closable={false}
-                        data-testid={`proposed-term-${actionRequest.params?.glossaryTermProposal?.glossaryTerm.name}`}
+                        data-testid={`proposed-term-${actionRequest.params?.glossaryTermProposal?.glossaryTerm?.name}`}
                         onClick={() => {
                             setShowProposalDecisionModal(true);
                         }}
                     >
                         <BookOutlined style={{ marginRight: '3%' }} />
-                        {actionRequest.params?.glossaryTermProposal?.glossaryTerm.name}
+                        {entityRegistry.getDisplayName(
+                            EntityType.GlossaryTerm,
+                            actionRequest.params?.glossaryTermProposal?.glossaryTerm,
+                        )}
                         <ProposalModal
                             actionRequest={actionRequest}
                             showProposalDecisionModal={showProposalDecisionModal}
@@ -308,11 +311,14 @@ export default function TagTermGroup({
                             onProposalAcceptance={onProposalAcceptance}
                             onProposalRejection={onProposalRejection}
                             onActionRequestUpdate={onActionRequestUpdate}
-                            elementName={actionRequest.params?.glossaryTermProposal?.glossaryTerm.name}
+                            elementName={entityRegistry.getDisplayName(
+                                EntityType.GlossaryTerm,
+                                actionRequest.params?.glossaryTermProposal?.glossaryTerm,
+                            )}
                         />
                         <ClockCircleOutlined style={{ color: 'orange', marginLeft: '3%' }} />
                     </ProposedTerm>
-                </HoverEntityTooltip>
+                </Tooltip>
             ))}
             {/* uneditable tags are provided by ingestion pipelines exclusively */}
             {uneditableTags?.tags?.map((tag) => {
@@ -364,7 +370,7 @@ export default function TagTermGroup({
                 );
             })}
             {proposedTags?.map((actionRequest) => (
-                <HoverEntityTooltip entity={tag?.tag}>
+                <Tooltip overlay="Pending approval from owners">
                     <StyledTag
                         data-testid={`proposed-tag-${actionRequest?.params?.tagProposal?.tag?.name}`}
                         $colorHash={actionRequest?.params?.tagProposal?.tag?.urn}
@@ -385,7 +391,7 @@ export default function TagTermGroup({
                         />
                         <ClockCircleOutlined style={{ color: 'orange', marginLeft: '3%' }} />
                     </StyledTag>
-                </HoverEntityTooltip>
+                </Tooltip>
             ))}
             {tagProfileDrawerVisible && (
                 <TagProfileDrawer

@@ -545,6 +545,7 @@ type Mutation {
     """
     batchAssignRole(input: BatchAssignRoleInput!): Boolean
 
+    """
     Create a new incident for a resource (asset)
     """
     raiseIncident(

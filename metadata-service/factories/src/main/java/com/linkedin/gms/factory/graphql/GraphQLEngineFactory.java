@@ -166,7 +166,7 @@ public class GraphQLEngineFactory {
           _configProvider.getDatahub(),
           _siblingGraphService,
           _groupService,
-          _configProvider.getFeatureFlags()
+          _configProvider.getFeatureFlags(),
           // Saas only
           _proposalService
           ).builder().build();
@@ -197,7 +197,7 @@ public class GraphQLEngineFactory {
         _configProvider.getDatahub(),
         _siblingGraphService,
         _groupService,
-        _configProvider.getFeatureFlags()
+        _configProvider.getFeatureFlags(),
         // SaaS only
         _proposalService
     ).builder().build();

@@ -415,7 +415,7 @@ public class GmsGraphQLEngine {
         final VisualConfiguration visualConfiguration, final TelemetryConfiguration telemetryConfiguration,
         final TestsConfiguration testsConfiguration, final DatahubConfiguration datahubConfiguration,
         final SiblingGraphService siblingGraphService, final GroupService groupService,
-				final FeatureFlags,
+        final FeatureFlags featureFlags,
         // SaaS only
         final ProposalService proposalService) {
 
@@ -473,12 +473,8 @@ public class GmsGraphQLEngine {
         this.dataPlatformInstanceType = new DataPlatformInstanceType(entityClient);
         this.accessTokenMetadataType = new AccessTokenMetadataType(entityClient);
         this.testType = new TestType(entityClient);
-<<<<<<< HEAD
-
-=======
         this.dataHubPolicyType = new DataHubPolicyType(entityClient);
         this.dataHubRoleType = new DataHubRoleType(entityClient);
->>>>>>> master
         // Init Lists
         this.entityTypes = ImmutableList.of(
             datasetType,

@@ -7,7 +7,7 @@ import {
     AppstoreOutlined,
     BellOutlined,
     LoginOutlined,
-    ToolOutlined
+    ToolOutlined,
 } from '@ant-design/icons';
 import { Redirect, Route, useHistory, useLocation, useRouteMatch, Switch } from 'react-router';
 import styled from 'styled-components';
@@ -21,6 +21,7 @@ import { PlatformIntegrations } from './platform/PlatformIntegrations';
 import { PlatformNotifications } from './platform/PlatformNotifications';
 import { PlatformSsoIntegrations } from './platform/PlatformSsoIntegrations';
 import { Preferences } from './Preferences';
+import { ManagePolicies } from '../permissions/policy/ManagePolicies';
 
 const PageContainer = styled.div`
     display: flex;

@@ -88,7 +88,7 @@ public class BootstrapManagerFactory {
         ingestRootUserStep,
         ingestGroupsStep,
         ingestPoliciesStep,
-				ingestRolesStep,
+        ingestRolesStep,
         ingestDataPlatformsStep,
         ingestDataPlatformInstancesStep,
         _ingestRetentionPoliciesStep,

@@ -63,8 +63,6 @@ public class ConfigurationProvider {
    */
   private EventSinksConfiguration eventSinks;
 
-  private DatahubConfiguration datahub;
-
   /**
    * Feature flags indicating what is turned on vs turned off
    */
