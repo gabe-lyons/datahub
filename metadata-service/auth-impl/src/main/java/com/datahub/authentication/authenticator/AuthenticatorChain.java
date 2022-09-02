@@ -60,7 +60,7 @@ public class AuthenticatorChain {
       } catch (Exception e) {
         // Log as a normal error otherwise.
         authenticationFailures.add(new Pair<>(authenticator.getClass().getCanonicalName(), e.getMessage()));
-        log.error(String.format(
+        log.debug(String.format(
             "Caught exception while attempting to authenticate request using Authenticator %s",
             authenticator.getClass().getCanonicalName()), e);
       }
