@@ -109,7 +109,7 @@ public class IncidentNotificationGenerator extends BaseMclNotificationGenerator 
 
     Set<NotificationRecipient> recipients = new HashSet<>(buildRecipients(NotificationScenarioType.NEW_INCIDENT, entityUrn));
     if (recipients.isEmpty()) {
-      log.info("Skipping incident generation - no recipients");
+      log.warn("Skipping incident notification generation - no recipients");
       return;
     }
 

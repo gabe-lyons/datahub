@@ -553,7 +553,7 @@ public class EntityChangeNotificationGenerator extends BaseMclNotificationGenera
     );
 
     // 3. Send request.
-    log.info(String.format("Broadcasting entity change notification request for entity %s, notification type %s", entityUrn,
+    log.debug(String.format("Broadcasting entity change notification request for entity %s, notification type %s", entityUrn,
         notificationScenarioType));
     sendNotificationRequest(notificationRequest);
   }

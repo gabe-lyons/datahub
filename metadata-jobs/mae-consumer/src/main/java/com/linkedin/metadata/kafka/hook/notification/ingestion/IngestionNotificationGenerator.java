@@ -115,7 +115,7 @@ public class IngestionNotificationGenerator extends BaseMclNotificationGenerator
         recipients
     );
 
-    log.info(String.format("Broadcasting ingestion run change for execution request %s, ingestion source %s...", urn, ingestionSourceUrn));
+    log.debug(String.format("Broadcasting ingestion run change for execution request %s, ingestion source %s...", urn, ingestionSourceUrn));
     sendNotificationRequest(notificationRequest);
   }
 

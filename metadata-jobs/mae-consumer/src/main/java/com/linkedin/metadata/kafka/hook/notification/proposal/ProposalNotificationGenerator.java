@@ -158,7 +158,7 @@ public class ProposalNotificationGenerator extends BaseMclNotificationGenerator 
         recipients
     );
 
-    log.info(String.format("Broadcasting new proposal change for entity %s, action request %s...", entityUrn, urn));
+    log.debug(String.format("Broadcasting new proposal change for entity %s, action request %s...", entityUrn, urn));
     sendNotificationRequest(notificationRequest);
   }
 
