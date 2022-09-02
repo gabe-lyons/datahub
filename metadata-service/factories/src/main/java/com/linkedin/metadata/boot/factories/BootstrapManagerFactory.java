@@ -13,6 +13,7 @@ import com.linkedin.metadata.boot.steps.IngestMetadataTestsStep;
 import com.linkedin.metadata.boot.steps.IngestGroupsStep;
 import com.linkedin.metadata.boot.steps.IngestPoliciesStep;
 import com.linkedin.metadata.boot.steps.IngestRetentionPoliciesStep;
+import com.linkedin.metadata.boot.steps.IngestRolesStep;
 import com.linkedin.metadata.boot.steps.IngestRootUserStep;
 import com.linkedin.metadata.boot.steps.RemoveClientIdAspectStep;
 import com.linkedin.metadata.boot.steps.RestoreDbtSiblingsIndices;
@@ -72,6 +73,7 @@ public class BootstrapManagerFactory {
     final IngestGroupsStep ingestGroupsStep = new IngestGroupsStep(_entityService);
     final IngestPoliciesStep ingestPoliciesStep =
         new IngestPoliciesStep(_entityRegistry, _entityService, _entitySearchService, _searchDocumentTransformer);
+    final IngestRolesStep ingestRolesStep = new IngestRolesStep(_entityService);
     final IngestDataPlatformsStep ingestDataPlatformsStep = new IngestDataPlatformsStep(_entityService);
     final IngestDataPlatformInstancesStep ingestDataPlatformInstancesStep =
         new IngestDataPlatformInstancesStep(_entityService, _migrationsDao);
@@ -86,6 +88,7 @@ public class BootstrapManagerFactory {
         ingestRootUserStep,
         ingestGroupsStep,
         ingestPoliciesStep,
+        ingestRolesStep,
         ingestDataPlatformsStep,
         ingestDataPlatformInstancesStep,
         _ingestRetentionPoliciesStep,

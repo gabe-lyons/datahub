@@ -220,9 +220,7 @@ fragment nonSiblingDatasetFields on Dataset {
         params {
             glossaryTermProposal {
                 glossaryTerm {
-                    urn
-                    type
-                    name
+                    ...glossaryTerm
                 }
             }
         }
@@ -274,6 +272,10 @@ fragment nonSiblingDatasetFields on Dataset {
                     urn
                     type
                     name
+                    description
+                    properties {
+                        colorHex
+                    }
                 }
             }
         }

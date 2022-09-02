@@ -29,6 +29,11 @@ query getMe {
                     }
                 }
             }
+            settings {
+                appearance {
+                    showSimplifiedHomepage
+                }
+            }
         }
         platformPrivileges {
             viewAnalytics
@@ -48,4 +53,8 @@ query getMe {
             manageGlobalSettings
         }
     }
+}
+
+mutation updateUserSetting($input: UpdateUserSettingInput!) {
+    updateUserSetting(input: $input)
 }

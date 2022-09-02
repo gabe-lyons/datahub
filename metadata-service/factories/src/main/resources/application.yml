@@ -109,6 +109,7 @@ platformAnalytics:
 visualConfig:
   assets:
     logoUrl: ${REACT_APP_LOGO_URL:/assets/logos/acryl-dark-mark.svg}
+    faviconUrl: ${REACT_APP_FAVICON_URL:/assets/favicon.ico}
 
 # Storage Layer
 
@@ -247,3 +248,6 @@ eventSinks:
 
 siblings:
   enabled: ${ENABLE_SIBLING_HOOK:true} # enable to turn on automatic sibling associations for dbt
+
+featureFlags:
+  showSimplifiedHomepageByDefault: ${SHOW_SIMPLIFIED_HOMEPAGE_BY_DEFAULT:false} # shows a simplified homepage with just datasets, charts and dashboards by default to users. this can be configured in user settings

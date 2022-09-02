@@ -109,3 +109,7 @@ mutation raiseIncident($input: RaiseIncidentInput!) {
 mutation updateIncidentStatus($urn: String!, $input: UpdateIncidentStatusInput!){
     updateIncidentStatus(urn: $urn, input: $input)
 }
+
+mutation batchAssignRole($input: BatchAssignRoleInput!) {
+    batchAssignRole(input: $input)
+}

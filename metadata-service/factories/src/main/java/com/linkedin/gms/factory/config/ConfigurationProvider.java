@@ -2,6 +2,7 @@ package com.linkedin.gms.factory.config;
 
 import com.datahub.authentication.AuthenticationConfiguration;
 import com.datahub.authorization.AuthorizationConfiguration;
+import com.linkedin.datahub.graphql.featureflags.FeatureFlags;
 import com.linkedin.metadata.config.DatahubConfiguration;
 import com.linkedin.metadata.config.IngestionConfiguration;
 import com.linkedin.metadata.config.TestsConfiguration;
@@ -61,4 +62,9 @@ public class ConfigurationProvider {
    * Event mirroring related configs
    */
   private EventSinksConfiguration eventSinks;
+
+  /**
+   * Feature flags indicating what is turned on vs turned off
+   */
+  private FeatureFlags featureFlags;
 }

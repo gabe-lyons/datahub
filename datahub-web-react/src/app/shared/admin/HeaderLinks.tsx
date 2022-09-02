@@ -59,10 +59,15 @@ export function HeaderLinks(props: Props) {
     const showSettings = true;
     const showIngestion =
         isIngestionEnabled && me && me.platformPrivileges.manageIngestion && me.platformPrivileges.manageSecrets;
+    const showDomains = me?.platformPrivileges.createDomains || me?.platformPrivileges.manageDomains;
 
     // SaaS only
     const showActionRequests = (isActionRequestsEnabled && me && me.platformPrivileges.viewMetadataProposals) || false;
     const showTests = (isTestsEnabled && me?.platformPrivileges?.manageTests) || false;
+    console.log({
+        isTestsEnabled,
+        pp: me?.platformPrivileges?.manageTests,
+    });
 
     return (
         <LinksWrapper areLinksHidden={areLinksHidden}>
@@ -102,15 +107,17 @@ export function HeaderLinks(props: Props) {
                                 <BookOutlined style={{ fontSize: '14px', fontWeight: 'bold' }} /> Glossary
                             </Link>
                         </MenuItem>
-                        <MenuItem key="1">
-                            <Link to="/domains">
-                                <FolderOutlined style={{ fontSize: '14px', fontWeight: 'bold' }} /> Domains
-                            </Link>
-                        </MenuItem>
                         {showTests && (
                             <MenuItem key="2">
                                 <Link to="/tests">
                                     <FileDoneOutlined style={{ fontSize: '14px', fontWeight: 'bold' }} /> Tests
+                                </Link>
+                            </MenuItem>
+                        )}
+                        {showDomains && (
+                            <MenuItem key="1">
+                                <Link to="/domains">
+                                    <FolderOutlined style={{ fontSize: '14px', fontWeight: 'bold' }} /> Domains
                                 </Link>
                             </MenuItem>
                         )}

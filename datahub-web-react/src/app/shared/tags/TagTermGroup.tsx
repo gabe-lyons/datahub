@@ -22,6 +22,7 @@ import { TagProfileDrawer } from './TagProfileDrawer';
 import { useAcceptProposalMutation, useRejectProposalMutation } from '../../../graphql/actionRequest.generated';
 import ProposalModal from './ProposalModal';
 import EditTagTermsModal from './AddTagsTermsModal';
+import { HoverEntityTooltip } from '../../recommendations/renderer/component/HoverEntityTooltip';
 
 const PropagateThunderbolt = styled(ThunderboltOutlined)`
     color: rgba(0, 143, 100, 0.95);
@@ -240,7 +241,7 @@ export default function TagTermGroup({
     return (
         <>
             {domain && (
-                <DomainLink urn={domain.urn} name={entityRegistry.getDisplayName(EntityType.Domain, domain) || ''} />
+                <DomainLink domain={domain} name={entityRegistry.getDisplayName(EntityType.Domain, domain) || ''} />
             )}
             {uneditableGlossaryTerms?.terms?.map((term) => {
                 renderedTags += 1;
@@ -255,28 +256,24 @@ export default function TagTermGroup({
                 if (maxShow && renderedTags > maxShow) return null;
 
                 return (
-                    <TermLink
-                        to={entityRegistry.getEntityUrl(EntityType.GlossaryTerm, term.term.urn)}
-                        key={term.term.urn}
-                    >
-                        <Tooltip
-                            title="This term was propagated from a related dataset."
-                            visible={term.actor?.urn === PROPAGATOR_URN ? undefined : false}
+                    <HoverEntityTooltip entity={term.term}>
+                        <TermLink
+                            to={entityRegistry.getEntityUrl(EntityType.GlossaryTerm, term.term.urn)}
+                            key={term.term.urn}
                         >
                             <Tag closable={false} style={{ cursor: 'pointer' }}>
                                 <BookOutlined style={{ marginRight: '3%' }} />
                                 {entityRegistry.getDisplayName(EntityType.GlossaryTerm, term.term)}
-                                {term.actor?.urn === PROPAGATOR_URN && <PropagateThunderbolt />}
                             </Tag>
-                        </Tooltip>
-                    </TermLink>
+                        </TermLink>
+                    </HoverEntityTooltip>
                 );
             })}
             {editableGlossaryTerms?.terms?.map((term) => (
-                <TermLink to={entityRegistry.getEntityUrl(EntityType.GlossaryTerm, term.term.urn)} key={term.term.urn}>
-                    <Tooltip
-                        title="This term was propagated from a related dataset."
-                        visible={term.actor?.urn === PROPAGATOR_URN ? undefined : false}
+                <HoverEntityTooltip entity={term.term}>
+                    <TermLink
+                        to={entityRegistry.getEntityUrl(EntityType.GlossaryTerm, term.term.urn)}
+                        key={term.term.urn}
                     >
                         <Tag
                             style={{ cursor: 'pointer' }}
@@ -290,20 +287,23 @@ export default function TagTermGroup({
                             {entityRegistry.getDisplayName(EntityType.GlossaryTerm, term.term)}
                             {term.actor?.urn === PROPAGATOR_URN && <PropagateThunderbolt />}
                         </Tag>
-                    </Tooltip>
-                </TermLink>
+                    </TermLink>
+                </HoverEntityTooltip>
             ))}
             {proposedGlossaryTerms?.map((actionRequest) => (
                 <Tooltip overlay="Pending approval from owners">
                     <ProposedTerm
                         closable={false}
-                        data-testid={`proposed-term-${actionRequest.params?.glossaryTermProposal?.glossaryTerm.name}`}
+                        data-testid={`proposed-term-${actionRequest.params?.glossaryTermProposal?.glossaryTerm?.name}`}
                         onClick={() => {
                             setShowProposalDecisionModal(true);
                         }}
                     >
                         <BookOutlined style={{ marginRight: '3%' }} />
-                        {actionRequest.params?.glossaryTermProposal?.glossaryTerm.name}
+                        {entityRegistry.getDisplayName(
+                            EntityType.GlossaryTerm,
+                            actionRequest.params?.glossaryTermProposal?.glossaryTerm,
+                        )}
                         <ProposalModal
                             actionRequest={actionRequest}
                             showProposalDecisionModal={showProposalDecisionModal}
@@ -311,7 +311,10 @@ export default function TagTermGroup({
                             onProposalAcceptance={onProposalAcceptance}
                             onProposalRejection={onProposalRejection}
                             onActionRequestUpdate={onActionRequestUpdate}
-                            elementName={actionRequest.params?.glossaryTermProposal?.glossaryTerm.name}
+                            elementName={entityRegistry.getDisplayName(
+                                EntityType.GlossaryTerm,
+                                actionRequest.params?.glossaryTermProposal?.glossaryTerm,
+                            )}
                         />
                         <ClockCircleOutlined style={{ color: 'orange', marginLeft: '3%' }} />
                     </ProposedTerm>
@@ -327,17 +330,19 @@ export default function TagTermGroup({
                 if (maxShow && renderedTags > maxShow) return null;
 
                 return (
-                    <TagLink key={tag?.tag?.urn}>
-                        <StyledTag
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => showTagProfileDrawer(tag?.tag?.urn)}
-                            $colorHash={tag?.tag?.urn}
-                            $color={tag?.tag?.properties?.colorHex}
-                            closable={false}
-                        >
-                            {entityRegistry.getDisplayName(EntityType.Tag, tag.tag)}
-                        </StyledTag>
-                    </TagLink>
+                    <HoverEntityTooltip entity={tag?.tag}>
+                        <TagLink key={tag?.tag?.urn}>
+                            <StyledTag
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => showTagProfileDrawer(tag?.tag?.urn)}
+                                $colorHash={tag?.tag?.urn}
+                                $color={tag?.tag?.properties?.colorHex}
+                                closable={false}
+                            >
+                                {entityRegistry.getDisplayName(EntityType.Tag, tag.tag)}
+                            </StyledTag>
+                        </TagLink>
+                    </HoverEntityTooltip>
                 );
             })}
             {/* editable tags may be provided by ingestion pipelines or the UI */}
@@ -345,21 +350,23 @@ export default function TagTermGroup({
                 renderedTags += 1;
                 if (maxShow && renderedTags > maxShow) return null;
                 return (
-                    <TagLink>
-                        <StyledTag
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => showTagProfileDrawer(tag?.tag?.urn)}
-                            $colorHash={tag?.tag?.urn}
-                            $color={tag?.tag?.properties?.colorHex}
-                            closable={canRemove}
-                            onClose={(e) => {
-                                e.preventDefault();
-                                removeTag(tag);
-                            }}
-                        >
-                            {tag?.tag?.name}
-                        </StyledTag>
-                    </TagLink>
+                    <HoverEntityTooltip entity={tag?.tag}>
+                        <TagLink>
+                            <StyledTag
+                                style={{ cursor: 'pointer' }}
+                                onClick={() => showTagProfileDrawer(tag?.tag?.urn)}
+                                $colorHash={tag?.tag?.urn}
+                                $color={tag?.tag?.properties?.colorHex}
+                                closable={canRemove}
+                                onClose={(e) => {
+                                    e.preventDefault();
+                                    removeTag(tag);
+                                }}
+                            >
+                                {tag?.tag?.name}
+                            </StyledTag>
+                        </TagLink>
+                    </HoverEntityTooltip>
                 );
             })}
             {proposedTags?.map((actionRequest) => (
@@ -403,7 +410,7 @@ export default function TagTermGroup({
                     {EMPTY_MESSAGES.terms.title}. {EMPTY_MESSAGES.terms.description}
                 </Typography.Paragraph>
             )}
-            {canAddTag && (uneditableTags?.tags?.length || 0) + (editableTags?.tags?.length || 0) < 10 && (
+            {canAddTag && (
                 <NoElementButton
                     type={showEmptyMessage && tagsEmpty ? 'default' : 'text'}
                     onClick={() => {
@@ -416,20 +423,19 @@ export default function TagTermGroup({
                     <span>Add Tags</span>
                 </NoElementButton>
             )}
-            {canAddTerm &&
-                (uneditableGlossaryTerms?.terms?.length || 0) + (editableGlossaryTerms?.terms?.length || 0) < 10 && (
-                    <NoElementButton
-                        type={showEmptyMessage && tagsEmpty ? 'default' : 'text'}
-                        onClick={() => {
-                            setAddModalType(EntityType.GlossaryTerm);
-                            setShowAddModal(true);
-                        }}
-                        {...buttonProps}
-                    >
-                        <PlusOutlined />
-                        <span>Add Terms</span>
-                    </NoElementButton>
-                )}
+            {canAddTerm && (
+                <NoElementButton
+                    type={showEmptyMessage && tagsEmpty ? 'default' : 'text'}
+                    onClick={() => {
+                        setAddModalType(EntityType.GlossaryTerm);
+                        setShowAddModal(true);
+                    }}
+                    {...buttonProps}
+                >
+                    <PlusOutlined />
+                    <span>Add Terms</span>
+                </NoElementButton>
+            )}
             {showAddModal && !!entityUrn && !!entityType && (
                 <EditTagTermsModal
                     type={addModalType}

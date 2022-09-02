@@ -72,6 +72,7 @@ const user1 = {
             },
         ],
     },
+    settings: { appearance: { showSimplifiedHomepage: false } },
 };
 
 const user2 = {
@@ -125,6 +126,7 @@ const user2 = {
             },
         ],
     },
+    settings: { appearance: { showSimplifiedHomepage: false } },
 };
 
 const dataPlatform = {
@@ -424,7 +426,10 @@ export const dataset3 = {
                         description: 'sample definition',
                         definition: 'sample definition',
                         termSource: 'sample term source',
+                        customProperties: null,
                     },
+                    ownership: null,
+                    parentNodes: null,
                 },
                 associatedUrn: 'urn:li:dataset:3',
             },
@@ -454,6 +459,7 @@ export const dataset3 = {
         createdAt: 0,
         fields: [
             {
+                __typename: 'SchemaField',
                 nullable: false,
                 recursive: false,
                 fieldPath: 'user_id',
@@ -464,8 +470,10 @@ export const dataset3 = {
                 jsonPath: null,
                 globalTags: null,
                 glossaryTerms: null,
+                label: 'hi',
             },
             {
+                __typename: 'SchemaField',
                 nullable: false,
                 recursive: false,
                 fieldPath: 'user_name',
@@ -476,6 +484,7 @@ export const dataset3 = {
                 jsonPath: null,
                 globalTags: null,
                 glossaryTerms: null,
+                label: 'hi',
             },
         ],
         hash: '',
@@ -882,6 +891,7 @@ const glossaryTerm1 = {
         sourceRef: 'sourceRef',
         sourceURI: 'sourceURI',
     },
+    parentNodes: null,
     deprecation: null,
 } as GlossaryTerm;
 
@@ -954,6 +964,7 @@ const glossaryTerm2 = {
         ],
         __typename: 'EntityRelationshipsResult',
     },
+    parentNodes: null,
     __typename: 'GlossaryTerm',
 };
 
