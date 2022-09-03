@@ -51,8 +51,6 @@ export const TestBuilderModal = ({ initialState, editing, visible, onSubmit, onC
     const [createButtonEnabled, setCreateButtonEnabled] = useState(false);
     const [form] = Form.useForm();
 
-    console.log(editing);
-
     useEffect(() => {
         setTestBuilderState(initialState || {});
         form.resetFields();

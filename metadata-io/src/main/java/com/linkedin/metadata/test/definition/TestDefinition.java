@@ -1,7 +1,9 @@
 package com.linkedin.metadata.test.definition;
 
 import com.linkedin.common.urn.Urn;
+import com.linkedin.metadata.test.definition.operator.Predicate;
 import lombok.Data;
+import lombok.ToString;
 
 
 /**
@@ -10,19 +12,20 @@ import lombok.Data;
  * and the main test rule defines whether the entity passed the test or not
  */
 @Data
+@ToString
 public class TestDefinition {
   /**
    * Urn of the test
    */
-  private final Urn testUrn;
+  private final Urn urn;
 
   /**
    * Targeting rule that defines which entities are eligible for this test
    */
-  private final TestTargetingRule target;
+  private final TestMatch on;
 
   /**
    * Main test rule that returns true or false given an entity
    */
-  private final TestPredicate rule;
+  private final Predicate rules;
 }

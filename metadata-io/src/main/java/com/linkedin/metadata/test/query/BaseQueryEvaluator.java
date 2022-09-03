@@ -1,7 +1,6 @@
 package com.linkedin.metadata.test.query;
 
 import com.linkedin.common.urn.Urn;
-import com.linkedin.metadata.test.definition.TestQuery;
 import com.linkedin.metadata.test.definition.ValidationResult;
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +9,8 @@ import java.util.Set;
 /**
  * Base interface for query evaluators, which defines the set of queries that are eligible for this evaluator
  * and the evaluation logic
+ *
+ * TODO: Rebrand this as PropertyResolver. And simplify the API.
  */
 public interface BaseQueryEvaluator {
   /**
@@ -36,6 +37,5 @@ public interface BaseQueryEvaluator {
    * Evaluate the input queries for the given urn. Note all urns must be of type entityType
    */
   Map<Urn, Map<TestQuery, TestQueryResponse>> evaluate(String entityType, Set<Urn> urns, Set<TestQuery> queries);
-
 
 }

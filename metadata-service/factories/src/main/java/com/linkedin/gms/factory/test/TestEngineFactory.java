@@ -9,8 +9,8 @@ import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.test.TestEngine;
 import com.linkedin.metadata.test.TestFetcher;
-import com.linkedin.metadata.test.definition.TestDefinitionProvider;
-import com.linkedin.metadata.test.eval.TestPredicateEvaluator;
+import com.linkedin.metadata.test.definition.TestDefinitionParser;
+import com.linkedin.metadata.test.eval.PredicateEvaluator;
 import com.linkedin.metadata.test.query.QueryEngine;
 import javax.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,9 +51,9 @@ public class TestEngineFactory {
   @Bean(name = "testEngine")
   @Nonnull
   protected TestEngine getInstance() {
-    TestPredicateEvaluator testPredicateEvaluator = TestPredicateEvaluator.getInstance();
+    PredicateEvaluator predicateEvaluator = PredicateEvaluator.getInstance();
     return new TestEngine(entityService, new TestFetcher(entityService, entitySearchService),
-        new TestDefinitionProvider(testPredicateEvaluator), queryEngine, testPredicateEvaluator, 10,
+        new TestDefinitionParser(predicateEvaluator), queryEngine, predicateEvaluator, 10,
         testCacheRefreshIntervalSeconds);
   }
 }

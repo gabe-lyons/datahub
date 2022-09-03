@@ -31,11 +31,14 @@ import static com.linkedin.metadata.Constants.TEST_INFO_ASPECT_NAME;
 @Slf4j
 @RequiredArgsConstructor
 public class TestFetcher {
+
+  private static final String LAST_UPDATED_TIME_FIELD = "lastUpdatedTimestamp";
+
   private final EntityService _entityService;
   private final EntitySearchService _entitySearchService;
 
   private static final SortCriterion SORT_CRITERION =
-      new SortCriterion().setField("lastUpdatedTimestamp").setOrder(SortOrder.DESCENDING);
+      new SortCriterion().setField(LAST_UPDATED_TIME_FIELD).setOrder(SortOrder.DESCENDING);
 
   public TestFetchResult fetch(int start, int count) throws RemoteInvocationException, URISyntaxException {
     return fetch(start, count, "");

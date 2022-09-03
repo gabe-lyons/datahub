@@ -56,12 +56,32 @@ public class MetadataTestHook implements MetadataChangeLogHook {
   private final Cache<Urn, Long> _urnObserverCache;
   private final boolean _isEnabled;
 
+  private static final Set<String> ENTITIES_TO_IGNORE =
+      ImmutableSet.of(
+          Constants.TEST_ENTITY_NAME,
+          Constants.POLICY_ENTITY_NAME,
+          Constants.DATA_PLATFORM_ENTITY_NAME,
+          Constants.GLOSSARY_NODE_ENTITY_NAME,
+          Constants.GLOSSARY_TERM_ENTITY_NAME,
+          Constants.DOMAIN_ENTITY_NAME,
+          Constants.TAG_ENTITY_NAME,
+          Constants.ASSERTION_ENTITY_NAME,
+          Constants.ACCESS_TOKEN_ENTITY_NAME,
+          Constants.ACTION_REQUEST_ENTITY_NAME,
+          Constants.CORP_GROUP_ENTITY_NAME,
+          Constants.CORP_USER_ENTITY_NAME,
+          Constants.INGESTION_SOURCE_ENTITY_NAME,
+          Constants.EXECUTION_REQUEST_ENTITY_NAME,
+          Constants.SECRETS_ENTITY_NAME,
+          Constants.DATA_PROCESS_INSTANCE_ENTITY_NAME);
+
   // Set of aspects to ignore a.k.a do not run tests when these aspects change
   // TestResults needs to be ignored, because otherwise tests will always trigger twice
   // (once when aspect changes -> once when test results changes when the test is evaluated)
   // Status is ignored for now, as massive delete operations can cause massive test triggering
   private static final Set<String> ASPECTS_TO_IGNORE =
       ImmutableSet.of(Constants.TEST_RESULTS_ASPECT_NAME, Constants.STATUS_ASPECT_NAME);
+
 
   @Autowired
   public MetadataTestHook(@Nonnull final EntityRegistry entityRegistry, @Nonnull final MetadataTestClient testClient,
@@ -94,7 +114,7 @@ public class MetadataTestHook implements MetadataChangeLogHook {
       log.debug("Evaluating tests for urn {}", entity);
       _testClient.evaluate(entity, null, true, _systemAuthentication);
     } catch (RemoteInvocationException e) {
-      MetricUtils.counter(this.getClass(), "evaluteTestOnChangeFailed").inc();
+      MetricUtils.counter(this.getClass(), "evaluateTestOnChangeFailed").inc();
       log.error("Error while evaluating test for entity {}", entity, e);
     }
   }
@@ -102,7 +122,7 @@ public class MetadataTestHook implements MetadataChangeLogHook {
   @Override
   public void invoke(@NotNull MetadataChangeLog event) throws Exception {
     // Only trigger tests if the change is an UPSERT, change is not for test entity
-    if (event.getChangeType() != ChangeType.UPSERT || event.getEntityType().equals(Constants.TEST_ENTITY_NAME)) {
+    if (event.getChangeType() != ChangeType.UPSERT || ENTITIES_TO_IGNORE.contains(event.getEntityType())) {
       return;
     }
     // Do not trigger tests if the change is for an aspect among the aspects to ignore set
