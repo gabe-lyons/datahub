@@ -15,7 +15,6 @@ FROM --platform=$BUILDPLATFORM node:16.13.0-alpine3.14 AS prod-build
 RUN apk --no-cache --update-cache --available upgrade \
     && apk --no-cache add perl openjdk8
 
-ARG ENABLE_EMBER="false"
 ARG USE_SYSTEM_NODE="true"
 ENV CI=true
 ENV GRADLE_OPTS="-Xms256m -Xmx512m"
@@ -23,7 +22,7 @@ COPY . datahub-src
 RUN mkdir /scripts && cp datahub-src/docker/datahub-frontend/start.sh /scripts/start.sh \
     && cd datahub-src \
     && ./gradlew :datahub-web-react:build -x test -x yarnTest -x yarnLint \
-    && ./gradlew :datahub-frontend:dist -PenableEmber=${ENABLE_EMBER} -PuseSystemNode=${USE_SYSTEM_NODE} -x test -x yarnTest -x yarnLint \
+    && ./gradlew :datahub-frontend:dist -PuseSystemNode=${USE_SYSTEM_NODE} -x test -x yarnTest -x yarnLint \
     && cp datahub-frontend/build/distributions/datahub-frontend.zip ../datahub-frontend.zip \
     && cd .. && rm -rf datahub-src && unzip datahub-frontend.zip
 
