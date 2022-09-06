@@ -2451,7 +2451,7 @@
               "optional" : true,
               "Searchable" : {
                 "boostScore" : 0.2,
-                "fieldName" : "fieldLabel",
+                "fieldName" : "fieldLabels",
                 "fieldType" : "TEXT"
               }
             }, {
@@ -3605,6 +3605,17 @@
         } ]
       } ],
       "actions" : [ {
+        "name" : "getCount",
+        "parameters" : [ {
+          "name" : "aspect",
+          "type" : "string"
+        }, {
+          "name" : "urnLike",
+          "type" : "string",
+          "optional" : true
+        } ],
+        "returns" : "int"
+      }, {
         "name" : "getTimeseriesAspectValues",
         "parameters" : [ {
           "name" : "urn",
@@ -3642,6 +3653,30 @@
         "parameters" : [ {
           "name" : "proposal",
           "type" : "com.linkedin.mxe.MetadataChangeProposal"
+        } ],
+        "returns" : "string"
+      }, {
+        "name" : "restoreIndices",
+        "parameters" : [ {
+          "name" : "aspect",
+          "type" : "string",
+          "optional" : true
+        }, {
+          "name" : "urn",
+          "type" : "string",
+          "optional" : true
+        }, {
+          "name" : "urnLike",
+          "type" : "string",
+          "optional" : true
+        }, {
+          "name" : "start",
+          "type" : "int",
+          "optional" : true
+        }, {
+          "name" : "batchSize",
+          "type" : "int",
+          "optional" : true
         } ],
         "returns" : "string"
       } ],
