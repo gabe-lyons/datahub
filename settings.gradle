@@ -47,3 +47,9 @@ include 'datahub-ranger-plugin'
 include 'metadata-ingestion-modules:airflow-plugin'
 include 'smoke-test'
 include 'notifications'
+
+try {
+    'git config --local core.hooksPath .githooks'.execute()
+} catch (Exception e) {
+    print("Could not set git hook config")
+}
