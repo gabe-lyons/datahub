@@ -6,6 +6,7 @@ import com.linkedin.gms.factory.entityregistry.EntityRegistryFactory;
 import com.linkedin.gms.factory.search.EntitySearchServiceFactory;
 import com.linkedin.gms.factory.search.SearchDocumentTransformerFactory;
 import com.linkedin.metadata.boot.BootstrapManager;
+import com.linkedin.metadata.boot.BootstrapStep;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformInstancesStep;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformsStep;
 import com.linkedin.metadata.boot.steps.IngestDefaultGlobalSettingsStep;
@@ -18,14 +19,18 @@ import com.linkedin.metadata.boot.steps.IngestRootUserStep;
 import com.linkedin.metadata.boot.steps.RemoveClientIdAspectStep;
 import com.linkedin.metadata.boot.steps.RestoreDbtSiblingsIndices;
 import com.linkedin.metadata.boot.steps.RestoreGlossaryIndices;
+import com.linkedin.metadata.boot.steps.UpgradeDefaultBrowsePathsStep;
 import com.linkedin.metadata.entity.AspectMigrationsDao;
 import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.search.transformer.SearchDocumentTransformer;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -65,6 +70,9 @@ public class BootstrapManagerFactory {
   @Qualifier("ingestMetadataTestsStep")
   private IngestMetadataTestsStep _ingestMetadataTestsStep;
 
+  @Value("${bootstrap.upgradeDefaultBrowsePaths.enabled}")
+  private Boolean _upgradeDefaultBrowsePathsEnabled;
+
   @Bean(name = "bootstrapManager")
   @Scope("singleton")
   @Nonnull
@@ -84,18 +92,15 @@ public class BootstrapManagerFactory {
     final RemoveClientIdAspectStep removeClientIdAspectStep = new RemoveClientIdAspectStep(_entityService);
     // acryl-main only
     final IngestDefaultGlobalSettingsStep ingestSettingsStep = new IngestDefaultGlobalSettingsStep(_entityService);
-    return new BootstrapManager(ImmutableList.of(
-        ingestRootUserStep,
-        ingestGroupsStep,
-        ingestPoliciesStep,
-        ingestRolesStep,
-        ingestDataPlatformsStep,
-        ingestDataPlatformInstancesStep,
-        _ingestRetentionPoliciesStep,
-        ingestSettingsStep,
-        _ingestMetadataTestsStep,
-        restoreGlossaryIndicesStep,
-        removeClientIdAspectStep,
-        restoreDbtSiblingsIndices));
+
+    final List<BootstrapStep> finalSteps = new ArrayList<>(ImmutableList.of(ingestRootUserStep, ingestGroupsStep, ingestPoliciesStep, ingestRolesStep,
+        ingestDataPlatformsStep, ingestDataPlatformInstancesStep, _ingestRetentionPoliciesStep, ingestSettingsStep, restoreGlossaryIndicesStep,
+        removeClientIdAspectStep, restoreDbtSiblingsIndices));
+
+    if (_upgradeDefaultBrowsePathsEnabled) {
+      finalSteps.add(new UpgradeDefaultBrowsePathsStep(_entityService));
+    }
+
+    return new BootstrapManager(finalSteps);
   }
 }
