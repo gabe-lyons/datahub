@@ -20,6 +20,6 @@ jobs:
           days-before-pr-stale: 30
           days-before-pr-close: 30
           stale-pr-label: "stale"
-          stale-pr-message: "This PR is stale. We will close it in 30 days."
+          stale-pr-message: "This PR is stale. We will close it in 30 days if there is no comment."
           close-pr-message: "Closing stale PR."
           repo-token: ${{ secrets.GITHUB_TOKEN }}
