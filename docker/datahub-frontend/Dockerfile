@@ -34,6 +34,7 @@ COPY ./metadata-io ./datahub-src/metadata-io
 COPY ./datahub-graphql-core ./datahub-src/datahub-graphql-core
 COPY ./gradle ./datahub-src/gradle
 COPY repositories.gradle gradle.properties gradlew settings.gradle build.gradle ./datahub-src/
+COPY ./docker/datahub-frontend/ ./datahub-src/docker/datahub-frontend/
 RUN mkdir /scripts && cp datahub-src/docker/datahub-frontend/start.sh /scripts/start.sh \
     && cd datahub-src \
     && ./gradlew :datahub-web-react:build -x test -x yarnTest -x yarnLint \
