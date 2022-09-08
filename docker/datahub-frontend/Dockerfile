@@ -18,11 +18,6 @@ RUN apk --no-cache --update-cache --available upgrade \
 ARG USE_SYSTEM_NODE="true"
 ENV CI=true
 ENV GRADLE_OPTS="-Xms256m -Xmx512m"
-<<<<<<< HEAD
-COPY . datahub-src
-RUN mkdir /scripts && cp datahub-src/docker/datahub-frontend/start.sh /scripts/start.sh \
-    && cd datahub-src \
-=======
 
 # copy only what's realy needed for the build
 # to get the benefits of caching as much as possible
@@ -39,9 +34,8 @@ COPY ./metadata-io ./datahub-src/metadata-io
 COPY ./datahub-graphql-core ./datahub-src/datahub-graphql-core
 COPY ./gradle ./datahub-src/gradle
 COPY repositories.gradle gradle.properties gradlew settings.gradle build.gradle ./datahub-src/
-
-RUN cd datahub-src \
->>>>>>> master
+RUN mkdir /scripts && cp datahub-src/docker/datahub-frontend/start.sh /scripts/start.sh \
+    && cd datahub-src \
     && ./gradlew :datahub-web-react:build -x test -x yarnTest -x yarnLint \
     && ./gradlew :datahub-frontend:dist -PuseSystemNode=${USE_SYSTEM_NODE} -x test -x yarnTest -x yarnLint \
     && cp datahub-frontend/build/distributions/datahub-frontend.zip ../datahub-frontend.zip \
@@ -50,15 +44,12 @@ RUN cd datahub-src \
 FROM base as prod-install
 
 COPY --from=prod-build /datahub-frontend /datahub-frontend/
-<<<<<<< HEAD
 COPY --from=prod-build /scripts /scripts/
 
 RUN chmod +x /scripts/start.sh
-=======
 COPY ./docker/monitoring/client-prometheus-config.yaml /datahub-frontend/
 RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.4.1/opentelemetry-javaagent-all.jar -O opentelemetry-javaagent-all.jar \
     && wget https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.1/jmx_prometheus_javaagent-0.16.1.jar -O jmx_prometheus_javaagent.jar
->>>>>>> master
 RUN chown -R datahub:datahub /datahub-frontend && chmod 755 /datahub-frontend
 
 FROM base as dev-install
@@ -75,7 +66,6 @@ RUN echo $SERVER_PORT
 EXPOSE $SERVER_PORT
 
 HEALTHCHECK --start-period=2m --retries=4 CMD curl --fail http://localhost:$SERVER_PORT/admin || exit 1
-<<<<<<< HEAD
 
 ENV JAVA_OPTS=" \
    -Xms512m \
@@ -88,7 +78,3 @@ ENV JAVA_OPTS=" \
    -Dpidfile.path=/dev/null"
 
 CMD /scripts/start.sh
-=======
-COPY ./docker/datahub-frontend/start.sh /
-CMD ./start.sh
->>>>>>> master
