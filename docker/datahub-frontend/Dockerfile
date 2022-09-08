@@ -18,7 +18,22 @@ RUN apk --no-cache --update-cache --available upgrade \
 ARG USE_SYSTEM_NODE="true"
 ENV CI=true
 ENV GRADLE_OPTS="-Xms256m -Xmx512m"
-COPY . datahub-src
+
+# copy only what's realy needed for the build
+# to get the benefits of caching as much as possible
+COPY ./datahub-frontend ./datahub-src/datahub-frontend
+COPY ./entity-registry ./datahub-src/entity-registry
+COPY ./buildSrc ./datahub-src/buildSrc
+COPY ./datahub-web-react ./datahub-src/datahub-web-react
+COPY ./li-utils ./datahub-src/li-utils
+COPY ./metadata-models ./datahub-src/metadata-models
+COPY ./metadata-models-validator ./datahub-src/metadata-models-validator
+COPY ./metadata-utils ./datahub-src/metadata-utils
+COPY ./metadata-service ./datahub-src/metadata-service
+COPY ./metadata-io ./datahub-src/metadata-io
+COPY ./datahub-graphql-core ./datahub-src/datahub-graphql-core
+COPY ./gradle ./datahub-src/gradle
+COPY repositories.gradle gradle.properties gradlew settings.gradle build.gradle ./datahub-src/
 RUN mkdir /scripts && cp datahub-src/docker/datahub-frontend/start.sh /scripts/start.sh \
     && cd datahub-src \
     && ./gradlew :datahub-web-react:build -x test -x yarnTest -x yarnLint \
@@ -32,6 +47,9 @@ COPY --from=prod-build /datahub-frontend /datahub-frontend/
 COPY --from=prod-build /scripts /scripts/
 
 RUN chmod +x /scripts/start.sh
+COPY ./docker/monitoring/client-prometheus-config.yaml /datahub-frontend/
+RUN wget https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v1.4.1/opentelemetry-javaagent-all.jar -O opentelemetry-javaagent-all.jar \
+    && wget https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.16.1/jmx_prometheus_javaagent-0.16.1.jar -O jmx_prometheus_javaagent.jar
 RUN chown -R datahub:datahub /datahub-frontend && chmod 755 /datahub-frontend
 
 FROM base as dev-install
