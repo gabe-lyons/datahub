@@ -247,4 +247,6 @@ export class DashboardEntity implements Entity<Dashboard> {
             EntityCapabilityType.SOFT_DELETE,
         ]);
     };
+
+    getGraphName = () => this.getPathName();
 }

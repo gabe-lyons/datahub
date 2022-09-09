@@ -22,7 +22,7 @@
 remote="$1"
 url="$2"
 
-if [[ "$url" == "git@github.com:acryldata/datahub-fork.git"  ]] || [[ "$url" == "https://github.com/acryldata/datahub-fork.git" ]]
+if [[ "$url" == "git@github.com:acryldata/datahub-fork.git" ]] || [[ "$url" == "https://github.com/acryldata/datahub-fork.git" ]]
 then
 	echo "for $remote url is $url which is allowed."
 	exit 0

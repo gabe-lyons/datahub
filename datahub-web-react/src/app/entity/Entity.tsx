@@ -73,7 +73,11 @@ export enum EntityCapabilityType {
      */
     SOFT_DELETE,
     /**
-     * Assigning a role to an entity. Currently only supported for users.
+     * Run tests against an entity
+     */
+    TEST,
+    /**
+     * Add roles to the entity
      */
     ROLES,
 }
@@ -167,4 +171,9 @@ export interface Entity<T> {
      * Returns the supported features for the entity
      */
     supportedCapabilities: () => Set<EntityCapabilityType>;
+
+    /**
+     * Returns the graph name of the entity, as it appears in the GMS entity registry
+     */
+    getGraphName: () => string;
 }

@@ -73,7 +73,9 @@ export class DatasetEntity implements Entity<Dataset> {
 
     getAutoCompleteFieldName = () => 'name';
 
-    getPathName = () => 'dataset';
+    getGraphName = () => 'dataset';
+
+    getPathName = () => this.getGraphName();
 
     getEntityName = () => 'Dataset';
 
@@ -353,6 +355,7 @@ export class DatasetEntity implements Entity<Dataset> {
             EntityCapabilityType.DOMAINS,
             EntityCapabilityType.DEPRECATION,
             EntityCapabilityType.SOFT_DELETE,
+            EntityCapabilityType.TEST,
         ]);
     };
 }

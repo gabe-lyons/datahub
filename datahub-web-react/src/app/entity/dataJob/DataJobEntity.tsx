@@ -56,6 +56,8 @@ export class DataJobEntity implements Entity<DataJob> {
 
     getAutoCompleteFieldName = () => 'name';
 
+    getGraphName = () => 'dataJob';
+
     getPathName = () => 'tasks';
 
     getEntityName = () => 'Task';
@@ -213,6 +215,7 @@ export class DataJobEntity implements Entity<DataJob> {
             EntityCapabilityType.DOMAINS,
             EntityCapabilityType.DEPRECATION,
             EntityCapabilityType.SOFT_DELETE,
+            EntityCapabilityType.TEST,
         ]);
     };
 }

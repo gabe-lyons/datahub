@@ -1,29 +1,86 @@
 /**
- * The object represents the state of the Test Builder form.
+ * A single property predicate as it appears in a deserialized
+ * Test Definition.
  */
-export interface TestBuilderState {
+export interface Predicate {
+    property: string;
+    operator?: string;
+    values?: string[];
+}
+
+/**
+ * A conjunctive predicate as it appears in a deserialized
+ * Test Definition.
+ */
+export type AndPredicate = {
+    and: TestPredicate;
+};
+
+/**
+ * A disjunctive predicate as it appears in a deserialized
+ * Test Definition
+ */
+export type OrPredicate = {
+    or: TestPredicate;
+};
+
+/**
+ * An inverse predicate as it appears in a deserialized
+ * Test Definition
+ */
+export type NotPredicate = {
+    not: TestPredicate;
+};
+
+/**
+ * A compound Test Predicate, which can be nested with various
+ * sub predicates.
+ */
+export type TestPredicate = AndPredicate | OrPredicate | NotPredicate | Predicate | TestPredicate[];
+
+/**
+ * An object representation of the 'on' block in a deserialized
+ * Test Definition.
+ */
+export type SelectPredicate = {
+    types: string[];
+    conditions?: TestPredicate;
+};
+
+/**
+ * A single Action present in the actions clause of a deserialized
+ * Test Definition.
+ */
+export type TestAction = {
+    action: string;
+    params: any;
+};
+
+/**
+ * A set of on success / on failure actions present in the actions clause
+ * of a deserialized Test Definition.
+ */
+export type TestActions = {
+    onFailure: TestAction[];
+    onSuccess: TestAction[];
+};
+
+/**
+ * A deserialized Test Definition.
+ */
+export interface TestDefinition {
     /**
-     * The name of the test.
+     * The select conditions for the test (or)
      */
-    name?: string;
+    on: SelectPredicate;
 
     /**
-     * The category of the test.
+     * The rules conditions for the test
      */
-    category?: string;
+    rules: TestPredicate;
 
     /**
-     * An optional description for the test.
+     * The actions for the test
      */
-    description?: string | null;
-
-    /**
-     * The definition of the test
-     */
-    definition?: {
-        /**
-         * The JSON version of a test definition.
-         */
-        json?: string | null;
-    };
+    actions?: TestActions;
 }

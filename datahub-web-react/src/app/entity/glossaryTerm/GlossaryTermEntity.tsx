@@ -17,11 +17,14 @@ import { SidebarAboutSection } from '../shared/containers/profile/sidebar/Sideba
 import GlossaryEntitiesPath from '../../glossary/GlossaryEntitiesPath';
 import { EntityMenuItems } from '../shared/EntityDropdown/EntityDropdown';
 import { EntityActionItem } from '../shared/entity/EntityActions';
+import { FetchedEntity } from '../../lineage/types';
 
 /**
  * Definition of the DataHub Dataset entity.
  */
 export class GlossaryTermEntity implements Entity<GlossaryTerm> {
+    getLineageVizConfig?: ((entity: GlossaryTerm) => FetchedEntity) | undefined;
+
     type: EntityType = EntityType.GlossaryTerm;
 
     icon = (fontSize: number, styleType: IconStyleType) => {
@@ -167,4 +170,6 @@ export class GlossaryTermEntity implements Entity<GlossaryTerm> {
             EntityCapabilityType.SOFT_DELETE,
         ]);
     };
+
+    getGraphName = () => this.getPathName();
 }

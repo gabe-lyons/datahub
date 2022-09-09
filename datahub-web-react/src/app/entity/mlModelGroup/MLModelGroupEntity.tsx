@@ -48,6 +48,8 @@ export class MLModelGroupEntity implements Entity<MlModelGroup> {
 
     getAutoCompleteFieldName = () => 'name';
 
+    getGraphName = () => 'mlModelGroup';
+
     getPathName = () => 'mlModelGroup';
 
     getEntityName = () => 'ML Group';

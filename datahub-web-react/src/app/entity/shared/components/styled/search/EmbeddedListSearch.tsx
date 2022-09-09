@@ -11,6 +11,7 @@ import { GetSearchResultsParams, SearchResultsInterface } from './types';
 import { isListSubset } from '../../../utils';
 import { EntityAndType } from '../../../types';
 import { Message } from '../../../../../shared/Message';
+import { EntityActionProps } from '../../../../../recommendations/renderer/component/EntityNameList';
 
 const Container = styled.div`
     display: flex;
@@ -60,6 +61,7 @@ type Props = {
     defaultFilters?: Array<FacetFilterInput>;
     searchBarStyle?: any;
     searchBarInputStyle?: any;
+    entityAction?: React.FC<EntityActionProps>;
     useGetSearchResults?: (params: GetSearchResultsParams) => {
         data: SearchResultsInterface | undefined | null;
         loading: boolean;
@@ -83,6 +85,7 @@ export const EmbeddedListSearch = ({
     defaultFilters,
     searchBarStyle,
     searchBarInputStyle,
+    entityAction,
     useGetSearchResults = useWrappedSearchResults,
 }: Props) => {
     // Adjust query based on props
@@ -213,6 +216,7 @@ export const EmbeddedListSearch = ({
                 isSelectMode={isSelectMode}
                 selectedEntities={selectedEntities}
                 setSelectedEntities={setSelectedEntities}
+                entityAction={entityAction}
             />
         </Container>
     );

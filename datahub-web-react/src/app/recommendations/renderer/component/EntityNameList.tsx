@@ -1,7 +1,7 @@
 import React from 'react';
 import { Divider, List, Checkbox } from 'antd';
 import styled from 'styled-components';
-import { Entity } from '../../../../types.generated';
+import { Entity, EntityType } from '../../../../types.generated';
 import { useEntityRegistry } from '../../../useEntityRegistry';
 import DefaultPreviewCard from '../../../preview/DefaultPreviewCard';
 import { IconStyleType } from '../../../entity/Entity';
@@ -58,6 +58,11 @@ const ThinDivider = styled(Divider)`
     margin: 0px;
 `;
 
+export type EntityActionProps = {
+    urn: string;
+    type: EntityType;
+};
+
 type AdditionalProperties = {
     degree?: number;
 };
@@ -73,6 +78,7 @@ type Props = {
     selectedEntities?: EntityAndType[];
     setSelectedEntities?: (entities: EntityAndType[]) => any;
     bordered?: boolean;
+    entityAction?: React.FC<EntityActionProps>;
 };
 
 export const EntityNameList = ({
@@ -83,6 +89,7 @@ export const EntityNameList = ({
     selectedEntities = [],
     setSelectedEntities,
     bordered = true,
+    entityAction,
 }: Props) => {
     const entityRegistry = useEntityRegistry();
     const selectedEntityUrns = selectedEntities?.map((entity) => entity.urn) || [];
@@ -108,6 +115,8 @@ export const EntityNameList = ({
             setSelectedEntities?.(selectedEntities?.filter((entity) => entity.urn !== selectedEntity.urn) || []);
         }
     };
+
+    const EntityAction = entityAction as React.FC<EntityActionProps>;
 
     return (
         <StyledList
@@ -154,6 +163,7 @@ export const EntityNameList = ({
                                 degree={additionalProperties?.degree}
                                 deprecation={deprecation}
                             />
+                            {entityAction && <EntityAction urn={entity.urn} type={entity.type} />}
                         </ListItem>
                         <ThinDivider />
                     </>

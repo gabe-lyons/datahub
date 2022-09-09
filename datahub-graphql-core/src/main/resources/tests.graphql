@@ -44,6 +44,7 @@ Definition of the test
 type TestDefinition {
   """
   JSON-based def for the test
+  Deprecated! JSON representation is no longer supported.
   """
   json: String
 }
@@ -214,6 +215,7 @@ input UpdateTestInput {
 input TestDefinitionInput {
   """
   The string representation of the Test
+  Deprecated! JSON representation is no longer supported.
   """
   json: String
 }
@@ -228,6 +230,30 @@ type TestValidationResult {
   Additional messages to indicate the reasons why definition is invalid
   """
   messages: [String!]
+}
+
+enum RunTestDefinitionStatus {
+  """
+  The test passed
+  """
+  PASS
+
+  """
+  The test failed
+  """
+  FAIL
+
+  """
+  The test was not run (did not match)
+  """
+  NONE
+}
+
+type RunTestDefinitionResult {
+  """
+  Whether or not the test passed
+  """
+  status: RunTestDefinitionStatus!
 }
 
 extend type Mutation {
@@ -245,6 +271,11 @@ extend type Mutation {
   Create an existing test - note that this will NOT delete dangling pointers until the next execution of the test.
   """
   deleteTest(urn: String!): Boolean
+
+  """
+  Execute a test definition against a specific urn
+  """
+  runTestDefinition(urn: String!, test: TestDefinitionInput!): RunTestDefinitionResult!
 
   """
   Run tests for the given entity urn

@@ -1,160 +1,127 @@
-import { Button, Form, Input, Modal, Typography } from 'antd';
-import React, { useEffect, useState } from 'react';
-import { jsonToYaml, yamlToJson } from '../../ingest/source/utils';
-import { TestBuilderState } from '../types';
-import { TestDefinitionForm } from './TestDefinitionBuilder';
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import { Button, Modal, Steps, Typography } from 'antd';
+import { ExpandAltOutlined, ShrinkOutlined } from '@ant-design/icons';
+import ClickOutside from '../../shared/ClickOutside';
+import { TestBuilderStepComponent, TestBuilderStepTitles } from './conf';
+import { DEFAULT_BUILDER_STATE, StepProps, TestBuilderState, TestBuilderStep } from './types';
 
-const DEFAULT_TEST_JSON = `
-{
-  "on": {
-    "dataset": [
-      {
-        "query": "dataPlatformInstance.platform",
-        "condition": "EQUALS",
-        "values": [
-          "urn:li:dataPlatform:bigQuery"
-        ]
-      }
-    ]
-  },
-  "rules": {
-    "or": [
-      {
-        "query": "glossaryTerms.terms.glossaryTermInfo.parentNode",
-        "condition": "EQUALS",
-        "values": [
-          "urn:li:glossaryNode:Category"
-        ]
-      },
-      {
-        "query": "container.container.glossaryTerms.terms.glossaryTermInfo.parentNode",
-        "condition": "EQUALS",
-        "values": [
-          "urn:li:glossaryNode:Category"
-        ]
-      }
-    ]
-  }
-}
+const modalStyle = { top: 40 };
+const modalBodyStyle = { paddingRight: 60, paddingLeft: 60, paddingBottom: 40 };
+
+const ExpandButton = styled(Button)`
+    && {
+        margin-right: 32px;
+    }
 `;
+
+const TitleContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+`;
+
+const StepsContainer = styled.div`
+    margin-right: 20px;
+    margin-left: 20px;
+    margin-bottom: 40px;
+`;
+
+const stepIds = Object.values(TestBuilderStep);
+const stepIndexToId = new Map();
+stepIds.forEach((stepId, index) => stepIndexToId.set(stepId, index));
 
 type Props = {
     initialState?: TestBuilderState;
-    editing: boolean;
-    visible: boolean;
-    onSubmit?: (source: TestBuilderState, resetState: () => void) => void;
+    onSubmit?: (input: TestBuilderState) => void;
     onCancel?: () => void;
 };
 
-export const TestBuilderModal = ({ initialState, editing, visible, onSubmit, onCancel }: Props) => {
-    const [testBuilderState, setTestBuilderState] = useState<TestBuilderState>(initialState || {});
-    const [createButtonEnabled, setCreateButtonEnabled] = useState(false);
-    const [form] = Form.useForm();
+export const TestBuilderModal = ({ initialState, onSubmit, onCancel }: Props) => {
+    const isEditing = initialState !== undefined;
+    const titleText = isEditing ? 'Edit Metadata Test' : 'New Metadata Test';
 
-    useEffect(() => {
-        setTestBuilderState(initialState || {});
-        form.resetFields();
-    }, [initialState, form]);
+    const [stepStack, setStepStack] = useState<TestBuilderStep[]>([TestBuilderStep.SELECT]);
+    const [modalExpanded, setModalExpanded] = useState(false);
+    const [builderState, setBuilderState] = useState<TestBuilderState>(initialState || DEFAULT_BUILDER_STATE);
 
-    const setName = (name: string) => {
-        setTestBuilderState({
-            ...testBuilderState,
-            name,
-        });
+    const goTo = (step: TestBuilderStep) => {
+        setStepStack([...stepStack, step]);
     };
 
-    const setCategory = (category: string) => {
-        setTestBuilderState({
-            ...testBuilderState,
-            category,
-        });
+    const prev = () => {
+        setStepStack(stepStack.slice(0, -1));
     };
 
-    const setDescription = (description: string) => {
-        setTestBuilderState({
-            ...testBuilderState,
-            description,
-        });
+    const cancel = () => {
+        onCancel?.();
     };
 
-    const setDefinitionJson = (definitionJson: string | undefined) => {
-        setTestBuilderState({
-            ...testBuilderState,
-            definition: {
-                json: definitionJson,
+    const submit = () => {
+        onSubmit?.(builderState);
+    };
+
+    const modalClosePopup = () => {
+        Modal.confirm({
+            title: 'Exit Test Editor',
+            content: `Are you sure you want to exit test editor? All changes will be lost`,
+            onOk() {
+                onCancel?.();
             },
+            onCancel() {},
+            okText: 'Yes',
+            maskClosable: true,
+            closable: true,
         });
     };
 
-    const checkCreateButtonEnabled = (validYaml: boolean) => {
-        const hasErrors = form.getFieldsError().some((field) => field.errors.length > 0);
-        setCreateButtonEnabled(validYaml && !hasErrors);
-    };
-
-    const onChangeYaml = (definitionYaml: string) => {
-        try {
-            setDefinitionJson(yamlToJson(definitionYaml));
-            checkCreateButtonEnabled(true);
-        } catch (e) {
-            setDefinitionJson(undefined);
-            checkCreateButtonEnabled(false);
-        }
-    };
+    /**
+     * The current step id, e.g. SELECT
+     */
+    const currentStep = stepStack[stepStack.length - 1];
+    /**
+     * The current step index, e.g. 0
+     */
+    const currentStepIndex = stepIndexToId.get(currentStep);
+    /**
+     * The current step component
+     */
+    const StepComponent: React.FC<StepProps> = TestBuilderStepComponent[currentStep];
 
     return (
-        <Modal
-            width={800}
-            style={{ top: 40 }}
-            title={<Typography.Text>{editing ? 'Edit Test' : 'Create a new Test'}</Typography.Text>}
-            visible={visible}
-            onCancel={onCancel}
-            footer={
-                <>
-                    <Button onClick={onCancel} type="text">
-                        Cancel
-                    </Button>
-                    <Button
-                        id="createTestButton"
-                        onClick={() => onSubmit?.(testBuilderState, () => setTestBuilderState({}))}
-                        disabled={!createButtonEnabled}
-                    >
-                        Done
-                    </Button>
-                </>
-            }
-        >
-            <Form form={form} layout="vertical">
-                <Form.Item required label={<Typography.Text strong>Name</Typography.Text>}>
-                    <Typography.Paragraph>Give your test a name.</Typography.Paragraph>
-                    <Input
-                        placeholder="A name for your test"
-                        value={testBuilderState.name}
-                        onChange={(event) => setName(event.target.value)}
-                    />
-                </Form.Item>
-                <Form.Item required label={<Typography.Text strong>Category</Typography.Text>}>
-                    <Typography.Paragraph>The category of your test.</Typography.Paragraph>
-                    <Input
-                        placeholder="The category of your test"
-                        value={testBuilderState.category}
-                        onChange={(event) => setCategory(event.target.value)}
-                    />
-                </Form.Item>
-                <Form.Item label={<Typography.Text strong>Description</Typography.Text>}>
-                    <Typography.Paragraph>
-                        An optional description to help keep track of your test.
-                    </Typography.Paragraph>
-                    <Input
-                        placeholder="The description for your test"
-                        value={testBuilderState.description || undefined}
-                        onChange={(event) => setDescription(event.target.value)}
-                    />
-                </Form.Item>
-                <TestDefinitionForm
-                    onChange={onChangeYaml}
-                    initialValue={jsonToYaml(initialState?.definition?.json || DEFAULT_TEST_JSON)}
+        <ClickOutside onClickOutside={modalClosePopup} wrapperClassName="test-builder-modal">
+            <Modal
+                wrapClassName="test-builder-modal"
+                width={modalExpanded ? 1400 : 1000}
+                footer={null}
+                title={
+                    <TitleContainer>
+                        <Typography.Text>{titleText}</Typography.Text>
+                        <ExpandButton onClick={() => setModalExpanded(!modalExpanded)}>
+                            {(modalExpanded && <ShrinkOutlined />) || <ExpandAltOutlined />}
+                        </ExpandButton>
+                    </TitleContainer>
+                }
+                style={modalStyle}
+                bodyStyle={modalBodyStyle}
+                visible
+                onCancel={onCancel}
+            >
+                <StepsContainer>
+                    <Steps current={currentStepIndex}>
+                        {stepIds.map((id) => (
+                            <Steps.Step key={id} title={TestBuilderStepTitles[id]} />
+                        ))}
+                    </Steps>
+                </StepsContainer>
+                <StepComponent
+                    state={builderState}
+                    updateState={setBuilderState}
+                    goTo={goTo}
+                    prev={stepStack.length > 1 ? prev : undefined}
+                    submit={submit}
+                    cancel={cancel}
                 />
-            </Form>
-        </Modal>
+            </Modal>
+        </ClickOutside>
     );
 };

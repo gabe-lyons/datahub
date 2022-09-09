@@ -53,7 +53,9 @@ export class DomainEntity implements Entity<Domain> {
 
     getAutoCompleteFieldName = () => 'name';
 
-    getPathName = () => 'domain';
+    getGraphName = () => 'domain';
+
+    getPathName = () => this.getGraphName();
 
     getEntityName = () => 'Domain';
 

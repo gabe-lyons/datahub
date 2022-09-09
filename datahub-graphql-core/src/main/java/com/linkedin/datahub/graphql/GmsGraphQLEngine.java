@@ -210,6 +210,7 @@ import com.linkedin.datahub.graphql.resolvers.tag.SetTagColorResolver;
 import com.linkedin.datahub.graphql.resolvers.test.CreateTestResolver;
 import com.linkedin.datahub.graphql.resolvers.test.DeleteTestResolver;
 import com.linkedin.datahub.graphql.resolvers.test.ListTestsResolver;
+import com.linkedin.datahub.graphql.resolvers.test.RunTestDefinitionResolver;
 import com.linkedin.datahub.graphql.resolvers.test.RunTestsResolver;
 import com.linkedin.datahub.graphql.resolvers.test.TestResultsResolver;
 import com.linkedin.datahub.graphql.resolvers.test.UpdateTestResolver;
@@ -568,6 +569,7 @@ public class GmsGraphQLEngine {
         configureResolvedAuditStampResolvers(builder);
         configureGlobalSettingsResolvers(builder);
         configureRoleResolvers(builder);
+        configureTestResolvers(builder);
     }
 
     public GraphQLEngine.Builder builder() {
@@ -1615,5 +1617,11 @@ public class GmsGraphQLEngine {
 
     private void configureIngestionSourceResolvers(final RuntimeWiring.Builder builder) {
         builder.type("IngestionSource", typeWiring -> typeWiring.dataFetcher("executions", new IngestionSourceExecutionRequestsResolver(entityClient)));
+    }
+
+    private void configureTestResolvers(final RuntimeWiring.Builder builder) {
+        builder.type("Mutation", typeWiring -> typeWiring
+            .dataFetcher("runTestDefinition", new RunTestDefinitionResolver(testEngine))
+        );
     }
 }

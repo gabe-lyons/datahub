@@ -1,7 +1,7 @@
 import { UserOutlined } from '@ant-design/icons';
 import * as React from 'react';
 import { CorpUser, EntityType, SearchResult } from '../../../types.generated';
-import { Entity, EntityCapabilityType, IconStyleType, PreviewType } from '../Entity';
+import { Entity, IconStyleType, PreviewType } from '../Entity';
 import { getDataForEntityType } from '../shared/containers/profile/utils';
 import { Preview } from './preview/Preview';
 import UserProfile from './UserProfile';
@@ -38,6 +38,8 @@ export class UserEntity implements Entity<CorpUser> {
     isLineageEnabled = () => false;
 
     getAutoCompleteFieldName = () => 'username';
+
+    getGraphName: () => string = () => 'corpuser';
 
     getPathName: () => string = () => 'user';
 
@@ -77,6 +79,6 @@ export class UserEntity implements Entity<CorpUser> {
     };
 
     supportedCapabilities = () => {
-        return new Set([EntityCapabilityType.ROLES]);
+        return new Set([]);
     };
 }

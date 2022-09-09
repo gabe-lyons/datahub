@@ -13,12 +13,13 @@ import {
 import { Message } from '../shared/Message';
 import TabToolbar from '../entity/shared/components/styled/TabToolbar';
 import { TestBuilderModal } from './builder/TestBuilderModal';
-import { TestBuilderState } from './types';
 import { StyledTable } from '../entity/shared/components/styled/StyledTable';
 import { SearchBar } from '../search/SearchBar';
 import { useEntityRegistry } from '../useEntityRegistry';
 import { TestResultsSummary } from './TestResultsSummary';
 import CopyUrn from '../shared/CopyUrn';
+import { TestDefinitionInput } from '../../types.generated';
+import { TestBuilderState } from './builder/types';
 
 const DeleteButtonContainer = styled.div`
     display: flex;
@@ -87,7 +88,7 @@ export const TestsList = () => {
             .catch((e: unknown) => {
                 message.destroy();
                 if (e instanceof Error) {
-                    message.error({ content: `Failed to remove test: \n ${e.message || ''}`, duration: 3 });
+                    message.error({ content: `Failed to remove test: An unexpected error occurred.`, duration: 3 });
                 }
             });
     };
@@ -96,61 +97,35 @@ export const TestsList = () => {
         setPage(newPage);
     };
 
-    const onSubmit = (state: TestBuilderState, resetBuilderState: () => void) => {
+    const onSubmit = (state: TestBuilderState) => {
         const input = {
             name: state.name as string,
             category: state.category as string,
             description: state.description as string,
-            definition: {
-                ...state.definition,
-            },
+            definition: state.definition as TestDefinitionInput,
         };
-        if (isEditing && focusTestUrn) {
-            updateTestMutation({
-                variables: {
-                    urn: focusTestUrn,
-                    input,
-                },
-            })
-                .then(() => {
-                    message.success({
-                        content: `Successfully edited Test!`,
-                        duration: 3,
-                    });
-                    resetBuilderState();
-                    setIsBuildingTest(false);
-                    setTimeout(() => refetch(), 3000);
-                })
-                .catch((e) => {
-                    message.destroy();
-                    message.error({
-                        content: `Failed to edit Test!: \n ${e.message || ''}`,
-                        duration: 3,
-                    });
+        const mutation = isEditing && focusTestUrn ? updateTestMutation : createTestMutation;
+        const variables = isEditing && focusTestUrn ? { urn: focusTestUrn, input } : { input };
+        (
+            mutation({
+                variables: variables as any,
+            }) as any
+        )
+            .then(() => {
+                message.success({
+                    content: `Successfully ${isEditing ? 'edited' : 'created'} Test!`,
+                    duration: 3,
                 });
-        } else {
-            createTestMutation({
-                variables: {
-                    input,
-                },
+                setIsBuildingTest(false);
+                setTimeout(() => refetch(), 3000);
             })
-                .then(() => {
-                    message.success({
-                        content: `Successfully created Test!`,
-                        duration: 3,
-                    });
-                    resetBuilderState();
-                    setIsBuildingTest(false);
-                    setTimeout(() => refetch(), 3000);
-                })
-                .catch((e) => {
-                    message.destroy();
-                    message.error({
-                        content: `Failed to create Test!: \n ${e.message || ''}`,
-                        duration: 3,
-                    });
+            .catch((_) => {
+                message.destroy();
+                message.error({
+                    content: `Failed to save Test! Please review your test definition.`,
+                    duration: 3,
                 });
-        }
+            });
     };
 
     const onDeleteTest = (urn: string) => {
@@ -168,10 +143,15 @@ export const TestsList = () => {
     };
 
     const onEdit = (urn: string) => {
-        console.log('setting on edit true');
         setIsEditing(true);
         setIsBuildingTest(true);
         setFocusTestUrn(urn);
+    };
+
+    const onCancel = () => {
+        setIsBuildingTest(false);
+        setIsEditing(false);
+        setFocusTestUrn(undefined);
     };
 
     const tableColumns = [
@@ -220,7 +200,7 @@ export const TestsList = () => {
             render: (_, record: any) => (
                 <DeleteButtonContainer>
                     <Button style={{ marginRight: 16 }} onClick={() => onEdit(record.urn)}>
-                        Edit
+                        EDIT
                     </Button>
                     <CopyUrn urn={record.urn} />
                     <Button onClick={() => onDeleteTest(record.urn)} type="text" shape="circle" danger>
@@ -241,7 +221,7 @@ export const TestsList = () => {
     return (
         <>
             {!data && loading && <Message type="loading" content="Loading tests..." />}
-            {error && message.error({ content: `Failed to load tests! \n ${error.message || ''}`, duration: 3 })}
+            {error && message.error({ content: `Failed to load tests! An unexpected error occurred.`, duration: 3 })}
             <div>
                 <TabToolbar>
                     <div>
@@ -287,13 +267,7 @@ export const TestsList = () => {
                     />
                 </SourcePaginationContainer>
             </div>
-            <TestBuilderModal
-                initialState={focusTest}
-                editing={isEditing}
-                visible={isBuildingTest}
-                onSubmit={onSubmit}
-                onCancel={() => setIsBuildingTest(false)}
-            />
+            {isBuildingTest && <TestBuilderModal initialState={focusTest} onSubmit={onSubmit} onCancel={onCancel} />}
         </>
     );
 };

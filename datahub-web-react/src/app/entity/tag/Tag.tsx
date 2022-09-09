@@ -45,7 +45,9 @@ export class TagEntity implements Entity<Tag> {
 
     getAutoCompleteFieldName = () => 'name';
 
-    getPathName: () => string = () => 'tag';
+    getGraphName = () => 'tag';
+
+    getPathName: () => string = () => this.getGraphName();
 
     getCollectionName: () => string = () => 'Tags';
 

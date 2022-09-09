@@ -36,3 +36,9 @@ mutation updateTest($urn: String!, $input: UpdateTestInput!) {
 mutation deleteTest($urn: String!) {
     deleteTest(urn: $urn)
 }
+
+mutation runTestDefinition($urn: String!, $test: TestDefinitionInput!) {
+    runTestDefinition(urn: $urn, test: $test) {
+        status
+    }
+}

@@ -3,6 +3,7 @@ import React from 'react';
 import { useGetGlossaryNodeQuery } from '../../../graphql/glossaryNode.generated';
 import { EntityType, GlossaryNode, SearchResult } from '../../../types.generated';
 import GlossaryEntitiesPath from '../../glossary/GlossaryEntitiesPath';
+import { FetchedEntity } from '../../lineage/types';
 import { Entity, EntityCapabilityType, IconStyleType, PreviewType } from '../Entity';
 import { EntityProfile } from '../shared/containers/profile/EntityProfile';
 import { SidebarOwnerSection } from '../shared/containers/profile/sidebar/Ownership/SidebarOwnerSection';
@@ -14,6 +15,8 @@ import ChildrenTab from './ChildrenTab';
 import { Preview } from './preview/Preview';
 
 class GlossaryNodeEntity implements Entity<GlossaryNode> {
+    getLineageVizConfig?: ((entity: GlossaryNode) => FetchedEntity) | undefined;
+
     type: EntityType = EntityType.GlossaryNode;
 
     icon = (fontSize: number, styleType: IconStyleType) => {
@@ -145,6 +148,8 @@ class GlossaryNodeEntity implements Entity<GlossaryNode> {
             EntityCapabilityType.SOFT_DELETE,
         ]);
     };
+
+    getGraphName = () => this.getPathName();
 }
 
 export default GlossaryNodeEntity;

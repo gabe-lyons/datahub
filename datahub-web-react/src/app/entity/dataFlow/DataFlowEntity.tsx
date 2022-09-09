@@ -49,6 +49,8 @@ export class DataFlowEntity implements Entity<DataFlow> {
 
     getAutoCompleteFieldName = () => 'name';
 
+    getGraphName = () => 'dataFlow';
+
     getPathName = () => 'pipelines';
 
     getEntityName = () => 'Pipeline';
@@ -167,6 +169,7 @@ export class DataFlowEntity implements Entity<DataFlow> {
             EntityCapabilityType.DOMAINS,
             EntityCapabilityType.DEPRECATION,
             EntityCapabilityType.SOFT_DELETE,
+            EntityCapabilityType.TEST,
         ]);
     };
 }
