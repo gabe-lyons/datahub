@@ -504,7 +504,11 @@
         "MANAGE_DOMAINS",
         "MANAGE_GLOSSARIES",
         "MANAGE_USER_CREDENTIALS",
-        "MANAGE_TAGS"
+        "MANAGE_TAGS",
+        "VIEW_METADATA_PROPOSALS",
+        "MANAGE_TESTS",
+        "MANAGE_GLOBAL_SETTINGS",
+        "CREATE_CONSTRAINTS"
       ],
       "displayName":"Admins - Platform Policy",
       "description":"Admins have all platform privileges.",
@@ -551,8 +555,12 @@
         "MANAGE_ENTITY_GLOSSARY_TERMS_PRIVILEGE",
         "MANAGE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE",
         "MANAGE_DATASET_COL_TAGS_PRIVILEGE",
-        "EDIT_ENTITY_ASSERTIONS_PRIVILEGE"
-
+        "EDIT_ENTITY_ASSERTIONS_PRIVILEGE",
+        "EDIT_ENTITY_OPERATIONS",
+        "PROPOSE_ENTITY_TAGS_PRIVILEGE",
+        "PROPOSE_ENTITY_GLOSSARY_TERMS_PRIVILEGE",
+        "PROPOSE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE",
+        "PROPOSE_DATASET_COL_TAGS_PRIVILEGE"
       ],
       "displayName":"Admins - Metadata Policy",
       "description":"Admins have all metadata privileges.",
@@ -578,7 +586,9 @@
         "GENERATE_PERSONAL_ACCESS_TOKENS",
         "MANAGE_DOMAINS",
         "MANAGE_GLOSSARIES",
-        "MANAGE_TAGS"
+        "MANAGE_TAGS",
+        "MANAGE_TESTS",
+        "CREATE_CONSTRAINTS"
       ],
       "displayName":"Editors - Platform Policy",
       "description":"Editors can manage ingestion and view analytics.",
@@ -625,7 +635,12 @@
         "MANAGE_ENTITY_GLOSSARY_TERMS_PRIVILEGE",
         "MANAGE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE",
         "MANAGE_DATASET_COL_TAGS_PRIVILEGE",
-        "EDIT_ENTITY_ASSERTIONS_PRIVILEGE"
+        "EDIT_ENTITY_ASSERTIONS_PRIVILEGE",
+        "EDIT_ENTITY_OPERATIONS",
+        "PROPOSE_ENTITY_TAGS_PRIVILEGE",
+        "PROPOSE_ENTITY_GLOSSARY_TERMS_PRIVILEGE",
+        "PROPOSE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE",
+        "PROPOSE_DATASET_COL_TAGS_PRIVILEGE"
       ],
       "displayName":"Editors - Metadata Policy",
       "description":"Editors have all metadata privileges.",
@@ -671,7 +686,11 @@
       "privileges":[
         "VIEW_ENTITY_PAGE",
         "VIEW_DATASET_USAGE",
-        "VIEW_DATASET_PROFILE"
+        "VIEW_DATASET_PROFILE",
+        "PROPOSE_ENTITY_TAGS_PRIVILEGE",
+        "PROPOSE_ENTITY_GLOSSARY_TERMS_PRIVILEGE",
+        "PROPOSE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE",
+        "PROPOSE_DATASET_COL_TAGS_PRIVILEGE"
       ],
       "displayName":"Readers - Metadata Policy",
       "description":"Readers can view all assets.",
