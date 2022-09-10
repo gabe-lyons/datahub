@@ -2,15 +2,16 @@ import { SourceConfig } from '../types';
 import snowflakeLogo from '../../../../../images/snowflakelogo.png';
 
 const placeholderRecipe = `\
-source: 
-    type: snowflake
+source:
+    type: snowflake-beta
     config:
-        account_id: "example_id"
-        warehouse: "example_warehouse"
-        role: "datahub_role"
-        include_table_lineage: true
-        include_view_lineage: true
+        account_id: abcde
+        username: "\${SNOWFLAKE_DATAHUB_USER}"
+        password: "\${SNOWFLAKE_DATAHUB_PASSWORD}"
+        warehouse: "\${DATAHUB_WAREHOUSE}"
+        role: datahub_role
         profiling:
+            turn_off_expensive_profiling_metrics: true
             enabled: true
         stateful_ingestion:
             enabled: true
