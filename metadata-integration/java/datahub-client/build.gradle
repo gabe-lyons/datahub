@@ -1,5 +1,5 @@
 plugins {
-    id("com.palantir.git-version") apply false
+  id("com.palantir.git-version") apply false
 }
 apply plugin: 'java'
 apply plugin: 'com.github.johnrengelman.shadow'
@@ -13,35 +13,35 @@ import org.apache.tools.ant.filters.ReplaceTokens
 jar.enabled = false // Since we only want to build shadow jars, disabling the regular jar creation
 
 dependencies {
-    // DO NOT DELETE. Required for SaaS version
-    implementation project(':entity-registry')
-    implementation project(':metadata-events:mxe-utils-avro-1.7')
+  // DO NOT DELETE. Required for SaaS version
+  implementation project(':entity-registry')
+  implementation project(':metadata-events:mxe-utils-avro-1.7')
 
-    implementation project(':metadata-models')
-    compile externalDependency.avro_1_7
-    constraints {
-      implementation('commons-collections:commons-collections:3.2.2') {
-        because 'Vulnerability Issue'
-      }
+  implementation project(':metadata-models')
+  compile externalDependency.avro_1_7
+  constraints {
+    implementation('commons-collections:commons-collections:3.2.2') {
+      because 'Vulnerability Issue'
     }
-    shadow externalDependency.httpAsyncClient // we want our clients to provide this
-    implementation externalDependency.jacksonDataBind
-    implementation externalDependency.javaxValidation
-    implementation externalDependency.springContext
-    implementation externalDependency.swaggerAnnotations
-    implementation(externalDependency.kafkaAvroSerializer) {
-      exclude group: "org.apache.avro"
-    }
-    
-    compileOnly externalDependency.lombok
-    annotationProcessor externalDependency.lombok
-    testCompile externalDependency.httpAsyncClient // needed as shadow excludes it
-    testCompile externalDependency.mockito
-    testCompile externalDependency.mockServer
-    testCompile externalDependency.mockServerClient
-    testCompile externalDependency.testContainers
+  }
+  shadow externalDependency.httpAsyncClient // we want our clients to provide this
+  implementation externalDependency.jacksonDataBind
+  implementation externalDependency.javaxValidation
+  implementation externalDependency.springContext
+  implementation externalDependency.swaggerAnnotations
+  implementation(externalDependency.kafkaAvroSerializer) {
+    exclude group: "org.apache.avro"
+  }
 
-    swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.33'
+  compileOnly externalDependency.lombok
+  annotationProcessor externalDependency.lombok
+  testCompile externalDependency.httpAsyncClient // needed as shadow excludes it
+  testCompile externalDependency.mockito
+  testCompile externalDependency.mockServer
+  testCompile externalDependency.mockServerClient
+  testCompile externalDependency.testContainers
+
+  swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.33'
 }
 
 //jacocoTestReport {
@@ -60,7 +60,7 @@ compileJava.dependsOn copyAvroSchemas
 
 
 jacocoTestReport {
-    dependsOn test // tests are required to run before generating the report
+  dependsOn test // tests are required to run before generating the report
 }
 
 test {
@@ -71,7 +71,7 @@ test {
 }
 
 task checkShadowJar(type: Exec) {
-   commandLine 'sh', '-c', 'scripts/check_jar.sh'
+  commandLine 'sh', '-c', 'scripts/check_jar.sh'
 }
 
 
@@ -87,20 +87,21 @@ shadowJar {
   mergeServiceFiles()
   // we relocate namespaces manually, because we want to know exactly which libs we are exposing and why
   // we can move to automatic relocation using ConfigureShadowRelocation after we get to a good place on these first
+  // acryl-main doesn't perform any re-locations. I don't exactly know why, but keeping this comment here for future readers
 }
 
 assemble {
-    dependsOn shadowJar
+  dependsOn shadowJar
 }
 
 task sourcesJar(type: Jar) {
-     archiveClassifier = 'sources'
-     from sourceSets.main.allSource
+  archiveClassifier = 'sources'
+  from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar) {
-    archiveClassifier = 'javadoc'
-    from javadoc
+  archiveClassifier = 'javadoc'
+  from javadoc
 }
 
 
@@ -108,35 +109,35 @@ publishing {
   publications {
     shadow(MavenPublication) {
       publication -> project.shadow.component(publication)
-      pom {
-        name = 'Datahub Client'
-        group = 'io.acryl'
-        artifactId = 'datahub-client'
-        description = 'DataHub Java client for metadata integration'
-        url = 'https://datahubproject.io'
-        artifacts = [ shadowJar, javadocJar, sourcesJar ]
+        pom {
+          name = 'Datahub Client'
+          group = 'io.acryl'
+          artifactId = 'datahub-client'
+          description = 'DataHub Java client for metadata integration'
+          url = 'https://datahubproject.io'
+          artifacts = [ shadowJar, javadocJar, sourcesJar ]
 
-        scm {
-          connection = 'scm:git:git://github.com/datahub-project/datahub.git'
-          developerConnection = 'scm:git:ssh://github.com:datahub-project/datahub.git'
-          url = 'https://github.com/datahub-project/datahub.git'
-        }
+          scm {
+            connection = 'scm:git:git://github.com/datahub-project/datahub.git'
+            developerConnection = 'scm:git:ssh://github.com:datahub-project/datahub.git'
+            url = 'https://github.com/datahub-project/datahub.git'
+          }
 
-        licenses {
-          license {
-            name = 'The Apache License, Version 2.0'
-            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          licenses {
+            license {
+              name = 'The Apache License, Version 2.0'
+              url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            }
+          }
+
+          developers {
+            developer {
+              id = 'datahub'
+              name = 'Datahub'
+              email = 'datahub@acryl.io'
+            }
           }
         }
-
-        developers {
-          developer {
-            id = 'datahub'
-            name = 'Datahub'
-            email = 'datahub@acryl.io'
-          }
-        }
-      }
     }
   }
 

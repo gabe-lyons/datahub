@@ -3,7 +3,7 @@ name: Publish Datahub Java Jars (Client, Spark Lineage, Protobuf)
 on:
   push:
     branches:
-      - acryl-main
+      - master
     paths-ignore:
       - "docs/**"
       - "**.md"
@@ -52,8 +52,6 @@ jobs:
       contents: read
     needs: ["check-secret", "setup"]
     if: ${{ needs.check-secret.outputs.publish-enabled == 'true' }}
-    needs: [check-secret]
-    if: needs.check-secret.outputs.publish-enabled == 'true'
     steps:
       - uses: actions/checkout@v2
         with:
