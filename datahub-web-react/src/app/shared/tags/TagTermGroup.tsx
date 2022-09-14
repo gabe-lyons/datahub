@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
 import { BookOutlined, ClockCircleOutlined, PlusOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import Highlight from 'react-highlighter';
+
 import { useEntityRegistry } from '../../useEntityRegistry';
 import {
     Domain,
@@ -46,6 +48,7 @@ type Props = {
     entityUrn?: string;
     entityType?: EntityType;
     entitySubresource?: string;
+    highlightText?: string;
     refetch?: () => Promise<any>;
 
     proposedGlossaryTerms?: ActionRequest[];
@@ -79,6 +82,8 @@ const ProposedTerm = styled(Tag)`
 
 const PROPAGATOR_URN = 'urn:li:corpuser:__datahub_propagator';
 
+const highlightMatchStyle = { background: '#ffe58f', padding: '0' };
+
 export default function TagTermGroup({
     uneditableTags,
     editableTags,
@@ -97,6 +102,7 @@ export default function TagTermGroup({
     entityUrn,
     entityType,
     entitySubresource,
+    highlightText,
     refetch,
 }: Props) {
     const entityRegistry = useEntityRegistry();
@@ -248,9 +254,11 @@ export default function TagTermGroup({
                 if (maxShow && renderedTags === maxShow + 1)
                     return (
                         <TagText>
-                            {uneditableGlossaryTerms?.terms
-                                ? `+${uneditableGlossaryTerms?.terms?.length - maxShow}`
-                                : null}
+                            <Highlight matchStyle={highlightMatchStyle} search={highlightText}>
+                                {uneditableGlossaryTerms?.terms
+                                    ? `+${uneditableGlossaryTerms?.terms?.length - maxShow}`
+                                    : null}
+                            </Highlight>
                         </TagText>
                     );
                 if (maxShow && renderedTags > maxShow) return null;
@@ -284,7 +292,9 @@ export default function TagTermGroup({
                             }}
                         >
                             <BookOutlined style={{ marginRight: '3%' }} />
-                            {entityRegistry.getDisplayName(EntityType.GlossaryTerm, term.term)}
+                            <Highlight matchStyle={highlightMatchStyle} search={highlightText}>
+                                {entityRegistry.getDisplayName(EntityType.GlossaryTerm, term.term)}
+                            </Highlight>
                             {term.actor?.urn === PROPAGATOR_URN && <PropagateThunderbolt />}
                         </Tag>
                     </TermLink>
@@ -329,9 +339,10 @@ export default function TagTermGroup({
                     );
                 if (maxShow && renderedTags > maxShow) return null;
 
+                const displayName = entityRegistry.getDisplayName(EntityType.Tag, tag.tag);
                 return (
                     <HoverEntityTooltip entity={tag?.tag}>
-                        <TagLink key={tag?.tag?.urn}>
+                        <TagLink key={tag?.tag?.urn} data-testid={`tag-${displayName}`}>
                             <StyledTag
                                 style={{ cursor: 'pointer' }}
                                 onClick={() => showTagProfileDrawer(tag?.tag?.urn)}
@@ -339,7 +350,9 @@ export default function TagTermGroup({
                                 $color={tag?.tag?.properties?.colorHex}
                                 closable={false}
                             >
-                                {entityRegistry.getDisplayName(EntityType.Tag, tag.tag)}
+                                <Highlight matchStyle={highlightMatchStyle} search={highlightText}>
+                                    {displayName}
+                                </Highlight>
                             </StyledTag>
                         </TagLink>
                     </HoverEntityTooltip>
@@ -349,9 +362,11 @@ export default function TagTermGroup({
             {editableTags?.tags?.map((tag) => {
                 renderedTags += 1;
                 if (maxShow && renderedTags > maxShow) return null;
+
+                const displayName = entityRegistry.getDisplayName(EntityType.Tag, tag.tag);
                 return (
                     <HoverEntityTooltip entity={tag?.tag}>
-                        <TagLink>
+                        <TagLink data-testid={`tag-${displayName}`}>
                             <StyledTag
                                 style={{ cursor: 'pointer' }}
                                 onClick={() => showTagProfileDrawer(tag?.tag?.urn)}
@@ -363,7 +378,9 @@ export default function TagTermGroup({
                                     removeTag(tag);
                                 }}
                             >
-                                {tag?.tag?.name}
+                                <Highlight matchStyle={highlightMatchStyle} search={highlightText}>
+                                    {displayName}
+                                </Highlight>
                             </StyledTag>
                         </TagLink>
                     </HoverEntityTooltip>

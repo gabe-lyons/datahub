@@ -52,8 +52,8 @@ services:
   datahub-frontend-react:
     image: 795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-frontend-react:debug
     build:
-      context: datahub-frontend
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: docker/datahub-frontend/Dockerfile
       args:
         APP_ENV: dev
     volumes:

@@ -849,7 +849,7 @@ export const container2 = {
     __typename: 'Container',
 } as Container;
 
-const glossaryTerm1 = {
+export const glossaryTerm1 = {
     urn: 'urn:li:glossaryTerm:1',
     type: EntityType.GlossaryTerm,
     name: 'Another glossary term',
@@ -1099,7 +1099,7 @@ export const glossaryNode5 = {
     __typename: 'GlossaryNode',
 } as GlossaryNode;
 
-const sampleTag = {
+export const sampleTag = {
     urn: 'urn:li:tag:abc-sample-tag',
     name: 'abc-sample-tag',
     description: 'sample tag description',
