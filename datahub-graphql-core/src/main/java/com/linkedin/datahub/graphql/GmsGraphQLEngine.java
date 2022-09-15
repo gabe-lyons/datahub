@@ -55,6 +55,7 @@ import com.linkedin.datahub.graphql.generated.GlossaryNode;
 import com.linkedin.datahub.graphql.generated.GlossaryTerm;
 import com.linkedin.datahub.graphql.generated.GlossaryTermAssociation;
 import com.linkedin.datahub.graphql.generated.GlossaryTermProposalParams;
+import com.linkedin.datahub.graphql.generated.IngestionSource;
 import com.linkedin.datahub.graphql.generated.InstitutionalMemoryMetadata;
 import com.linkedin.datahub.graphql.generated.LineageRelationship;
 import com.linkedin.datahub.graphql.generated.ListAccessTokenResult;
@@ -147,6 +148,7 @@ import com.linkedin.datahub.graphql.resolvers.ingest.source.UpsertIngestionSourc
 import com.linkedin.datahub.graphql.resolvers.jobs.DataJobRunsResolver;
 import com.linkedin.datahub.graphql.resolvers.jobs.EntityRunsResolver;
 import com.linkedin.datahub.graphql.resolvers.load.AspectResolver;
+import com.linkedin.datahub.graphql.resolvers.load.BatchGetEntitiesResolver;
 import com.linkedin.datahub.graphql.resolvers.load.EntityLineageResultResolver;
 import com.linkedin.datahub.graphql.resolvers.load.EntityRelationshipsResultResolver;
 import com.linkedin.datahub.graphql.resolvers.load.EntityTypeBatchResolver;
@@ -764,8 +766,24 @@ public class GmsGraphQLEngine {
             .dataFetcher("listRejectedActionRequests",
                 new ListRejectedActionRequestsResolver(entityClient, entityService))
             .dataFetcher("entity", getEntityResolver())
+            .dataFetcher("entities", getEntitiesResolver())
             .dataFetcher("listRoles", new ListRolesResolver(this.entityClient))
         );
+    }
+
+    private DataFetcher getEntitiesResolver() {
+        return new BatchGetEntitiesResolver(entityTypes,
+            (env) -> {
+                List<String> urns = env.getArgument(URNS_FIELD_NAME);
+                return urns.stream().map((urn) -> {
+                    try {
+                        Urn entityUrn = Urn.createFromString(urn);
+                        return UrnToEntityMapper.map(entityUrn);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to get entity", e);
+                    }
+                }).collect(Collectors.toList());
+            });
     }
 
     private DataFetcher getEntityResolver() {
@@ -1616,7 +1634,14 @@ public class GmsGraphQLEngine {
     }
 
     private void configureIngestionSourceResolvers(final RuntimeWiring.Builder builder) {
-        builder.type("IngestionSource", typeWiring -> typeWiring.dataFetcher("executions", new IngestionSourceExecutionRequestsResolver(entityClient)));
+        builder.type("IngestionSource", typeWiring -> typeWiring
+            .dataFetcher("executions", new IngestionSourceExecutionRequestsResolver(entityClient))
+            .dataFetcher("platform", new LoadableTypeResolver<>(dataPlatformType,
+                (env) -> {
+                    final IngestionSource ingestionSource = env.getSource();
+                    return ingestionSource.getPlatform() != null ? ingestionSource.getPlatform().getUrn() : null;
+                })
+            ));
     }
 
     private void configureTestResolvers(final RuntimeWiring.Builder builder) {
