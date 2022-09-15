@@ -6,6 +6,7 @@ import com.linkedin.entity.client.RestliEntityClient;
 import com.linkedin.gms.factory.auth.SystemAuthenticationFactory;
 import com.linkedin.gms.factory.common.GraphClientFactory;
 import com.linkedin.gms.factory.entity.RestliEntityClientFactory;
+import com.linkedin.gms.factory.kafka.DataHubKafkaEventProducerFactory;
 import com.linkedin.gms.factory.notifications.SettingsProviderFactory;
 import com.linkedin.gms.factory.spring.YamlPropertySourceFactory;
 import com.linkedin.metadata.event.EventProducer;
@@ -22,7 +23,7 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 @Import({SystemAuthenticationFactory.class, RestliEntityClientFactory.class, GraphClientFactory.class,
-    SettingsProviderFactory.class})
+    SettingsProviderFactory.class, DataHubKafkaEventProducerFactory.class})
 @PropertySource(value = "classpath:/application.yml", factory = YamlPropertySourceFactory.class)
 public class IncidentNotificationGeneratorFactory {
 
