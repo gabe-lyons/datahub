@@ -218,7 +218,7 @@ const datasetProps: Property[] = [
         displayName: 'Metrics',
         children: [
             {
-                id: 'usageFeatures.queryCountLast30Days',
+                id: 'usageFeatures.usageCountLast30Days',
                 displayName: 'Query Count in Last 30 Days',
                 valueType: ValueTypeId.NUMBER,
             },
@@ -228,12 +228,12 @@ const datasetProps: Property[] = [
                 valueType: ValueTypeId.NUMBER,
             },
             {
-                id: 'usageFeatures.updateCountLast30Days',
+                id: 'usageFeatures.writeCountLast30Days',
                 displayName: 'Update Count in Last 30 Days',
                 valueType: ValueTypeId.NUMBER,
             },
             {
-                id: 'usageFeatures.updateCountPercentileLast30Days',
+                id: 'usageFeatures.writeCountPercentileLast30Days',
                 displayName: 'Update Count Percentile in Last 30 Days (0-100)',
                 valueType: ValueTypeId.NUMBER,
             },
@@ -243,7 +243,7 @@ const datasetProps: Property[] = [
                 valueType: ValueTypeId.NUMBER,
             },
             {
-                id: 'usageFeatures.uniqueUserCountPercentileLast30Days',
+                id: 'usageFeatures.uniqueUserPercentileLast30Days',
                 displayName: 'Unique User Percentile in the Last 30 Days (0-100)',
                 valueType: ValueTypeId.NUMBER,
             },
@@ -282,7 +282,7 @@ const dashboardProps = [
                 valueType: ValueTypeId.NUMBER,
             },
             {
-                id: 'usageFeatures.uniqueUserCountPercentileLast30Days',
+                id: 'usageFeatures.uniqueUserPercentileLast30Days',
                 displayName: 'Unique User Percentile in the Last 30 Days (0-100)',
                 valueType: ValueTypeId.NUMBER,
             },
@@ -318,7 +318,7 @@ const chartProps = [
                 valueType: ValueTypeId.NUMBER,
             },
             {
-                id: 'usageFeatures.uniqueUserCountPercentileLast30Days',
+                id: 'usageFeatures.uniqueUserPercentileLast30Days',
                 displayName: 'Unique User Percentile in the Last 30 Days (0-100)',
                 valueType: ValueTypeId.NUMBER,
             },

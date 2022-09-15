@@ -11,10 +11,8 @@ import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Component;
 
 @Slf4j
-@Component
 @Singleton
 @Import({IncidentNotificationGeneratorFactory.class})
 public class NotificationGeneratorHook implements MetadataChangeLogHook {

@@ -44,7 +44,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Import;
-import org.springframework.stereotype.Component;
 
 import static com.linkedin.metadata.kafka.hook.notification.NotificationUtils.*;
 
@@ -73,7 +72,6 @@ import static com.linkedin.metadata.kafka.hook.notification.NotificationUtils.*;
  *    - [advanced] domains added or removed, terms and glossaries added or removed.
  */
 @Slf4j
-@Component
 @Import({
     AspectDifferRegistry.class,
     EntityRegistryFactory.class,
