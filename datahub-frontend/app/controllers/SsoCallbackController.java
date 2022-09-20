@@ -1,23 +1,27 @@
 package controllers;
 
+import auth.sso.SsoManager;
+import auth.sso.SsoProvider;
+import auth.sso.oidc.OidcCallbackLogic;
 import client.AuthServiceClient;
 import com.datahub.authentication.Authentication;
 import com.linkedin.entity.client.EntityClient;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
+import org.pac4j.core.client.Client;
+import org.pac4j.core.client.Clients;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.play.CallbackController;
 import org.pac4j.play.PlayWebContext;
 import play.mvc.Result;
-import auth.sso.oidc.OidcCallbackLogic;
-import auth.sso.SsoManager;
-import auth.sso.SsoProvider;
 
 
 /**
@@ -31,14 +35,13 @@ import auth.sso.SsoProvider;
 public class SsoCallbackController extends CallbackController {
 
   private final SsoManager _ssoManager;
+  private final Config _config;
 
   @Inject
-  public SsoCallbackController(
-      @Nonnull SsoManager ssoManager,
-      @Nonnull Authentication systemAuthentication,
-      @Nonnull EntityClient entityClient,
-      @Nonnull AuthServiceClient authClient) {
+  public SsoCallbackController(@Nonnull SsoManager ssoManager, @Nonnull Authentication systemAuthentication,
+      @Nonnull EntityClient entityClient, @Nonnull AuthServiceClient authClient, @Nonnull Config config) {
     _ssoManager = ssoManager;
+    _config = config;
     setDefaultUrl("/"); // By default, redirects to Home Page on log in.
     setCallbackLogic(new SsoCallbackLogic(ssoManager, systemAuthentication, entityClient, authClient));
   }
@@ -79,7 +82,8 @@ public class SsoCallbackController extends CallbackController {
         HttpActionAdapter<Result, PlayWebContext> httpActionAdapter, String defaultUrl, Boolean saveInSession,
         Boolean multiProfile, Boolean renewSession, String defaultClient) {
       if (SsoProvider.SsoProtocol.OIDC.equals(_ssoManager.getSsoProvider().protocol())) {
-        return _oidcCallbackLogic.perform(context, config, httpActionAdapter, defaultUrl, saveInSession, multiProfile, renewSession, defaultClient);
+        return _oidcCallbackLogic.perform(context, config, httpActionAdapter, defaultUrl, saveInSession, multiProfile,
+            renewSession, defaultClient);
       }
       // Should never occur.
       throw new UnsupportedOperationException("Failed to find matching SSO Provider. Only one supported is OIDC.");
@@ -87,6 +91,18 @@ public class SsoCallbackController extends CallbackController {
   }
 
   private boolean shouldHandleCallback(final String protocol) {
-    return _ssoManager.isSsoEnabled() && _ssoManager.getSsoProvider().protocol().getCommonName().equals(protocol);
+    if (!_ssoManager.isSsoEnabled()) {
+      return false;
+    }
+    updateConfig();
+    return _ssoManager.getSsoProvider().protocol().getCommonName().equals(protocol);
+  }
+
+  private void updateConfig() {
+    final Clients clients = new Clients();
+    final List<Client> clientList = new ArrayList<>();
+    clientList.add(_ssoManager.getSsoProvider().client());
+    clients.setClients(clientList);
+    _config.setClients(clients);
   }
 }

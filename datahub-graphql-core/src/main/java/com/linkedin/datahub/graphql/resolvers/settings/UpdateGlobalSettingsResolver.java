@@ -163,6 +163,9 @@ public class UpdateGlobalSettingsResolver implements DataFetcher<CompletableFutu
     if (update.getPreProvisioningRequired() != null) {
       oidcSettings.setPreProvisioningRequired(update.getPreProvisioningRequired());
     }
+    if (update.getExtractGroupsEnabled() != null) {
+      oidcSettings.setExtractGroupsEnabled(update.getExtractGroupsEnabled());
+    }
     if (update.getGroupsClaim() != null) {
       oidcSettings.setGroupsClaim(update.getGroupsClaim());
     }

@@ -14,15 +14,11 @@ import com.linkedin.metadata.restli.DefaultRestliClientFactory;
 import com.linkedin.util.Configuration;
 import controllers.SsoCallbackController;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.pac4j.core.client.Client;
-import org.pac4j.core.client.Clients;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.play.LogoutController;
@@ -97,11 +93,9 @@ public class AuthModule extends AbstractModule {
         }
 
         try {
-            bind(SsoCallbackController.class).toConstructor(SsoCallbackController.class.getConstructor(
-                SsoManager.class,
-                Authentication.class,
-                EntityClient.class,
-                AuthServiceClient.class));
+            bind(SsoCallbackController.class).toConstructor(
+                SsoCallbackController.class.getConstructor(SsoManager.class, Authentication.class, EntityClient.class,
+                    AuthServiceClient.class, Config.class));
         } catch (NoSuchMethodException | SecurityException e) {
             throw new RuntimeException("Failed to bind to SsoCallbackController. Cannot find constructor, e");
         }
@@ -111,18 +105,12 @@ public class AuthModule extends AbstractModule {
         bind(LogoutController.class).toInstance(logoutController);
     }
 
-    @Provides @Singleton
-    protected Config provideConfig(SsoManager ssoManager) {
-        if (ssoManager.isSsoEnabled()) {
-            final Clients clients = new Clients();
-            final List<Client> clientList = new ArrayList<>();
-            clientList.add(ssoManager.getSsoProvider().client());
-            clients.setClients(clientList);
-            final Config config = new Config(clients);
-            config.setHttpActionAdapter(new PlayHttpActionAdapter());
-            return config;
-        }
-        return new Config();
+    @Provides
+    @Singleton
+    protected Config provideConfig() {
+        Config config = new Config();
+        config.setHttpActionAdapter(new PlayHttpActionAdapter());
+        return config;
     }
 
     @Provides

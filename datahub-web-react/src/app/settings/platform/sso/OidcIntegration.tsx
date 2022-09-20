@@ -32,7 +32,6 @@ const StyledInput = styled(Input)`
 const InstructionsCard = styled(Card)`
     padding: 4px 4px 0px 4px;
     margin: 0px 16px 16px 0px;
-    width: 40%;
 `;
 
 const InstructionsTitle = styled(Typography.Text)`
@@ -253,8 +252,8 @@ export const OidcIntegration = () => {
                                         </Typography.Text>
                                         <SettingValueContainer>
                                             <StyledInput
-                                                value={oidcSettings.scope || 'oidc email profile'}
-                                                placeholder="oidc email profile"
+                                                value={oidcSettings.scope || 'openid email profile'}
+                                                placeholder="openid email profile"
                                                 onChange={(e) =>
                                                     setOidcSettings({
                                                         ...oidcSettings,

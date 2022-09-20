@@ -158,6 +158,9 @@ public class SettingsMapper {
     if (input.hasPreProvisioningRequired()) {
       result.setPreProvisioningRequired(input.isPreProvisioningRequired());
     }
+    if (input.hasExtractGroupsEnabled()) {
+      result.setExtractGroupsEnabled(input.isExtractGroupsEnabled());
+    }
     if (input.hasGroupsClaim()) {
       result.setGroupsClaim(input.getGroupsClaim());
     }
