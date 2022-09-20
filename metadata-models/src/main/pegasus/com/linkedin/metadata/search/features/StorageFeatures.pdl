@@ -1,0 +1,28 @@
+namespace com.linkedin.metadata.search.features
+
+import com.linkedin.common.Urn
+
+@Aspect = {
+  "name": "storageFeatures"
+}
+record StorageFeatures {
+  /**
+   * The percentile of size in bytes relative to other assets from the data plaform instance.
+   */
+  sizeInBytesPercentile: optional long
+
+  /**
+   * The absolute rank of size in bytes relative to other assets from the data plaform instance.
+   */
+  sizeInBytesRank: optional long
+
+  /**
+   * The percentile of the total row / document count relative to other assets from the data platform instance.
+   */
+  rowCountPercentile: optional int
+
+  /**
+   * The absolute rank of size in bytes relative to other assets from the data plaform instance.
+   */
+  rowCountRank: optional int
+}

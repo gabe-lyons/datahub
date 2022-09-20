@@ -92,4 +92,19 @@ record UsageFeatures {
    * It is ranked by highest usage descending.
    */
   topUsersLast30Days: optional array[Urn]
+
+  /**
+   * The percentile of size in bytes relative to other assets from the data plaform instance.
+   */
+  sizeInBytesPercentile: optional long
+
+  /**
+   * The percentile of size in bytes relative to other assets from the data plaform instance.
+   */
+  sizeInBytesRank: optional long
+
+  /**
+   * The precentile
+   */
+  rowCountPercentile: optional int
 }
