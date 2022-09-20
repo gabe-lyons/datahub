@@ -9,6 +9,7 @@ import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.test.TestEngine;
 import com.linkedin.metadata.test.TestFetcher;
+import com.linkedin.metadata.test.action.ActionApplier;
 import com.linkedin.metadata.test.definition.TestDefinitionParser;
 import com.linkedin.metadata.test.eval.PredicateEvaluator;
 import com.linkedin.metadata.test.query.QueryEngine;
@@ -42,6 +43,10 @@ public class TestEngineFactory {
   @Qualifier("queryEngine")
   private QueryEngine queryEngine;
 
+  @Autowired
+  @Qualifier("testActionApplier")
+  private ActionApplier actionApplier;
+
   @Value("${metadataTests.cacheRefreshIntervalSecs}")
   private Integer testCacheRefreshIntervalSeconds;
 
@@ -53,7 +58,7 @@ public class TestEngineFactory {
   protected TestEngine getInstance() {
     PredicateEvaluator predicateEvaluator = PredicateEvaluator.getInstance();
     return new TestEngine(entityService, new TestFetcher(entityService, entitySearchService),
-        new TestDefinitionParser(predicateEvaluator), queryEngine, predicateEvaluator, 10,
-        testCacheRefreshIntervalSeconds);
+        new TestDefinitionParser(predicateEvaluator), queryEngine, predicateEvaluator, this.actionApplier,
+        10, testCacheRefreshIntervalSeconds);
   }
 }

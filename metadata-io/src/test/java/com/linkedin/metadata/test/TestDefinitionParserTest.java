@@ -39,7 +39,8 @@ public class TestDefinitionParserTest {
         + "rules=Predicate(operatorType=AND, operands=[Operand(index=0, name=null, "
         + "expression=Predicate(operatorType=NOT, operands=[Operand(index=0, name=null, "
         + "expression=Predicate(operatorType=EXISTS, operands=[Operand(index=0, name=query, "
-        + "expression=Query(query=editableDatasetProperties.description))]))]))]))";
+        + "expression=Query(query=editableDatasetProperties.description))]))]))]), "
+        + "actions=TestActions(passing=[], failing=[]))";
     Assert.assertEquals(result.toString(), expected);
   }
 
@@ -62,7 +63,8 @@ public class TestDefinitionParserTest {
         + "expression=Query(query=editableDatasetProperties.description))])), Operand(index=1, name=null, "
         + "expression=Predicate(operatorType=CONTAINS_STR, operands=[Operand(index=0, name=query, "
         + "expression=Query(query=datasetProperties.description)), Operand(index=1, name=values, "
-        + "expression=StringListLiteral(values=[pii]))]))]))";
+        + "expression=StringListLiteral(values=[pii]))]))]), "
+        + "actions=TestActions(passing=[], failing=[]))";
     Assert.assertEquals(result.toString(), expected);
   }
 
@@ -122,7 +124,8 @@ public class TestDefinitionParserTest {
         + "expression=Predicate(operatorType=AND, operands=[Operand(index=0, name=null, "
         + "expression=Predicate(operatorType=CONTAINS_ANY, operands=[Operand(index=0, name=query, "
         + "expression=Query(query=datasetProperties.description)), Operand(index=1, name=values, "
-        + "expression=StringListLiteral(values=[required field option 2]))]))]))]))]))]))";
+        + "expression=StringListLiteral(values=[required field option 2]))]))]))]))]))]), "
+        + "actions=TestActions(passing=[], failing=[]))";
     Assert.assertEquals(result.toString(), expected);
   }
 
@@ -140,7 +143,36 @@ public class TestDefinitionParserTest {
         + "expression=Query(query=editableDatasetProperties.description)), Operand(index=1, name=values, "
         + "expression=StringListLiteral(values=[value1]))]))])), rules=Predicate(operatorType=AND, operands=[Operand(index=0, name=null, "
         + "expression=Predicate(operatorType=EXISTS, operands=[Operand(index=0, name=query, "
-        + "expression=Query(query=editableDatasetProperties.description))]))]))";
+        + "expression=Query(query=editableDatasetProperties.description))]))]), "
+        + "actions=TestActions(passing=[], failing=[]))";
+    Assert.assertEquals(result.toString(), expected);
+  }
+
+  @Test
+  public void testParseValidActionsTest() throws Exception {
+    String jsonTest = loadTest("valid_actions_test.yaml");
+    TestDefinition result = PARSER.deserialize(TEST_URN, jsonTest);
+
+    String expected = "TestDefinition("
+        + "urn=urn:li:test:test, "
+        + "on=TestMatch(entityTypes=[dataset], "
+        + "conditions=Predicate(operatorType=AND, "
+        + "operands=[Operand(index=0, name=null, "
+        + "expression=Predicate(operatorType=STARTS_WITH, operands=[Operand(index=0, name=query, "
+        + "expression=Query(query=datasetProperties.name)), Operand(index=1, name=values, "
+        + "expression=StringListLiteral(values=[special_prefix]))]))])), "
+        + "rules=Predicate(operatorType=AND, operands=[Operand(index=0, name=null, "
+        + "expression=Predicate(operatorType=EXISTS, operands=[Operand(index=0, name=query, "
+        + "expression=Query(query=editableDatasetProperties.description))])), Operand(index=1, name=null, "
+        + "expression=Predicate(operatorType=CONTAINS_STR, operands=[Operand(index=0, name=query, "
+        + "expression=Query(query=datasetProperties.description)), Operand(index=1, name=values, "
+        + "expression=StringListLiteral(values=[pii]))]))]), "
+        + "actions=TestActions(passing=[TestAction(type=ADD_OWNERS, "
+        + "params={values=[urn:li:corpuser:1, urn:li:corpGroup:2]}), "
+        + "TestAction(type=REMOVE_OWNERS, params={values=[urn:li:corpuser:1, urn:li:corpGroup:2]})], "
+        + "failing=[TestAction(type=ADD_GLOSSARY_TERMS, params={values=[urn:li:glossaryTerm:1, urn:li:glossaryTerm:2]}), "
+        + "TestAction(type=REMOVE_GLOSSARY_TERMS, params={values=[urn:li:glossaryTerm:1, urn:li:glossaryTerm:2]})]))";
+
     Assert.assertEquals(result.toString(), expected);
   }
 
@@ -189,6 +221,25 @@ public class TestDefinitionParserTest {
   @Test
   public void testParseInvalidLegacyFormatMissingParamValues() throws Exception {
     String jsonTest = loadTest("invalid_legacy_test_missing_values.yaml");
+    Assert.assertThrows(TestDefinitionParsingException.class, () -> PARSER.deserialize(TEST_URN, jsonTest));
+  }
+
+  @Test
+  public void testParseInvalidActionsTestBadActionType() throws Exception {
+    String jsonTest = loadTest("invalid_test_bad_action_type.yaml");
+    Assert.assertThrows(TestDefinitionParsingException.class, () -> PARSER.deserialize(TEST_URN, jsonTest));
+  }
+
+  @Test
+  public void testParseInvalidActionsTestBadActionParams() throws Exception {
+    String jsonTest = loadTest("invalid_test_bad_action_params.yaml");
+    Assert.assertThrows(TestDefinitionParsingException.class, () -> PARSER.deserialize(TEST_URN, jsonTest));
+  }
+
+  @Test
+  public void testParseInvalidActionsTestBadActionsObject() throws Exception {
+    // Passing and failing objects are not arrays (should be)
+    String jsonTest = loadTest("invalid_test_bad_actions.yaml");
     Assert.assertThrows(TestDefinitionParsingException.class, () -> PARSER.deserialize(TEST_URN, jsonTest));
   }
 

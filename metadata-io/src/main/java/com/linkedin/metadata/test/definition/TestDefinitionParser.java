@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableSet;
 import com.linkedin.common.urn.Urn;
+import com.linkedin.metadata.test.action.ActionType;
 import com.linkedin.metadata.test.definition.expression.Expression;
 import com.linkedin.metadata.test.definition.operator.Operand;
 import com.linkedin.metadata.test.definition.operator.OperandConstants;
@@ -19,12 +20,14 @@ import com.linkedin.metadata.test.exception.InvalidOperandException;
 import com.linkedin.metadata.test.exception.TestDefinitionParsingException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 
 
@@ -92,6 +95,13 @@ public class TestDefinitionParser {
   private static final String ENTITY_TYPES_FIELD = "types";
   private static final String CONDITIONS_FIELD = "conditions";
   private static final String RULES_FIELD = "rules";
+  private static final String ACTIONS_FIELD = "actions";
+
+  // Actions
+  private static final String PASSING_ACTIONS_FIELD = "passing";
+  private static final String FAILING_ACTIONS_FIELD = "failing";
+  private static final String ACTION_TYPE_FIELD = "type";
+  private static final String ACTION_PARAMS_FIELD = "params";
 
   private static final Set<String> STANDARD_PREDICATE_FIELDS = ImmutableSet.of(
       LEGACY_OPERATION_FIELD,
@@ -102,6 +112,12 @@ public class TestDefinitionParser {
       PARAMS_FIELD
   );
 
+  private static final Set<String> STANDARD_ACTION_FIELDS = ImmutableSet.of(
+      ACTION_TYPE_FIELD,
+      ACTION_PARAMS_FIELD
+  );
+
+  private static final TestActions EMPTY_ACTIONS = new TestActions(Collections.emptyList(), Collections.emptyList());
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
   private final PredicateEvaluator predicateEvaluator;
@@ -118,8 +134,11 @@ public class TestDefinitionParser {
           "Failed to deserialize test definition %s: test definition must have a on clause and a rules clause",
           jsonTestDefinition));
     }
-    return new TestDefinition(testUrn, deserializeMatchConditions(parsedTestDefinition.get("on")),
-        deserializeRule(parsedTestDefinition.get(RULES_FIELD)));
+    return new TestDefinition(
+        testUrn,
+        deserializeMatchConditions(parsedTestDefinition.get(ON_FIELD)),
+        deserializeRule(parsedTestDefinition.get(RULES_FIELD)),
+        deserializeActions(parsedTestDefinition.get(ACTIONS_FIELD)));
   }
 
   private TestMatch deserializeMatchConditions(JsonNode jsonTargetingRule) {
@@ -180,6 +199,117 @@ public class TestDefinitionParser {
       return deserializeBasePredicate(ruleObject, negated);
     }
     throw new TestDefinitionParsingException(String.format("Failed to deserialize rule %s", jsonRule.toString()));
+  }
+
+  private TestActions deserializeActions(@Nullable JsonNode jsonActions) {
+    if (jsonActions == null) {
+      return EMPTY_ACTIONS;
+    }
+    if (!jsonActions.isObject()) {
+      throw new TestDefinitionParsingException(String.format("Failed to deserialize actions %s. Actions block must be an object! Found %s",
+          jsonActions.toString(), jsonActions.getNodeType()));
+    }
+    ObjectNode ruleObject = (ObjectNode) jsonActions;
+
+    final List<TestAction> failingActions = new ArrayList<>();
+    final List<TestAction> passingActions = new ArrayList<>();
+
+    if (ruleObject.has(PASSING_ACTIONS_FIELD)) {
+      passingActions.addAll(deserializeActionsList(ruleObject.get(PASSING_ACTIONS_FIELD)));
+    }
+    if (ruleObject.has(FAILING_ACTIONS_FIELD)) {
+      failingActions.addAll(deserializeActionsList(ruleObject.get(FAILING_ACTIONS_FIELD)));
+    }
+    return new TestActions(passingActions, failingActions);
+  }
+
+  private List<TestAction> deserializeActionsList(JsonNode jsonActionsList) {
+    if (!jsonActionsList.isArray()) {
+      throw new TestDefinitionParsingException(String.format("Failed to deserialize actions list %s. Actions list must be a list! Found %s",
+          jsonActionsList.toString(), jsonActionsList.getNodeType()));
+    }
+    ArrayNode actionsList = (ArrayNode) jsonActionsList;
+    final List<TestAction> actions = new ArrayList<>();
+    for (JsonNode node : actionsList) {
+      actions.add(deserializeAction(node));
+    }
+    return actions;
+  }
+
+
+  private TestAction deserializeAction(JsonNode jsonAction) {
+    if (!jsonAction.isObject()) {
+      throw new TestDefinitionParsingException(String.format("Failed to deserialize action %s. Actions definition must be an object! Found %s",
+          jsonAction.toString(), jsonAction.getNodeType()));
+    }
+    ObjectNode action = (ObjectNode) jsonAction;
+
+    ActionType actionType = deserializeTestActionType(action);
+    Map<String, List<String>> actionParams = deserializeTestActionParams(action);
+    return new TestAction(actionType, actionParams);
+  }
+
+  private ActionType deserializeTestActionType(ObjectNode action) {
+    if (action.has(ACTION_TYPE_FIELD) && action.get(ACTION_TYPE_FIELD).isTextual()) {
+      String actionType = action.get(ACTION_TYPE_FIELD).asText();
+      try {
+        return ActionType.fromCommonName(actionType);
+      } catch (IllegalArgumentException e) {
+        throw new TestDefinitionParsingException(String.format("Failed to deserialize action %s. Action has an unrecognized 'type' %s",
+            action.toString(),
+            actionType));
+      }
+    }
+    throw new TestDefinitionParsingException(String.format("Failed to deserialize actions %s. Action must have a valid 'type' field of type string.",
+        action.toString()));
+  }
+
+  private Map<String, List<String>> deserializeTestActionParams(ObjectNode action) {
+    Map<String, List<String>> result = new HashMap<>();
+    if (action.has(ACTION_PARAMS_FIELD)) {
+      JsonNode actionParamsNode = action.get(ACTION_PARAMS_FIELD);
+      if (!actionParamsNode.isObject()) {
+        throw new TestDefinitionParsingException(String.format("Failed to deserialize action %s."
+                + " Action must have a valid params of type map or object. Found %s",
+            action.toString(),
+            actionParamsNode.getNodeType()));
+      }
+      ObjectNode paramsObject = (ObjectNode) action.get(ACTION_PARAMS_FIELD);
+      for (Iterator<String> it = paramsObject.fieldNames(); it.hasNext(); ) {
+        String fieldName = it.next();
+        result.put(fieldName, deserializeTestActionParam(paramsObject.get(fieldName)));
+      }
+    } else {
+      // Treat the remaining fields as implicit parameters.
+      for (Iterator<Map.Entry<String, JsonNode>> it = action.fields(); it.hasNext(); ) {
+        Map.Entry<String, JsonNode> next = it.next();
+        if (!STANDARD_ACTION_FIELDS.contains(next.getKey())) {
+          result.put(next.getKey(), deserializeTestActionParam(next.getValue()));
+        }
+      }
+    }
+    return result;
+  }
+
+  private List<String> deserializeTestActionParam(JsonNode param) {
+    if (param.isTextual()) {
+      // Simply case into an array
+      return Collections.singletonList(param.asText());
+    } else if (param.isArray()) {
+      ArrayNode paramArray = (ArrayNode) param;
+      List<String> result = new ArrayList<>();
+      for (JsonNode paramNode : paramArray) {
+        if (paramNode.isTextual()) {
+          result.add(paramNode.asText());
+        } else {
+          throw new TestDefinitionParsingException(String.format("Failed to deserialize action param %s. Action param must be of type string or list of string",
+              param.toString()));
+        }
+      }
+      return result;
+    }
+    throw new TestDefinitionParsingException(String.format("Failed to deserialize action param %s. Action param must be of type string or list of string",
+        param.toString()));
   }
 
   private Predicate deserializeCompositePredicate(ArrayNode childPredicates, String operation, boolean negated) {

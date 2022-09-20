@@ -1,0 +1,14 @@
+[
+  {
+    "auditHeader":null,
+    "entityType":"globalSettings",
+    "entityUrn": "urn:li:globalSettings:0",
+    "changeType":"UPSERT",
+    "aspectName":"globalSettingsInfo",
+    "aspect":{
+      "value":"{\n    \"integrations\": {\n        \"slackSettings\": {\n            \"enabled\": false\n        }\n    },\n    \"notifications\": {\n        \"settings\": {\n            \"ENTITY_GLOSSARY_TERM_CHANGE\": {\n                \"value\": \"ENABLED\"\n            },\n            \"NEW_INCIDENT\": {\n                \"value\": \"ENABLED\"\n            },\n            \"NEW_PROPOSAL\": {\n                \"value\": \"ENABLED\"\n            },\n            \"DATASET_SCHEMA_CHANGE\": {\n                \"value\": \"ENABLED\"\n            },\n            \"INCIDENT_STATUS_CHANGE\": {\n                \"value\": \"ENABLED\"\n            },\n            \"ENTITY_TAG_CHANGE\": {\n                \"value\": \"ENABLED\"\n            },\n            \"ENTITY_DOMAIN_CHANGE\": {\n                \"value\": \"ENABLED\"\n            },\n            \"ENTITY_OWNER_CHANGE\": {\n                \"value\": \"ENABLED\"\n            },\n            \"ENTITY_DEPRECATION_CHANGE\": {\n                \"value\": \"ENABLED\"\n            },\n            \"PROPOSAL_STATUS_CHANGE\": {\n                \"value\": \"ENABLED\"\n            }\n        }\n    }\n}",
+      "contentType":"application/json"
+    },
+    "systemMetadata":null
+  }
+]

@@ -256,6 +256,18 @@ type RunTestDefinitionResult {
   status: RunTestDefinitionStatus!
 }
 
+enum TestEvaluationMode {
+  """
+  Evaluate the test only. Do not save results or apply actions.
+  """
+  EVALUATE_ONLY
+
+  """
+  Default mode. Evaluate, store results, and apply actions.
+  """
+  DEFAULT
+}
+
 extend type Mutation {
   """
   Create a new test
@@ -275,7 +287,7 @@ extend type Mutation {
   """
   Execute a test definition against a specific urn
   """
-  runTestDefinition(urn: String!, test: TestDefinitionInput!): RunTestDefinitionResult!
+  runTestDefinition(urn: String!, test: TestDefinitionInput!, mode: TestEvaluationMode): RunTestDefinitionResult!
 
   """
   Run tests for the given entity urn

@@ -59,7 +59,7 @@ public class EvaluateTestsStep implements UpgradeStep {
               scrollResult.getEntities().stream().map(SearchEntity::getEntity).collect(Collectors.toList());
           Map<Urn, TestResults> result;
           try {
-            result = _testEngine.batchEvaluateTestsForEntities(entitiesInBatch, true);
+            result = _testEngine.batchEvaluateTestsForEntities(entitiesInBatch, TestEngine.EvaluationMode.DEFAULT);
             context.report()
                 .addLine(String.format("Pushed %d test results for batch %d of %s entities", result.size(), batch,
                     entityType));

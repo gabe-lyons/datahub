@@ -28,4 +28,9 @@ public class TestDefinition {
    * Main test rule that returns true or false given an entity
    */
   private final Predicate rules;
+
+  /**
+   * Actions to run on failure / success of a particular test.
+   */
+  private final TestActions actions;
 }

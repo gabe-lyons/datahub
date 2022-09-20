@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RunTestsResolver implements DataFetcher<CompletableFuture<Boolean>> {
 
+  private static final String MODE_ARG_NAME = "mode";
   private final TestEngine _testEngine;
 
   @Override
@@ -25,7 +26,11 @@ public class RunTestsResolver implements DataFetcher<CompletableFuture<Boolean>>
 
       final String urnStr = environment.getArgument("urn");
       final Urn urn = UrnUtils.getUrn(urnStr);
-      TestResults testResults = _testEngine.evaluateTestsForEntity(urn, true);
+      final TestEngine.EvaluationMode evaluationMode = environment.getArgument(MODE_ARG_NAME) != null
+          ? TestEngine.EvaluationMode.valueOf(environment.getArgument(MODE_ARG_NAME))
+          : TestEngine.EvaluationMode.DEFAULT;
+
+      TestResults testResults = _testEngine.evaluateTestsForEntity(urn, evaluationMode);
 
       return testResults.getFailing().isEmpty();
     });
