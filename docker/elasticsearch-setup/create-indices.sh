@@ -102,6 +102,39 @@ function create_datahub_usage_event_aws_elasticsearch() {
   fi
 }
 
+function create_access_policy_data_es_cloud {
+  cat <<EOF
+{
+   "cluster":[ "monitor" ],
+   "indices":[
+      {
+         "names":["${INDEX_PREFIX}_*"],
+         "privileges":["all"]
+      }
+   ]
+}
+EOF
+}
+
+function create_user_data_es_cloud {
+    cat <<EOF
+{
+   "password": "${ELASTICSEARCH_PASSWORD}",
+	  "roles":["${INDEX_PREFIX}_access"]
+}
+EOF
+}
+
+function create_user_es_cloud {
+  # Tested with Elastic 7.17
+  ROLE="${INDEX_PREFIX}_access"
+  echo -e '\ncreating role' "${ROLE}"
+  curl -XPOST --header "$ELASTICSEARCH_AUTH_HEADER" "$ELASTICSEARCH_PROTOCOL://$ELASTICSEARCH_HOST:$ELASTICSEARCH_PORT/_security/role/${ROLE}" -H 'Content-Type: application/json' --data "$(create_access_policy_data_es_cloud)"
+  echo -e '\ncreating user' "${ELASTICSEARCH_USERNAME}"
+  curl -XPOST --header "$ELASTICSEARCH_AUTH_HEADER" "$ELASTICSEARCH_PROTOCOL://$ELASTICSEARCH_HOST:$ELASTICSEARCH_PORT/_security/user/${ELASTICSEARCH_USERNAME}" -H 'Content-Type: application/json' --data "$(create_user_data_es_cloud)"
+}
+
+
 function create_user() {
   ROLE="${INDEX_PREFIX}_access"
   echo -e '\ncreating role' "${ROLE}"
@@ -113,7 +146,11 @@ function create_user() {
 }
 
 if [[ $CREATE_USER == true ]]; then
-  create_user || exit 1
+  if [[ $USE_AWS_ELASTICSEARCH == true ]]; then
+    create_user || exit 1
+  else
+    create_user_es_cloud || exit 1
+  fi
 fi
 
 if [[ $DATAHUB_ANALYTICS_ENABLED == true ]]; then
