@@ -36,4 +36,5 @@ export const getNameFromType = (type: IncidentType) => {
 };
 
 export const SUCCESS_COLOR_HEX = '#52C41A';
-export const FAILURE_COLOR_HEX = '#FA8C16';
+export const FAILURE_COLOR_HEX = '#F5222D';
+export const WARNING_COLOR_HEX = '#FA8C16';

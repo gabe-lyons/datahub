@@ -76,7 +76,7 @@ export const ResetCredentials: React.VFC<ResetCredentialsProps> = () => {
                     return Promise.resolve();
                 })
                 .catch((_) => {
-                    message.error(`Failed to log in!`);
+                    message.error(`Failed to log in! An unexpected error occurred.`);
                 })
                 .finally(() => setLoading(false));
         },

@@ -1,17 +1,15 @@
 import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
-import { Button, Select, Typography } from 'antd';
-import React, { useState } from 'react';
+import { Typography } from 'antd';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 import { ANTD_GRAY } from '../../../../entity/shared/constants';
 import { FAILURE_COLOR_HEX, SUCCESS_COLOR_HEX } from '../../../../entity/shared/tabs/Incident/incidentUtils';
 import { StepProps, TestBuilderStep } from '../../types';
-import { ActionType, ResultActions } from '../definition/builder/property/types/action';
-
-const ControlsContainer = styled.div`
-    display: flex;
-    justify-content: space-between;
-    margin-top: 8px;
-`;
+import { ACTION_TYPES } from '../definition/builder/property/types/action';
+import { deserializeTestDefinition, serializeTestDefinition } from '../definition/utils';
+import { YamlStep } from '../definition/yaml/YamlStep';
+import { ActionsBuilder } from '../definition/builder/action/ActionsBuilder';
+import { Action } from './types';
 
 const ActionSection = styled.div`
     margin-bottom: 20px;
@@ -19,7 +17,7 @@ const ActionSection = styled.div`
 
 const ActionSectionTitle = styled.div`
     margin-top: 8px;
-    margin-bottom: 4px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     justify-content: left;
@@ -46,9 +44,11 @@ const SuccessIcon = styled(CheckCircleFilled)`
 `;
 
 const StatusTitle = styled(Typography.Title)`
-    margin: 0px;
-    padding: 0px;
-    margin-left: 8px;
+    && {
+        margin: 0px;
+        padding: 0px;
+        margin-left: 8px;
+    }
 `;
 
 const ActionSelect = styled.div`
@@ -57,89 +57,84 @@ const ActionSelect = styled.div`
     margin-right: 12px;
 `;
 
-// This step is NOT yet supported and is still under active development.
 export const ActionsStep = ({ state, updateState, prev, goTo }: StepProps) => {
-    const [actions, setActions] = useState<ResultActions>();
+    const testDefinition = useMemo(() => deserializeTestDefinition(state?.definition?.json || '{}'), [state]);
 
-    const onAddSuccessAction = () => {
-        const newSuccessActions = [
-            ...(actions?.onSuccess || []),
-            {
-                id: ActionType.ADD_TAGS,
+    const selectedPassingActions = testDefinition.actions?.passing || [];
+    const selectedFailingActions = testDefinition.actions?.failing || [];
+
+    const onSetPassingActions = (newActions: Action[]) => {
+        const newDefinition = {
+            ...testDefinition,
+            actions: {
+                passing: newActions,
+                failing: testDefinition.actions?.failing || [],
             },
-        ];
-        const newActions = {
-            onFailure: actions?.onFailure || [],
-            onSuccess: newSuccessActions,
         };
-        setActions(newActions);
+        const newState = {
+            ...state,
+            definition: {
+                json: serializeTestDefinition(newDefinition),
+            },
+        };
+        updateState(newState);
     };
 
-    const onAddFailureAction = () => {
-        const newFailureActions = [
-            ...(actions?.onFailure || []),
-            {
-                id: ActionType.REMOVE_TAGS,
+    const onSetFailingActions = (newActions: Action[]) => {
+        const newDefinition = {
+            ...testDefinition,
+            actions: {
+                passing: testDefinition.actions?.passing || [],
+                failing: newActions,
             },
-        ];
-        const newActions = {
-            onSuccess: actions?.onSuccess || [],
-            onFailure: newFailureActions,
         };
-        setActions(newActions);
+        const newState = {
+            ...state,
+            definition: {
+                json: serializeTestDefinition(newDefinition),
+            },
+        };
+        updateState(newState);
     };
 
     const onClickNext = () => {
-        const newState = {
-            ...state,
-            actions,
-        };
-        updateState(newState);
         goTo(TestBuilderStep.NAME);
     };
 
     return (
         <>
-            <Typography.Title level={4}>Actions</Typography.Title>
-            <Typography.Paragraph type="secondary">
-                Define a set of actions to run against the entities that fail or succeed the test.
-            </Typography.Paragraph>
-            <ActionsContainer>
-                <ActionSection>
-                    <ActionSectionTitle>
-                        <SuccessIcon />
-                        <StatusTitle level={5}>On success</StatusTitle>
-                    </ActionSectionTitle>
-                    <Button type="text" onClick={onAddSuccessAction}>
-                        + Add action
-                    </Button>
-                </ActionSection>
-                <ActionSection>
-                    <ActionSectionTitle>
-                        <FailureIcon />
-                        <StatusTitle level={5}>On failure</StatusTitle>
-                    </ActionSectionTitle>
-                    <ActionSelect>
-                        {actions?.onFailure &&
-                            actions.onFailure.map((action) => (
-                                <ActionSelect>
-                                    <Select style={{ width: 200 }} value={action.id}>
-                                        {Object.keys(ActionType).map((key) => (
-                                            <Select.Option value={ActionType[key]}>{ActionType[key]}</Select.Option>
-                                        ))}
-                                    </Select>
-                                </ActionSelect>
-                            ))}
-                        <Button type="text" onClick={onAddFailureAction}>
-                            + Add action
-                        </Button>
-                    </ActionSelect>
-                </ActionSection>
-            </ActionsContainer>
-            <ControlsContainer>
-                <Button onClick={prev}>Previous</Button>
-                <Button onClick={onClickNext}>Next</Button>
-            </ControlsContainer>
+            <YamlStep state={state} updateState={updateState} onNext={onClickNext} onPrev={prev}>
+                <Typography.Title level={4}>Actions</Typography.Title>
+                <Typography.Paragraph type="secondary">
+                    Define a set of actions to run against the entities that fail or succeed the test.
+                </Typography.Paragraph>
+                <ActionsContainer>
+                    <ActionSection>
+                        <ActionSectionTitle>
+                            <SuccessIcon />
+                            <StatusTitle level={5}>On Passing</StatusTitle>
+                        </ActionSectionTitle>
+                        <ActionsBuilder
+                            actionTypes={ACTION_TYPES}
+                            selectedActions={selectedPassingActions}
+                            onChangeActions={onSetPassingActions}
+                        />
+                    </ActionSection>
+                    <ActionSection>
+                        <ActionSectionTitle>
+                            <FailureIcon />
+                            <StatusTitle level={5}>On Failing</StatusTitle>
+                        </ActionSectionTitle>
+                        <ActionSelect>
+                            <ActionsBuilder
+                                actionTypes={ACTION_TYPES}
+                                selectedActions={selectedFailingActions}
+                                onChangeActions={onSetFailingActions}
+                            />
+                        </ActionSelect>
+                    </ActionSection>
+                </ActionsContainer>
+            </YamlStep>
         </>
     );
 };

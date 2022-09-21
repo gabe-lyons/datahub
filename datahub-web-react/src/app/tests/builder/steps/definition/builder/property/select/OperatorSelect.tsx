@@ -24,11 +24,11 @@ export const OperatorSelect = ({ selectedOperator, operators, onChangeOperator }
             defaultActiveFirstOption={false}
             placeholder="Select an operator..."
             onSelect={(newVal) => onChangeOperator(newVal as string)}
-            value={selectedOperator}
+            value={selectedOperator?.toLowerCase()}
         >
             {operators?.map((operator) => {
                 return (
-                    <Select.Option value={operator.id} key={operator.id}>
+                    <Select.Option value={operator.id.toLowerCase()} key={operator.id.toLowerCase()}>
                         <Tooltip title={operator.description} placement="right">
                             <Typography.Text>{operator.displayName}</Typography.Text>
                         </Tooltip>

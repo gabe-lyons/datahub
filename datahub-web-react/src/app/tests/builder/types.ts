@@ -47,7 +47,7 @@ export interface TestBuilderState {
 export enum TestBuilderStep {
     SELECT = 'SELECT',
     RULES = 'RULES',
-    // ACTIONS = 'ACTIONS',
+    ACTIONS = 'ACTIONS',
     NAME = 'NAME',
 }
 

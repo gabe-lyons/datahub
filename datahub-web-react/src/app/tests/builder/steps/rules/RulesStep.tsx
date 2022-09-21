@@ -26,7 +26,7 @@ export const RulesStep = ({ state, updateState, prev, goTo }: StepProps) => {
     const [showTestModal, setShowTestModal] = useState(false);
 
     const onClickNext = () => {
-        goTo(TestBuilderStep.NAME);
+        goTo(TestBuilderStep.ACTIONS);
     };
 
     const onClickTest = () => {

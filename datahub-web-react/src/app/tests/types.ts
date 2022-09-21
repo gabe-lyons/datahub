@@ -52,8 +52,8 @@ export type SelectPredicate = {
  * Test Definition.
  */
 export type TestAction = {
-    action: string;
-    params: any;
+    type: string;
+    values: string[];
 };
 
 /**
@@ -61,8 +61,8 @@ export type TestAction = {
  * of a deserialized Test Definition.
  */
 export type TestActions = {
-    onFailure: TestAction[];
-    onSuccess: TestAction[];
+    failing: TestAction[];
+    passing: TestAction[];
 };
 
 /**

@@ -2,8 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { Select } from 'antd';
 import { ValueInputType, ValueOptions } from '../types/values';
-import { EntitySearchInput } from '../input/EntitySearchInput';
 import { SelectInput } from '../input/SelectInput';
+import { EntitySearchInput } from '../../../../../../../entity/shared/EntitySearchInput/EntitySearchInput';
 
 const StyledSelect = styled(Select)`
     & {
