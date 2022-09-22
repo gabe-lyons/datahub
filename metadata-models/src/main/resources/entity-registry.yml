@@ -39,6 +39,7 @@ entities:
       - domains
       - deprecation
       - versionInfo
+      - testResults
   - name: dataFlow
     category: core
     keyAspect: dataFlowKey
@@ -46,6 +47,7 @@ entities:
       - domains
       - deprecation
       - versionInfo
+      - testResults
   - name: dataProcessInstance
     doc: DataProcessInstance represents an instance of a datajob/jobflow run
     keyAspect: dataProcessInstanceKey
