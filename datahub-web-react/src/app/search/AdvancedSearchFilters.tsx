@@ -135,7 +135,6 @@ export const AdvancedSearchFilters = ({
                         const newFilter: FacetFilterInput = {
                             field: filterField,
                             values: values as string[],
-                            value: '', // TODO(Gabe): remove once we refactor the model
                             condition:
                                 FIELDS_WHO_USE_CONTAINS_OPERATOR.indexOf(filterField) > -1
                                     ? SearchCondition.Contain

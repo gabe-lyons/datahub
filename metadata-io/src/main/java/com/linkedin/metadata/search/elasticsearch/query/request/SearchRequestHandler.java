@@ -16,6 +16,7 @@ import com.linkedin.metadata.query.filter.Filter;
 import com.linkedin.metadata.query.filter.SortCriterion;
 import com.linkedin.metadata.search.AggregationMetadata;
 import com.linkedin.metadata.search.AggregationMetadataArray;
+import com.linkedin.metadata.search.FilterValue;
 import com.linkedin.metadata.search.FilterValueArray;
 import com.linkedin.metadata.search.MatchedField;
 import com.linkedin.metadata.search.MatchedFieldArray;
@@ -30,6 +31,7 @@ import io.opentelemetry.extension.annotations.WithSpan;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,6 +63,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 
+import static com.linkedin.metadata.search.utils.ESUtils.*;
 import static com.linkedin.metadata.utils.SearchUtil.*;
 
 
@@ -69,6 +72,8 @@ public class SearchRequestHandler {
 
   private static final Map<EntitySpec, SearchRequestHandler> REQUEST_HANDLER_BY_ENTITY_NAME = new ConcurrentHashMap<>();
   private static final String REMOVED = "removed";
+
+  private static final String URN_FILTER = "urn";
   private static final int DEFAULT_MAX_TERM_BUCKET_SIZE = 20;
 
   private final EntitySpec _entitySpec;
@@ -133,7 +138,7 @@ public class SearchRequestHandler {
     boolean removedInOrFilter = false;
     if (filter != null) {
       removedInOrFilter = filter.getOr().stream().anyMatch(
-              or -> or.getAnd().stream().anyMatch(criterion -> criterion.getField().equals(REMOVED))
+              or -> or.getAnd().stream().anyMatch(criterion -> criterion.getField().equals(REMOVED) || criterion.getField().equals(REMOVED + KEYWORD_SUFFIX))
       );
     }
     // Filter out entities that are marked "removed" if and only if filter does not contain a criterion referencing it.
@@ -404,8 +409,8 @@ public class SearchRequestHandler {
   /**
    * Injects the missing conjunctive filters into the aggregations list.
    */
-  private List<AggregationMetadata> addFiltersToAggregationMetadata(@Nonnull final List<AggregationMetadata> originalMetadata, @Nullable final Filter filter) {
-    if (filter == null) {
+  public List<AggregationMetadata> addFiltersToAggregationMetadata(@Nonnull final List<AggregationMetadata> originalMetadata, @Nullable final Filter filter) {
+     if (filter == null) {
       return originalMetadata;
     }
     if (filter.hasOr()) {
@@ -416,7 +421,7 @@ public class SearchRequestHandler {
     return originalMetadata;
   }
 
-  private void addOrFiltersToAggregationMetadata(@Nonnull final ConjunctiveCriterionArray or, @Nonnull final List<AggregationMetadata> originalMetadata) {
+  void addOrFiltersToAggregationMetadata(@Nonnull final ConjunctiveCriterionArray or, @Nonnull final List<AggregationMetadata> originalMetadata) {
     for (ConjunctiveCriterion conjunction : or) {
       // For each item in the conjunction, inject an empty aggregation if necessary
       addCriteriaFiltersToAggregationMetadata(conjunction.getAnd(), originalMetadata);
@@ -445,6 +450,11 @@ public class SearchRequestHandler {
       return;
     }
 
+    // we don't want to persist urn filters back--- they are automatically added by searchAcrossLineage
+    if (finalFacetField.equals(URN_FILTER)) {
+      return;
+    }
+
     if (aggregationMetadataMap.containsKey(finalFacetField)) {
       /*
        * If we already have aggregations for the facet field, simply inject any missing values counts into the set.
@@ -452,7 +462,11 @@ public class SearchRequestHandler {
        * Elasticsearch.
        */
       AggregationMetadata originalAggMetadata = aggregationMetadataMap.get(finalFacetField);
-      addMissingAggregationValueToAggregationMetadata(criterion.getValue(), originalAggMetadata);
+      if (criterion.hasValues()) {
+        criterion.getValues().stream().forEach(value -> addMissingAggregationValueToAggregationMetadata(value, originalAggMetadata));
+      } else {
+        addMissingAggregationValueToAggregationMetadata(criterion.getValue(), originalAggMetadata);
+      }
     } else {
       /*
        * If we do not have ANY aggregation for the facet field, then inject a new aggregation metadata object for the
@@ -463,17 +477,21 @@ public class SearchRequestHandler {
       originalMetadata.add(buildAggregationMetadata(
           finalFacetField,
           _filtersToDisplayName.getOrDefault(finalFacetField, finalFacetField),
-          new LongMap(ImmutableMap.of(criterion.getValue(), 0L)),
-          new FilterValueArray(ImmutableList.of(createFilterValue(criterion.getValue(), 0L))))
+          new LongMap(criterion.getValues().stream().collect(Collectors.toMap(i -> i, i -> 0L))),
+          new FilterValueArray(criterion.getValues().stream().map(value -> createFilterValue(value, 0L)).collect(
+              Collectors.toList())))
       );
     }
   }
 
   private void addMissingAggregationValueToAggregationMetadata(@Nonnull final String value, @Nonnull final AggregationMetadata originalMetadata) {
-    if (originalMetadata.getAggregations().entrySet().stream().noneMatch(entry -> value.equals(entry.getKey()))) {
+    if (
+        originalMetadata.getAggregations().entrySet().stream().noneMatch(entry -> value.equals(entry.getKey())) ||
+            originalMetadata.getFilterValues().stream().noneMatch(entry -> entry.getValue().equals(value))
+    ) {
       // No aggregation found for filtered value -- inject one!
       originalMetadata.getAggregations().put(value, 0L);
-      originalMetadata.getFilterValues().add(createFilterValue(value, 0L));
+      originalMetadata.getFilterValues().add(0, createFilterValue(value, 0L));
     }
   }
 
@@ -489,12 +507,4 @@ public class SearchRequestHandler {
         .setFilterValues(filterValues);
   }
 
-  @Nullable
-  private String toFacetField(@Nonnull final String filterField) {
-    String trimmedField = filterField.replace(ESUtils.KEYWORD_SUFFIX, "");
-    if (_facetFields.contains(trimmedField)) {
-      return trimmedField;
-    }
-    return null;
-  }
 }

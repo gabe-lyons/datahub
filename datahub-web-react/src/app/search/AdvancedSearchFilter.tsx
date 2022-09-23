@@ -100,7 +100,7 @@ export const AdvancedSearchFilter = ({ facet, filter, onClose, onUpdate }: Props
                                 </StyledSearchFilterLabel>
                             );
                         })}
-                    {TEXT_FILTERS.indexOf(filter.field) !== -1 && filter?.values?.map((value) => <span>{value}</span>)}
+                    {TEXT_FILTERS.indexOf(filter.field) !== -1 && filter.values.map((value) => <span>{value}</span>)}
                 </ValueFilterSection>
             </FilterContainer>
             {isEditing && (
@@ -111,14 +111,13 @@ export const AdvancedSearchFilter = ({ facet, filter, onClose, onUpdate }: Props
                     onSelect={(values) => {
                         const newFilter: FacetFilterInput = {
                             field: filter.field,
-                            value: '',
                             values: values as string[],
                             condition: filter.condition,
                             negated: filter.negated || false,
                         };
                         onUpdate(newFilter);
                     }}
-                    initialValues={filter.values || []}
+                    initialValues={filter.values}
                 />
             )}
         </>

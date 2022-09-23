@@ -27,8 +27,11 @@ public class ListAccessTokensResolverTest extends TestCase {
     final ListAccessTokenInput input = new ListAccessTokenInput();
     input.setStart(0);
     input.setCount(100);
-    final ImmutableList<FacetFilterInput> filters = ImmutableList.of(new FacetFilterInput("actor",
-        "urn:li:corpuser:test", ImmutableList.of("urn:li:corpuser:test"), false, SearchCondition.EQUAL));
+    FacetFilterInput filter = new FacetFilterInput();
+    filter.setField("actor");
+    filter.setValues(ImmutableList.of("urn:li:corpuser:test"));
+    final ImmutableList<FacetFilterInput> filters = ImmutableList.of(filter);
+
     input.setFilters(filters);
     Mockito.when(mockEnv.getArgument(Mockito.eq("input"))).thenReturn(input);
 

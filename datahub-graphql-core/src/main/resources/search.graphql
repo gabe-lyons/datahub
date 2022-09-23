@@ -64,10 +64,15 @@ input SearchInput {
   """
   count: Int
 
-  """
-  Facet filters to apply to search results
-  """
-  filters: [FacetFilterInput!]
+	"""
+	Facet filters to apply to search results
+	"""
+	filters: [FacetFilterInput!]
+
+    """
+    Filters are by default 'AND'-ed together. This lets you provide a set of OR filters
+    """
+    orFilters: [FacetFilterInput!]
 }
 
 """
@@ -94,10 +99,15 @@ input SearchAcrossEntitiesInput {
   """
   count: Int
 
-  """
-  Faceted filters applied to search results
-  """
-  filters: [FacetFilterInput!]
+	"""
+	Faceted filters applied to search results
+	"""
+	filters: [FacetFilterInput!]
+
+    """
+    Filters are by default 'AND'-ed together. This lets you provide a set of OR filters
+    """
+    orFilters: [FacetFilterInput!]
 }
 
 """
@@ -134,10 +144,15 @@ input SearchAcrossLineageInput {
   """
   count: Int
 
-  """
-  Faceted filters applied to search results
-  """
-  filters: [FacetFilterInput!]
+	"""
+	Faceted filters applied to search results
+	"""
+	filters: [FacetFilterInput!]
+
+	"""
+	Filters are by default 'AND'-ed together. This lets you provide a set of OR filters
+	"""
+	orFilters: [FacetFilterInput!]
 }
 
 """
@@ -148,11 +163,6 @@ input FacetFilterInput {
   Name of field to filter by
   """
   field: String!
-
-  """
-  Value of the field to filter by (soon to be deprecated)
-  """
-  value: String!
 
   """
   Values of the field to filter by
@@ -508,9 +518,14 @@ input BrowseInput {
   count: Int
 
   """
-  Faceted filters applied to browse results
+  Faceted filters applied to browse results. These are joined together using `AND`.
   """
-  filters: [FacetFilterInput!]
+	filters: [FacetFilterInput!]
+
+	"""
+	Filters are by default 'AND'-ed together. This lets you provide a set of OR filters
+	"""
+	orFilters: [FacetFilterInput!]
 }
 
 """
