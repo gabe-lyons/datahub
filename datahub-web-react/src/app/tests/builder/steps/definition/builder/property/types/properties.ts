@@ -174,45 +174,12 @@ const datasetProps: Property[] = [
         description: 'The subtype of the asset.',
         valueType: ValueTypeId.STRING,
     },
-    // {
-    //     id: 'schemaFields',
-    //     displayName: 'Schema Fields',
-    //     description: 'Apply conditions that match any schema field.',
-    //     children: [
-    //         {
-    //             id: 'schemaFields.tags',
-    //             displayName: 'Schema Field Tags',
-    //             description: 'The aggregate set of tags attached to all schema fields.',
-    //             valueType: ValueTypeId.URN_LIST,
-    //             valueOptions: {
-    //                 entityTypes: [EntityType.Tag],
-    //                 mode: 'multiple',
-    //             },
-    //         },
-    //         {
-    //             id: 'schemaFields.glossaryTerms',
-    //             displayName: 'Schema Field Glossary Terms',
-    //             description: 'The aggregate set of glossary terms attached to all schema fields.',
-    //             valueType: ValueTypeId.URN_LIST,
-    //             valueOptions: {
-    //                 entityTypes: [EntityType.GlossaryTerm],
-    //                 mode: 'multiple',
-    //             },
-    //         },
-    //         {
-    //             id: 'schemaFields.name',
-    //             displayName: 'Schema Field Names',
-    //             description: 'The aggregate set of names of the schema fields, flattened into a schema path.',
-    //             valueType: ValueTypeId.STRING_LIST,
-    //         },
-    //         {
-    //             id: 'schemaFields.description',
-    //             displayName: 'Schema Field Descriptions',
-    //             description: 'The aggregate set of descriptions of the schema fields.',
-    //             valueType: ValueTypeId.STRING_LIST,
-    //         },
-    //     ],
-    // },
+    {
+        id: 'schemaMetadata.fields.fieldPath',
+        displayName: 'Schema Field Paths (Column Paths)',
+        description: 'The set of paths associated with the schema fields (columns) of the dataset.',
+        valueType: ValueTypeId.STRING_LIST,
+    },
     {
         id: 'metrics',
         displayName: 'Metrics',
