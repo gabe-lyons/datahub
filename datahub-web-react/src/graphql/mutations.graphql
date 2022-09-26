@@ -106,7 +106,7 @@ mutation raiseIncident($input: RaiseIncidentInput!) {
     raiseIncident(input: $input)
 }
 
-mutation updateIncidentStatus($urn: String!, $input: UpdateIncidentStatusInput!){
+mutation updateIncidentStatus($urn: String!, $input: UpdateIncidentStatusInput!) {
     updateIncidentStatus(urn: $urn, input: $input)
 }
 
@@ -123,4 +123,3 @@ mutation createInviteToken($input: CreateInviteTokenInput!) {
 mutation acceptRole($input: AcceptRoleInput!) {
     acceptRole(input: $input)
 }
->>>>>>> master
