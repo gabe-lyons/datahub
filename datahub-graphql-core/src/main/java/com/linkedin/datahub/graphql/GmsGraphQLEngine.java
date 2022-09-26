@@ -911,7 +911,7 @@ public class GmsGraphQLEngine {
             // Incidents not in OSS
             .dataFetcher("raiseIncident", new RaiseIncidentResolver(this.entityClient))
             .dataFetcher("updateIncidentStatus", new UpdateIncidentStatusResolver(this.entityClient, this.entityService))
-            .dataFetcher("batchAssignRole", new BatchAssignRoleResolver(this.entityClient))
+            .dataFetcher("batchAssignRole", new BatchAssignRoleResolver(this.roleService))
         );
     }
 
