@@ -58,7 +58,7 @@ public class TestEntityRegistry implements EntityRegistry {
   @Nonnull
   @Override
   public Map<String, EventSpec> getEventSpecs() {
-    return new HashMap<>();
+    return Collections.emptyMap();
   }
 
   @Nonnull
