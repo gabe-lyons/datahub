@@ -13,10 +13,10 @@ from typing import (
     Set,
     Tuple,
     Union,
-    cast,
 )
 from urllib.parse import urlparse
 
+import botocore.exceptions
 import yaml
 from pydantic import validator
 from pydantic.fields import Field
@@ -291,6 +291,14 @@ class GlueSource(StatefulIngestionSourceBase):
             run_id=self.ctx.run_id,
         )
 
+    def get_glue_arn(
+        self, account_id: str, database: str, table: Optional[str] = None
+    ) -> str:
+        prefix = f"arn:aws:glue:{self.source_config.aws_region}:{account_id}"
+        if table:
+            return f"{prefix}:table/{database}/{table}"
+        return f"{prefix}:database/{database}"
+
     @classmethod
     def create(cls, config_dict, ctx):
         config = GlueSourceConfig.parse_obj(config_dict)
@@ -354,7 +362,14 @@ class GlueSource(StatefulIngestionSourceBase):
 
         # download the script contents
         # see https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/s3.html#S3.Client.get_object
-        obj = self.s3_client.get_object(Bucket=bucket, Key=key)
+        try:
+            obj = self.s3_client.get_object(Bucket=bucket, Key=key)
+        except botocore.exceptions.ClientError as e:
+            self.report.report_failure(
+                script_path,
+                f"Unable to download DAG for Glue job from {script_path}, so job subtasks and lineage will be missing: {e}",
+            )
+            return None
         script = obj["Body"].read().decode("utf-8")
 
         try:
@@ -925,6 +940,9 @@ class GlueSource(StatefulIngestionSourceBase):
             sub_types=["Database"],
             domain_urn=domain_urn,
             description=database.get("Description"),
+            qualified_name=self.get_glue_arn(
+                account_id=database["CatalogId"], database=database["Name"]
+            ),
         )
 
         for wu in container_workunits:
@@ -1118,12 +1136,17 @@ class GlueSource(StatefulIngestionSourceBase):
                     **table.get("Parameters", {}),
                     **{
                         k: str(v)
-                        for k, v in table["StorageDescriptor"].items()
+                        for k, v in table.get("StorageDescriptor", {}).items()
                         if k not in ["Columns", "Parameters"]
                     },
                 },
                 uri=table.get("Location"),
                 tags=[],
+                qualifiedName=self.get_glue_arn(
+                    account_id=table["CatalogId"],
+                    database=table["DatabaseName"],
+                    table=table["Name"],
+                ),
             )
 
         def get_s3_tags() -> Optional[GlobalTagsClass]:
@@ -1194,7 +1217,10 @@ class GlueSource(StatefulIngestionSourceBase):
             )
             return new_tags
 
-        def get_schema_metadata() -> SchemaMetadata:
+        def get_schema_metadata() -> Optional[SchemaMetadata]:
+            if not table.get("StorageDescriptor"):
+                return None
+
             schema = table["StorageDescriptor"]["Columns"]
             fields: List[SchemaField] = []
             for field in schema:
@@ -1241,10 +1267,14 @@ class GlueSource(StatefulIngestionSourceBase):
             aspects=[
                 Status(removed=False),
                 get_dataset_properties(),
-                get_schema_metadata(),
-                get_data_platform_instance(),
             ],
         )
+
+        schema_metadata = get_schema_metadata()
+        if schema_metadata:
+            dataset_snapshot.aspects.append(schema_metadata)
+
+        dataset_snapshot.aspects.append(get_data_platform_instance())
 
         if self.extract_owners:
             optional_owner_aspect = get_owner()

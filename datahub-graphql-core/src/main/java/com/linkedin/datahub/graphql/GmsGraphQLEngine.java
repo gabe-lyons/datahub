@@ -3,9 +3,11 @@ package com.linkedin.datahub.graphql;
 import com.datahub.authentication.AuthenticationConfiguration;
 import com.datahub.authentication.group.GroupService;
 import com.datahub.authentication.proposal.ProposalService;
+import com.datahub.authentication.invite.InviteTokenService;
 import com.datahub.authentication.token.StatefulTokenService;
 import com.datahub.authentication.user.NativeUserService;
 import com.datahub.authorization.AuthorizationConfiguration;
+import com.datahub.authorization.role.RoleService;
 import com.google.common.collect.ImmutableList;
 import com.linkedin.common.VersionedUrn;
 import com.linkedin.common.urn.Urn;
@@ -197,7 +199,10 @@ import com.linkedin.datahub.graphql.resolvers.policy.GetGrantedPrivilegesResolve
 import com.linkedin.datahub.graphql.resolvers.policy.ListPoliciesResolver;
 import com.linkedin.datahub.graphql.resolvers.policy.UpsertPolicyResolver;
 import com.linkedin.datahub.graphql.resolvers.recommendation.ListRecommendationsResolver;
+import com.linkedin.datahub.graphql.resolvers.role.AcceptRoleResolver;
 import com.linkedin.datahub.graphql.resolvers.role.BatchAssignRoleResolver;
+import com.linkedin.datahub.graphql.resolvers.role.CreateInviteTokenResolver;
+import com.linkedin.datahub.graphql.resolvers.role.GetInviteTokenResolver;
 import com.linkedin.datahub.graphql.resolvers.role.ListRolesResolver;
 import com.linkedin.datahub.graphql.resolvers.search.AutoCompleteForMultipleResolver;
 import com.linkedin.datahub.graphql.resolvers.search.AutoCompleteResolver;
@@ -225,9 +230,7 @@ import com.linkedin.datahub.graphql.resolvers.type.HyperParameterValueTypeResolv
 import com.linkedin.datahub.graphql.resolvers.type.PlatformSchemaUnionTypeResolver;
 import com.linkedin.datahub.graphql.resolvers.type.ResultsTypeResolver;
 import com.linkedin.datahub.graphql.resolvers.type.TimeSeriesAspectInterfaceTypeResolver;
-import com.linkedin.datahub.graphql.resolvers.user.CreateNativeUserInviteTokenResolver;
 import com.linkedin.datahub.graphql.resolvers.user.CreateNativeUserResetTokenResolver;
-import com.linkedin.datahub.graphql.resolvers.user.GetNativeUserInviteTokenResolver;
 import com.linkedin.datahub.graphql.resolvers.user.ListUsersResolver;
 import com.linkedin.datahub.graphql.resolvers.user.RemoveUserResolver;
 import com.linkedin.datahub.graphql.resolvers.user.UpdateUserStatusResolver;
@@ -337,6 +340,8 @@ public class GmsGraphQLEngine {
     private final TestEngine testEngine;
     private final NativeUserService nativeUserService;
     private final GroupService groupService;
+    private final RoleService roleService;
+    private final InviteTokenService inviteTokenService;
 
     private final FeatureFlags featureFlags;
 
@@ -417,7 +422,8 @@ public class GmsGraphQLEngine {
         final TimelineService timelineService, final boolean supportsImpactAnalysis,
         final VisualConfiguration visualConfiguration, final TelemetryConfiguration telemetryConfiguration,
         final TestsConfiguration testsConfiguration, final DatahubConfiguration datahubConfiguration,
-        final SiblingGraphService siblingGraphService, final GroupService groupService,
+        final SiblingGraphService siblingGraphService, final GroupService groupService, final RoleService roleService,
+        final InviteTokenService inviteTokenService,
         final FeatureFlags featureFlags,
         // SaaS only
         final ProposalService proposalService) {
@@ -441,6 +447,8 @@ public class GmsGraphQLEngine {
         this.nativeUserService = nativeUserService;
         this.testEngine = testEngine;
         this.groupService = groupService;
+        this.roleService = roleService;
+        this.inviteTokenService = inviteTokenService;
 
         this.ingestionConfiguration = Objects.requireNonNull(ingestionConfiguration);
         this.authenticationConfiguration = Objects.requireNonNull(authenticationConfiguration);
@@ -759,15 +767,15 @@ public class GmsGraphQLEngine {
             .dataFetcher("getRootGlossaryTerms", new GetRootGlossaryTermsResolver(this.entityClient))
             .dataFetcher("getRootGlossaryNodes", new GetRootGlossaryNodesResolver(this.entityClient))
             .dataFetcher("entityExists", new EntityExistsResolver(this.entityService))
-            .dataFetcher("getNativeUserInviteToken", new GetNativeUserInviteTokenResolver(this.nativeUserService))
+            .dataFetcher("entity", getEntityResolver())
+            .dataFetcher("entities", getEntitiesResolver())
+            .dataFetcher("listRoles", new ListRolesResolver(this.entityClient))
+            .dataFetcher("getInviteToken", new GetInviteTokenResolver(this.inviteTokenService))
             // Proposals not in OSS
             .dataFetcher("listActionRequests",
                 new ListActionRequestsResolver(entityClient))
             .dataFetcher("listRejectedActionRequests",
                 new ListRejectedActionRequestsResolver(entityClient, entityService))
-            .dataFetcher("entity", getEntityResolver())
-            .dataFetcher("entities", getEntitiesResolver())
-            .dataFetcher("listRoles", new ListRolesResolver(this.entityClient))
         );
     }
 
@@ -887,11 +895,13 @@ public class GmsGraphQLEngine {
             .dataFetcher("updateName", new UpdateNameResolver(entityService))
             .dataFetcher("addRelatedTerms", new AddRelatedTermsResolver(this.entityService))
             .dataFetcher("removeRelatedTerms", new RemoveRelatedTermsResolver(this.entityService))
-            .dataFetcher("createNativeUserInviteToken", new CreateNativeUserInviteTokenResolver(this.nativeUserService))
             .dataFetcher("createNativeUserResetToken", new CreateNativeUserResetTokenResolver(this.nativeUserService))
             .dataFetcher("batchUpdateSoftDeleted", new BatchUpdateSoftDeletedResolver(this.entityService))
             .dataFetcher("updateUserSetting", new UpdateUserSettingResolver(this.entityService))
             .dataFetcher("rollbackIngestion", new RollbackIngestionResolver(this.entityClient))
+            .dataFetcher("batchAssignRole", new BatchAssignRoleResolver(this.roleService))
+            .dataFetcher("createInviteToken", new CreateInviteTokenResolver(this.inviteTokenService))
+            .dataFetcher("acceptRole", new AcceptRoleResolver(this.roleService, this.inviteTokenService))
             // Proposals not in OSS
             .dataFetcher("proposeTag", new ProposeTagResolver(entityService, entityClient))
             .dataFetcher("proposeTerm", new ProposeTermResolver(entityService, entityClient))
@@ -902,7 +912,6 @@ public class GmsGraphQLEngine {
             .dataFetcher("raiseIncident", new RaiseIncidentResolver(this.entityClient))
             .dataFetcher("updateIncidentStatus", new UpdateIncidentStatusResolver(this.entityClient, this.entityService))
             .dataFetcher("batchAssignRole", new BatchAssignRoleResolver(this.entityClient))
-
         );
     }
 

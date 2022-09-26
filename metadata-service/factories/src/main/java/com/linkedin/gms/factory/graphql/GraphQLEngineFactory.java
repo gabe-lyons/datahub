@@ -2,8 +2,10 @@ package com.linkedin.gms.factory.graphql;
 
 import com.datahub.authentication.group.GroupService;
 import com.datahub.authentication.proposal.ProposalService;
+import com.datahub.authentication.invite.InviteTokenService;
 import com.datahub.authentication.token.StatefulTokenService;
 import com.datahub.authentication.user.NativeUserService;
+import com.datahub.authorization.role.RoleService;
 import com.linkedin.datahub.graphql.GmsGraphQLEngine;
 import com.linkedin.datahub.graphql.GraphQLEngine;
 import com.linkedin.datahub.graphql.analytics.service.AnalyticsService;
@@ -131,6 +133,14 @@ public class GraphQLEngineFactory {
   @Qualifier("proposalService")
   private ProposalService _proposalService;
 
+  @Autowired
+  @Qualifier("roleService")
+  private RoleService _roleService;
+
+  @Autowired
+  @Qualifier("inviteTokenService")
+  private InviteTokenService _inviteTokenService;
+
   @Value("${platformAnalytics.enabled}") // TODO: Migrate to DATAHUB_ANALYTICS_ENABLED
   private Boolean isAnalyticsEnabled;
 
@@ -166,6 +176,8 @@ public class GraphQLEngineFactory {
           _configProvider.getDatahub(),
           _siblingGraphService,
           _groupService,
+          _roleService,
+          _inviteTokenService,
           _configProvider.getFeatureFlags(),
           // Saas only
           _proposalService
@@ -197,6 +209,8 @@ public class GraphQLEngineFactory {
         _configProvider.getDatahub(),
         _siblingGraphService,
         _groupService,
+        _roleService,
+        _inviteTokenService,
         _configProvider.getFeatureFlags(),
         // SaaS only
         _proposalService
