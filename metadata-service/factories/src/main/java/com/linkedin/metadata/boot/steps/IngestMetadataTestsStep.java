@@ -100,7 +100,7 @@ public class IngestMetadataTestsStep implements BootstrapStep {
     final MetadataChangeProposal keyAspectProposal = new MetadataChangeProposal();
     final AspectSpec keyAspectSpec = _entityService.getKeyAspectSpec(testUrn);
     GenericAspect aspect = GenericRecordUtils.serializeAspect(
-        EntityKeyUtils.convertUrnToEntityKey(testUrn, keyAspectSpec.getPegasusSchema()));
+        EntityKeyUtils.convertUrnToEntityKey(testUrn, keyAspectSpec));
     keyAspectProposal.setAspect(aspect);
     keyAspectProposal.setAspectName(keyAspectSpec.getName());
     keyAspectProposal.setEntityType(Constants.TEST_ENTITY_NAME);
