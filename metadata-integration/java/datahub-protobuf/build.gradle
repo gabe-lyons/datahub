@@ -187,16 +187,7 @@ signing {
 }
 
 nexusStaging {
-<<<<<<< HEAD
   serverUrl = "https://s01.oss.sonatype.org/service/local/" //required only for projects registered in Sonatype after 2021-02-24
   username = System.getenv("NEXUS_USERNAME")
   password = System.getenv("NEXUS_PASSWORD")
 }
-=======
-    serverUrl = "https://s01.oss.sonatype.org/service/local/" //required only for projects registered in Sonatype after 2021-02-24
-    username = System.getenv("NEXUS_USERNAME")
-    password = System.getenv("NEXUS_PASSWORD")
-}
-
-
->>>>>>> master
