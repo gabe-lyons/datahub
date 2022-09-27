@@ -2,6 +2,7 @@ package client;
 
 import com.datahub.authentication.Authentication;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.Objects;
 import javax.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +74,10 @@ public class AuthServiceClient {
               GENERATE_SESSION_TOKEN_ENDPOINT));
 
       // Build JSON request to generate a token on behalf of a user.
-      String json = String.format("{ \"%s\":\"%s\" }", USER_ID_FIELD, userId);
+      final ObjectMapper objectMapper = new ObjectMapper();
+      final ObjectNode objectNode = objectMapper.createObjectNode();
+      objectNode.put(USER_ID_FIELD, userId);
+      final String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectNode);
       request.setEntity(new StringEntity(json));
 
       // Add authorization header with DataHub frontend system id and secret.
@@ -119,15 +123,20 @@ public class AuthServiceClient {
     try {
 
       final String protocol = this.metadataServiceUseSsl ? "https" : "http";
-      final HttpPost request =
-          new HttpPost(String.format("%s://%s:%s/%s", protocol, this.metadataServiceHost, this.metadataServicePort,
+      final HttpPost request = new HttpPost(
+          String.format("%s://%s:%s/%s", protocol, this.metadataServiceHost, this.metadataServicePort,
               SIGN_UP_ENDPOINT));
 
-      // Build JSON request to verify credentials for a native user.
-      String json =
-          String.format("{ \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\" }",
-              USER_URN_FIELD, userUrn, FULL_NAME_FIELD, fullName, EMAIL_FIELD, email, TITLE_FIELD, title,
-              PASSWORD_FIELD, password, INVITE_TOKEN_FIELD, inviteToken);
+      // Build JSON request to sign up a native user.
+      final ObjectMapper objectMapper = new ObjectMapper();
+      final ObjectNode objectNode = objectMapper.createObjectNode();
+      objectNode.put(USER_URN_FIELD, userUrn);
+      objectNode.put(FULL_NAME_FIELD, fullName);
+      objectNode.put(EMAIL_FIELD, email);
+      objectNode.put(TITLE_FIELD, title);
+      objectNode.put(PASSWORD_FIELD, password);
+      objectNode.put(INVITE_TOKEN_FIELD, inviteToken);
+      final String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectNode);
       request.setEntity(new StringEntity(json));
 
       // Add authorization header with DataHub frontend system id and secret.
@@ -145,7 +154,7 @@ public class AuthServiceClient {
                 response.getEntity().toString()));
       }
     } catch (Exception e) {
-      throw new RuntimeException("Failed to create user", e);
+      throw new RuntimeException(String.format("Failed to create user %s", userUrn), e);
     } finally {
       try {
         if (response != null) {
@@ -175,9 +184,12 @@ public class AuthServiceClient {
               RESET_NATIVE_USER_CREDENTIALS_ENDPOINT));
 
       // Build JSON request to verify credentials for a native user.
-      String json =
-          String.format("{ \"%s\":\"%s\", \"%s\":\"%s\", \"%s\":\"%s\" }", USER_URN_FIELD, userUrn,
-              PASSWORD_FIELD, password, RESET_TOKEN_FIELD, resetToken);
+      final ObjectMapper objectMapper = new ObjectMapper();
+      final ObjectNode objectNode = objectMapper.createObjectNode();
+      objectNode.put(USER_URN_FIELD, userUrn);
+      objectNode.put(PASSWORD_FIELD, password);
+      objectNode.put(RESET_TOKEN_FIELD, resetToken);
+      final String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectNode);
       request.setEntity(new StringEntity(json));
 
       // Add authorization header with DataHub frontend system id and secret.
@@ -223,8 +235,11 @@ public class AuthServiceClient {
               VERIFY_NATIVE_USER_CREDENTIALS_ENDPOINT));
 
       // Build JSON request to verify credentials for a native user.
-      String json =
-          String.format("{ \"%s\":\"%s\", \"%s\":\"%s\" }", USER_URN_FIELD, userUrn, PASSWORD_FIELD, password);
+      final ObjectMapper objectMapper = new ObjectMapper();
+      final ObjectNode objectNode = objectMapper.createObjectNode();
+      objectNode.put(USER_URN_FIELD, userUrn);
+      objectNode.put(PASSWORD_FIELD, password);
+      final String json = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(objectNode);
       request.setEntity(new StringEntity(json));
 
       // Add authorization header with DataHub frontend system id and secret.

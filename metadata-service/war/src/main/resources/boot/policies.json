@@ -83,7 +83,6 @@
         "users":[]
       },
       "privileges":[
-        "MANAGE_POLICIES",
         "MANAGE_INGESTION",
         "MANAGE_SECRETS",
         "MANAGE_USERS_AND_GROUPS",
@@ -96,7 +95,7 @@
         "VIEW_METADATA_PROPOSALS",
         "MANAGE_DOMAINS"
       ],
-      "displayName":"All Users - All Platform Privileges",
+      "displayName":"All Users - All Platform Privileges (EXCEPT MANAGE POLICIES)",
       "description":"Grants full platform privileges to ALL users of DataHub. Change this policy to alter that behavior.",
       "state":"ACTIVE",
       "type":"PLATFORM",

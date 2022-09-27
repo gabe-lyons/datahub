@@ -106,10 +106,20 @@ mutation raiseIncident($input: RaiseIncidentInput!) {
     raiseIncident(input: $input)
 }
 
-mutation updateIncidentStatus($urn: String!, $input: UpdateIncidentStatusInput!){
+mutation updateIncidentStatus($urn: String!, $input: UpdateIncidentStatusInput!) {
     updateIncidentStatus(urn: $urn, input: $input)
 }
 
 mutation batchAssignRole($input: BatchAssignRoleInput!) {
     batchAssignRole(input: $input)
+}
+
+mutation createInviteToken($input: CreateInviteTokenInput!) {
+    createInviteToken(input: $input) {
+        inviteToken
+    }
+}
+
+mutation acceptRole($input: AcceptRoleInput!) {
+    acceptRole(input: $input)
 }
