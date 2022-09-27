@@ -68,4 +68,8 @@ export class DataPlatformEntity implements Entity<DataPlatform> {
     supportedCapabilities = () => {
         return new Set([]);
     };
+
+    getGraphName = () => {
+        return 'dataPlatform';
+    };
 }
