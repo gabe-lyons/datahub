@@ -101,10 +101,17 @@ public class ElasticSearchGraphService implements GraphService {
     return _lineageRegistry;
   }
 
+  @Override
   public void addEdge(@Nonnull final Edge edge) {
     String docId = toDocId(edge);
     String edgeDocument = toDocument(edge);
     _graphWriteDAO.upsertDocument(docId, edgeDocument);
+  }
+
+  @Override
+  public void removeEdge(@Nonnull final Edge edge) {
+    String docId = toDocId(edge);
+    _graphWriteDAO.deleteDocument(docId);
   }
 
   @Nonnull

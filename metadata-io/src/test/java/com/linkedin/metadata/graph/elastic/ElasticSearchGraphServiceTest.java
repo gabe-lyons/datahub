@@ -1,8 +1,13 @@
 package com.linkedin.metadata.graph.elastic;
 
+import com.linkedin.common.FabricType;
+import com.linkedin.common.urn.DataPlatformUrn;
+import com.linkedin.common.urn.DatasetUrn;
+import com.linkedin.common.urn.TagUrn;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.metadata.ElasticSearchTestUtils;
 import com.linkedin.metadata.ElasticTestUtils;
+import com.linkedin.metadata.graph.Edge;
 import com.linkedin.metadata.graph.EntityLineageResult;
 import com.linkedin.metadata.graph.GraphService;
 import com.linkedin.metadata.graph.GraphServiceTestBase;
@@ -18,6 +23,7 @@ import com.linkedin.metadata.query.filter.RelationshipFilter;
 import com.linkedin.metadata.search.elasticsearch.ElasticSearchServiceTest;
 import com.linkedin.metadata.utils.elasticsearch.IndexConvention;
 import com.linkedin.metadata.utils.elasticsearch.IndexConventionImpl;
+import java.util.Collections;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testng.SkipException;
@@ -36,6 +42,7 @@ import java.util.stream.Collectors;
 
 import static com.linkedin.metadata.DockerTestUtils.checkContainerEngine;
 import static com.linkedin.metadata.graph.elastic.ElasticSearchGraphService.INDEX_NAME;
+import static com.linkedin.metadata.search.utils.QueryUtils.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -47,6 +54,8 @@ public class ElasticSearchGraphServiceTest extends GraphServiceTestBase {
   private final IndexConvention _indexConvention = new IndexConventionImpl(null);
   private final String _indexName = _indexConvention.getIndexName(INDEX_NAME);
   private ElasticSearchGraphService _client;
+
+  private static final String TAG_RELATIONSHIP = "SchemaFieldTaggedWith";
 
   @BeforeClass
   public void setup() {
@@ -185,6 +194,28 @@ public class ElasticSearchGraphServiceTest extends GraphServiceTestBase {
   public void testRemoveEdgesFromNodeNoRelationshipTypes() {
     // https://github.com/linkedin/datahub/issues/3117
     throw new SkipException("ElasticSearchGraphService does not support empty list of relationship types");
+  }
+
+  @Test
+  // TODO: Only in ES for now since unimplemented in other services
+  public void testRemoveEdge() throws Exception {
+    DatasetUrn datasetUrn = new DatasetUrn(new DataPlatformUrn("snowflake"), "test", FabricType.TEST);
+    TagUrn tagUrn = new TagUrn("newTag");
+    Edge edge = new Edge(datasetUrn, tagUrn, TAG_RELATIONSHIP);
+    getGraphService().addEdge(edge);
+    syncAfterWrite();
+    RelatedEntitiesResult result = getGraphService().findRelatedEntities(Collections.singletonList(datasetType),
+        newFilter(Collections.singletonMap("urn", datasetUrn.toString())), Collections.singletonList("tag"),
+        EMPTY_FILTER, Collections.singletonList(TAG_RELATIONSHIP),
+        newRelationshipFilter(EMPTY_FILTER, RelationshipDirection.OUTGOING), 0, 100);
+    assertEquals(result.getTotal(), 1);
+    getGraphService().removeEdge(edge);
+    syncAfterWrite();
+    result = getGraphService().findRelatedEntities(Collections.singletonList(datasetType),
+        newFilter(Collections.singletonMap("urn", datasetUrn.toString())), Collections.singletonList("tag"),
+        EMPTY_FILTER, Collections.singletonList(TAG_RELATIONSHIP),
+        newRelationshipFilter(EMPTY_FILTER, RelationshipDirection.OUTGOING), 0, 100);
+    assertEquals(result.getTotal(), 0);
   }
 
   @Test

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.linkedin.metadata.query.filter.Filter;
 import com.linkedin.metadata.query.filter.RelationshipFilter;
 import com.linkedin.metadata.utils.elasticsearch.IndexConvention;
+import com.linkedin.metadata.utils.metrics.MetricUtils;
 import java.io.IOException;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -11,6 +12,7 @@ import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.bulk.BulkProcessor;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.client.RequestOptions;
@@ -31,6 +33,8 @@ public class ESGraphWriteDAO {
   private final IndexConvention indexConvention;
   private final BulkProcessor bulkProcessor;
 
+  private static final String ES_WRITES_METRIC = "num_elasticSearch_writes";
+
   /**
    * Updates or inserts the given search document.
    *
@@ -44,7 +48,20 @@ public class ESGraphWriteDAO {
         new UpdateRequest(indexConvention.getIndexName(INDEX_NAME), docId).doc(document, XContentType.JSON)
             .detectNoop(false)
             .upsert(indexRequest);
+    MetricUtils.counter(this.getClass(), ES_WRITES_METRIC).inc();
     bulkProcessor.add(updateRequest);
+  }
+
+  /**
+   * Deletes the given search document.
+   *
+   * @param docId the ID of the document
+   */
+  public void deleteDocument(@Nonnull String docId) {
+    final DeleteRequest deleteRequest =
+        new DeleteRequest(indexConvention.getIndexName(INDEX_NAME)).id(docId);
+    MetricUtils.counter(this.getClass(), ES_WRITES_METRIC).inc();
+    bulkProcessor.add(deleteRequest);
   }
 
   public BulkByScrollResponse deleteByQuery(@Nullable final String sourceType, @Nonnull final Filter sourceEntityFilter,
@@ -63,6 +80,7 @@ public class ESGraphWriteDAO {
 
     try {
       final BulkByScrollResponse deleteResponse = client.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+      MetricUtils.counter(this.getClass(), ES_WRITES_METRIC).inc(deleteResponse.getTotal());
       return deleteResponse;
     } catch (IOException e) {
       log.error("ERROR: Failed to delete by query. See stacktrace for a more detailed error:");

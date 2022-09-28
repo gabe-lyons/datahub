@@ -69,6 +69,7 @@ public class ESGraphQueryDAO {
   private static final String SOURCE = "source";
   private static final String DESTINATION = "destination";
   private static final String RELATIONSHIP_TYPE = "relationshipType";
+  private static final String SEARCH_EXECUTIONS_METRIC = "num_elasticSearch_reads";
 
   @Nonnull
   public static void addFilterToQueryBuilder(@Nonnull Filter filter, String node, BoolQueryBuilder rootQuery) {
@@ -101,6 +102,7 @@ public class ESGraphQueryDAO {
     searchRequest.indices(indexConvention.getIndexName(INDEX_NAME));
 
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "esQuery").time()) {
+      MetricUtils.counter(this.getClass(), SEARCH_EXECUTIONS_METRIC).inc();
       return client.search(searchRequest, RequestOptions.DEFAULT);
     } catch (Exception e) {
       log.error("Search query failed", e);
