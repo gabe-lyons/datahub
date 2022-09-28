@@ -1,6 +1,5 @@
 import { LineChartOutlined } from '@ant-design/icons';
 import * as React from 'react';
-import { Typography } from 'antd';
 
 import { Chart, EntityType, LineageDirection, SearchResult } from '../../../types.generated';
 import { Entity, EntityCapabilityType, IconStyleType, PreviewType } from '../Entity';
@@ -19,8 +18,6 @@ import { SidebarDomainSection } from '../shared/containers/profile/sidebar/Domai
 import { EntityMenuItems } from '../shared/EntityDropdown/EntityDropdown';
 import { LineageTab } from '../shared/tabs/Lineage/LineageTab';
 import { ChartStatsSummarySubHeader } from './profile/stats/ChartStatsSummarySubHeader';
-import { getMatchPrioritizingPrimary } from '../shared/utils';
-import { FIELDS_TO_HIGHLIGHT } from '../dataset/search/highlights';
 import { InputFieldsTab } from '../shared/tabs/Entity/InputFieldsTab';
 import { ChartSnippet } from './ChartSnippet';
 
