@@ -39,7 +39,7 @@ public class ElasticsearchConnector {
       @Override
       public void afterBulk(long executionId, BulkRequest request, BulkResponse response) {
         log.info("Successfully feeded bulk request. Number of events: " + response.getItems().length + " Took time ms: "
-            + response.getIngestTookInMillis());
+            + response.getIngestTookInMillis() + " For request: " + request.getDescription());
       }
 
       @Override
