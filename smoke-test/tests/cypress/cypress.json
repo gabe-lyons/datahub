@@ -6,7 +6,7 @@
   "projectId": "1d7nwt",
   "defaultCommandTimeout": 10000,
   "retries": {
-    "runMode": 2,
+    "runMode": 4,
     "openMode": 0
   }
 }

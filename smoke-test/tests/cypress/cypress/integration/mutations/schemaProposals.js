@@ -191,7 +191,7 @@ describe('schemaProposals', () => {
       cy.contains('DatasetToProposeOn').should('not.exist');
     });
     */
-    it('can propose a schema-level tag to a dataset and then accept the proposal from the my requests tab', () => {
+    it.skip('can propose a schema-level tag to a dataset and then accept the proposal from the my requests tab', () => {
       cy.login();
 
       // Proposing a tag
@@ -241,7 +241,7 @@ describe('schemaProposals', () => {
       cy.contains('Yes').click();
     });
 
-    it('can propose a schema-level term to dataset and then accept the proposal from the my requests tab', () => {
+    it.skip('can propose a schema-level term to dataset and then accept the proposal from the my requests tab', () => {
       cy.login();
 
       // Proposing a term

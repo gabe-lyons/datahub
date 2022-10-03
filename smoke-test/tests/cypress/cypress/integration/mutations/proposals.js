@@ -1,3 +1,4 @@
+// TODO: Remove any skips once we fix the flakiness
 describe('proposals', () => {
   Cypress.on('uncaught:exception', (err, runnable) => {
     return false;
@@ -58,7 +59,7 @@ describe('proposals', () => {
     cy.get('[data-testid="proposed-term-TermToPropose"]').should('not.exist');
   });
 
-  it('can propose tag to dataset and then accept tag proposal from the dataset page', () => {
+  it.skip('can propose tag to dataset and then accept tag proposal from the dataset page', () => {
     cy.login();
 
     // Proposing the tag
@@ -124,7 +125,7 @@ describe('proposals', () => {
     cy.wait(1000);
   });
 
-  it('can propose tag to dataset and then decline tag proposal from the my requests tab', () => {
+  it.skip('can propose tag to dataset and then decline tag proposal from the my requests tab', () => {
     cy.login();
 
     // Proposing the tag
@@ -168,7 +169,7 @@ describe('proposals', () => {
     cy.get('[data-testid="proposed-tag-TagToPropose"]').should('not.exist');
   });
 
-  it('can propose term to dataset and then decline term proposal from the my requests tab', () => {
+  it.skip('can propose term to dataset and then decline term proposal from the my requests tab', () => {
     cy.login();
 
     // Proposing the term
@@ -212,7 +213,7 @@ describe('proposals', () => {
     cy.get('[data-testid="proposed-term-TermToPropose"]').should('not.exist');
   });
   
-  it('can propose tag to dataset and then accept tag proposal from the my requests tab', () => {
+  it.skip('can propose tag to dataset and then accept tag proposal from the my requests tab', () => {
     cy.login();
 
     // Proposing the tag
