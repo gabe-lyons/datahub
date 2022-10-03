@@ -4,6 +4,7 @@ import com.linkedin.gms.factory.spring.YamlPropertySourceFactory;
 import com.linkedin.metadata.search.ranker.SearchRanker;
 import com.linkedin.metadata.search.ranker.SimpleRanker;
 import com.linkedin.metadata.search.ranker.DefaultRanker;
+import com.linkedin.metadata.search.ranker.OnlineUsageBasedRanker;
 import javax.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,8 +17,14 @@ import org.springframework.context.annotation.PropertySource;
 @Configuration
 @PropertySource(value = "classpath:/application.yml", factory = YamlPropertySourceFactory.class)
 public class SearchRankerFactory {
+  public static final String SIMPLE_RANKER_TYPE = "SimpleRanker";
+
+  public static final String ONLINE_USAGE_RANKER_TYPE = "OnlineUsageRanker";
   @Autowired
   private DefaultRanker _defaultRanker;
+
+  @Autowired
+  private OnlineUsageBasedRanker _usageBasedOnlineRanker;
 
   @Value("${searchService.ranker.type}")
   private String rankerType;
@@ -26,8 +33,11 @@ public class SearchRankerFactory {
   @Primary
   @Nonnull
   protected SearchRanker getInstance() {
-    if (rankerType != null && rankerType.equals("SimpleRanker")) {
+    if (rankerType != null && rankerType.equals(SIMPLE_RANKER_TYPE)) {
       return new SimpleRanker();
+    }
+    if (rankerType != null && rankerType.equals(ONLINE_USAGE_RANKER_TYPE)) {
+      return _usageBasedOnlineRanker;
     }
     return _defaultRanker;
   }
