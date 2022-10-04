@@ -4,21 +4,17 @@ import { SelectOption } from '../types/values';
 
 type Props = {
     options: SelectOption[];
-    selected?: string | string[];
+    selected?: string[];
     mode?: 'multiple' | 'tags';
     placeholder?: string;
     style?: any;
-    onChangeSelected: (newSelectedIds: string | string[] | undefined) => void;
+    onChangeSelected: (newSelectedIds: string[] | undefined) => void;
 };
 
 export const SelectInput = ({ options, selected, mode, placeholder, style, onChangeSelected }: Props) => {
     const onSelect = (id) => {
-        if (Array.isArray(selected)) {
-            const newSelected = [...selected, id];
-            onChangeSelected(newSelected);
-        } else {
-            onChangeSelected(id);
-        }
+        const newSelected = [...(selected || []), id];
+        onChangeSelected(newSelected);
     };
 
     const onDeselect = (id) => {

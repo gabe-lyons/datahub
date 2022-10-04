@@ -27,9 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
@@ -37,12 +35,10 @@ import org.apache.commons.lang3.tuple.Pair;
 
 @Slf4j
 @RequiredArgsConstructor
-public class QueryVersionedAspectEvaluator implements BaseQueryEvaluator {
+public class QueryVersionedAspectEvaluator extends BaseQueryEvaluator {
+
   private final EntityRegistry entityRegistry;
   private final EntityService entityService;
-  @Getter
-  @Setter
-  private QueryEngine queryEngine;
 
   @Override
   public boolean isEligible(String entityType, TestQuery query) {

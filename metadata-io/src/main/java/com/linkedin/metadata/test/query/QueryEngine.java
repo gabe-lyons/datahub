@@ -14,15 +14,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 
 /**
  * Engine for batch evaluating metadata test queries. It ties together internal evaluators to achieve it's goal
  */
 public class QueryEngine {
-  private final List<BaseQueryEvaluator> _queryEvaluators;
+  private final List<QueryEvaluator> _queryEvaluators;
 
-  public QueryEngine(List<BaseQueryEvaluator> queryEvaluators) {
+  public QueryEngine(@Nonnull final List<QueryEvaluator> queryEvaluators) {
     _queryEvaluators = queryEvaluators;
     queryEvaluators.forEach(evaluator -> evaluator.setQueryEngine(this));
   }
@@ -99,7 +100,7 @@ public class QueryEngine {
   public ValidationResult validateQuery(TestQuery query, List<String> entityTypes) {
     List<String> messages = new ArrayList<>();
     for (String entityType : entityTypes) {
-      Optional<BaseQueryEvaluator> eligibleEvaluator =
+      Optional<QueryEvaluator> eligibleEvaluator =
           _queryEvaluators.stream().filter(evaluator -> evaluator.isEligible(entityType, query)).findFirst();
       if (!eligibleEvaluator.isPresent()) {
         messages.add(String.format(

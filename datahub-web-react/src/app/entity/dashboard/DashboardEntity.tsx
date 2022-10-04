@@ -254,6 +254,7 @@ export class DashboardEntity implements Entity<Dashboard> {
             EntityCapabilityType.DOMAINS,
             EntityCapabilityType.DEPRECATION,
             EntityCapabilityType.SOFT_DELETE,
+            EntityCapabilityType.TEST,
         ]);
     };
 

@@ -38,7 +38,8 @@ public class QueryEngineTest {
   EntityService _entityService = Mockito.mock(EntityService.class);
   QueryVersionedAspectEvaluator _queryVersionedAspectEvaluator =
       new QueryVersionedAspectEvaluator(SnapshotEntityRegistry.getInstance(), _entityService);
-  QueryEngine _queryEngine = new QueryEngine(ImmutableList.of(_queryVersionedAspectEvaluator));
+  EntityUrnTypeEvaluator _urnTypeEvaluator = new EntityUrnTypeEvaluator();
+  QueryEngine _queryEngine = new QueryEngine(ImmutableList.of(_urnTypeEvaluator, _queryVersionedAspectEvaluator));
 
   static final DatasetUrn DATASET_URN = new DatasetUrn(new DataPlatformUrn("bigquery"), "test_dataset", FabricType.DEV);
   static final GlossaryTermUrn GLOSSARY_TERM_WITH_PARENT = new GlossaryTermUrn("term_with_parent");
@@ -123,6 +124,35 @@ public class QueryEngineTest {
     assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
         ImmutableMap.of(DATASET_URN, ImmutableMap.of(testQuery,
             new TestQueryResponse(ImmutableList.of(PARENT_NODE.toString(), PARENT_NODE.toString())))));
+
+    // Test URN + Entity Type queries
+
+    // Case 1: Base Entity URN
+    testQuery = new TestQuery("urn");
+    assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
+        ImmutableMap.of(DATASET_URN, ImmutableMap.of(testQuery,
+            new TestQueryResponse(ImmutableList.of(DATASET_URN.toString())))));
+    // Case 2: Base Entity Type
+    testQuery = new TestQuery("entityType");
+    assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
+        ImmutableMap.of(DATASET_URN, ImmutableMap.of(testQuery,
+            new TestQueryResponse(ImmutableList.of(DATASET_URN.getEntityType())))));
+
+    Mockito.when(_entityService.getEntitiesV2(eq(Constants.DATASET_ENTITY_NAME), eq(ImmutableSet.of(DATASET_URN)),
+        eq(ImmutableSet.of(Constants.GLOSSARY_TERMS_ASPECT_NAME))))
+        .thenReturn(ImmutableMap.of(DATASET_URN,
+            createGlossaryTerms(ImmutableList.of(GLOSSARY_TERM_WITH_PARENT))));
+
+    // Case 3: Nested Entity URN
+    testQuery = new TestQuery("glossaryTerms.terms.urn.urn");
+    assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
+        ImmutableMap.of(DATASET_URN, ImmutableMap.of(testQuery,
+            new TestQueryResponse(ImmutableList.of(GLOSSARY_TERM_WITH_PARENT.toString())))));
+    // Case 4: Nested Entity Type
+    testQuery = new TestQuery("glossaryTerms.terms.urn.entityType");
+    assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
+        ImmutableMap.of(DATASET_URN, ImmutableMap.of(testQuery,
+            new TestQueryResponse(ImmutableList.of(GLOSSARY_TERM_WITH_PARENT.getEntityType())))));
   }
 
   private EntityResponse emptyEntityResponse() {

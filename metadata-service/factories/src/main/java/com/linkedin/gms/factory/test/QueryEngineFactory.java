@@ -7,6 +7,7 @@ import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.test.query.QueryEngine;
 import com.linkedin.metadata.test.query.QueryVersionedAspectEvaluator;
+import com.linkedin.metadata.test.query.EntityUrnTypeEvaluator;
 import javax.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,8 +30,9 @@ public class QueryEngineFactory {
   @Bean(name = "queryEngine")
   @Nonnull
   protected QueryEngine getInstance() {
-    QueryVersionedAspectEvaluator queryVersionedAspectEvaluator =
+    final EntityUrnTypeEvaluator urnTypeEvaluator = new EntityUrnTypeEvaluator();
+    final QueryVersionedAspectEvaluator queryVersionedAspectEvaluator =
         new QueryVersionedAspectEvaluator(entityRegistry, entityService);
-    return new QueryEngine(ImmutableList.of(queryVersionedAspectEvaluator));
+    return new QueryEngine(ImmutableList.of(urnTypeEvaluator, queryVersionedAspectEvaluator));
   }
 }

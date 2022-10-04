@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Select } from 'antd';
-import { ValueInputType, ValueOptions } from '../types/values';
+import { SelectParams, ValueInputType, ValueOptions } from '../types/values';
 import { SelectInput } from '../input/SelectInput';
 import { EntitySearchInput } from '../../../../../../../entity/shared/EntitySearchInput/EntitySearchInput';
 
@@ -56,7 +56,7 @@ export const ValueSelect = ({ selectedValues, options, onChangeValues }: Props) 
                     selected={selectedValues}
                     onChangeSelected={(selected) => onChangeValues(selected as string[])}
                     placeholder="Select a value..."
-                    options={options.options as any}
+                    options={(options.options as SelectParams)?.options}
                     mode={(options.options as any)?.mode || 'single'}
                     style={SelectInputStyle}
                 />

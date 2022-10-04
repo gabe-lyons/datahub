@@ -28,21 +28,27 @@ export const getPropertiesForEntityType = (type: EntityType): Property[] => {
     return maybeProperties.length > 0 ? maybeProperties[0].properties : [];
 };
 
+const intersectPropertySets = (a: Property[], b: Property[]): Property[] => {
+    const aIds = new Set<string>(a.map((prop) => prop.id));
+    const mergedProperties: Property[] = [];
+    b.forEach((prop) => {
+        if (aIds.has(prop.id)) {
+            mergedProperties.push(prop);
+        }
+    });
+    return mergedProperties;
+};
+
 /**
- * Returns a union of properties supported by each entity types in the set.
+ * Returns the subset of properties supported by all entity types in the set. (intersection)
  */
 export const getPropertiesForEntityTypes = (types: EntityType[]): Property[] => {
-    const propertyIds = new Set<string>();
-    const properties: Property[] = [];
+    const propertySets: Property[][] = [];
     types.forEach((type) => {
         const props = getPropertiesForEntityType(type);
-        props.forEach((prop) => {
-            if (!propertyIds.has(prop.id)) {
-                properties.push(prop);
-            }
-        });
+        propertySets.push(props);
     });
-    return properties;
+    return propertySets.length > 0 ? propertySets.reduce(intersectPropertySets) : [];
 };
 
 /**
@@ -69,7 +75,7 @@ export const getPropertyWithId = (propertyId: string, properties: Property[]): P
  * Returns the set of operators that are supported
  * for a given well-supported property.
  *
- * This is based on the "value type" of the property.
+ * This is based on the "value type" of the property, along with the options.
  */
 export const getOperatorOptions = (predicate: PropertyPredicate, properties: Property[]): Operator[] | undefined => {
     if (!predicate.property) {

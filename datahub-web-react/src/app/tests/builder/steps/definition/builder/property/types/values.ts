@@ -14,6 +14,10 @@ export enum ValueTypeId {
      */
     STRING = 'STRING',
     /**
+     * Enum (fixed string) type
+     */
+    ENUM = 'ENUM',
+    /**
      * Number type
      */
     NUMBER = 'NUMBER',
@@ -81,6 +85,11 @@ export const valueTypes = [
             OperatorId.REGEX_MATCH,
             OperatorId.EXISTS,
         ],
+    },
+    {
+        id: ValueTypeId.ENUM,
+        displayName: 'String',
+        operators: [OperatorId.EQUAL_TO, OperatorId.EXISTS],
     },
     {
         id: ValueTypeId.TIMESTAMP,

@@ -30,7 +30,7 @@ export const PropertyTreeNodeLabel = ({ property, parents, valueType }: Props) =
     return (
         <>
             {parents.map((parentProp) => (
-                <Typography.Text>
+                <Typography.Text key={parentProp.id}>
                     {parentProp.displayName}
                     <StyledCaret />
                 </Typography.Text>

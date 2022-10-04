@@ -39,41 +39,50 @@ export type Property = {
  *          "Must have an owner of type Technical Owner"
  */
 const commonProps: Property[] = [
-    // {
-    //     id: 'entityType', // --> TODO Determine what this means for Datasets.
-    //     displayName: 'Asset Type',
-    //     description: 'The type of the asset.',
-    //     valueType: ValueTypeId.STRING,
-    //     valueOptions: {
-    //         mode: 'multiple',
-    //         options: [
-    //             {
-    //                 id: 'dataset',
-    //                 displayName: 'Dataset',
-    //             },
-    //             {
-    //                 id: 'dashboard',
-    //                 displayName: 'Dashboard',
-    //             },
-    //             {
-    //                 id: 'chart',
-    //                 displayName: 'Chart',
-    //             },
-    //             {
-    //                 id: 'dataJob',
-    //                 displayName: 'Data Job (Task)',
-    //             },
-    //             {
-    //                 id: 'dataFlow',
-    //                 displayName: 'Data Flow (Pipeline)',
-    //             },
-    //             {
-    //                 id: 'container',
-    //                 displayName: 'Container',
-    //             },
-    //         ],
-    //     },
-    // },
+    {
+        id: 'urn',
+        displayName: 'Urn',
+        description: 'The raw urn identifier of the asset.',
+        valueType: ValueTypeId.STRING,
+        valueOptions: {
+            mode: SelectInputMode.MULTIPLE,
+        },
+    },
+    {
+        id: 'entityType',
+        displayName: 'Type',
+        description: 'The type of the asset.',
+        valueType: ValueTypeId.ENUM,
+        valueOptions: {
+            mode: SelectInputMode.MULTIPLE,
+            options: [
+                {
+                    id: 'dataset',
+                    displayName: 'Dataset',
+                },
+                {
+                    id: 'dashboard',
+                    displayName: 'Dashboard',
+                },
+                {
+                    id: 'chart',
+                    displayName: 'Chart',
+                },
+                {
+                    id: 'dataJob',
+                    displayName: 'Data Job (Task)',
+                },
+                {
+                    id: 'dataFlow',
+                    displayName: 'Data Flow (Pipeline)',
+                },
+                {
+                    id: 'container',
+                    displayName: 'Container',
+                },
+            ],
+        },
+    },
     // {
     //     id: 'name', // --> TODO Determine what this means for Datasets.
     //     displayName: 'Name',
@@ -119,7 +128,7 @@ const commonProps: Property[] = [
             {
                 id: 'glossaryTerms.terms.urn.glossaryTermInfo.parentNode',
                 displayName: 'Term Groups',
-                description: 'The term groups in which the terms reside.',
+                description: 'The parent term groups in which the terms reside.',
                 valueType: ValueTypeId.URN_LIST,
                 valueOptions: {
                     entityTypes: [EntityType.GlossaryNode],
@@ -169,6 +178,24 @@ const commonProps: Property[] = [
 const datasetProps: Property[] = [
     ...commonProps,
     {
+        id: 'datasetDescription',
+        displayName: 'Description',
+        children: [
+            {
+                id: 'datasetProperties.description',
+                displayName: 'Native Platform Description',
+                description: 'The description as authored and ingested from an external Data Platform.',
+                valueType: ValueTypeId.STRING,
+            },
+            {
+                id: 'editableDatasetProperties.description',
+                displayName: 'DataHub Description',
+                description: 'The description as authored inside DataHub directly.',
+                valueType: ValueTypeId.STRING,
+            },
+        ],
+    },
+    {
         id: 'subTypes.typeNames',
         displayName: 'Subtype',
         description: 'The subtype of the asset.',
@@ -181,76 +208,156 @@ const datasetProps: Property[] = [
         valueType: ValueTypeId.STRING_LIST,
     },
     {
-        id: 'metrics',
+        id: 'datasetMetrics',
         displayName: 'Metrics',
         children: [
             {
                 id: 'usageFeatures.usageCountLast30Days',
                 displayName: 'Query Count in Last 30 Days',
+                description:
+                    'The total query count in the past 30 days. This requires usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.queryCountPercentileLast30Days',
                 displayName: 'Query Count Percentile in Last 30 Days (0-100)',
+                description:
+                    'The relative query count percentile for this dataset inside the data platform instance. This requires usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.writeCountLast30Days',
                 displayName: 'Update Count in Last 30 Days',
+                description:
+                    'The total write count for this dataset in the past 30 days. This requires usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.writeCountPercentileLast30Days',
                 displayName: 'Update Count Percentile in Last 30 Days (0-100)',
+                description:
+                    'The relative write count percentile for this dataset within the data platform instance. This requires usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.uniqueUserCountLast30Days',
                 displayName: 'Unique Users in the Last 30 Days',
+                description:
+                    'The total unique user count for this dataset in the past 30 days. This requires usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.uniqueUserPercentileLast30Days',
                 displayName: 'Unique User Percentile in the Last 30 Days (0-100)',
+                description:
+                    'The relative unique user count percentile for this dataset within the data platform instance. This requires usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
         ],
     },
 ];
 
-const dataJobProps = [...commonProps];
+const dataJobProps = [
+    ...commonProps,
+    {
+        id: 'dataJobDescription',
+        displayName: 'Description',
+        children: [
+            {
+                id: 'dataJobInfo.description',
+                displayName: 'Native Platform Description',
+                description: 'The description as authored and ingested from an external Data Platform.',
+                valueType: ValueTypeId.STRING,
+            },
+            {
+                id: 'editableDataJobProperties.description',
+                displayName: 'DataHub Description',
+                description: 'The description as authored inside DataHub directly.',
+                valueType: ValueTypeId.STRING,
+            },
+        ],
+    },
+];
 
-const dataFlowProps = [...commonProps];
+const dataFlowProps = [
+    ...commonProps,
+    {
+        id: 'dataFlowDescription',
+        displayName: 'Description',
+        children: [
+            {
+                id: 'dataFlowInfo.description',
+                displayName: 'Native Platform Description',
+                description: 'The description as authored and ingested from an external Data Platform.',
+                valueType: ValueTypeId.STRING,
+            },
+            {
+                id: 'editableDataFlowProperties.description',
+                displayName: 'DataHub Description',
+                description: 'The description as authored inside DataHub directly.',
+                valueType: ValueTypeId.STRING,
+            },
+        ],
+    },
+];
 
 const dashboardProps = [
     ...commonProps,
     {
-        id: 'metrics',
+        id: 'dashboardDescription',
+        displayName: 'Description',
+        children: [
+            {
+                id: 'dashboardInfo.description',
+                displayName: 'Native Platform Description',
+                description: 'The description as authored and ingested from an external Data Platform.',
+                valueType: ValueTypeId.STRING,
+            },
+            {
+                id: 'editableDashboardProperties.description',
+                displayName: 'DataHub Description',
+                description: 'The description as authored inside DataHub directly.',
+                valueType: ValueTypeId.STRING,
+            },
+        ],
+    },
+    {
+        id: 'dashboardMetrics',
         displayName: 'Metrics',
         children: [
             {
                 id: 'usageFeatures.viewCountTotal',
                 displayName: 'Total View Count',
+                description:
+                    'The total view count for this dashboard. This requires dashboard usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.viewCountLast30Days',
                 displayName: 'View Count in Last 30 Days',
+                description:
+                    'The total view count for this dashboard in the past 30 days. This requires dashboard usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.viewCountPercentileLast30Days',
                 displayName: 'View Count Percentile in Last 30 Days (0-100)',
+                description:
+                    'The relative view count percentile for this dashboard within the data platform instance in the past 30 days. This requires dashboard usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.uniqueUserCountLast30Days',
                 displayName: 'Unique Users in the Last 30 Days',
+                description:
+                    'The total unique user count for this dashboard in the past 30 days. This requires dashboard usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.uniqueUserPercentileLast30Days',
                 displayName: 'Unique User Percentile in the Last 30 Days (0-100)',
+                description:
+                    'The relative view count percentile for this dashboard within the data platform instance in the past 30 days. This requires dashboard usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
         ],
@@ -260,33 +367,61 @@ const dashboardProps = [
 const chartProps = [
     ...commonProps,
     {
-        id: 'metrics',
+        id: 'chartDescription',
+        displayName: 'Description',
+        children: [
+            {
+                id: 'chartInfo.description',
+                displayName: 'Native Platform Description',
+                description: 'The description as authored and ingested from an external Data Platform.',
+                valueType: ValueTypeId.STRING,
+            },
+            {
+                id: 'editableChartProperties.description',
+                displayName: 'DataHub Description',
+                description: 'The description as authored inside DataHub directly.',
+                valueType: ValueTypeId.STRING,
+            },
+        ],
+    },
+    {
+        id: 'chartMetrics',
         displayName: 'Metrics',
         selectable: false,
         children: [
             {
                 id: 'usageFeatures.viewCountTotal',
                 displayName: 'Total View Count',
+                description:
+                    'The total view count for this chart. This requires chart usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.viewCountLast30Days',
                 displayName: 'View Count in Last 30 Days',
+                description:
+                    'The total view count for this chart in the past 30 days. This requires chart usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.viewCountPercentileLast30Days',
                 displayName: 'View Count Percentile in Last 30 Days (0-100)',
+                description:
+                    'The relative view count percentile for this chart within the data platform instance in the past 30 days. This requires chart usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.uniqueUserCountLast30Days',
                 displayName: 'Unique Users in the Last 30 Days',
+                description:
+                    'The total unique user count for this chart in the past 30 days. This requires chart usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
             {
                 id: 'usageFeatures.uniqueUserPercentileLast30Days',
                 displayName: 'Unique User Percentile in the Last 30 Days (0-100)',
+                description:
+                    'The relative view count percentile for this chart within the data platform instance in the past 30 days. This requires chart usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
             },
         ],
@@ -295,6 +430,24 @@ const chartProps = [
 
 const containerProps = [
     ...commonProps,
+    {
+        id: 'containerDescription',
+        displayName: 'Description',
+        children: [
+            {
+                id: 'containerProperties.description',
+                displayName: 'Native Platform Description',
+                description: 'The description as authored and ingested from an external Data Platform.',
+                valueType: ValueTypeId.STRING,
+            },
+            {
+                id: 'editableContainerProperties.description',
+                displayName: 'DataHub Description',
+                description: 'The description as authored inside DataHub directly.',
+                valueType: ValueTypeId.STRING,
+            },
+        ],
+    },
     {
         id: 'subTypes.typeNames',
         displayName: 'Subtypes',
