@@ -100,7 +100,7 @@ export const valueTypes = [
     {
         id: ValueTypeId.STRING_LIST,
         displayName: 'List',
-        operators: [OperatorId.CONTAINS_ANY, OperatorId.EXISTS],
+        operators: [OperatorId.CONTAINS_ANY, OperatorId.REGEX_MATCH, OperatorId.EXISTS],
     },
     {
         id: ValueTypeId.ENTRY_LIST,
