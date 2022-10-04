@@ -148,9 +148,9 @@ public class RotateSecretsStep implements UpgradeStep {
             proposal.setAspect(GenericRecordUtils.serializeAspect(entry.getValue()));
             proposal.setChangeType(ChangeType.UPSERT);
             try {
-              _entityService.ingestProposal(
-                  proposal,
-                  secretResponse.get(entry.getKey()).getAspects().get(Constants.SECRET_VALUE_ASPECT_NAME).getCreated());
+              _entityService.ingestProposal(proposal,
+                  secretResponse.get(entry.getKey()).getAspects().get(Constants.SECRET_VALUE_ASPECT_NAME).getCreated(),
+                  false);
             } catch (Exception e) {
               throw new RuntimeException(String.format("Failed to create rotated secret with urn %s", entry.getKey()), e);
             }

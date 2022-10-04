@@ -266,21 +266,6 @@ public class EventUtils {
   }
 
   /**
-   * Converts a Pegasus MCP into the equivalent Avro model as a {@link GenericRecord}.
-   *
-   * @param metadataChangeProposal the Pegasus {@link MetadataChangeProposal} model
-   * @return the Avro model with com.linkedin.pegasus2avro.mxe namesapce
-   * @throws IOException if the conversion fails
-   */
-  @Nonnull
-  public static GenericRecord pegasusToAvroMCP(@Nonnull MetadataChangeProposal metadataChangeProposal) throws IOException {
-    GenericRecord original =
-            DataTranslator.dataMapToGenericRecord(metadataChangeProposal.data(), metadataChangeProposal.schema(),
-                    ORIGINAL_MCP_AVRO_SCHEMA);
-    return renameSchemaNamespace(original, ORIGINAL_MCP_AVRO_SCHEMA, RENAMED_MCP_AVRO_SCHEMA);
-  }
-
-  /**
   * Converts a Pegasus Platform Event into the equivalent Avro model as a {@link GenericRecord}.
   *
   * @param event the Pegasus {@link PlatformEvent} model
