@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { ApolloError } from '@apollo/client';
 import { EntityType, FacetFilterInput } from '../../../../../../types.generated';
-import { ENTITY_FILTER_NAME } from '../../../../../search/utils/constants';
+import { ENTITY_FILTER_NAME, UnionType } from '../../../../../search/utils/constants';
 import { SearchCfg } from '../../../../../../conf';
 import { EmbeddedListSearchResults } from './EmbeddedListSearchResults';
 import EmbeddedListSearchHeader from './EmbeddedListSearchHeader';
@@ -12,6 +12,7 @@ import { isListSubset } from '../../../utils';
 import { EntityAndType } from '../../../types';
 import { Message } from '../../../../../shared/Message';
 import { EntityActionProps } from '../../../../../recommendations/renderer/component/EntityNameList';
+import { generateOrFilters } from '../../../../../search/utils/generateOrFilters';
 
 const Container = styled.div`
     display: flex;
@@ -49,10 +50,12 @@ export const addFixedQuery = (baseQuery: string, fixedQuery: string, emptyQuery:
 type Props = {
     query: string;
     page: number;
+    unionType: UnionType;
     filters: FacetFilterInput[];
     onChangeQuery: (query) => void;
     onChangeFilters: (filters) => void;
     onChangePage: (page) => void;
+    onChangeUnionType: (unionType: UnionType) => void;
     emptySearchQuery?: string | null;
     fixedFilter?: FacetFilterInput | null;
     fixedQuery?: string | null;
@@ -74,9 +77,11 @@ export const EmbeddedListSearch = ({
     query,
     filters,
     page,
+    unionType,
     onChangeQuery,
     onChangeFilters,
     onChangePage,
+    onChangeUnionType,
     emptySearchQuery,
     fixedFilter,
     fixedQuery,
@@ -98,7 +103,7 @@ export const EmbeddedListSearch = ({
     const finalFilters = (fixedFilter && [...filtersWithoutEntities, fixedFilter]) || filtersWithoutEntities;
     const entityFilters: Array<EntityType> = filters
         .filter((filter) => filter.field === ENTITY_FILTER_NAME)
-        .map((filter) => filter.value.toUpperCase() as EntityType);
+        .flatMap((filter) => filter.values.map((value) => value?.toUpperCase() as EntityType));
 
     const [showFilters, setShowFilters] = useState(defaultShowFilters || false);
     const [isSelectMode, setIsSelectMode] = useState(false);
@@ -112,7 +117,8 @@ export const EmbeddedListSearch = ({
                 query: finalQuery,
                 start: (page - 1) * SearchCfg.RESULTS_PER_PAGE,
                 count: SearchCfg.RESULTS_PER_PAGE,
-                filters: finalFilters,
+                filters: [],
+                orFilters: generateOrFilters(unionType, filtersWithoutEntities),
             },
         },
         skip: true,
@@ -129,7 +135,8 @@ export const EmbeddedListSearch = ({
                 query: finalQuery,
                 start: (page - 1) * numResultsPerPage,
                 count: numResultsPerPage,
-                filters: finalFilters,
+                filters: [],
+                orFilters: generateOrFilters(unionType, filtersWithoutEntities),
             },
         },
     });
@@ -203,12 +210,14 @@ export const EmbeddedListSearch = ({
                 searchBarInputStyle={searchBarInputStyle}
             />
             <EmbeddedListSearchResults
+                unionType={unionType}
                 loading={loading}
                 searchResponse={data}
                 filters={filteredFilters}
                 selectedFilters={filters}
                 onChangeFilters={onChangeFilters}
                 onChangePage={onChangePage}
+                onChangeUnionType={onChangeUnionType}
                 page={page}
                 showFilters={showFilters}
                 numResultsPerPage={numResultsPerPage}

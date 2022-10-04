@@ -103,6 +103,11 @@ public class PoliciesConfig {
       "Create Domains",
       "Create new Domains.");
 
+  public static final Privilege CREATE_GLOBAL_ANNOUNCEMENTS_PRIVILEGE = Privilege.of(
+      "CREATE_GLOBAL_ANNOUNCEMENTS",
+      "Create Global Announcements",
+      "Create new Global Announcements.");
+
   public static final Privilege MANAGE_GLOBAL_SETTINGS = Privilege.of(
       "MANAGE_GLOBAL_SETTINGS",
       "Manage Platform Settings",
@@ -125,6 +130,7 @@ public class PoliciesConfig {
       MANAGE_TAGS_PRIVILEGE,
       CREATE_TAGS_PRIVILEGE,
       CREATE_DOMAINS_PRIVILEGE,
+      CREATE_GLOBAL_ANNOUNCEMENTS_PRIVILEGE,
       MANAGE_GLOBAL_SETTINGS
   );
 

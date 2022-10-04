@@ -143,7 +143,7 @@ export default function EditTagTermsModal({
             entity.type === EntityType.Tag ? (entity as Tag).name : entityRegistry.getDisplayName(entity.type, entity);
         const tagOrTermComponent = <TagTermLabel entity={entity} />;
         return (
-            <Select.Option value={entity.urn} key={entity.urn} name={displayName}>
+            <Select.Option data-testid="tag-term-option" value={entity.urn} key={entity.urn} name={displayName}>
                 {tagOrTermComponent}
             </Select.Option>
         );
@@ -512,6 +512,7 @@ export default function EditTagTermsModal({
         >
             <ClickOutside onClickOutside={() => setIsFocusedOnInput(false)}>
                 <TagSelect
+                    data-testid="tag-term-modal-input"
                     autoFocus
                     defaultOpen
                     mode="multiple"
