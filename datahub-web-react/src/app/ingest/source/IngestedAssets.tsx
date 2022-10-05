@@ -71,7 +71,7 @@ export default function IngestedAssets({ id }: Props) {
                 filters: [
                     {
                         field: 'runId',
-                        value: id,
+                        values: [id],
                     },
                 ],
             },
@@ -136,7 +136,7 @@ export default function IngestedAssets({ id }: Props) {
                 <EmbeddedListSearchModal
                     title="View Ingested Assets"
                     searchBarStyle={{ width: 600, marginRight: 40 }}
-                    fixedFilter={{ field: 'runId', value: id }}
+                    fixedFilter={{ field: 'runId', values: [id] }}
                     onClose={() => setShowAssetSearch(false)}
                 />
             )}

@@ -304,5 +304,10 @@ entities:
     keyAspect: dataHubRoleKey
     aspects:
       - dataHubRoleInfo
+  - name: post
+    category: core
+    keyAspect: postKey
+    aspects:
+      - postInfo
 events:
   - name: notificationRequest

@@ -451,6 +451,6 @@ public class PropagateTermsStep implements UpgradeStep {
     SystemMetadata systemMetadata = new SystemMetadata().setRunId(runId).setLastObserved(System.currentTimeMillis());
     proposal.setSystemMetadata(systemMetadata);
 
-    _entityService.ingestProposal(proposal, auditStamp);
+    _entityService.ingestProposal(proposal, auditStamp, false);
   }
 }

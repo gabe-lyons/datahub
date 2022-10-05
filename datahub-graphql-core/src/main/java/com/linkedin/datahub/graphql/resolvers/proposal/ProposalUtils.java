@@ -363,7 +363,7 @@ public class ProposalUtils {
 
     System.out.println(String.format("About to ingest %s", metadataChangeProposal));
     try {
-      entityService.ingestProposal(metadataChangeProposal, auditStamp);
+      entityService.ingestProposal(metadataChangeProposal, auditStamp, false);
     } catch (Exception e) {
       throw new RuntimeException(String.format("Failed to ingest %s", metadataChangeProposal), e);
     }

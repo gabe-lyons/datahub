@@ -27,7 +27,7 @@ export const TestResultsSummary = ({ urn }: Props) => {
                 filters: [
                     {
                         field: 'failingTests',
-                        value: `${urn}`,
+                        values: [`${urn}`],
                     },
                 ],
             },
@@ -41,7 +41,7 @@ export const TestResultsSummary = ({ urn }: Props) => {
                 filters: [
                     {
                         field: 'passingTests',
-                        value: `${urn}`,
+                        values: [`${urn}`],
                     },
                 ],
             },
@@ -57,7 +57,7 @@ export const TestResultsSummary = ({ urn }: Props) => {
                         filters: [
                             {
                                 field: 'passingTests',
-                                value: urn,
+                                values: [urn],
                             },
                         ],
                         history,
@@ -80,7 +80,7 @@ export const TestResultsSummary = ({ urn }: Props) => {
                         filters: [
                             {
                                 field: 'failingTests',
-                                value: urn,
+                                values: [urn],
                             },
                         ],
                         history,
