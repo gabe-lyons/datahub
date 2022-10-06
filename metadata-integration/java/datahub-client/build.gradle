@@ -38,6 +38,7 @@ dependencies {
   shadow externalDependency.httpAsyncClient // we want our clients to provide this
   implementation externalDependency.jacksonDataBind
   implementation externalDependency.javaxValidation
+  runtimeOnly externalDependency.jna
   implementation externalDependency.springContext
   implementation externalDependency.swaggerAnnotations
   implementation(externalDependency.kafkaAvroSerializer) {
