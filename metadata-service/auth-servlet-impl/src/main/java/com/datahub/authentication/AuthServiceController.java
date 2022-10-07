@@ -4,6 +4,7 @@ import com.datahub.authentication.invite.InviteTokenService;
 import com.datahub.authentication.token.StatelessTokenService;
 import com.datahub.authentication.token.TokenType;
 import com.datahub.authentication.user.NativeUserService;
+import com.datahub.telemetry.TrackingService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +17,7 @@ import com.linkedin.settings.global.OidcSettings;
 import com.linkedin.settings.global.SsoSettings;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -84,6 +86,10 @@ public class AuthServiceController {
 
   @Inject
   InviteTokenService _inviteTokenService;
+
+  @Inject
+  @Nullable
+  TrackingService _trackingService;
 
   /**
    * Generates a JWT access token for as user UI session, provided a unique "user id" to generate the token for inside a JSON
@@ -333,6 +339,36 @@ public class AuthServiceController {
         return new ResponseEntity<>(response, HttpStatus.OK);
       } catch (Exception e) {
         log.error(String.format("Failed to verify credentials for native user %s", userUrnString), e);
+        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+      }
+    });
+  }
+
+  /**
+   * Tracking endpoint
+   */
+  @PostMapping(value = "/track", produces = "application/json;charset=utf-8")
+  CompletableFuture<ResponseEntity<String>> track(final HttpEntity<String> httpEntity) {
+    String jsonStr = httpEntity.getBody();
+    ObjectMapper mapper = new ObjectMapper();
+    JsonNode bodyJson;
+    try {
+      bodyJson = mapper.readTree(jsonStr);
+    } catch (JsonProcessingException e) {
+      log.error(String.format("Failed to parse json while attempting to track analytics event %s", jsonStr));
+      return CompletableFuture.completedFuture(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+    }
+    if (bodyJson == null) {
+      return CompletableFuture.completedFuture(new ResponseEntity<>(HttpStatus.BAD_REQUEST));
+    }
+    return CompletableFuture.supplyAsync(() -> {
+      try {
+        if (_trackingService != null) {
+          _trackingService.emitAnalyticsEvent(bodyJson);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
+      } catch (Exception e) {
+        log.error("Failed to track event", e);
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
       }
     });
