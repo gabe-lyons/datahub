@@ -133,7 +133,8 @@ public class AuthModule extends AbstractModule {
             Collections.emptyMap());
     }
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     protected EntityClient provideEntityClient() {
         return new RestliEntityClient(buildRestliClient(_configs));
     }

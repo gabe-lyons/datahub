@@ -26,6 +26,7 @@ public class AuthServiceClient {
   private static final String SIGN_UP_ENDPOINT = "auth/signUp";
   private static final String RESET_NATIVE_USER_CREDENTIALS_ENDPOINT = "auth/resetNativeUserCredentials";
   private static final String VERIFY_NATIVE_USER_CREDENTIALS_ENDPOINT = "auth/verifyNativeUserCredentials";
+  private static final String TRACK_ENDPOINT = "auth/track";
   private static final String ACCESS_TOKEN_FIELD = "accessToken";
   private static final String USER_ID_FIELD = "userId";
   private static final String USER_URN_FIELD = "userUrn";
@@ -64,8 +65,8 @@ public class AuthServiceClient {
   @Nonnull
   public String generateSessionTokenForUser(@Nonnull final String userId) {
     Objects.requireNonNull(userId, "userId must not be null");
-
     CloseableHttpResponse response = null;
+
     try {
 
       final String protocol = this.metadataServiceUseSsl ? "https" : "http";
@@ -118,8 +119,8 @@ public class AuthServiceClient {
     Objects.requireNonNull(title, "title must not be null");
     Objects.requireNonNull(password, "password must not be null");
     Objects.requireNonNull(inviteToken, "inviteToken must not be null");
-
     CloseableHttpResponse response = null;
+
     try {
 
       final String protocol = this.metadataServiceUseSsl ? "https" : "http";
@@ -214,7 +215,7 @@ public class AuthServiceClient {
           response.close();
         }
       } catch (Exception e) {
-        log.warn("Failed to close http response", e);
+        log.error("Failed to close http response", e);
       }
     }
   }
@@ -225,8 +226,8 @@ public class AuthServiceClient {
   public boolean verifyNativeUserCredentials(@Nonnull final String userUrn, @Nonnull final String password) {
     Objects.requireNonNull(userUrn, "userUrn must not be null");
     Objects.requireNonNull(password, "password must not be null");
-
     CloseableHttpResponse response = null;
+
     try {
 
       final String protocol = this.metadataServiceUseSsl ? "https" : "http";
@@ -264,7 +265,46 @@ public class AuthServiceClient {
           response.close();
         }
       } catch (Exception e) {
-        log.warn("Failed to close http response", e);
+        log.error("Failed to close http response", e);
+      }
+    }
+  }
+
+  /**
+   * Call the Auth Service to track an analytics event
+   */
+  public void track(@Nonnull final String event) {
+    Objects.requireNonNull(event, "event must not be null");
+    CloseableHttpResponse response = null;
+
+    try {
+      final String protocol = this.metadataServiceUseSsl ? "https" : "http";
+      final HttpPost request = new HttpPost(
+          String.format("%s://%s:%s/%s", protocol, this.metadataServiceHost, this.metadataServicePort, TRACK_ENDPOINT));
+
+      // Build JSON request to track event.
+      request.setEntity(new StringEntity(event));
+
+      // Add authorization header with DataHub frontend system id and secret.
+      request.addHeader(Http.HeaderNames.AUTHORIZATION, this.systemAuthentication.getCredentials());
+
+      response = httpClient.execute(request);
+      final HttpEntity entity = response.getEntity();
+
+      if (response.getStatusLine().getStatusCode() != HttpStatus.SC_OK || entity == null) {
+        throw new RuntimeException(
+            String.format("Bad response from the Metadata Service: %s %s", response.getStatusLine().toString(),
+                response.getEntity().toString()));
+      }
+    } catch (Exception e) {
+      throw new RuntimeException("Failed to track event", e);
+    } finally {
+      try {
+        if (response != null) {
+          response.close();
+        }
+      } catch (Exception e) {
+        log.error("Failed to close http response", e);
       }
     }
   }
