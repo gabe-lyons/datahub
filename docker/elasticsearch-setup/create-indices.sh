@@ -177,7 +177,7 @@ function create_user_data_es_cloud {
 EOF
 }
 
-function create_aws_role {
+function create_aws_access_policy_role {
   cat << EOF
 {
      "cluster_permissions": [
@@ -215,9 +215,11 @@ function create_user_es_cloud {
 
   create_access_policy_data_es_cloud > $INDEX_DEFINITIONS_ROOT/access_policy_data_es_cloud.json
   create_if_not_exists "_security/role/${ROLE}" access_policy_data_es_cloud.json
+  echo -e "\nAccess policy created"
 
   create_user_data_es_cloud > $INDEX_DEFINITIONS_ROOT/user_data_es_cloud.json
   create_if_not_exists "_security/user/${ELASTICSEARCH_USERNAME}" user_data_es_cloud.json
+  echo -e "\nData User created"
 }
 
 function create_aws_user {
@@ -225,9 +227,11 @@ function create_aws_user {
 
   create_aws_access_policy_role > $INDEX_DEFINITIONS_ROOT/aws_role.json
   create_if_not_exists "_opendistro/_security/api/roles/${ROLE}" aws_role.json
+  echo -e "\nAWS Access policy created"
 
   create_aws_data_user > $INDEX_DEFINITIONS_ROOT/aws_user.json
   create_if_not_exists "_opendistro/_security/api/internalusers/${ELASTICSEARCH_USERNAME}" aws_user.json
+  echo -e "\nAWS Data User created"
 }
 
 if [[ $CREATE_USER == true ]]; then
