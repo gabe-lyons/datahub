@@ -13,6 +13,7 @@ FROM base AS prod-install
 COPY docker/elasticsearch-setup/create-indices.sh /
 RUN chmod 755 create-indices.sh
 COPY metadata-service/restli-servlet-impl/src/main/resources/index /index
+RUN chmod a+rwx -R /index
 
 FROM base AS dev-install
 # Dummy stage for development. Use local files for setup

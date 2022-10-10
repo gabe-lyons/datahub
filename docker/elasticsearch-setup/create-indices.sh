@@ -67,7 +67,7 @@ function create_if_not_exists {
   RESOURCE_DEFINITION_NAME="$2"
 
   # query ES to see if the resource already exists
-  RESOURCE_STATUS=$(curl "${CURL_ARGS[@]}" -o response.txt -w "%{http_code}\n" "$ELASTICSEARCH_URL/$RESOURCE_ADDRESS")
+  RESOURCE_STATUS=$(curl "${CURL_ARGS[@]}" -o request_response.txt -w "%{http_code}\n" "$ELASTICSEARCH_URL/$RESOURCE_ADDRESS")
   echo -e "\n>>> GET $RESOURCE_ADDRESS response code is $RESOURCE_STATUS"
 
   if [ "$RESOURCE_STATUS" -eq 200 ]; then
@@ -86,8 +86,8 @@ function create_if_not_exists {
   elif [ "$RESOURCE_STATUS" -eq 403 ]; then
     # probably authorization fail
     echo -e ">>> forbidden access to $RESOURCE_ADDRESS ! -> exiting"
-    jq response.txt
-    rm response.txt
+    cat request_response.txt
+    rm request_response.txt
     exit 1
 
   else
@@ -102,8 +102,8 @@ function create_if_not_exists {
     fi
 
     echo -e ">>> failed to GET $RESOURCE_ADDRESS ! -> exiting"
-    echo response.txt
-    rm response.txt
+    cat request_response.txt
+    rm request_response.txt
     exit 1
   fi
 }
@@ -134,7 +134,7 @@ function create_datahub_usage_event_aws_elasticsearch() {
   #     ... but first check whether `datahub_usage_event` wasn't already autocreated by GMS before `datahub_usage_event-000001`
   #     (as is common case when this script was initially run without properly setting `USE_AWS_ELASTICSEARCH` to `true`)
   #     -> https://github.com/datahub-project/datahub/issues/5376
-  USAGE_EVENT_STATUS=$(curl "${CURL_ARGS[@]}" -o response.txt -w "%{http_code}\n" "$ELASTICSEARCH_URL/${PREFIX}datahub_usage_event")
+  USAGE_EVENT_STATUS=$(curl "${CURL_ARGS[@]}" -o request_response.txt -w "%{http_code}\n" "$ELASTICSEARCH_URL/${PREFIX}datahub_usage_event")
   if [ "$USAGE_EVENT_STATUS" -eq 200 ]; then
     USAGE_EVENT_DEFINITION=$(curl "${CURL_ARGS[@]}" "$ELASTICSEARCH_URL/${PREFIX}datahub_usage_event")
     # the definition is expected to contain "datahub_usage_event-000001" string
@@ -146,8 +146,8 @@ function create_datahub_usage_event_aws_elasticsearch() {
     fi
   else
     echo -e "Usage event status: $USAGE_EVENT_STATUS"
-    echo response.txt
-    rm response.txt
+    echo request_response.txt
+    rm request_response.txt
   fi
 
   #   ... now we are safe to create the index
@@ -212,24 +212,25 @@ function create_user_es_cloud {
   # Tested with Elastic 7.17
   ROLE="${INDEX_PREFIX}_access"
 
-  create_access_policy_data_es_cloud > /index/access_policy_data_es_cloud.json
+  create_access_policy_data_es_cloud > $INDEX_DEFINITIONS_ROOT/access_policy_data_es_cloud.json
   create_if_not_exists "_security/role/${ROLE}" access_policy_data_es_cloud.json
 
-  create_user_data_es_cloud > /index/user_data_es_cloud.json
+  create_user_data_es_cloud > $INDEX_DEFINITIONS_ROOT/user_data_es_cloud.json
   create_if_not_exists "_security/user/${ELASTICSEARCH_USERNAME}" user_data_es_cloud.json
 }
 
 function create_aws_user() {
   ROLE="${INDEX_PREFIX}_access"
 
-  create_aws_role > /index/aws_role.json
+  create_aws_role > $INDEX_DEFINITIONS_ROOT/aws_role.json
   create_if_not_exists "_opendistro/_security/api/roles/${ROLE}" aws_role.json
 
-  create_aws_user > /index/aws_user.json
+  create_aws_user > $INDEX_DEFINITIONS_ROOT/aws_user.json
   create_if_not_exists "_opendistro/_security/api/internalusers/${ELASTICSEARCH_USERNAME}" aws_user.json
 }
 
 if [[ $CREATE_USER == true ]]; then
+  echo -e "\nCreating user"
   if [[ $USE_AWS_ELASTICSEARCH == true ]]; then
     create_aws_user || exit 1
   else
@@ -238,15 +239,14 @@ if [[ $CREATE_USER == true ]]; then
 fi
 
 if [[ $DATAHUB_ANALYTICS_ENABLED == true ]]; then
-  echo -e "\ndatahub_analytics_enabled: $DATAHUB_ANALYTICS_ENABLED"
+  echo -e "\nCreating indices for analytics"
   if [[ $USE_AWS_ELASTICSEARCH == false ]]; then
     create_datahub_usage_event_datastream || exit 1
   else
-    echo -e "\nUsing AWS code"
     create_datahub_usage_event_aws_elasticsearch || exit 1
   fi
 else
-  echo -e "\ndatahub_analytics_enabled: $DATAHUB_ANALYTICS_ENABLED"
+  echo -e "\nCreating usage index"
   DATAHUB_USAGE_EVENT_INDEX_RESPONSE_CODE=$(curl -o /dev/null -s -w "%{http_code}" --header "$ELASTICSEARCH_AUTH_HEADER" "${ELASTICSEARCH_INSECURE}$ELASTICSEARCH_PROTOCOL://$ELASTICSEARCH_HOST:$ELASTICSEARCH_PORT/cat/indices/${PREFIX}datahub_usage_event")
   if [ "$DATAHUB_USAGE_EVENT_INDEX_RESPONSE_CODE" -eq 404 ]
   then
