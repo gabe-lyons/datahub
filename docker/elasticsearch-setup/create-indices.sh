@@ -2,9 +2,9 @@
 
 set -e
 
-: ${DATAHUB_ANALYTICS_ENABLED:=true}
-: ${USE_AWS_ELASTICSEARCH:=false}
-: ${ELASTICSEARCH_INSECURE:=false}
+: "${DATAHUB_ANALYTICS_ENABLED:=true}"
+: "${USE_AWS_ELASTICSEARCH:=false}"
+: "${ELASTICSEARCH_INSECURE:=false}"
 
 # protocol: http or https?
 if [[ $ELASTICSEARCH_USE_SSL == true ]]; then
@@ -17,18 +17,24 @@ echo -e "going to use protocol: $ELASTICSEARCH_PROTOCOL"
 # Elasticsearch URL to be suffixed with a resource address
 ELASTICSEARCH_URL="$ELASTICSEARCH_PROTOCOL://$ELASTICSEARCH_HOST:$ELASTICSEARCH_PORT"
 
-# set auth header if none is given
+if [[ -z $ELASTICSEARCH_MASTER_USERNAME ]]; then
+  echo -e "Variable ELASTICSEARCH_MASTER_USERNAME is not set. Going to use value of ELASTICSEARCH_USERNAME"
+  ELASTICSEARCH_MASTER_USERNAME=$ELASTICSEARCH_USERNAME
+fi
+if [[ -z $ELASTICSEARCH_MASTER_PASSWORD ]]; then
+  echo -e "Variable ELASTICSEARCH_MASTER_PASSWORD is not set. Going to use value of ELASTICSEARCH_PASSWORD"
+  ELASTICSEARCH_MASTER_PASSWORD=$ELASTICSEARCH_PASSWORD
+fi
+
+if [[ -n $ELASTICSEARCH_MASTER_USERNAME ]] && [[ -z $ELASTICSEARCH_AUTH_HEADER ]]; then
+  AUTH_TOKEN=$(echo -ne "$ELASTICSEARCH_MASTER_USERNAME:$ELASTICSEARCH_MASTER_PASSWORD" | base64 --wrap 0)
+  ELASTICSEARCH_AUTH_HEADER="Authorization:Basic $AUTH_TOKEN"
+fi
+
+# Add default header if needed
 if [[ -z $ELASTICSEARCH_AUTH_HEADER ]]; then
-  if [[ ! -z $ELASTICSEARCH_USERNAME ]]; then
-    # no auth header given, but username is defined -> use it to create the auth header
-    AUTH_TOKEN=$(echo -ne "$ELASTICSEARCH_USERNAME:$ELASTICSEARCH_PASSWORD" | base64 --wrap 0)
-    ELASTICSEARCH_AUTH_HEADER="Authorization:Basic $AUTH_TOKEN"
-    echo -e "going to use elastic headers based on username and password"
-  else
-    # no auth header or username given -> use default auth header
-    ELASTICSEARCH_AUTH_HEADER="Accept: */*"
-    echo -e "going to use default elastic headers"
-  fi
+  echo -e "Going to use default elastic headers"
+  ELASTICSEARCH_AUTH_HEADER="Accept: */*"
 fi
 
 # will be using this for all curl communication with Elasticsearch:
@@ -61,14 +67,14 @@ function create_if_not_exists {
   RESOURCE_DEFINITION_NAME="$2"
 
   # query ES to see if the resource already exists
-  RESOURCE_STATUS=$(curl "${CURL_ARGS[@]}" -o /dev/null -w "%{http_code}\n" "$ELASTICSEARCH_URL/$RESOURCE_ADDRESS")
+  RESOURCE_STATUS=$(curl "${CURL_ARGS[@]}" -o response.txt -w "%{http_code}\n" "$ELASTICSEARCH_URL/$RESOURCE_ADDRESS")
   echo -e "\n>>> GET $RESOURCE_ADDRESS response code is $RESOURCE_STATUS"
 
-  if [ $RESOURCE_STATUS -eq 200 ]; then
+  if [ "$RESOURCE_STATUS" -eq 200 ]; then
     # resource already exists -> nothing to do
     echo -e ">>> $RESOURCE_ADDRESS already exists ✓"
 
-  elif [ $RESOURCE_STATUS -eq 404 ]; then
+  elif [ "$RESOURCE_STATUS" -eq 404 ]; then
     # resource doesn't exist -> need to create it
     echo -e ">>> creating $RESOURCE_ADDRESS because it doesn't exist ..."
     # use the file at given path as definition, but first replace all occurences of `PREFIX`
@@ -77,9 +83,11 @@ function create_if_not_exists {
     sed -e "s/PREFIX/$PREFIX/g" "$INDEX_DEFINITIONS_ROOT/$RESOURCE_DEFINITION_NAME" | tee -a "$TMP_SOURCE_PATH"
     curl "${CURL_ARGS[@]}" -XPUT "$ELASTICSEARCH_URL/$RESOURCE_ADDRESS" -H 'Content-Type: application/json' --data "@$TMP_SOURCE_PATH"
 
-  elif [ $RESOURCE_STATUS -eq 403 ]; then
+  elif [ "$RESOURCE_STATUS" -eq 403 ]; then
     # probably authorization fail
     echo -e ">>> forbidden access to $RESOURCE_ADDRESS ! -> exiting"
+    jq response.txt
+    rm response.txt
     exit 1
 
   else
@@ -87,13 +95,15 @@ function create_if_not_exists {
     # this script will use wrong paths (e.g. `_ilm/policy/` instead of AWS-compatible `_opendistro/_ism/policies/`)
     # and the ES endpoint will return `401 Unauthorized` or `405 Method Not Allowed`
     # let's use this as chance to point that wrong config might be used!
-    if [ $RESOURCE_STATUS -eq 401 ] || [ $RESOURCE_STATUS -eq 405 ]; then
-      if [[ $USE_AWS_ELASTICSEARCH == false ]] && [[ $ELASTICSEARCH_URL == *"amazonaws"* ]]; then
+    if [ "$RESOURCE_STATUS" -eq 401 ] || [ "$RESOURCE_STATUS" -eq 405 ]; then
+      if [[ "$USE_AWS_ELASTICSEARCH" == false ]] && [[ "$ELASTICSEARCH_URL" == *"amazonaws"* ]]; then
         echo "... looks like AWS OpenSearch is used; please set USE_AWS_ELASTICSEARCH env value to true"
       fi
     fi
 
     echo -e ">>> failed to GET $RESOURCE_ADDRESS ! -> exiting"
+    echo response.txt
+    rm response.txt
     exit 1
   fi
 }
@@ -124,21 +134,108 @@ function create_datahub_usage_event_aws_elasticsearch() {
   #     ... but first check whether `datahub_usage_event` wasn't already autocreated by GMS before `datahub_usage_event-000001`
   #     (as is common case when this script was initially run without properly setting `USE_AWS_ELASTICSEARCH` to `true`)
   #     -> https://github.com/datahub-project/datahub/issues/5376
-  USAGE_EVENT_STATUS=$(curl "${CURL_ARGS[@]}" -o /dev/null -w "%{http_code}\n" "$ELASTICSEARCH_URL/${PREFIX}datahub_usage_event")
-  if [ $USAGE_EVENT_STATUS -eq 200 ]; then
+  USAGE_EVENT_STATUS=$(curl "${CURL_ARGS[@]}" -o response.txt -w "%{http_code}\n" "$ELASTICSEARCH_URL/${PREFIX}datahub_usage_event")
+  if [ "$USAGE_EVENT_STATUS" -eq 200 ]; then
     USAGE_EVENT_DEFINITION=$(curl "${CURL_ARGS[@]}" "$ELASTICSEARCH_URL/${PREFIX}datahub_usage_event")
     # the definition is expected to contain "datahub_usage_event-000001" string
-    if [[ $USAGE_EVENT_DEFINITION != *"datahub_usage_event-$INDEX_SUFFIX"* ]]; then
+    if [[ "$USAGE_EVENT_DEFINITION" != *"datahub_usage_event-$INDEX_SUFFIX"* ]]; then
       # ... if it doesn't, we need to drop it
       echo -e "\n>>> deleting invalid datahub_usage_event ..."
       curl "${CURL_ARGS[@]}" -XDELETE "$ELASTICSEARCH_URL/${PREFIX}datahub_usage_event"
       # ... and then recreate it below
     fi
+  else
+    echo -e "Usage event status: $USAGE_EVENT_STATUS"
+    echo response.txt
+    rm response.txt
   fi
 
   #   ... now we are safe to create the index
   create_if_not_exists "${PREFIX}datahub_usage_event-$INDEX_SUFFIX" aws_es_index.json
 }
+
+function create_access_policy_data_es_cloud {
+  cat <<EOF
+{
+   "cluster":[ "monitor" ],
+   "indices":[
+      {
+         "names":["${INDEX_PREFIX}_*"],
+         "privileges":["all"]
+      }
+   ]
+}
+EOF
+}
+
+function create_user_data_es_cloud {
+    cat <<EOF
+{
+   "password": "${ELASTICSEARCH_PASSWORD}",
+	  "roles":["${INDEX_PREFIX}_access"]
+}
+EOF
+}
+
+function create_aws_role {
+    cat <<EOF
+{
+    "cluster_permissions": [
+        "indices:*",
+        "cluster:monitor/tasks/lists"
+    ],
+    "index_permissions": [
+        {
+            "index_patterns": [
+                "${INDEX_PREFIX}_*"
+            ],
+            "allowed_actions": [
+                "indices_all"
+            ]
+        }
+    ]
+}
+EOF
+}
+function create_aws_user {
+    cat <<EOF
+{
+    "password": "${ELASTICSEARCH_PASSWORD}",
+    "opendistro_security_roles": [
+        "${ROLE}"
+    ]
+}
+EOF
+}
+
+function create_user_es_cloud {
+  # Tested with Elastic 7.17
+  ROLE="${INDEX_PREFIX}_access"
+
+  create_access_policy_data_es_cloud > /index/access_policy_data_es_cloud.json
+  create_if_not_exists "_security/role/${ROLE}" access_policy_data_es_cloud.json
+
+  create_user_data_es_cloud > /index/user_data_es_cloud.json
+  create_if_not_exists "_security/user/${ELASTICSEARCH_USERNAME}" user_data_es_cloud.json
+}
+
+function create_aws_user() {
+  ROLE="${INDEX_PREFIX}_access"
+
+  create_aws_role > /index/aws_role.json
+  create_if_not_exists "_opendistro/_security/api/roles/${ROLE}" aws_role.json
+
+  create_aws_user > /index/aws_user.json
+  create_if_not_exists "_opendistro/_security/api/internalusers/${ELASTICSEARCH_USERNAME}" aws_user.json
+}
+
+if [[ $CREATE_USER == true ]]; then
+  if [[ $USE_AWS_ELASTICSEARCH == true ]]; then
+    create_aws_user || exit 1
+  else
+    create_user_es_cloud || exit 1
+  fi
+fi
 
 if [[ $DATAHUB_ANALYTICS_ENABLED == true ]]; then
   echo -e "\ndatahub_analytics_enabled: $DATAHUB_ANALYTICS_ENABLED"
@@ -151,13 +248,13 @@ if [[ $DATAHUB_ANALYTICS_ENABLED == true ]]; then
 else
   echo -e "\ndatahub_analytics_enabled: $DATAHUB_ANALYTICS_ENABLED"
   DATAHUB_USAGE_EVENT_INDEX_RESPONSE_CODE=$(curl -o /dev/null -s -w "%{http_code}" --header "$ELASTICSEARCH_AUTH_HEADER" "${ELASTICSEARCH_INSECURE}$ELASTICSEARCH_PROTOCOL://$ELASTICSEARCH_HOST:$ELASTICSEARCH_PORT/cat/indices/${PREFIX}datahub_usage_event")
-  if [ $DATAHUB_USAGE_EVENT_INDEX_RESPONSE_CODE -eq 404 ]
+  if [ "$DATAHUB_USAGE_EVENT_INDEX_RESPONSE_CODE" -eq 404 ]
   then
     echo -e "\ncreating ${PREFIX}datahub_usage_event"
     curl -XPUT --header "$ELASTICSEARCH_AUTH_HEADER" "${ELASTICSEARCH_INSECURE}$ELASTICSEARCH_PROTOCOL://$ELASTICSEARCH_HOST:$ELASTICSEARCH_PORT/${PREFIX}datahub_usage_event"
-  elif [ $DATAHUB_USAGE_EVENT_INDEX_RESPONSE_CODE -eq 200 ]; then
+  elif [ "$DATAHUB_USAGE_EVENT_INDEX_RESPONSE_CODE" -eq 200 ]; then
     echo -e "\n${PREFIX}datahub_usage_event exists"
-  elif [ $DATAHUB_USAGE_EVENT_INDEX_RESPONSE_CODE -eq 403 ]; then
+  elif [ "$DATAHUB_USAGE_EVENT_INDEX_RESPONSE_CODE" -eq 403 ]; then
     echo -e "Forbidden so exiting"
   fi
 fi
