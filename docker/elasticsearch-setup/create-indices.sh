@@ -112,9 +112,10 @@ function create_datahub_usage_event_aws_elasticsearch() {
   # AWS env requires creation of three resources for Datahub usage events:
   #   1. ISM policy
   create_if_not_exists "_opendistro/_ism/policies/${PREFIX}datahub_usage_event_policy" aws_es_ism_policy.json
-
+  echo -e "\nISM policy created"
   #   2. index template
   create_if_not_exists "_template/${PREFIX}datahub_usage_event_index_template" aws_es_index_template.json
+  echo -e "\nIndex template created"
 
   #   3. event index datahub_usage_event-000001
   #     (note that AWS *rollover* indices need to use `^.*-\d+$` naming pattern)
@@ -140,10 +141,11 @@ function create_datahub_usage_event_aws_elasticsearch() {
 }
 
 if [[ $DATAHUB_ANALYTICS_ENABLED == true ]]; then
-  echo -e "\n datahub_analytics_enabled: $DATAHUB_ANALYTICS_ENABLED"
+  echo -e "\ndatahub_analytics_enabled: $DATAHUB_ANALYTICS_ENABLED"
   if [[ $USE_AWS_ELASTICSEARCH == false ]]; then
     create_datahub_usage_event_datastream || exit 1
   else
+    echo -e "\nUsing AWS code"
     create_datahub_usage_event_aws_elasticsearch || exit 1
   fi
 else
