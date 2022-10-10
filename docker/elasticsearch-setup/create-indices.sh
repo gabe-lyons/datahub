@@ -62,7 +62,7 @@ INDEX_DEFINITIONS_ROOT=/index/usage-event
 
 # check Elasticsearch for given index/resource (first argument)
 # if it doesn't exist (http code 404), use the given file (second argument) to create it
-function create_if_not_exists {
+function create_if_not_exists() {
   RESOURCE_ADDRESS="$1"
   RESOURCE_DEFINITION_NAME="$2"
 
@@ -155,56 +155,57 @@ function create_datahub_usage_event_aws_elasticsearch() {
 }
 
 function create_access_policy_data_es_cloud {
-  cat <<EOF
+  cat << EOF
 {
-   "cluster":[ "monitor" ],
-   "indices":[
-      {
-         "names":["${INDEX_PREFIX}_*"],
-         "privileges":["all"]
-      }
-   ]
-}
+    "cluster":[ "monitor" ],
+    "indices":[
+       {
+          "names":["${INDEX_PREFIX}_*"],
+          "privileges":["all"]
+       }
+    ]
+ }
 EOF
 }
 
 function create_user_data_es_cloud {
-    cat <<EOF
+  cat <<EOF
 {
-   "password": "${ELASTICSEARCH_PASSWORD}",
-	  "roles":["${INDEX_PREFIX}_access"]
-}
+    "password": "${ELASTICSEARCH_PASSWORD}",
+ 	  "roles":["${INDEX_PREFIX}_access"]
+ }
 EOF
 }
 
 function create_aws_role {
-    cat <<EOF
+  cat << EOF
 {
-    "cluster_permissions": [
-        "indices:*",
-        "cluster:monitor/tasks/lists"
-    ],
-    "index_permissions": [
-        {
-            "index_patterns": [
-                "${INDEX_PREFIX}_*"
-            ],
-            "allowed_actions": [
-                "indices_all"
-            ]
-        }
-    ]
-}
+     "cluster_permissions": [
+         "indices:*",
+         "cluster:monitor/tasks/lists"
+     ],
+     "index_permissions": [
+         {
+             "index_patterns": [
+                 "${INDEX_PREFIX}_*"
+             ],
+             "allowed_actions": [
+                 "indices_all"
+             ]
+         }
+     ]
+ }
 EOF
 }
-function create_aws_user {
-    cat <<EOF
+
+function create_aws_data_user {
+  cat << EOF
 {
-    "password": "${ELASTICSEARCH_PASSWORD}",
-    "opendistro_security_roles": [
-        "${ROLE}"
-    ]
-}
+     "password": "${ELASTICSEARCH_PASSWORD}",
+     "opendistro_security_roles": [
+         "${ROLE}"
+     ]
+ }
 EOF
 }
 
@@ -219,13 +220,13 @@ function create_user_es_cloud {
   create_if_not_exists "_security/user/${ELASTICSEARCH_USERNAME}" user_data_es_cloud.json
 }
 
-function create_aws_user() {
+function create_aws_user {
   ROLE="${INDEX_PREFIX}_access"
 
-  create_aws_role > $INDEX_DEFINITIONS_ROOT/aws_role.json
+  create_aws_access_policy_role > $INDEX_DEFINITIONS_ROOT/aws_role.json
   create_if_not_exists "_opendistro/_security/api/roles/${ROLE}" aws_role.json
 
-  create_aws_user > $INDEX_DEFINITIONS_ROOT/aws_user.json
+  create_aws_data_user > $INDEX_DEFINITIONS_ROOT/aws_user.json
   create_if_not_exists "_opendistro/_security/api/internalusers/${ELASTICSEARCH_USERNAME}" aws_user.json
 }
 
