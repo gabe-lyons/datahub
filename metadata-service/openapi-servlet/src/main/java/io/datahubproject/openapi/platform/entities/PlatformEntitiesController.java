@@ -4,6 +4,7 @@ import com.datahub.authentication.Authentication;
 import com.datahub.authentication.AuthenticationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linkedin.metadata.entity.EntityService;
+import com.linkedin.metadata.search.client.CachingEntitySearchService;
 import com.linkedin.util.Pair;
 import io.datahubproject.openapi.generated.MetadataChangeProposal;
 import io.datahubproject.openapi.util.MappingUtil;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class PlatformEntitiesController {
 
   private final EntityService _entityService;
+  private final CachingEntitySearchService _cachingEntitySearchService;
   private final ObjectMapper _objectMapper;
 
   @InitBinder
@@ -58,5 +60,15 @@ public class PlatformEntitiesController {
     } else {
       return ResponseEntity.ok(Collections.emptyList());
     }
+  }
+
+  @PostMapping(value = "/clearCache", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<String> clearCache() {
+    Authentication authentication = AuthenticationContext.getAuthentication();
+    String actorUrnStr = authentication.getActor().toUrnStr();
+
+    _cachingEntitySearchService.clearCache();
+
+    return ResponseEntity.ok("Cache successfully cleared by " + actorUrnStr);
   }
 }
