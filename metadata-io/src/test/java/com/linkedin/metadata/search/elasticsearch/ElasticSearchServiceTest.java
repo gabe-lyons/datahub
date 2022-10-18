@@ -25,24 +25,21 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.unit.TimeValue;
-import org.testcontainers.elasticsearch.ElasticsearchContainer;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.annotation.Nonnull;
 import java.util.Collections;
+import java.util.Map;
 
-import static com.linkedin.metadata.DockerTestUtils.checkContainerEngine;
 import static com.linkedin.metadata.ElasticSearchTestUtils.syncAfterWrite;
 import static org.testng.Assert.assertEquals;
 
 
 public class ElasticSearchServiceTest {
 
-  private ElasticsearchContainer _elasticsearchContainer;
   private RestHighLevelClient _searchClient;
   private EntityRegistry _entityRegistry;
   private IndexConvention _indexConvention;
@@ -55,11 +52,8 @@ public class ElasticSearchServiceTest {
   public void setup() {
     _entityRegistry = new SnapshotEntityRegistry(new Snapshot());
     _indexConvention = new IndexConventionImpl(null);
-    _elasticsearchContainer = ElasticTestUtils.getNewElasticsearchContainer();
     _settingsBuilder = new SettingsBuilder(Collections.emptyList(), null);
-    checkContainerEngine(_elasticsearchContainer.getDockerClient());
-    _elasticsearchContainer.start();
-    _searchClient = ElasticTestUtils.buildRestClient(_elasticsearchContainer);
+    _searchClient = ElasticTestUtils.getElasticsearchClient();
     _elasticSearchService = buildService();
     _elasticSearchService.configure();
   }
@@ -87,7 +81,7 @@ public class ElasticSearchServiceTest {
   }
 
   public static ESIndexBuilder getIndexBuilder(RestHighLevelClient searchClient) {
-    return new ESIndexBuilder(searchClient, 1, 1, 3);
+    return new ESIndexBuilder(searchClient, 1, 1, 3, 1, Map.of(), false);
   }
 
   @Nonnull
@@ -99,11 +93,6 @@ public class ElasticSearchServiceTest {
     ESWriteDAO writeDAO =
         new ESWriteDAO(_entityRegistry, _searchClient, _indexConvention, getBulkProcessor(_searchClient));
     return new ElasticSearchService(indexBuilders, searchDAO, browseDAO, writeDAO);
-  }
-
-  @AfterClass
-  public void tearDown() {
-    _elasticsearchContainer.stop();
   }
 
   @Test
