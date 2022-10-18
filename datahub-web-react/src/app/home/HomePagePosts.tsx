@@ -1,6 +1,6 @@
 import React from 'react';
 import { Divider, Typography } from 'antd';
-import styled from 'styled-components';
+import styled from 'styled-components/macro';
 import { useListPostsQuery } from '../../graphql/post.generated';
 import { Post, PostContentType } from '../../types.generated';
 import { PostTextCard } from '../search/PostTextCard';
@@ -10,6 +10,8 @@ const RecommendationContainer = styled.div`
     margin-bottom: 32px;
     max-width: 1000px;
     min-width: 750px;
+    padding-right: 12px;
+    padding-left: 12px;
 `;
 
 const RecommendationTitle = styled(Typography.Title)`
@@ -24,8 +26,9 @@ const ThinDivider = styled(Divider)`
 `;
 
 const LinkPostsContainer = styled.div`
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 12px;
 `;
 
 export const HomePagePosts = () => {
@@ -51,8 +54,8 @@ export const HomePagePosts = () => {
                 <PostTextCard textPost={post as Post} />
             ))}
             <LinkPostsContainer>
-                {linkPosts.map((post, index) => (
-                    <PostLinkCard linkPost={post as Post} index={index} />
+                {linkPosts.map((post) => (
+                    <PostLinkCard linkPost={post as Post} />
                 ))}
             </LinkPostsContainer>
         </RecommendationContainer>
