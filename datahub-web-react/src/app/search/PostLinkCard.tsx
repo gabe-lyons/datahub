@@ -9,7 +9,6 @@ const CardContainer = styled(Button)`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin-bottom: 12px;
     padding: 0px;
     height: 100px;
     border: 1px solid ${ANTD_GRAY[4]};
