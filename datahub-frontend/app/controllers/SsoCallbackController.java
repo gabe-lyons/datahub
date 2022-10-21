@@ -43,6 +43,7 @@ public class SsoCallbackController extends CallbackController {
     _ssoManager = ssoManager;
     _config = config;
     setDefaultUrl("/"); // By default, redirects to Home Page on log in.
+    setSaveInSession(false);
     setCallbackLogic(new SsoCallbackLogic(ssoManager, systemAuthentication, entityClient, authClient));
   }
 
