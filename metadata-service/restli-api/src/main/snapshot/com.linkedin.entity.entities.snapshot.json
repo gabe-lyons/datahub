@@ -117,6 +117,11 @@
               "type" : "com.linkedin.common.Urn",
               "doc" : "The urn of the parent node of the Proposed Term",
               "optional" : true
+            }, {
+              "name" : "description",
+              "type" : "string",
+              "doc" : "The description of the Proposed Term",
+              "optional" : true
             } ]
           },
           "doc" : "An optional set of information specific to proposals for creating new Glossary Terms.",
@@ -134,6 +139,11 @@
               "name" : "parentNode",
               "type" : "com.linkedin.common.Urn",
               "doc" : "The urn of the parent node of the Proposed Node",
+              "optional" : true
+            }, {
+              "name" : "description",
+              "type" : "string",
+              "doc" : "The description of the Proposed Node",
               "optional" : true
             } ]
           },

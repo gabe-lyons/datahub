@@ -261,6 +261,9 @@ public class ActionRequestUtils {
       parentNode.setUrn(proposal.getParentNode().toString());
       glossaryEntity.setParentNode(parentNode);
     }
+    if (proposal.hasDescription()) {
+      glossaryEntity.setDescription(proposal.getDescription());
+    }
     params.setGlossaryTerm(glossaryEntity);
     return params;
   }
@@ -273,6 +276,9 @@ public class ActionRequestUtils {
       final GlossaryNode parentNode = new GlossaryNode();
       parentNode.setUrn(proposal.getParentNode().toString());
       glossaryEntity.setParentNode(parentNode);
+    }
+    if (proposal.hasDescription()) {
+      glossaryEntity.setDescription(proposal.getDescription());
     }
     params.setGlossaryNode(glossaryEntity);
     return params;

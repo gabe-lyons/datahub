@@ -88,7 +88,7 @@ public class ProposalService {
   }
 
   public boolean proposeCreateGlossaryTerm(@Nonnull final Urn actorUrn, @Nonnull final String name,
-      @Nonnull final Optional<Urn> parentNode, final Authorizer dataHubAuthorizer) {
+      @Nonnull final Optional<Urn> parentNode, final String description, final Authorizer dataHubAuthorizer) {
     Objects.requireNonNull(actorUrn, "actorUrn cannot be null");
     Objects.requireNonNull(name, "name cannot be null");
     Objects.requireNonNull(parentNode, "parentNode cannot be null");
@@ -99,7 +99,7 @@ public class ProposalService {
     List<Urn> assignedGroups = assignedUsersAndGroups.getSecond();
 
     ActionRequestSnapshot snapshot =
-        createCreateGlossaryTermProposalActionRequest(actorUrn, assignedUsers, assignedGroups, name, parentNode);
+        createCreateGlossaryTermProposalActionRequest(actorUrn, assignedUsers, assignedGroups, name, parentNode, description);
 
     final AuditStamp auditStamp = new AuditStamp();
     auditStamp.setActor(actorUrn, SetMode.IGNORE_NULL);
@@ -412,7 +412,7 @@ public class ProposalService {
 
   static ActionRequestSnapshot createCreateGlossaryTermProposalActionRequest(@Nonnull final Urn actorUrn,
       @Nonnull final List<Urn> assignedUsers, @Nonnull final List<Urn> assignedGroups, @Nonnull final String name,
-      @Nonnull final Optional<Urn> parentNode) {
+      @Nonnull final Optional<Urn> parentNode, final String description) {
     final ActionRequestSnapshot result = new ActionRequestSnapshot();
 
     final UUID uuid = UUID.randomUUID();
@@ -422,7 +422,7 @@ public class ProposalService {
     final ActionRequestAspectArray aspects = new ActionRequestAspectArray();
     aspects.add(ActionRequestAspect.create(createActionRequestStatus(actorUrn)));
     aspects.add(ActionRequestAspect.create(
-        createCreateGlossaryTermActionRequestInfo(actorUrn, assignedUsers, assignedGroups, name, parentNode)));
+        createCreateGlossaryTermActionRequestInfo(actorUrn, assignedUsers, assignedGroups, name, parentNode, description)));
 
     result.setAspects(aspects);
 
@@ -465,13 +465,13 @@ public class ProposalService {
 
   static ActionRequestInfo createCreateGlossaryTermActionRequestInfo(@Nonnull final Urn actorUrn,
       @Nonnull final List<Urn> assignedUsers, @Nonnull final List<Urn> assignedGroups, @Nonnull final String name,
-      @Nonnull final Optional<Urn> parentNode) {
+      @Nonnull final Optional<Urn> parentNode, final String description) {
     final ActionRequestInfo info = new ActionRequestInfo();
     info.setType(CREATE_GLOSSARY_TERM_ACTION_REQUEST_TYPE);
     info.setAssignedUsers(new UrnArray(assignedUsers));
     info.setAssignedGroups(new UrnArray(assignedGroups));
     info.setResourceType(GLOSSARY_TERM_ENTITY_NAME);
-    info.setParams(createCreateGlossaryTermActionRequestParams(name, parentNode));
+    info.setParams(createCreateGlossaryTermActionRequestParams(name, parentNode, description));
 
     info.setCreated(System.currentTimeMillis());
     info.setCreatedBy(actorUrn);
@@ -508,10 +508,13 @@ public class ProposalService {
   }
 
   static ActionRequestParams createCreateGlossaryTermActionRequestParams(@Nonnull final String name,
-      @Nonnull final Optional<Urn> parentNode) {
+      @Nonnull final Optional<Urn> parentNode, final String description) {
     CreateGlossaryTermProposal createGlossaryTermProposal = new CreateGlossaryTermProposal();
     createGlossaryTermProposal.setName(name);
     parentNode.ifPresent(createGlossaryTermProposal::setParentNode);
+    if (description != null) {
+      createGlossaryTermProposal.setDescription(description);
+    }
 
     ActionRequestParams actionRequestParams = new ActionRequestParams();
     actionRequestParams.setCreateGlossaryTermProposal(createGlossaryTermProposal);
