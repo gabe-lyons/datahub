@@ -3,7 +3,6 @@ import styled from 'styled-components/macro';
 import { EditOutlined } from '@ant-design/icons';
 import { message, Button, Input, Modal, Typography, Form } from 'antd';
 import DOMPurify from 'dompurify';
-import MDEditor from '@uiw/react-md-editor';
 import {
     useCreateGlossaryTermMutation,
     useCreateGlossaryNodeMutation,
@@ -29,10 +28,6 @@ const OptionalWrapper = styled.span`
 
 const StyledButton = styled(Button)`
     padding: 0;
-`;
-
-const MarkdownWrapper = styled.div`
-    padding: 5px 0 5px 11px;
 `;
 
 interface Props {
@@ -112,7 +107,7 @@ function CreateGlossaryEntityModal(props: Props) {
                 input: {
                     name: stagedName,
                     parentNode: selectedParentUrn || null,
-                    description: sanitizedDescription,
+                    description: sanitizedDescription || null,
                 },
             },
         })
@@ -201,14 +196,9 @@ function CreateGlossaryEntityModal(props: Props) {
                         </Typography.Text>
                     }
                 >
-                    {sanitizedDocumentation && (
-                        <MarkdownWrapper>
-                            <MDEditor.Markdown style={{ fontWeight: 400 }} source={sanitizedDocumentation} />
-                        </MarkdownWrapper>
-                    )}
                     <StyledButton type="link" onClick={() => setIsDocumentationModalVisible(true)}>
                         <EditOutlined />
-                        &nbsp; {sanitizedDocumentation ? 'Edit' : 'Add'} Documentation
+                        {sanitizedDocumentation ? 'Edit' : 'Add'} Documentation
                     </StyledButton>
                     {isDocumentationModalVisible && (
                         <DescriptionModal
