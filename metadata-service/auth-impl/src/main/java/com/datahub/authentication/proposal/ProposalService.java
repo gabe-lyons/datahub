@@ -63,7 +63,7 @@ public class ProposalService {
   private final EntityClient _entityClient;
 
   public boolean proposeCreateGlossaryNode(@Nonnull final Urn actorUrn, @Nonnull final String name,
-      @Nonnull final Optional<Urn> parentNode, final Authorizer dataHubAuthorizer) {
+      @Nonnull final Optional<Urn> parentNode, final String description, final Authorizer dataHubAuthorizer) {
     Objects.requireNonNull(actorUrn, "actorUrn cannot be null");
     Objects.requireNonNull(name, "name cannot be null");
     Objects.requireNonNull(parentNode, "parentNode cannot be null");
@@ -74,7 +74,7 @@ public class ProposalService {
     List<Urn> assignedGroups = assignedUsersAndGroups.getSecond();
 
     ActionRequestSnapshot snapshot =
-        createCreateGlossaryNodeProposalActionRequest(actorUrn, assignedUsers, assignedGroups, name, parentNode);
+        createCreateGlossaryNodeProposalActionRequest(actorUrn, assignedUsers, assignedGroups, name, parentNode, description);
 
     final AuditStamp auditStamp = new AuditStamp();
     auditStamp.setActor(actorUrn, SetMode.IGNORE_NULL);
@@ -397,7 +397,7 @@ public class ProposalService {
 
   static ActionRequestSnapshot createCreateGlossaryNodeProposalActionRequest(@Nonnull final Urn actorUrn,
       @Nonnull final List<Urn> assignedUsers, @Nonnull final List<Urn> assignedGroups, @Nonnull final String name,
-      @Nonnull final Optional<Urn> parentNode) {
+      @Nonnull final Optional<Urn> parentNode, final String description) {
     final ActionRequestSnapshot result = new ActionRequestSnapshot();
 
     final UUID uuid = UUID.randomUUID();
@@ -407,7 +407,7 @@ public class ProposalService {
     final ActionRequestAspectArray aspects = new ActionRequestAspectArray();
     aspects.add(ActionRequestAspect.create(createActionRequestStatus(actorUrn)));
     aspects.add(ActionRequestAspect.create(
-        createCreateGlossaryNodeActionRequestInfo(actorUrn, assignedUsers, assignedGroups, name, parentNode)));
+        createCreateGlossaryNodeActionRequestInfo(actorUrn, assignedUsers, assignedGroups, name, parentNode, description)));
 
     result.setAspects(aspects);
 
@@ -453,13 +453,13 @@ public class ProposalService {
   }
 
   static ActionRequestInfo createCreateGlossaryNodeActionRequestInfo(final Urn creator, final List<Urn> assignedUsers,
-      final List<Urn> assignedGroups, final String name, final Optional<Urn> parentNode) {
+      final List<Urn> assignedGroups, final String name, final Optional<Urn> parentNode, final String description) {
     final ActionRequestInfo info = new ActionRequestInfo();
     info.setType(CREATE_GLOSSARY_NODE_ACTION_REQUEST_TYPE);
     info.setAssignedUsers(new UrnArray(assignedUsers));
     info.setAssignedGroups(new UrnArray(assignedGroups));
     info.setResourceType(GLOSSARY_NODE_ENTITY_NAME);
-    info.setParams(createCreateGlossaryNodeActionRequestParams(name, parentNode));
+    info.setParams(createCreateGlossaryNodeActionRequestParams(name, parentNode, description));
 
     info.setCreated(System.currentTimeMillis());
     info.setCreatedBy(creator);
@@ -501,10 +501,13 @@ public class ProposalService {
   }
 
   static ActionRequestParams createCreateGlossaryNodeActionRequestParams(@Nonnull final String name,
-      @Nonnull final Optional<Urn> parentNode) {
+      @Nonnull final Optional<Urn> parentNode, final String description) {
     CreateGlossaryNodeProposal createGlossaryNodeProposal = new CreateGlossaryNodeProposal();
     createGlossaryNodeProposal.setName(name);
     parentNode.ifPresent(createGlossaryNodeProposal::setParentNode);
+    if (description != null) {
+      createGlossaryNodeProposal.setDescription(description);
+    }
 
     ActionRequestParams actionRequestParams = new ActionRequestParams();
     actionRequestParams.setCreateGlossaryNodeProposal(createGlossaryNodeProposal);
