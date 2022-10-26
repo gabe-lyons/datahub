@@ -11,9 +11,10 @@ import CreatedByView from '../CreatedByView';
 import RequestTargetEntityView from '../RequestTargetEntityView';
 import DescriptionDifferenceModal from './DescriptionDifferenceModal';
 
-const ViewChangeButton = styled(Button)`
+export const ViewDocumentationButton = styled(Button)`
     color: ${blue[5]};
     margin-left: 5px;
+    padding: 4px 8px;
 `;
 
 interface Props {
@@ -52,10 +53,10 @@ function UpdateDescriptionContentView({ actionRequest }: Props) {
                 {' '}
                 requests to update the description on {entityName}{' '}
                 <RequestTargetEntityView actionRequest={actionRequest} />.
-                <ViewChangeButton type="text" onClick={handleClick}>
+                <ViewDocumentationButton type="text" onClick={handleClick}>
                     <DiffOutlined />
                     {isRequestPending ? 'View difference' : 'View description'}
-                </ViewChangeButton>
+                </ViewDocumentationButton>
             </Typography.Text>
             {isDiffModalVisible && (
                 <DescriptionDifferenceModal

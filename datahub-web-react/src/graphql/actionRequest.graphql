@@ -154,6 +154,7 @@ query listActionRequests($input: ListActionRequestsInput!) {
                 createGlossaryTermProposal {
                     glossaryTerm {
                         name
+                        description
                         parentNode {
                             urn
                             properties {
@@ -165,6 +166,7 @@ query listActionRequests($input: ListActionRequestsInput!) {
                 createGlossaryNodeProposal {
                     glossaryNode {
                         name
+                        description
                         parentNode {
                             urn
                             properties {

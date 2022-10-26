@@ -17,6 +17,7 @@ export default function CreateTermRequestItem({ actionRequest, onUpdate, showAct
 
     const proposedName = actionRequest.params?.createGlossaryTermProposal?.glossaryTerm.name || '';
     const parentNode = actionRequest.params?.createGlossaryTermProposal?.glossaryTerm.parentNode || null;
+    const description = actionRequest.params?.createGlossaryTermProposal?.glossaryTerm.description || '';
     const entityName = entityRegistry.getEntityName(EntityType.GlossaryTerm);
     const contentView = (
         <CreateGlossaryEntityContentView
@@ -24,6 +25,7 @@ export default function CreateTermRequestItem({ actionRequest, onUpdate, showAct
             actionRequest={actionRequest}
             entityName={entityName || ''}
             parentNode={parentNode}
+            description={description}
         />
     );
 

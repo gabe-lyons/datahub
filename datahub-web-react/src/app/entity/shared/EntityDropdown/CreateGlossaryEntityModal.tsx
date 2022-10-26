@@ -106,12 +106,13 @@ function CreateGlossaryEntityModal(props: Props) {
                 ? proposeCreateGlossaryTermMutation
                 : proposeCreateGlossaryNodeMutation;
 
-        // TODO: sanitize the documentation and plop it here in input on GQL is up-to-date
+        const sanitizedDescription = DOMPurify.sanitize(documentation);
         mutation({
             variables: {
                 input: {
                     name: stagedName,
                     parentNode: selectedParentUrn || null,
+                    description: sanitizedDescription,
                 },
             },
         })
