@@ -178,12 +178,14 @@ public class ProposalService {
     Optional<Urn> parentNode =
         createGlossaryNodeProposal.hasParentNode() && createGlossaryNodeProposal.getParentNode() != null ? Optional.of(
             createGlossaryNodeProposal.getParentNode()) : Optional.empty();
+    Optional<String> description = createGlossaryNodeProposal.hasDescription() ?
+        Optional.ofNullable(createGlossaryNodeProposal.getDescription()) : Optional.empty();
       if (!canManageGlossaries && !isAuthorizedToResolveGlossaryEntityAsOwner(actorUrn, parentNode)) {
         throw new RuntimeException(
             "Unauthorized to accept creating this Glossary Node. Please contact your DataHub administrator.");
       }
 
-      createGlossaryNodeEntity(name, parentNode, authentication);
+      createGlossaryNodeEntity(name, parentNode, description, authentication);
   }
 
   public void acceptCreateGlossaryTermProposal(@Nonnull final Urn actorUrn,
@@ -199,12 +201,14 @@ public class ProposalService {
     Optional<Urn> parentNode =
         createGlossaryTermProposal.hasParentNode() && createGlossaryTermProposal.getParentNode() != null ? Optional.of(
             createGlossaryTermProposal.getParentNode()) : Optional.empty();
+    Optional<String> description = createGlossaryTermProposal.hasDescription() ?
+        Optional.ofNullable(createGlossaryTermProposal.getDescription()) : Optional.empty();
       if (!canManageGlossaries && !isAuthorizedToResolveGlossaryEntityAsOwner(actorUrn, parentNode)) {
         throw new RuntimeException(
             "Unauthorized to accept creating this Glossary Node. Please contact your DataHub administrator.");
       }
 
-      createGlossaryTermEntity(name, parentNode, authentication);
+      createGlossaryTermEntity(name, parentNode, description, authentication);
   }
 
   public boolean canResolveGlossaryNodeProposal(@Nonnull final Urn actorUrn,
@@ -531,7 +535,7 @@ public class ProposalService {
   }
 
   void createGlossaryNodeEntity(@Nonnull final String name, @Nonnull final Optional<Urn> parentNode,
-      final Authentication authentication) throws Exception {
+      @Nonnull final Optional<String> description, final Authentication authentication) throws Exception {
     final GlossaryNodeKey key = new GlossaryNodeKey();
 
     final String id = UUID.randomUUID().toString();
@@ -546,14 +550,14 @@ public class ProposalService {
     proposal.setEntityKeyAspect(GenericRecordUtils.serializeAspect(key));
     proposal.setEntityType(Constants.GLOSSARY_NODE_ENTITY_NAME);
     proposal.setAspectName(Constants.GLOSSARY_NODE_INFO_ASPECT_NAME);
-    proposal.setAspect(GenericRecordUtils.serializeAspect(mapGlossaryNodeInfo(name, parentNode)));
+    proposal.setAspect(GenericRecordUtils.serializeAspect(mapGlossaryNodeInfo(name, parentNode, description)));
     proposal.setChangeType(ChangeType.UPSERT);
 
     _entityClient.ingestProposal(proposal, authentication);
   }
 
   void createGlossaryTermEntity(@Nonnull final String name, @Nonnull final Optional<Urn> parentNode,
-      final Authentication authentication) throws Exception {
+      @Nonnull final Optional<String> description, final Authentication authentication) throws Exception {
     final GlossaryTermKey key = new GlossaryTermKey();
 
     final String id = UUID.randomUUID().toString();
@@ -568,7 +572,7 @@ public class ProposalService {
     proposal.setEntityKeyAspect(GenericRecordUtils.serializeAspect(key));
     proposal.setEntityType(Constants.GLOSSARY_TERM_ENTITY_NAME);
     proposal.setAspectName(Constants.GLOSSARY_TERM_INFO_ASPECT_NAME);
-    proposal.setAspect(GenericRecordUtils.serializeAspect(mapGlossaryTermInfo(name, parentNode)));
+    proposal.setAspect(GenericRecordUtils.serializeAspect(mapGlossaryTermInfo(name, parentNode, description)));
     proposal.setChangeType(ChangeType.UPSERT);
 
     _entityClient.ingestProposal(proposal, authentication);
@@ -610,7 +614,7 @@ public class ProposalService {
     _entityClient.ingestProposal(proposal, authentication);
   }
 
-  GlossaryNodeInfo mapGlossaryNodeInfo(@Nonnull final String name, @Nonnull final Optional<Urn> parentNode) throws Exception {
+  GlossaryNodeInfo mapGlossaryNodeInfo(@Nonnull final String name, @Nonnull final Optional<Urn> parentNode, @Nonnull final Optional<String> description) throws Exception {
     final GlossaryNodeInfo result = new GlossaryNodeInfo();
     result.setName(name);
     result.setDefinition("");
@@ -618,11 +622,12 @@ public class ProposalService {
       final GlossaryNodeUrn nodeUrn = GlossaryNodeUrn.createFromString(parentNode.get().toString());
       result.setParentNode(nodeUrn);
     }
+    description.ifPresent(result::setDefinition);
 
     return result;
   }
 
-  GlossaryTermInfo mapGlossaryTermInfo(@Nonnull final String name, @Nonnull final Optional<Urn> parentNode) throws Exception {
+  GlossaryTermInfo mapGlossaryTermInfo(@Nonnull final String name, @Nonnull final Optional<Urn> parentNode, @Nonnull final Optional<String> description) throws Exception {
     final GlossaryTermInfo result = new GlossaryTermInfo();
     result.setName(name);
     result.setDefinition("");
@@ -631,6 +636,7 @@ public class ProposalService {
       final GlossaryNodeUrn nodeUrn = GlossaryNodeUrn.createFromString(parentNode.get().toString());
       result.setParentNode(nodeUrn);
     }
+    description.ifPresent(result::setDefinition);
 
     return result;
   }
