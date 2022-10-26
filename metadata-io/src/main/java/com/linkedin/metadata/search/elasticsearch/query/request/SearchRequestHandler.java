@@ -398,7 +398,7 @@ public class SearchRequestHandler {
       final AggregationMetadata aggregationMetadata = new AggregationMetadata().setName(entry.getKey())
           .setDisplayName(_filtersToDisplayName.get(entry.getKey()))
           .setAggregations(new LongMap(oneTermAggResult))
-          .setFilterValues(new FilterValueArray(SearchUtil.convertToFilters(oneTermAggResult)));
+          .setFilterValues(new FilterValueArray(SearchUtil.convertToFilters(oneTermAggResult, Collections.emptySet())));
       aggregationMetadataList.add(aggregationMetadata);
     }
 
@@ -519,8 +519,15 @@ public class SearchRequestHandler {
        */
       originalMetadata.add(buildAggregationMetadata(finalFacetField,
           _filtersToDisplayName.getOrDefault(finalFacetField, finalFacetField),
+<<<<<<< HEAD
           new LongMap(criterion.getValues().stream().collect(Collectors.toMap(i -> i, i -> 0L))), new FilterValueArray(
               criterion.getValues().stream().map(value -> createFilterValue(value, 0L)).collect(Collectors.toList()))));
+=======
+          new LongMap(criterion.getValues().stream().collect(Collectors.toMap(i -> i, i -> 0L))),
+          new FilterValueArray(criterion.getValues().stream().map(value -> createFilterValue(value, 0L, true)).collect(
+              Collectors.toList())))
+      );
+>>>>>>> 228c10de43 (fix(adv search): two advanced search fixes (#6252))
     }
   }
 
@@ -530,7 +537,7 @@ public class SearchRequestHandler {
         || originalMetadata.getFilterValues().stream().noneMatch(entry -> entry.getValue().equals(value))) {
       // No aggregation found for filtered value -- inject one!
       originalMetadata.getAggregations().put(value, 0L);
-      originalMetadata.getFilterValues().add(createFilterValue(value, 0L));
+      originalMetadata.getFilterValues().add(createFilterValue(value, 0L, true));
     }
   }
 
