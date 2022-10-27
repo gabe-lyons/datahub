@@ -519,15 +519,10 @@ public class SearchRequestHandler {
        */
       originalMetadata.add(buildAggregationMetadata(finalFacetField,
           _filtersToDisplayName.getOrDefault(finalFacetField, finalFacetField),
-<<<<<<< HEAD
-          new LongMap(criterion.getValues().stream().collect(Collectors.toMap(i -> i, i -> 0L))), new FilterValueArray(
-              criterion.getValues().stream().map(value -> createFilterValue(value, 0L)).collect(Collectors.toList()))));
-=======
           new LongMap(criterion.getValues().stream().collect(Collectors.toMap(i -> i, i -> 0L))),
           new FilterValueArray(criterion.getValues().stream().map(value -> createFilterValue(value, 0L, true)).collect(
               Collectors.toList())))
       );
->>>>>>> 228c10de43 (fix(adv search): two advanced search fixes (#6252))
     }
   }
 
