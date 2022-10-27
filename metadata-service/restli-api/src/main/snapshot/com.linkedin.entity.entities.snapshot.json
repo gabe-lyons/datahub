@@ -5711,6 +5711,10 @@
           }, {
             "name" : "facetCount",
             "type" : "long"
+          }, {
+            "name" : "filtered",
+            "type" : "boolean",
+            "optional" : true
           } ]
         }
       }
