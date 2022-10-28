@@ -10,7 +10,6 @@ import com.linkedin.datahub.graphql.generated.ListActionRequestsInput;
 import com.linkedin.datahub.graphql.generated.ListActionRequestsResult;
 import com.linkedin.entity.Entity;
 import com.linkedin.entity.client.EntityClient;
-import com.linkedin.identity.GroupMembership;
 import com.linkedin.metadata.query.filter.Condition;
 import com.linkedin.metadata.query.filter.ConjunctiveCriterion;
 import com.linkedin.metadata.query.filter.ConjunctiveCriterionArray;
@@ -27,7 +26,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -78,9 +76,7 @@ public class ListActionRequestsResolver implements DataFetcher<CompletableFuture
         if (assignee == null) {
           // Case 1: If no assignee filter provided, fall back to filtering for current user and their groups.
           actorUrn = Urn.createFromString(context.getActorUrn());
-          final Optional<GroupMembership> maybeGroupMembership =
-              resolveGroupMembership(actorUrn, context.getAuthentication(), _entityClient);
-          groupUrns = maybeGroupMembership.<List<Urn>>map(GroupMembership::getGroups).orElse(null);
+          groupUrns = getGroupUrns(actorUrn, context.getAuthentication(), _entityClient);
         } else {
           // Case 2: Caller provided a user or group assignee filter.
           final Urn assigneeUrn = Urn.createFromString(assignee.getUrn());
@@ -88,6 +84,7 @@ public class ListActionRequestsResolver implements DataFetcher<CompletableFuture
             groupUrns = Collections.singletonList(assigneeUrn);
           } else {
             actorUrn = assigneeUrn;
+            groupUrns = getGroupUrns(actorUrn, context.getAuthentication(), _entityClient);
           }
         }
 

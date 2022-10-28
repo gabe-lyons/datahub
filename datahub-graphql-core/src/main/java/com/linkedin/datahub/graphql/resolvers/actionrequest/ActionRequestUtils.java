@@ -35,15 +35,17 @@ import com.linkedin.datahub.graphql.types.dataset.mappers.EditableSchemaMetadata
 import com.linkedin.datahub.graphql.types.glossary.mappers.GlossaryTermsMapper;
 import com.linkedin.datahub.graphql.types.tag.mappers.GlobalTagsMapper;
 import com.linkedin.entity.Entity;
+import com.linkedin.entity.EntityResponse;
+import com.linkedin.entity.EnvelopedAspect;
+import com.linkedin.entity.EnvelopedAspectMap;
 import com.linkedin.entity.client.EntityClient;
 import com.linkedin.identity.GroupMembership;
+import com.linkedin.identity.NativeGroupMembership;
 import com.linkedin.metadata.aspect.ActionRequestAspect;
-import com.linkedin.metadata.aspect.CorpUserAspect;
 import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.query.filter.Condition;
 import com.linkedin.metadata.query.filter.Criterion;
 import com.linkedin.metadata.snapshot.ActionRequestSnapshot;
-import com.linkedin.metadata.snapshot.CorpUserSnapshot;
 import com.linkedin.r2.RemoteInvocationException;
 import com.linkedin.schema.EditableSchemaMetadata;
 import java.net.URISyntaxException;
@@ -359,20 +361,27 @@ public class ActionRequestUtils {
         .collect(Collectors.toList());
   }
 
-  public static Optional<GroupMembership> resolveGroupMembership(final Urn actor, final Authentication authentication,
-      EntityClient entityClient) {
+  public static List<Urn> getGroupUrns(final Urn actor, final Authentication authentication,
+      EntityClient entityClient) throws Exception {
+    List<Urn> groupUrns = new ArrayList<>();
     try {
-      final CorpUserSnapshot corpUser = entityClient.get(actor, authentication).getValue().getCorpUserSnapshot();
-      for (CorpUserAspect aspect : corpUser.getAspects()) {
-        if (aspect.isGroupMembership()) {
-          // Found group membership.
-          return Optional.of(aspect.getGroupMembership());
-        }
+      final EntityResponse response = entityClient.getV2(CORP_USER_ENTITY_NAME, actor, null, authentication);
+      final EnvelopedAspectMap aspects = response.getAspects();
+
+      if (aspects.get(GROUP_MEMBERSHIP_ASPECT_NAME) != null) {
+        EnvelopedAspect aspect = aspects.get(GROUP_MEMBERSHIP_ASPECT_NAME);
+        final GroupMembership groupMembership = new GroupMembership(aspect.getValue().data());
+        groupUrns.addAll(groupMembership.getGroups());
       }
+      if (aspects.get(NATIVE_GROUP_MEMBERSHIP_ASPECT_NAME) != null) {
+        EnvelopedAspect aspect = aspects.get(NATIVE_GROUP_MEMBERSHIP_ASPECT_NAME);
+        final NativeGroupMembership nativeGroupMembership = new NativeGroupMembership(aspect.getValue().data());
+        groupUrns.addAll(nativeGroupMembership.getNativeGroups());
+      }
+      return groupUrns;
     } catch (RemoteInvocationException e) {
       throw new RuntimeException(String.format("Failed to fetch corpUser for urn %s", actor), e);
     }
-    return Optional.empty();
   }
 
   private ActionRequestUtils() {
