@@ -78,9 +78,7 @@ public class ListActionRequestsResolver implements DataFetcher<CompletableFuture
         if (assignee == null) {
           // Case 1: If no assignee filter provided, fall back to filtering for current user and their groups.
           actorUrn = Urn.createFromString(context.getActorUrn());
-          final Optional<GroupMembership> maybeGroupMembership =
-              resolveGroupMembership(actorUrn, context.getAuthentication(), _entityClient);
-          groupUrns = maybeGroupMembership.<List<Urn>>map(GroupMembership::getGroups).orElse(null);
+          groupUrns = getGroupUrns(actorUrn, context.getAuthentication(), _entityClient);
         } else {
           // Case 2: Caller provided a user or group assignee filter.
           final Urn assigneeUrn = Urn.createFromString(assignee.getUrn());
@@ -88,6 +86,7 @@ public class ListActionRequestsResolver implements DataFetcher<CompletableFuture
             groupUrns = Collections.singletonList(assigneeUrn);
           } else {
             actorUrn = assigneeUrn;
+            groupUrns = getGroupUrns(actorUrn, context.getAuthentication(), _entityClient);
           }
         }
 
