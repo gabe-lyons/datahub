@@ -363,7 +363,7 @@ public class ActionRequestUtils {
 
   public static List<Urn> getGroupUrns(final Urn actor, final Authentication authentication,
       EntityClient entityClient) throws Exception {
-    List<Urn> groupUrns = null;
+    List<Urn> groupUrns = new ArrayList<>();
     try {
       final EntityResponse response = entityClient.getV2(CORP_USER_ENTITY_NAME, actor, null, authentication);
       final EnvelopedAspectMap aspects = response.getAspects();
@@ -371,16 +371,12 @@ public class ActionRequestUtils {
       if (aspects.get(GROUP_MEMBERSHIP_ASPECT_NAME) != null) {
         EnvelopedAspect aspect = aspects.get(GROUP_MEMBERSHIP_ASPECT_NAME);
         final GroupMembership groupMembership = new GroupMembership(aspect.getValue().data());
-        groupUrns = groupMembership.getGroups();
+        groupUrns.addAll(groupMembership.getGroups());
       }
       if (aspects.get(NATIVE_GROUP_MEMBERSHIP_ASPECT_NAME) != null) {
         EnvelopedAspect aspect = aspects.get(NATIVE_GROUP_MEMBERSHIP_ASPECT_NAME);
         final NativeGroupMembership nativeGroupMembership = new NativeGroupMembership(aspect.getValue().data());
-        if (groupUrns != null) {
-          groupUrns.addAll(nativeGroupMembership.getNativeGroups());
-        } else {
-          groupUrns = nativeGroupMembership.getNativeGroups();
-        }
+        groupUrns.addAll(nativeGroupMembership.getNativeGroups());
       }
       return groupUrns;
     } catch (RemoteInvocationException e) {
