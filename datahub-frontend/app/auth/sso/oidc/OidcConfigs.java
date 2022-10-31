@@ -44,7 +44,7 @@ public class OidcConfigs extends SsoConfigs {
     /**
      * Default values
      */
-    private static final String DEFAULT_OIDC_USERNAME_CLAIM = "preferred_username";
+    private static final String DEFAULT_OIDC_USERNAME_CLAIM = "email";
     private static final String DEFAULT_OIDC_USERNAME_CLAIM_REGEX = "(.*)";
     private static final String DEFAULT_OIDC_SCOPE = "openid profile email";
         // Often "group" must be included for groups.

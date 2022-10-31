@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import styled from 'styled-components/macro';
+import { EditOutlined } from '@ant-design/icons';
 import { message, Button, Input, Modal, Typography, Form } from 'antd';
+import DOMPurify from 'dompurify';
 import {
     useCreateGlossaryTermMutation,
     useCreateGlossaryNodeMutation,
@@ -13,6 +15,8 @@ import {
     useProposeCreateGlossaryNodeMutation,
     useProposeCreateGlossaryTermMutation,
 } from '../../../../graphql/proposals.generated';
+import analytics, { EventType } from '../../../analytics';
+import DescriptionModal from '../components/legacy/DescriptionModal';
 
 const StyledItem = styled(Form.Item)`
     margin-bottom: 0;
@@ -20,6 +24,10 @@ const StyledItem = styled(Form.Item)`
 
 const OptionalWrapper = styled.span`
     font-weight: normal;
+`;
+
+const StyledButton = styled(Button)`
+    padding: 0;
 `;
 
 interface Props {
@@ -36,6 +44,8 @@ function CreateGlossaryEntityModal(props: Props) {
     const entityRegistry = useEntityRegistry();
     const [stagedName, setStagedName] = useState('');
     const [selectedParentUrn, setSelectedParentUrn] = useState(entityData.urn);
+    const [documentation, setDocumentation] = useState('');
+    const [isDocumentationModalVisible, setIsDocumentationModalVisible] = useState(false);
     const [createButtonDisabled, setCreateButtonDisabled] = useState(true);
     const refetch = useRefetch();
 
@@ -48,17 +58,24 @@ function CreateGlossaryEntityModal(props: Props) {
         const mutation =
             entityType === EntityType.GlossaryTerm ? createGlossaryTermMutation : createGlossaryNodeMutation;
 
+        const sanitizedDescription = DOMPurify.sanitize(documentation);
         mutation({
             variables: {
                 input: {
                     name: stagedName,
                     parentNode: selectedParentUrn || null,
+                    description: sanitizedDescription || null,
                 },
             },
         })
             .then(() => {
                 message.loading({ content: 'Updating...', duration: 2 });
                 setTimeout(() => {
+                    analytics.event({
+                        type: EventType.CreateGlossaryEntityEvent,
+                        entityType,
+                        parentNodeUrn: selectedParentUrn || undefined,
+                    });
                     message.success({
                         content: `Created ${entityRegistry.getEntityName(entityType)}!`,
                         duration: 2,
@@ -98,6 +115,11 @@ function CreateGlossaryEntityModal(props: Props) {
                 message.success({ content: `Proposed ${entityRegistry.getEntityName(entityType)}!`, duration: 2 });
             });
         onClose();
+    }
+
+    function addDocumentation(description: string) {
+        setDocumentation(description);
+        setIsDocumentationModalVisible(false);
     }
 
     return (
@@ -159,6 +181,26 @@ function CreateGlossaryEntityModal(props: Props) {
                         />
                     </StyledItem>
                 </Form.Item>
+                <StyledItem
+                    label={
+                        <Typography.Text strong>
+                            Documentation <OptionalWrapper>(optional)</OptionalWrapper>
+                        </Typography.Text>
+                    }
+                >
+                    <StyledButton type="link" onClick={() => setIsDocumentationModalVisible(true)}>
+                        <EditOutlined />
+                        {documentation ? 'Edit' : 'Add'} Documentation
+                    </StyledButton>
+                    {isDocumentationModalVisible && (
+                        <DescriptionModal
+                            title="Add Documenataion"
+                            onClose={() => setIsDocumentationModalVisible(false)}
+                            onSubmit={addDocumentation}
+                            description={documentation}
+                        />
+                    )}
+                </StyledItem>
             </Form>
         </Modal>
     );
