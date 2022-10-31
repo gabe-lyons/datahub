@@ -247,7 +247,7 @@ public class UpdateIndicesHook implements MetadataChangeLogHook {
   }
 
   private void updateGraphServiceDiff(Urn urn, AspectSpec aspectSpec, @Nullable RecordTemplate oldAspect, @Nonnull RecordTemplate newAspect) {
-    Pair<List<Edge>, Set<String>> oldEdgeAndRelationTypes = null;
+    Pair<List<Edge>, HashMap<Urn, Set<String>>> oldEdgeAndRelationTypes = null;
     if (oldAspect != null) {
       oldEdgeAndRelationTypes = getEdgesAndRelationshipTypesFromAspect(urn, aspectSpec, oldAspect);
     }
@@ -255,7 +255,7 @@ public class UpdateIndicesHook implements MetadataChangeLogHook {
     final List<Edge> oldEdges = oldEdgeAndRelationTypes != null ? oldEdgeAndRelationTypes.getFirst() : Collections.emptyList();
     final Set<Edge> oldEdgeSet = new HashSet<>(oldEdges);
 
-    Pair<List<Edge>, Set<String>> newEdgeAndRelationTypes =
+    Pair<List<Edge>, HashMap<Urn, Set<String>>> newEdgeAndRelationTypes =
         getEdgesAndRelationshipTypesFromAspect(urn, aspectSpec, newAspect);
 
     final List<Edge> newEdges = newEdgeAndRelationTypes.getFirst();
