@@ -98,7 +98,8 @@ const customMerge = (isPrimary, key) => {
     if (key === 'upstream' || key === 'downstream') {
         return (_secondary, primary) => primary;
     }
-    if (key === 'platform') {
+    // take the platform & siblings of whichever entity we're merging with, rather than the primary
+    if (key === 'platform' || key === 'siblings') {
         return (secondary, primary) => (isPrimary ? primary : secondary);
     }
     if (key === 'testResults') {
