@@ -178,8 +178,8 @@ public class ProposalService {
     Optional<Urn> parentNode =
         createGlossaryNodeProposal.hasParentNode() && createGlossaryNodeProposal.getParentNode() != null ? Optional.of(
             createGlossaryNodeProposal.getParentNode()) : Optional.empty();
-    Optional<String> description = createGlossaryNodeProposal.hasDescription() ?
-        Optional.ofNullable(createGlossaryNodeProposal.getDescription()) : Optional.empty();
+    Optional<String> description = createGlossaryNodeProposal.hasDescription()
+        ? Optional.ofNullable(createGlossaryNodeProposal.getDescription()) : Optional.empty();
       if (!canManageGlossaries && !isAuthorizedToResolveGlossaryEntityAsOwner(actorUrn, parentNode)) {
         throw new RuntimeException(
             "Unauthorized to accept creating this Glossary Node. Please contact your DataHub administrator.");
@@ -201,8 +201,8 @@ public class ProposalService {
     Optional<Urn> parentNode =
         createGlossaryTermProposal.hasParentNode() && createGlossaryTermProposal.getParentNode() != null ? Optional.of(
             createGlossaryTermProposal.getParentNode()) : Optional.empty();
-    Optional<String> description = createGlossaryTermProposal.hasDescription() ?
-        Optional.ofNullable(createGlossaryTermProposal.getDescription()) : Optional.empty();
+    Optional<String> description = createGlossaryTermProposal.hasDescription()
+        ? Optional.ofNullable(createGlossaryTermProposal.getDescription()) : Optional.empty();
       if (!canManageGlossaries && !isAuthorizedToResolveGlossaryEntityAsOwner(actorUrn, parentNode)) {
         throw new RuntimeException(
             "Unauthorized to accept creating this Glossary Node. Please contact your DataHub administrator.");
@@ -617,7 +617,8 @@ public class ProposalService {
     _entityClient.ingestProposal(proposal, authentication);
   }
 
-  GlossaryNodeInfo mapGlossaryNodeInfo(@Nonnull final String name, @Nonnull final Optional<Urn> parentNode, @Nonnull final Optional<String> description) throws Exception {
+  GlossaryNodeInfo mapGlossaryNodeInfo(@Nonnull final String name, @Nonnull final Optional<Urn> parentNode,
+     @Nonnull final Optional<String> description) throws Exception {
     final GlossaryNodeInfo result = new GlossaryNodeInfo();
     result.setName(name);
     result.setDefinition("");
@@ -630,7 +631,8 @@ public class ProposalService {
     return result;
   }
 
-  GlossaryTermInfo mapGlossaryTermInfo(@Nonnull final String name, @Nonnull final Optional<Urn> parentNode, @Nonnull final Optional<String> description) throws Exception {
+  GlossaryTermInfo mapGlossaryTermInfo(@Nonnull final String name, @Nonnull final Optional<Urn> parentNode,
+     @Nonnull final Optional<String> description) throws Exception {
     final GlossaryTermInfo result = new GlossaryTermInfo();
     result.setName(name);
     result.setDefinition("");
