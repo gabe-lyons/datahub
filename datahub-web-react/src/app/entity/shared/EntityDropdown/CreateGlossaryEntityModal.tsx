@@ -54,8 +54,6 @@ function CreateGlossaryEntityModal(props: Props) {
     const [proposeCreateGlossaryTermMutation] = useProposeCreateGlossaryTermMutation();
     const [proposeCreateGlossaryNodeMutation] = useProposeCreateGlossaryNodeMutation();
 
-    const sanitizedDocumentation = DOMPurify.sanitize(documentation);
-
     function createGlossaryEntity() {
         const mutation =
             entityType === EntityType.GlossaryTerm ? createGlossaryTermMutation : createGlossaryNodeMutation;
@@ -198,7 +196,7 @@ function CreateGlossaryEntityModal(props: Props) {
                 >
                     <StyledButton type="link" onClick={() => setIsDocumentationModalVisible(true)}>
                         <EditOutlined />
-                        {sanitizedDocumentation ? 'Edit' : 'Add'} Documentation
+                        {documentation ? 'Edit' : 'Add'} Documentation
                     </StyledButton>
                     {isDocumentationModalVisible && (
                         <DescriptionModal
