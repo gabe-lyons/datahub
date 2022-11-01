@@ -14,12 +14,21 @@ import BusinessGlossaryPage from './glossary/BusinessGlossaryPage';
 import { SettingsPage } from './settings/SettingsPage';
 import { ActionRequestsPage } from './actionrequest/ActionRequestsPage';
 import { ManageTestsPage } from './tests/ManageTestsPage';
+import { useAppConfig } from './useAppConfig';
+import { useGetAuthenticatedUser } from './useGetAuthenticatedUser';
+import { shouldShowGlossary } from './identity/user/UserUtils';
 
 /**
  * Container for all searchable page routes
  */
 export const SearchRoutes = (): JSX.Element => {
     const entityRegistry = useEntityRegistry();
+    const appConfig = useAppConfig();
+    const authenticatedUser = useGetAuthenticatedUser();
+    const canManageGlossary = authenticatedUser?.platformPrivileges.manageGlossaries || false;
+    const hideGlossary = !!appConfig?.config?.visualConfig?.hideGlossary;
+    const showGlossary = shouldShowGlossary(canManageGlossary, hideGlossary);
+
     return (
         <SearchablePage>
             <Switch>
@@ -43,7 +52,10 @@ export const SearchRoutes = (): JSX.Element => {
                 <Route path={PageRoutes.DOMAINS} render={() => <ManageDomainsPage />} />
                 <Route path={PageRoutes.INGESTION} render={() => <ManageIngestionPage />} />
                 <Route path={PageRoutes.SETTINGS} render={() => <SettingsPage />} />
-                <Route path={PageRoutes.GLOSSARY} render={() => <BusinessGlossaryPage />} />
+                <Route
+                    path={PageRoutes.GLOSSARY}
+                    render={() => (showGlossary ? <BusinessGlossaryPage /> : <Redirect to="/" />)}
+                />
                 <Route path={PageRoutes.ACTION_REQUESTS} render={() => <ActionRequestsPage />} />
                 <Route path={PageRoutes.TESTS} render={() => <ManageTestsPage />} />
                 <Route component={NoPageFound} />
