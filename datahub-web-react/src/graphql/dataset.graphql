@@ -329,6 +329,9 @@ fragment nonSiblingDatasetFields on Dataset {
     totalIncidents: incidents(start: 0, count: 1) {
         total
     }
+    siblings {
+        isPrimary
+    }
 }
 
 fragment siblingFields on Dataset {
