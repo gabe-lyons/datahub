@@ -89,11 +89,16 @@ public class CacheableSearcher<K> {
       SearchResult result;
       if (enableCache()) {
         try (Timer.Context ignored2 = MetricUtils.timer(this.getClass(), "getBatch_cache").time()) {
+          Timer.Context cacheAccess = MetricUtils.timer(this.getClass(), "getBatch_cache_access").time();
           K cacheKey = cacheKeyGenerator.apply(batch);
           result = cache.get(cacheKey, SearchResult.class);
+          cacheAccess.stop();
           if (result == null) {
+            Timer.Context cacheMiss = MetricUtils.timer(this.getClass(), "getBatch_cache_miss").time();
             result = searcher.apply(batch);
             cache.put(cacheKey, result);
+            cacheMiss.stop();
+            MetricUtils.counter(this.getClass(), "getBatch_cache_miss_count").inc();
           }
         }
       } else {

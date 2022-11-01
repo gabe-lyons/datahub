@@ -159,6 +159,7 @@ entities:
       - ownership
       - deprecation
       - testResults
+      - domains
   - name: glossaryNode
     keyAspect: glossaryNodeKey
     aspects:

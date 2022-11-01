@@ -49,6 +49,7 @@ import com.linkedin.datahub.graphql.generated.Dataset;
 import com.linkedin.datahub.graphql.generated.DatasetStatsSummary;
 import com.linkedin.datahub.graphql.generated.Domain;
 import com.linkedin.datahub.graphql.generated.Entity;
+import com.linkedin.datahub.graphql.generated.EntityPath;
 import com.linkedin.datahub.graphql.generated.EntityRelationship;
 import com.linkedin.datahub.graphql.generated.EntityRelationshipLegacy;
 import com.linkedin.datahub.graphql.generated.ForeignKeyConstraint;
@@ -78,6 +79,7 @@ import com.linkedin.datahub.graphql.generated.Owner;
 import com.linkedin.datahub.graphql.generated.PolicyMatchCriterionValue;
 import com.linkedin.datahub.graphql.generated.RecommendationContent;
 import com.linkedin.datahub.graphql.generated.ResolvedAuditStamp;
+import com.linkedin.datahub.graphql.generated.SchemaFieldEntity;
 import com.linkedin.datahub.graphql.generated.SearchAcrossLineageResult;
 import com.linkedin.datahub.graphql.generated.SearchResult;
 import com.linkedin.datahub.graphql.generated.SiblingProperties;
@@ -270,6 +272,7 @@ import com.linkedin.datahub.graphql.types.mlmodel.MLPrimaryKeyType;
 import com.linkedin.datahub.graphql.types.notebook.NotebookType;
 import com.linkedin.datahub.graphql.types.policy.DataHubPolicyType;
 import com.linkedin.datahub.graphql.types.role.DataHubRoleType;
+import com.linkedin.datahub.graphql.types.schemafield.SchemaFieldType;
 import com.linkedin.datahub.graphql.types.tag.TagType;
 import com.linkedin.datahub.graphql.types.test.TestType;
 import com.linkedin.entity.client.EntityClient;
@@ -384,6 +387,7 @@ public class GmsGraphQLEngine {
     private final TestType testType;
     private final DataHubPolicyType dataHubPolicyType;
     private final DataHubRoleType dataHubRoleType;
+    private final SchemaFieldType schemaFieldType;
 
     // SaaS only
     private final ProposalService proposalService;
@@ -490,6 +494,7 @@ public class GmsGraphQLEngine {
         this.testType = new TestType(entityClient);
         this.dataHubPolicyType = new DataHubPolicyType(entityClient);
         this.dataHubRoleType = new DataHubRoleType(entityClient);
+        this.schemaFieldType = new SchemaFieldType();
         // Init Lists
         this.entityTypes = ImmutableList.of(
             datasetType,
@@ -517,7 +522,8 @@ public class GmsGraphQLEngine {
             accessTokenMetadataType,
             testType,
             dataHubPolicyType,
-            dataHubRoleType
+            dataHubRoleType,
+            schemaFieldType
         );
         this.loadableTypes = new ArrayList<>(entityTypes);
         this.ownerTypes = ImmutableList.of(corpUserType, corpGroupType);
@@ -578,6 +584,9 @@ public class GmsGraphQLEngine {
         configureVersionedDatasetResolvers(builder);
         configureAccessAccessTokenMetadataResolvers(builder);
         configureTestResultResolvers(builder);
+        configureSchemaFieldResolvers(builder);
+        configureEntityPathResolvers(builder);
+
         // Not in OSS
         configureActionRequestResolvers(builder);
         configureResolvedAuditStampResolvers(builder);
@@ -1149,6 +1158,20 @@ public class GmsGraphQLEngine {
     private void configureGlossaryNodeResolvers(final RuntimeWiring.Builder builder) {
         builder.type("GlossaryNode", typeWiring -> typeWiring
             .dataFetcher("parentNodes", new ParentNodesResolver(entityClient))
+        );
+    }
+
+    private void configureSchemaFieldResolvers(final RuntimeWiring.Builder builder) {
+        builder.type("SchemaFieldEntity", typeWiring -> typeWiring
+            .dataFetcher("parent", new EntityTypeResolver(entityTypes,
+                (env) -> ((SchemaFieldEntity) env.getSource()).getParent()))
+        );
+    }
+
+    private void configureEntityPathResolvers(final RuntimeWiring.Builder builder) {
+        builder.type("EntityPath", typeWiring -> typeWiring
+            .dataFetcher("path",  new BatchGetEntitiesResolver(entityTypes,
+                (env) -> ((EntityPath) env.getSource()).getPath()))
         );
     }
 

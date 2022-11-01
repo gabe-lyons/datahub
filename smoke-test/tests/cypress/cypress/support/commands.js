@@ -37,6 +37,56 @@ Cypress.Commands.add('typeSearchDisableCache', {prevSubject: 'element'}, (subjec
     const combinedStr = `${input} OR ${randomStr}{enter}`
     cy.get(subject.selector).type(combinedStr);
 })
+
+Cypress.Commands.add("goToGlossaryList", () => {
+  cy.visit("/glossary");
+  cy.contains("Glossary");
+});
+
+Cypress.Commands.add("goToDataset", (urn) => {
+  cy.visit(
+    "/dataset/" + urn
+  );
+})
+
+Cypress.Commands.add("openThreeDotDropdown", () => {
+  cy.get('div[class^="EntityHeader__SideHeaderContent-"] > div > .ant-dropdown-trigger').click();
+});
+
+Cypress.Commands.add("clickOptionWithText", (text) => {
+  cy.contains(text).click();
+});
+
+Cypress.Commands.add("deleteFromDropdown", () => {
+  cy.openThreeDotDropdown();
+  cy.clickOptionWithText("Delete");
+  cy.clickOptionWithText("Yes");
+});
+
+Cypress.Commands.add("addViaModel", (text) => {
+  cy.get(".ant-form-item-control-input-content > input[type='text']").type(text);
+  cy.get(".ant-modal-footer > [data-testid='add']").click();
+});
+
+Cypress.Commands.add("ensureTextNotPresent", (text) => {
+  cy.contains(text).should("not.exist");
+});
+
+Cypress.Commands.add('addTermToDataset', (urn, term) => {
+  cy.goToDataset(urn);
+  cy.clickOptionWithText("Add Term");
+  cy.focused().type(term);
+  cy.get(".ant-select-item-option-content").within(() =>
+    cy.contains(term).click({ force: true })
+  );
+  cy.get('[data-testid="add-tag-term-from-modal-btn"]').click({
+    force: true,
+  });
+  cy.get('[data-testid="add-tag-term-from-modal-btn"]').should("not.exist");
+
+  cy.contains(term);
+});
+
 //
 //
 // -- This is a child command --
