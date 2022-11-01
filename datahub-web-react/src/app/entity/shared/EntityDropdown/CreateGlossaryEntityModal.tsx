@@ -135,7 +135,11 @@ function CreateGlossaryEntityModal(props: Props) {
                     <Button onClick={proposeGlossaryEntity} disabled={createButtonDisabled}>
                         Propose
                     </Button>
-                    <Button onClick={createGlossaryEntity} disabled={createButtonDisabled || !canManageGlossaries}>
+                    <Button
+                        data-testid="add"
+                        onClick={createGlossaryEntity}
+                        disabled={createButtonDisabled || !canManageGlossaries}
+                    >
                         Create
                     </Button>
                 </>
