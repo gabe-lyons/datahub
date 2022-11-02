@@ -8,7 +8,15 @@ import { LogoCountCard } from '../shared/LogoCountCard';
 import { EventType } from '../analytics/event';
 import analytics from '../analytics';
 
-export const BrowseEntityCard = ({ entityType, count }: { entityType: EntityType; count: number }) => {
+export const BrowseEntityCard = ({
+    entityType,
+    count,
+    showGlossary,
+}: {
+    entityType: EntityType;
+    count: number;
+    showGlossary?: boolean;
+}) => {
     const entityRegistry = useEntityRegistry();
     const isGlossaryEntityCard = entityType === EntityType.GlossaryTerm;
     const entityPathName = entityRegistry.getPathName(entityType);
@@ -20,14 +28,20 @@ export const BrowseEntityCard = ({ entityType, count }: { entityType: EntityType
         });
     };
 
+    const showElement = isGlossaryEntityCard ? showGlossary : true;
+
     return (
-        <Link to={url} data-testid={`entity-type-browse-card-${entityType}`}>
-            <LogoCountCard
-                logoComponent={entityRegistry.getIcon(entityType, 18, IconStyleType.HIGHLIGHT)}
-                name={entityRegistry.getCollectionName(entityType)}
-                count={count}
-                onClick={onBrowseEntityCardClick}
-            />
-        </Link>
+        <>
+            {showElement && (
+                <Link to={url} data-testid={`entity-type-browse-card-${entityType}`}>
+                    <LogoCountCard
+                        logoComponent={entityRegistry.getIcon(entityType, 18, IconStyleType.HIGHLIGHT)}
+                        name={entityRegistry.getCollectionName(entityType)}
+                        count={count}
+                        onClick={onBrowseEntityCardClick}
+                    />
+                </Link>
+            )}
+        </>
     );
 };

@@ -20,8 +20,8 @@ import com.linkedin.datahub.graphql.generated.VisualConfig;
 import com.linkedin.metadata.config.DatahubConfiguration;
 import com.linkedin.metadata.config.IngestionConfiguration;
 import com.linkedin.metadata.config.TestsConfiguration;
-import com.linkedin.metadata.telemetry.TelemetryConfiguration;
 import com.linkedin.metadata.config.VisualConfiguration;
+import com.linkedin.metadata.telemetry.TelemetryConfiguration;
 import com.linkedin.metadata.version.GitVersion;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -121,9 +121,12 @@ public class AppConfigResolver implements DataFetcher<CompletableFuture<AppConfi
     appConfig.setAuthConfig(authConfig);
 
     final VisualConfig visualConfig = new VisualConfig();
-    if (_visualConfiguration != null && _visualConfiguration.getAssets() != null) {
-      visualConfig.setLogoUrl(_visualConfiguration.getAssets().getLogoUrl());
-      visualConfig.setFaviconUrl(_visualConfiguration.getAssets().getFaviconUrl());
+    if (_visualConfiguration != null) {
+      if (_visualConfiguration.getAssets() != null) {
+        visualConfig.setLogoUrl(_visualConfiguration.getAssets().getLogoUrl());
+        visualConfig.setFaviconUrl(_visualConfiguration.getAssets().getFaviconUrl());
+      }
+      visualConfig.setHideGlossary(_visualConfiguration.isHideGlossary());
     }
     appConfig.setVisualConfig(visualConfig);
 

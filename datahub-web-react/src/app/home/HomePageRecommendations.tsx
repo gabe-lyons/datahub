@@ -17,6 +17,8 @@ import { GettingStartedModal } from './GettingStartedModal';
 import { ANTD_GRAY } from '../entity/shared/constants';
 import { useGetAuthenticatedUser } from '../useGetAuthenticatedUser';
 import { HomePagePosts } from './HomePagePosts';
+import { useAppConfig } from '../useAppConfig';
+import { shouldShowGlossary } from '../identity/user/UserUtils';
 
 const RecommendationsContainer = styled.div`
     margin-top: 32px;
@@ -88,7 +90,12 @@ export const HomePageRecommendations = ({ userUrn }: Props) => {
     const entityRegistry = useEntityRegistry();
     const browseEntityList = entityRegistry.getBrowseEntityTypes();
     const [showGettingStartedModal, setShowGettingStartedModal] = useState(false);
-    const user = useGetAuthenticatedUser()?.corpUser;
+    const appConfig = useAppConfig();
+    const authenticatedUser = useGetAuthenticatedUser();
+    const user = authenticatedUser?.corpUser;
+    const canManageGlossary = !!authenticatedUser?.platformPrivileges?.manageGlossaries;
+    const hideGlossary = !!appConfig?.config?.visualConfig?.hideGlossary;
+    const showGlossary = shouldShowGlossary(canManageGlossary, hideGlossary);
 
     const showSimplifiedHomepage = user?.settings?.appearance?.showSimplifiedHomepage;
 
@@ -168,12 +175,19 @@ export const HomePageRecommendations = ({ userUrn }: Props) => {
                                             key={entityCount.entityType}
                                             entityType={entityCount.entityType}
                                             count={entityCount.count}
+                                            showGlossary={showGlossary}
                                         />
                                     ),
                             )}
                             {!orderedEntityCounts.some(
                                 (entityCount) => entityCount.entityType === EntityType.GlossaryTerm,
-                            ) && <BrowseEntityCard entityType={EntityType.GlossaryTerm} count={0} />}
+                            ) && (
+                                <BrowseEntityCard
+                                    entityType={EntityType.GlossaryTerm}
+                                    showGlossary={showGlossary}
+                                    count={0}
+                                />
+                            )}
                         </BrowseCardContainer>
                     ) : (
                         <NoMetadataContainer>
