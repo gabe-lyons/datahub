@@ -4724,6 +4724,14 @@
                   "doc" : "Properties associated with a GlossaryTerm",
                   "include" : [ "com.linkedin.common.CustomProperties" ],
                   "fields" : [ {
+                    "name" : "id",
+                    "type" : "string",
+                    "doc" : "Optional id for the term",
+                    "optional" : true,
+                    "Searchable" : {
+                      "fieldType" : "TEXT_PARTIAL"
+                    }
+                  }, {
                     "name" : "name",
                     "type" : "string",
                     "doc" : "Display name of the term",
@@ -4829,6 +4837,46 @@
                         "fieldType" : "URN"
                       }
                     }
+                  }, {
+                    "name" : "values",
+                    "type" : {
+                      "type" : "array",
+                      "items" : "com.linkedin.common.GlossaryTermUrn"
+                    },
+                    "doc" : "The relationship Has Value with glossary term.\nThese are fixed value a term has. For example a ColorEnum where RED, GREEN and YELLOW are fixed values.",
+                    "optional" : true,
+                    "Relationship" : {
+                      "/*" : {
+                        "entityTypes" : [ "glossaryTerm" ],
+                        "name" : "HasValue"
+                      }
+                    },
+                    "Searchable" : {
+                      "/*" : {
+                        "fieldName" : "values",
+                        "fieldType" : "URN"
+                      }
+                    }
+                  }, {
+                    "name" : "relatedTerms",
+                    "type" : {
+                      "type" : "array",
+                      "items" : "com.linkedin.common.GlossaryTermUrn"
+                    },
+                    "doc" : "The relationship isRelatedTo with glossary term",
+                    "optional" : true,
+                    "Relationship" : {
+                      "/*" : {
+                        "entityTypes" : [ "glossaryTerm" ],
+                        "name" : "IsRelatedTo"
+                      }
+                    },
+                    "Searchable" : {
+                      "/*" : {
+                        "fieldName" : "relatedTerms",
+                        "fieldType" : "URN"
+                      }
+                    }
                   } ],
                   "Aspect" : {
                     "name" : "glossaryRelatedTerms"
@@ -4908,6 +4956,14 @@
                       "boostScore" : 10.0,
                       "enableAutocomplete" : true,
                       "fieldName" : "displayName",
+                      "fieldType" : "TEXT_PARTIAL"
+                    }
+                  }, {
+                    "name" : "id",
+                    "type" : "string",
+                    "doc" : "Optional id for the GlossaryNode",
+                    "optional" : true,
+                    "Searchable" : {
                       "fieldType" : "TEXT_PARTIAL"
                     }
                   } ],
