@@ -62,7 +62,7 @@ public class ProposeCreateGlossaryTermResolverTest {
     CreateGlossaryEntityInput input = new CreateGlossaryEntityInput();
     input.setName(GLOSSARY_TERM_NAME);
     when(_dataFetchingEnvironment.getArgument(eq("input"))).thenReturn(input);
-    when(_proposalService.proposeCreateGlossaryTerm(any(), eq(GLOSSARY_TERM_NAME), any(), eq(_authorizer))).thenReturn(
+    when(_proposalService.proposeCreateGlossaryTerm(any(), eq(GLOSSARY_TERM_NAME), any(), any(), eq(_authorizer))).thenReturn(
         true);
 
     assertTrue(_resolver.get(_dataFetchingEnvironment).join());

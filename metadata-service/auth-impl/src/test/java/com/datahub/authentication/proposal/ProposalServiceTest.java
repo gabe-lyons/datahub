@@ -74,28 +74,28 @@ public class ProposalServiceTest {
   @Test
   public void proposeCreateGlossaryNodeNullArguments() {
     assertThrows(
-        () -> _proposalService.proposeCreateGlossaryNode(null, GLOSSARY_NODE_NAME, Optional.empty(), _authorizer));
-    assertThrows(() -> _proposalService.proposeCreateGlossaryNode(ACTOR_URN, null, Optional.empty(), _authorizer));
-    assertThrows(() -> _proposalService.proposeCreateGlossaryNode(ACTOR_URN, GLOSSARY_NODE_NAME, null, _authorizer));
+        () -> _proposalService.proposeCreateGlossaryNode(null, GLOSSARY_NODE_NAME, Optional.empty(), "test", _authorizer));
+    assertThrows(() -> _proposalService.proposeCreateGlossaryNode(ACTOR_URN, null, Optional.empty(), "test", _authorizer));
+    assertThrows(() -> _proposalService.proposeCreateGlossaryNode(ACTOR_URN, GLOSSARY_NODE_NAME, null, "test", _authorizer));
   }
 
   @Test
   public void proposeCreateGlossaryNodePasses() {
-    _proposalService.proposeCreateGlossaryNode(ACTOR_URN, GLOSSARY_NODE_NAME, Optional.empty(), _authorizer);
+    _proposalService.proposeCreateGlossaryNode(ACTOR_URN, GLOSSARY_NODE_NAME, Optional.empty(), "test", _authorizer);
     verify(_entityService).ingestEntity(any(), any());
   }
 
   @Test
   public void proposeCreateGlossaryTermNullArguments() {
     assertThrows(
-        () -> _proposalService.proposeCreateGlossaryTerm(null, GLOSSARY_TERM_NAME, Optional.empty(), _authorizer));
-    assertThrows(() -> _proposalService.proposeCreateGlossaryTerm(ACTOR_URN, null, Optional.empty(), _authorizer));
-    assertThrows(() -> _proposalService.proposeCreateGlossaryTerm(ACTOR_URN, GLOSSARY_TERM_NAME, null, _authorizer));
+        () -> _proposalService.proposeCreateGlossaryTerm(null, GLOSSARY_TERM_NAME, Optional.empty(), "test", _authorizer));
+    assertThrows(() -> _proposalService.proposeCreateGlossaryTerm(ACTOR_URN, null, Optional.empty(), "test", _authorizer));
+    assertThrows(() -> _proposalService.proposeCreateGlossaryTerm(ACTOR_URN, GLOSSARY_TERM_NAME, null, "test", _authorizer));
   }
 
   @Test
   public void proposeCreateGlossaryTermPasses() {
-    _proposalService.proposeCreateGlossaryTerm(ACTOR_URN, GLOSSARY_TERM_NAME, Optional.empty(), _authorizer);
+    _proposalService.proposeCreateGlossaryTerm(ACTOR_URN, GLOSSARY_TERM_NAME, Optional.empty(), "test", _authorizer);
     verify(_entityService).ingestEntity(any(), any());
   }
 
@@ -160,7 +160,7 @@ public class ProposalServiceTest {
 
     ActionRequestSnapshot actionRequestSnapshot =
         _proposalService.createCreateGlossaryNodeProposalActionRequest(ACTOR_URN, Collections.singletonList(ACTOR_URN),
-            Collections.EMPTY_LIST, GLOSSARY_NODE_NAME, Optional.empty());
+            Collections.EMPTY_LIST, GLOSSARY_NODE_NAME, Optional.empty(), "test");
     _proposalService.acceptCreateGlossaryNodeProposal(ACTOR_URN, actionRequestSnapshot, true, SYSTEM_AUTHENTICATION);
 
     verify(_entityClient).ingestProposal(any(), any());
@@ -179,7 +179,7 @@ public class ProposalServiceTest {
 
     ActionRequestSnapshot actionRequestSnapshot =
         _proposalService.createCreateGlossaryTermProposalActionRequest(ACTOR_URN, Collections.singletonList(ACTOR_URN),
-            Collections.EMPTY_LIST, GLOSSARY_TERM_NAME, Optional.empty());
+            Collections.EMPTY_LIST, GLOSSARY_TERM_NAME, Optional.empty(), "test");
     _proposalService.acceptCreateGlossaryTermProposal(ACTOR_URN, actionRequestSnapshot, true, SYSTEM_AUTHENTICATION);
 
     verify(_entityClient).ingestProposal(any(), any());
@@ -193,7 +193,7 @@ public class ProposalServiceTest {
 
   @Test
   public void acceptUpdateResourceDescriptionProposalForGlossaryNodePasses() throws Exception {
-    GlossaryNodeInfo glossaryNodeInfo = _proposalService.mapGlossaryNodeInfo(GLOSSARY_NODE_NAME, Optional.empty());
+    GlossaryNodeInfo glossaryNodeInfo = _proposalService.mapGlossaryNodeInfo(GLOSSARY_NODE_NAME, Optional.empty(), Optional.of("test"));
     when(_entityClient.exists(any(), any())).thenReturn(false);
     when(_entityService.getLatestAspect(eq(_glossaryNodeUrn), eq(GLOSSARY_NODE_INFO_ASPECT_NAME))).thenReturn(
         glossaryNodeInfo);
@@ -208,7 +208,7 @@ public class ProposalServiceTest {
 
   @Test
   public void acceptUpdateResourceDescriptionProposalForGlossaryTermPasses() throws Exception {
-    GlossaryTermInfo glossaryTermInfo = _proposalService.mapGlossaryTermInfo(GLOSSARY_TERM_NAME, Optional.empty());
+    GlossaryTermInfo glossaryTermInfo = _proposalService.mapGlossaryTermInfo(GLOSSARY_TERM_NAME, Optional.empty(), Optional.of("test"));
     when(_entityClient.exists(any(), any())).thenReturn(false);
     when(_entityService.getLatestAspect(eq(_glossaryTermUrn), eq(GLOSSARY_TERM_INFO_ASPECT_NAME))).thenReturn(
         glossaryTermInfo);

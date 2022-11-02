@@ -39,6 +39,10 @@ record ActionRequestParams {
      * The urn of the parent node of the Proposed Term
      */
     parentNode: optional Urn
+    /**
+     * The description of the Proposed Term
+     */
+    description: optional string
   }
 
   /**
@@ -53,6 +57,10 @@ record ActionRequestParams {
      * The urn of the parent node of the Proposed Node
      */
     parentNode: optional Urn
+    /**
+     * The description of the Proposed Node
+     */
+    description: optional string
   }
 
   /**

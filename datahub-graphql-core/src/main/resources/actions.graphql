@@ -297,6 +297,10 @@ type CreateGlossaryEntityProposalProperties {
     The optional parent node for a proposed Glossary Entity
     """
     parentNode: GlossaryNode
+    """
+    The optional description for a proposed Glossary Entity
+    """
+    description: String
 }
 
 type UpdateDescriptionProposalParams {

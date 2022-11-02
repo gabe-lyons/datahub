@@ -99,11 +99,13 @@ function CreateGlossaryEntityModal(props: Props) {
                 ? proposeCreateGlossaryTermMutation
                 : proposeCreateGlossaryNodeMutation;
 
+        const sanitizedDescription = DOMPurify.sanitize(documentation);
         mutation({
             variables: {
                 input: {
                     name: stagedName,
                     parentNode: selectedParentUrn || null,
+                    description: sanitizedDescription || null,
                 },
             },
         })
