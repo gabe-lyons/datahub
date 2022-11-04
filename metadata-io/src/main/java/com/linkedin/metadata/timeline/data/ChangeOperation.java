@@ -29,4 +29,12 @@ public enum ChangeOperation {
    * Entity is reinstated after being soft-deleted.
    */
   REINSTATE,
+  /**
+   * Run or Proposal is completed
+   */
+  COMPLETED,
+  /**
+   * Proposal is pending
+   */
+  PENDING,
 }

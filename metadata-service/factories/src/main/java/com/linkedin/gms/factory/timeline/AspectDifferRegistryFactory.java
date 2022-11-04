@@ -1,5 +1,7 @@
 package com.linkedin.gms.factory.timeline;
 
+import com.linkedin.metadata.timeline.differ.ActionRequestInfoDiffer;
+import com.linkedin.metadata.timeline.differ.ActionRequestStatusDiffer;
 import com.linkedin.metadata.timeline.differ.AspectDifferRegistry;
 import com.linkedin.metadata.timeline.differ.DatasetPropertiesDiffer;
 import com.linkedin.metadata.timeline.differ.DeprecationDiffer;
@@ -53,6 +55,10 @@ public class AspectDifferRegistryFactory {
     registry.register(CORP_GROUP_KEY_ASPECT_NAME, new EntityKeyDiffer<>());
     registry.register(STATUS_ASPECT_NAME, new StatusDiffer());
     registry.register(DEPRECATION_ASPECT_NAME, new DeprecationDiffer());
+
+    // Action Request Differs
+    registry.register(ACTION_REQUEST_STATUS_ASPECT_NAME, new ActionRequestStatusDiffer());
+    registry.register(ACTION_REQUEST_INFO_ASPECT_NAME, new ActionRequestInfoDiffer());
 
     // TODO: Add ML models.
 
