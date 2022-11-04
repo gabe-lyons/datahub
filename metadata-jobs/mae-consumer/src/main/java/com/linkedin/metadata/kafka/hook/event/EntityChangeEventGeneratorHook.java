@@ -18,8 +18,8 @@ import com.linkedin.metadata.models.AspectSpec;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.timeline.data.ChangeEvent;
 import com.linkedin.metadata.timeline.differ.Aspect;
-import com.linkedin.metadata.timeline.differ.AspectDifferRegistry;
 import com.linkedin.metadata.timeline.differ.AspectDiffer;
+import com.linkedin.metadata.timeline.differ.AspectDifferRegistry;
 import com.linkedin.metadata.utils.GenericRecordUtils;
 import com.linkedin.mxe.MetadataChangeLog;
 import com.linkedin.mxe.PlatformEvent;
@@ -78,7 +78,11 @@ public class EntityChangeEventGeneratorHook implements MetadataChangeLogHook {
       Constants.GLOSSARY_TERM_KEY_ASPECT_NAME,
       Constants.DOMAIN_KEY_ASPECT_NAME,
       Constants.TAG_KEY_ASPECT_NAME,
-      Constants.STATUS_ASPECT_NAME
+      Constants.STATUS_ASPECT_NAME,
+
+      // SaaS only
+      Constants.ACTION_REQUEST_STATUS_ASPECT_NAME,
+      Constants.ACTION_REQUEST_INFO_ASPECT_NAME
   );
   /**
    * The list of change types that are supported for generating semantic change events.
