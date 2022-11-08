@@ -10,25 +10,6 @@
         </filter>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_DIR}/gms.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <FileNamePattern>${LOG_DIR}/gms.%d{yyyy-dd-MM}-%i.log</FileNamePattern>
-            <!-- each archived file, size max 10MB -->
-            <maxFileSize>100MB</maxFileSize>
-            <!-- total size of all archive files, if total size > 10GB, it will delete old archived file -->
-            <totalSizeCap>10GB</totalSizeCap>
-            <!-- 30 days to keep -->
-            <maxHistory>30</maxHistory>
-        </rollingPolicy>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
-        </filter>
-        <encoder>
-            <pattern>%d{HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
-
     <appender name="DEBUG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/gms.debug.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
