@@ -9,5 +9,4 @@ source:
 sink:
   type: "datahub-rest"
   config:
-    server: "https://zendesk.acryl.io/gms"
-    token: "eyJhbGciOiJIUzI1NiJ9.eyJhY3RvclR5cGUiOiJVU0VSIiwiYWN0b3JJZCI6ImFkbWluIiwidHlwZSI6IlBFUlNPTkFMIiwidmVyc2lvbiI6IjIiLCJqdGkiOiIzZDk1OGY1My0xMzkxLTRlY2EtYTcyNC1kNDA0YjY4ZDhmYTYiLCJzdWIiOiJhZG1pbiIsImV4cCI6MTY2NjIxODIzNSwiaXNzIjoiZGF0YWh1Yi1tZXRhZGF0YS1zZXJ2aWNlIn0.Dns24d1MxD98SxCig0ONGPO-ard-YhtZdv-osLXNuWI"
+    server: "http://localhost:8080"
