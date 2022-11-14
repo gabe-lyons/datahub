@@ -5,6 +5,7 @@ import { FacetFilterInput } from '../../../../../../types.generated';
 import { EmbeddedListSearch } from './EmbeddedListSearch';
 import { EntityActionProps } from '../../../../../recommendations/renderer/component/EntityNameList';
 import { UnionType } from '../../../../../search/utils/constants';
+import { FilterSet } from './types';
 
 const SearchContainer = styled.div`
     height: 500px;
@@ -20,7 +21,7 @@ const modalBodyStyle = {
 type Props = {
     title: React.ReactNode;
     emptySearchQuery?: string | null;
-    fixedFilter?: FacetFilterInput | null;
+    fixedFilters?: FilterSet;
     fixedQuery?: string | null;
     placeholderText?: string | null;
     defaultShowFilters?: boolean;
@@ -34,7 +35,7 @@ type Props = {
 export const EmbeddedListSearchModal = ({
     title,
     emptySearchQuery,
-    fixedFilter,
+    fixedFilters,
     fixedQuery,
     placeholderText,
     defaultShowFilters,
@@ -84,7 +85,7 @@ export const EmbeddedListSearchModal = ({
                     onChangePage={onChangePage}
                     onChangeUnionType={setUnionType}
                     emptySearchQuery={emptySearchQuery}
-                    fixedFilter={fixedFilter}
+                    fixedFilters={fixedFilters}
                     fixedQuery={fixedQuery}
                     placeholderText={placeholderText}
                     defaultShowFilters={defaultShowFilters}

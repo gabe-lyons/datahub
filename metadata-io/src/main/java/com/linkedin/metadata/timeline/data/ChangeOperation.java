@@ -30,6 +30,10 @@ public enum ChangeOperation {
    */
   REINSTATE,
   /**
+   * Run has STARTED
+   */
+  STARTED,
+  /**
    * Run or Proposal is completed
    */
   COMPLETED,

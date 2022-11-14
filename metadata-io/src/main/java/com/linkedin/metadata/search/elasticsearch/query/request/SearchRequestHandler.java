@@ -467,20 +467,20 @@ public class SearchRequestHandler {
     }
   }
 
-  private void addCriteriaFiltersToAggregationMetadata(@Nonnull final CriterionArray criteria,
-      @Nonnull final List<AggregationMetadata> originalMetadata) {
-    // For each criterion check whether its already appearing in aggregations
-    Map<String, AggregationMetadata> aggMetadataMap =
-        originalMetadata.stream().collect(Collectors.toMap(AggregationMetadata::getName, agg -> agg));
-
+  private void addCriteriaFiltersToAggregationMetadata(@Nonnull final CriterionArray criteria, @Nonnull final List<AggregationMetadata> originalMetadata) {
     for (Criterion criterion : criteria) {
-      addCriterionFiltersToAggregationMetadata(criterion, originalMetadata, aggMetadataMap);
+      addCriterionFiltersToAggregationMetadata(criterion, originalMetadata);
     }
   }
 
-  private void addCriterionFiltersToAggregationMetadata(@Nonnull final Criterion criterion,
-      @Nonnull final List<AggregationMetadata> originalMetadata,
-      @Nonnull Map<String, AggregationMetadata> aggregationMetadataMap) {
+  private void addCriterionFiltersToAggregationMetadata(
+      @Nonnull final Criterion criterion,
+      @Nonnull final List<AggregationMetadata> aggregationMetadata) {
+
+    // We should never see duplicate aggregation for the same field in aggregation metadata list.
+    final Map<String, AggregationMetadata> aggregationMetadataMap = aggregationMetadata.stream().collect(Collectors.toMap(
+        AggregationMetadata::getName, agg -> agg));
+
     // Map a filter criterion to a facet field (e.g. domains.keyword -> domains)
     final String finalFacetField = toFacetField(criterion.getField());
 
@@ -517,7 +517,8 @@ public class SearchRequestHandler {
        * If there are no results for a particular facet, it will NOT be in the original aggregation set returned by
        * Elasticsearch.
        */
-      originalMetadata.add(buildAggregationMetadata(finalFacetField,
+      aggregationMetadata.add(buildAggregationMetadata(
+          finalFacetField,
           _filtersToDisplayName.getOrDefault(finalFacetField, finalFacetField),
           new LongMap(criterion.getValues().stream().collect(Collectors.toMap(i -> i, i -> 0L))),
           new FilterValueArray(criterion.getValues().stream().map(value -> createFilterValue(value, 0L, true)).collect(

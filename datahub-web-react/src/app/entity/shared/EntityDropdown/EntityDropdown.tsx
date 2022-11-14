@@ -12,14 +12,13 @@ import {
     WarningOutlined,
 } from '@ant-design/icons';
 import { Redirect, useHistory } from 'react-router';
-import { EntityType, PlatformPrivileges } from '../../../../types.generated';
+import { EntityType } from '../../../../types.generated';
 import CreateGlossaryEntityModal from './CreateGlossaryEntityModal';
 import { UpdateDeprecationModal } from './UpdateDeprecationModal';
 import { useUpdateDeprecationMutation } from '../../../../graphql/mutations.generated';
 import MoveGlossaryEntityModal from './MoveGlossaryEntityModal';
 import { ANTD_GRAY } from '../constants';
 import { useEntityRegistry } from '../../../useEntityRegistry';
-import { useGetAuthenticatedUser } from '../../../useGetAuthenticatedUser';
 import { AddIncidentModal } from '../tabs/Incident/components/AddIncidentModal';
 import { getEntityPath } from '../containers/profile/utils';
 import useDeleteEntity from './useDeleteEntity';
@@ -68,7 +67,6 @@ interface Props {
     entityType: EntityType;
     entityData?: any;
     menuItems: Set<EntityMenuItems>;
-    platformPrivileges?: PlatformPrivileges;
     size?: number;
     refetchForEntity?: () => void;
     refetchForTerms?: () => void;
@@ -85,7 +83,6 @@ function EntityDropdown(props: Props) {
         entityData,
         entityType,
         menuItems,
-        platformPrivileges,
         refetchForEntity,
         refetchForTerms,
         refetchForNodes,
@@ -95,7 +92,6 @@ function EntityDropdown(props: Props) {
     } = props;
 
     const entityRegistry = useEntityRegistry();
-    const me = useGetAuthenticatedUser(!!platformPrivileges);
     const [updateDeprecation] = useUpdateDeprecationMutation();
     const isHideSiblingMode = useIsSeparateSiblingsMode();
     const { onDeleteEntity, hasBeenDeleted } = useDeleteEntity(urn, entityType, entityData, onDelete);
@@ -131,11 +127,12 @@ function EntityDropdown(props: Props) {
         refetchForEntity?.();
     };
 
-    const canManageGlossaries = platformPrivileges
-        ? platformPrivileges.manageGlossaries
-        : me?.platformPrivileges.manageGlossaries;
     const pageUrl = window.location.href;
-    const isDeleteDisabled = !!entityData?.children?.count;
+    const isGlossaryEntity = entityType === EntityType.GlossaryNode || entityType === EntityType.GlossaryTerm;
+    const entityHasChildren = !!entityData?.children?.total;
+    const canManageGlossaryEntity = !!entityData?.privileges?.canManageEntity;
+    const canCreateGlossaryEntity = !!entityData?.privileges?.canManageChildren;
+    const canDeleteGlossaryEntity = !entityHasChildren && canManageGlossaryEntity;
 
     /**
      * A default path to redirect to if the entity is deleted.
@@ -173,14 +170,22 @@ function EntityDropdown(props: Props) {
                             </Menu.Item>
                         )}
                         {menuItems.has(EntityMenuItems.ADD_TERM) && (
-                            <StyledMenuItem key="2" onClick={() => setIsCreateTermModalVisible(true)}>
+                            <StyledMenuItem
+                                key="2"
+                                disabled={!canCreateGlossaryEntity}
+                                onClick={() => setIsCreateTermModalVisible(true)}
+                            >
                                 <MenuItem>
                                     <PlusOutlined /> &nbsp;Add Term
                                 </MenuItem>
                             </StyledMenuItem>
                         )}
                         {menuItems.has(EntityMenuItems.ADD_TERM_GROUP) && (
-                            <StyledMenuItem key="3" onClick={() => setIsCreateNodeModalVisible(true)}>
+                            <StyledMenuItem
+                                key="3"
+                                disabled={!canCreateGlossaryEntity}
+                                onClick={() => setIsCreateNodeModalVisible(true)}
+                            >
                                 <MenuItem>
                                     <FolderAddOutlined /> &nbsp;Add Term Group
                                 </MenuItem>
@@ -189,7 +194,7 @@ function EntityDropdown(props: Props) {
                         {menuItems.has(EntityMenuItems.MOVE) && (
                             <StyledMenuItem
                                 key="4"
-                                disabled={!canManageGlossaries}
+                                disabled={!canManageGlossaryEntity}
                                 onClick={() => setIsMoveModalVisible(true)}
                             >
                                 <MenuItem>
@@ -200,14 +205,16 @@ function EntityDropdown(props: Props) {
                         {menuItems.has(EntityMenuItems.DELETE) && (
                             <StyledMenuItem
                                 key="5"
-                                disabled={isDeleteDisabled || !canManageGlossaries}
+                                disabled={isGlossaryEntity && !canDeleteGlossaryEntity}
                                 onClick={onDeleteEntity}
                             >
                                 <Tooltip
                                     title={`Can't delete ${entityRegistry.getEntityName(
                                         entityType,
                                     )} with child entities.`}
-                                    overlayStyle={isDeleteDisabled ? {} : { display: 'none' }}
+                                    overlayStyle={
+                                        canManageGlossaryEntity && entityHasChildren ? {} : { display: 'none' }
+                                    }
                                 >
                                     <MenuItem>
                                         <DeleteOutlined /> &nbsp;Delete
@@ -234,7 +241,6 @@ function EntityDropdown(props: Props) {
                     entityType={EntityType.GlossaryTerm}
                     onClose={() => setIsCreateTermModalVisible(false)}
                     refetchData={refetchForTerms}
-                    canManageGlossaries={!!canManageGlossaries}
                 />
             )}
             {isCreateNodeModalVisible && (
@@ -242,7 +248,6 @@ function EntityDropdown(props: Props) {
                     entityType={EntityType.GlossaryNode}
                     onClose={() => setIsCreateNodeModalVisible(false)}
                     refetchData={refetchForNodes}
-                    canManageGlossaries={!!canManageGlossaries}
                 />
             )}
             {isDeprecationModalVisible && (
