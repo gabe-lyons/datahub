@@ -29,7 +29,7 @@ DATAHUB_TELEMETRY_ENABLED=false datahub docker quickstart --quickstart-compose-f
 
 (cd ..; ./gradlew :smoke-test:yarnInstall)
 
-export CYPRESS_ADMIN_USERNAME=${ADMIN_USERNAME:-datahub}
-export CYPRESS_ADMIN_PASSWORD=${ADMIN_PASSWORD:-datahub}
+export CYPRESS_ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+export CYPRESS_ADMIN_PASSWORD=${ADMIN_PASSWORD:-mypass}
 
 pytest -rP --durations=20 -vv --continue-on-collection-errors --junit-xml=junit.smoke.xml

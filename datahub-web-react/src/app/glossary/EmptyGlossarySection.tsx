@@ -19,7 +19,6 @@ const StyledButton = styled(Button)`
 `;
 
 interface Props {
-    canManageGlossaries: boolean;
     title?: string;
     description?: string;
     refetchForTerms?: () => void;
@@ -27,7 +26,7 @@ interface Props {
 }
 
 function EmptyGlossarySection(props: Props) {
-    const { canManageGlossaries, title, description, refetchForTerms, refetchForNodes } = props;
+    const { title, description, refetchForTerms, refetchForNodes } = props;
 
     const [isCreateTermModalVisible, setIsCreateTermModalVisible] = useState(false);
     const [isCreateNodeModalVisible, setIsCreateNodeModalVisible] = useState(false);
@@ -54,7 +53,6 @@ function EmptyGlossarySection(props: Props) {
                     entityType={EntityType.GlossaryTerm}
                     onClose={() => setIsCreateTermModalVisible(false)}
                     refetchData={refetchForTerms}
-                    canManageGlossaries={canManageGlossaries}
                 />
             )}
             {isCreateNodeModalVisible && (
@@ -62,7 +60,6 @@ function EmptyGlossarySection(props: Props) {
                     entityType={EntityType.GlossaryNode}
                     onClose={() => setIsCreateNodeModalVisible(false)}
                     refetchData={refetchForNodes}
-                    canManageGlossaries={canManageGlossaries}
                 />
             )}
         </>

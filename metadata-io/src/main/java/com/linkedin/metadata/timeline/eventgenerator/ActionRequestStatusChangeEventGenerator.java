@@ -1,14 +1,11 @@
-package com.linkedin.metadata.timeline.differ;
+package com.linkedin.metadata.timeline.eventgenerator;
 
-import com.github.fge.jsonpatch.JsonPatch;
 import com.linkedin.actionrequest.ActionRequestStatus;
 import com.linkedin.common.AuditStamp;
 import com.linkedin.common.urn.Urn;
-import com.linkedin.metadata.entity.EntityAspect;
 import com.linkedin.metadata.timeline.data.ChangeCategory;
 import com.linkedin.metadata.timeline.data.ChangeEvent;
 import com.linkedin.metadata.timeline.data.ChangeOperation;
-import com.linkedin.metadata.timeline.data.ChangeTransaction;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -19,14 +16,7 @@ import javax.annotation.Nullable;
 import static com.linkedin.metadata.AcrylConstants.*;
 
 
-public class ActionRequestStatusDiffer implements AspectDiffer<ActionRequestStatus> {
-
-  @Override
-  public ChangeTransaction getSemanticDiff(EntityAspect previousValue, EntityAspect currentValue,
-      ChangeCategory element, JsonPatch rawDiff, boolean rawDiffsRequested) {
-    // TODO: Migrate away from using getSemanticDiff.
-    throw new UnsupportedOperationException();
-  }
+public class ActionRequestStatusChangeEventGenerator extends EntityChangeEventGenerator<ActionRequestStatus> {
 
   @Override
   public List<ChangeEvent> getChangeEvents(@Nonnull Urn urn, @Nonnull String entity, @Nonnull String aspect,

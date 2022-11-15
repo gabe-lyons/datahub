@@ -34,11 +34,10 @@ interface Props {
     entityType: EntityType;
     onClose: () => void;
     refetchData?: () => void;
-    canManageGlossaries: boolean;
 }
 
 function CreateGlossaryEntityModal(props: Props) {
-    const { entityType, onClose, refetchData, canManageGlossaries } = props;
+    const { entityType, onClose, refetchData } = props;
     const entityData = useEntityData();
     const [form] = Form.useForm();
     const entityRegistry = useEntityRegistry();
@@ -137,11 +136,7 @@ function CreateGlossaryEntityModal(props: Props) {
                     <Button onClick={proposeGlossaryEntity} disabled={createButtonDisabled}>
                         Propose
                     </Button>
-                    <Button
-                        data-testid="add"
-                        onClick={createGlossaryEntity}
-                        disabled={createButtonDisabled || !canManageGlossaries}
-                    >
+                    <Button data-testid="add" onClick={createGlossaryEntity} disabled={createButtonDisabled}>
                         Create
                     </Button>
                 </>

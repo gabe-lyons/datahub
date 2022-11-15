@@ -48,13 +48,14 @@ import com.linkedin.entity.EnvelopedAspectMap;
 import com.linkedin.entity.client.EntityClient;
 import com.linkedin.entity.client.RestliEntityClient;
 import com.linkedin.events.metadata.ChangeType;
-import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.key.DatasetKey;
 import com.linkedin.metadata.models.AspectSpec;
 import com.linkedin.metadata.models.EntitySpec;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.timeline.data.ChangeCategory;
 import com.linkedin.metadata.timeline.data.ChangeOperation;
+import com.linkedin.metadata.timeline.eventgenerator.ActionRequestInfoChangeEventGenerator;
+import com.linkedin.metadata.timeline.eventgenerator.ActionRequestStatusChangeEventGenerator;
 import com.linkedin.metadata.timeline.eventgenerator.AssertionRunEventChangeEventGenerator;
 import com.linkedin.metadata.timeline.eventgenerator.DataProcessInstanceRunEventChangeEventGenerator;
 import com.linkedin.metadata.timeline.eventgenerator.DeprecationChangeEventGenerator;
@@ -114,10 +115,8 @@ public class EntityChangeEventGeneratorHookTest {
   private static final String TEST_GLOSSARY_NODE_DESCRIPTION = "A classification of data";
   private static final String TEST_GLOSSARY_TERM_NAME = "PII";
   private static final String TEST_GLOSSARY_TERM_DESCRIPTION = "Personally Identifiable Information";
-  private Urn actorUrn;
 
   private RestliEntityClient _mockClient;
-  private EntityService _mockEntityService;
   private EntityChangeEventGeneratorHook _entityChangeEventHook;
 
   @BeforeMethod
@@ -604,7 +603,7 @@ public class EntityChangeEventGeneratorHookTest {
     // Create Platform Event
     PlatformEvent platformEvent =
         createChangeEvent(ACTION_REQUEST_ENTITY_NAME, actionRequestUrn, ChangeCategory.LIFECYCLE,
-            ChangeOperation.PENDING, null, parameters, actorUrn, EVENT_TIME);
+            ChangeOperation.PENDING, null, parameters, actorUrn);
 
     verifyProducePlatformEvent(_mockClient, platformEvent, false);
   }
@@ -638,7 +637,7 @@ public class EntityChangeEventGeneratorHookTest {
     // Create Platform Event
     PlatformEvent platformEvent =
         createChangeEvent(ACTION_REQUEST_ENTITY_NAME, actionRequestUrn, ChangeCategory.LIFECYCLE,
-            ChangeOperation.COMPLETED, null, parameters, actorUrn, EVENT_TIME);
+            ChangeOperation.COMPLETED, null, parameters, actorUrn);
 
     verifyProducePlatformEvent(_mockClient, platformEvent, false);
   }
@@ -673,7 +672,7 @@ public class EntityChangeEventGeneratorHookTest {
     // Create Platform Event
     PlatformEvent platformEvent =
         createChangeEvent(ACTION_REQUEST_ENTITY_NAME, actionRequestUrn, ChangeCategory.LIFECYCLE,
-            ChangeOperation.CREATE, null, parameters, actorUrn, EVENT_TIME);
+            ChangeOperation.CREATE, null, parameters, actorUrn);
 
     verifyProducePlatformEvent(_mockClient, platformEvent, false);
   }
@@ -708,7 +707,7 @@ public class EntityChangeEventGeneratorHookTest {
     // Create Platform Event
     PlatformEvent platformEvent =
         createChangeEvent(ACTION_REQUEST_ENTITY_NAME, actionRequestUrn, ChangeCategory.LIFECYCLE,
-            ChangeOperation.CREATE, null, parameters, actorUrn, EVENT_TIME);
+            ChangeOperation.CREATE, null, parameters, actorUrn);
 
     verifyProducePlatformEvent(_mockClient, platformEvent, false);
   }
@@ -747,7 +746,7 @@ public class EntityChangeEventGeneratorHookTest {
     // Create Platform Event
     PlatformEvent platformEvent =
         createChangeEvent(ACTION_REQUEST_ENTITY_NAME, actionRequestUrn, ChangeCategory.LIFECYCLE,
-            ChangeOperation.CREATE, null, parameters, actorUrn, EVENT_TIME);
+            ChangeOperation.CREATE, null, parameters, actorUrn);
 
     verifyProducePlatformEvent(_mockClient, platformEvent, false);
   }
@@ -786,7 +785,7 @@ public class EntityChangeEventGeneratorHookTest {
     // Create Platform Event
     PlatformEvent platformEvent =
         createChangeEvent(ACTION_REQUEST_ENTITY_NAME, actionRequestUrn, ChangeCategory.LIFECYCLE,
-            ChangeOperation.CREATE, null, parameters, actorUrn, EVENT_TIME);
+            ChangeOperation.CREATE, null, parameters, actorUrn);
 
     verifyProducePlatformEvent(_mockClient, platformEvent, false);
   }
@@ -821,7 +820,7 @@ public class EntityChangeEventGeneratorHookTest {
     // Create Platform Event
     PlatformEvent platformEvent =
         createChangeEvent(ACTION_REQUEST_ENTITY_NAME, actionRequestUrn, ChangeCategory.LIFECYCLE,
-            ChangeOperation.CREATE, null, parameters, actorUrn, EVENT_TIME);
+            ChangeOperation.CREATE, null, parameters, actorUrn);
 
     verifyProducePlatformEvent(_mockClient, platformEvent, false);
   }
@@ -890,8 +889,8 @@ public class EntityChangeEventGeneratorHookTest {
         new DataProcessInstanceRunEventChangeEventGenerator(_mockClient, _mockAuthentication));
 
     // Action Request change event generators
-    registry.register(ACTION_REQUEST_STATUS_ASPECT_NAME, new ActionRequestStatusDiffer());
-    registry.register(ACTION_REQUEST_INFO_ASPECT_NAME, new ActionRequestInfoDiffer());
+    registry.register(ACTION_REQUEST_STATUS_ASPECT_NAME, new ActionRequestStatusChangeEventGenerator());
+    registry.register(ACTION_REQUEST_INFO_ASPECT_NAME, new ActionRequestInfoChangeEventGenerator());
 
     return registry;
   }

@@ -4,13 +4,13 @@ import com.datahub.authentication.proposal.ProposalService;
 import com.linkedin.common.urn.CorpuserUrn;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.datahub.graphql.QueryContext;
-import com.linkedin.datahub.graphql.authorization.AuthorizationUtils;
 import com.linkedin.datahub.graphql.exception.AuthorizationException;
 import com.linkedin.datahub.graphql.generated.ActionRequest;
 import com.linkedin.datahub.graphql.generated.ActionRequestResult;
 import com.linkedin.datahub.graphql.generated.ActionRequestStatus;
 import com.linkedin.datahub.graphql.generated.ActionRequestType;
 import com.linkedin.datahub.graphql.resolvers.actionrequest.ActionRequestUtils;
+import com.linkedin.datahub.graphql.resolvers.mutate.util.GlossaryUtils;
 import com.linkedin.entity.Entity;
 import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.snapshot.ActionRequestSnapshot;
@@ -83,12 +83,12 @@ public class RejectProposalResolver implements DataFetcher<CompletableFuture<Boo
           ProposalUtils.deleteTermFromEntityOrSchemaProposalsAspect(actor, termUrn, targetUrn, subResource,
               _entityService);
         } else if (proposal.getType().equals(ActionRequestType.CREATE_GLOSSARY_NODE)) {
-          boolean canManageGlossaries = AuthorizationUtils.canManageGlossaries(context);
+          boolean canManageGlossaries = GlossaryUtils.canManageGlossaries(context);
           if (!_proposalService.canResolveGlossaryNodeProposal(actor, actionRequestSnapshot, canManageGlossaries)) {
             throw new AuthorizationException("Unauthorized to perform this action. Please contact your DataHub administrator.");
           }
         } else if (proposal.getType().equals(ActionRequestType.CREATE_GLOSSARY_TERM)) {
-          boolean canManageGlossaries = AuthorizationUtils.canManageGlossaries(context);
+          boolean canManageGlossaries = GlossaryUtils.canManageGlossaries(context);
           if (!_proposalService.canResolveGlossaryTermProposal(actor, actionRequestSnapshot, canManageGlossaries)) {
             throw new AuthorizationException("Unauthorized to perform this action. Please contact your DataHub administrator.");
           }

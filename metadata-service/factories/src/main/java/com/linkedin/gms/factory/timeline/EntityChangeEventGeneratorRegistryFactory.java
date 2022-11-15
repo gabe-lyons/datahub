@@ -2,6 +2,8 @@ package com.linkedin.gms.factory.timeline;
 
 import com.datahub.authentication.Authentication;
 import com.linkedin.entity.client.RestliEntityClient;
+import com.linkedin.metadata.timeline.eventgenerator.ActionRequestInfoChangeEventGenerator;
+import com.linkedin.metadata.timeline.eventgenerator.ActionRequestStatusChangeEventGenerator;
 import com.linkedin.metadata.timeline.eventgenerator.AssertionRunEventChangeEventGenerator;
 import com.linkedin.metadata.timeline.eventgenerator.DataProcessInstanceRunEventChangeEventGenerator;
 import com.linkedin.metadata.timeline.eventgenerator.DatasetPropertiesChangeEventGenerator;
@@ -53,7 +55,7 @@ public class EntityChangeEventGeneratorRegistryFactory {
     registry.register(DATASET_PROPERTIES_ASPECT_NAME, new DatasetPropertiesChangeEventGenerator());
     registry.register(EDITABLE_DATASET_PROPERTIES_ASPECT_NAME, new EditableDatasetPropertiesChangeEventGenerator());
 
-    // Entity Lifecycle Differs
+    // Entity Lifecycle change event generators
     registry.register(DATASET_KEY_ASPECT_NAME, new EntityKeyChangeEventGenerator<>());
     registry.register(CONTAINER_KEY_ASPECT_NAME, new EntityKeyChangeEventGenerator<>());
     registry.register(CHART_KEY_ASPECT_NAME, new EntityKeyChangeEventGenerator<>());
@@ -67,12 +69,16 @@ public class EntityChangeEventGeneratorRegistryFactory {
     registry.register(STATUS_ASPECT_NAME, new StatusChangeEventGenerator());
     registry.register(DEPRECATION_ASPECT_NAME, new DeprecationChangeEventGenerator());
 
-    // Assertion differs
+    // Assertion change event generators
     registry.register(ASSERTION_RUN_EVENT_ASPECT_NAME, new AssertionRunEventChangeEventGenerator());
 
-    // Data Process Instance differs
+    // Data Process Instance change event generators
     registry.register(DATA_PROCESS_INSTANCE_RUN_EVENT_ASPECT_NAME,
         new DataProcessInstanceRunEventChangeEventGenerator(entityClient, systemAuthentication));
+
+    // Action Request change event generators
+    registry.register(ACTION_REQUEST_STATUS_ASPECT_NAME, new ActionRequestStatusChangeEventGenerator());
+    registry.register(ACTION_REQUEST_INFO_ASPECT_NAME, new ActionRequestInfoChangeEventGenerator());
 
     // TODO: Add ML models.
 
