@@ -97,6 +97,10 @@ def test_create_test(frontend_session, wait_for_healthchecks):
               definition {\n
                 json\n
               }\n
+              results {\n
+                passingCount\n
+                failingCount\n
+              }\n
             }
         }""",
         "variables": {"urn": test_urn},
@@ -116,6 +120,10 @@ def test_create_test(frontend_session, wait_for_healthchecks):
       "description": test_description,
       "definition": {
         "json": test_definition_json
+      },
+      "results": {
+        "passingCount": 0,
+        "failingCount": 0
       }
     }
     assert "errors" not in res_data
@@ -182,6 +190,10 @@ def test_update_test(frontend_session, wait_for_healthchecks):
               definition {\n
                 json\n
               }\n
+              results {\n
+                passingCount\n
+                failingCount\n
+              }\n
             }
         }""",
         "variables": {"urn": test_urn},
@@ -201,6 +213,10 @@ def test_update_test(frontend_session, wait_for_healthchecks):
       "description": test_description,
       "definition": {
         "json": test_definition_json,
+      },
+      "results": {
+        "passingCount": 0,
+        "failingCount": 0
       }
     }
     assert "errors" not in res_data

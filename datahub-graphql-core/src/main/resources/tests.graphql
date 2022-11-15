@@ -33,6 +33,11 @@ type Test implements Entity {
     definition: TestDefinition!
 
     """
+    Summary of the results for the test
+    """
+    results: TestResultsSummary!
+
+    """
     Unused for tests
     """
     relationships(input: RelationshipsInput!): EntityRelationshipsResult
@@ -293,4 +298,19 @@ extend type Mutation {
   Run tests for the given entity urn
   """
   runTests(urn: String!): TestValidationResult
+}
+
+"""
+A summary of the latest passing and failing entities for a given test.
+"""
+type TestResultsSummary {
+  """
+  The number of assets passing the test
+  """
+  passingCount: Long!
+
+  """
+  The number of assets failing the test
+  """
+  failingCount: Long!
 }

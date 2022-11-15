@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -29,12 +30,12 @@ import lombok.extern.slf4j.Slf4j;
  * GraphQL Resolver used for fetching the list of tests for an entity
  */
 @Slf4j
-public class TestResultsResolver implements DataFetcher<CompletableFuture<TestResults>> {
+public class EntityTestResultsResolver implements DataFetcher<CompletableFuture<TestResults>> {
 
   private final EntityClient _entityClient;
 
-  public TestResultsResolver(final EntityClient entityClient) {
-    _entityClient = entityClient;
+  public EntityTestResultsResolver(@Nonnull final EntityClient entityClient) {
+    _entityClient = Objects.requireNonNull(entityClient, "entityClient must not be null");
   }
 
   @Override

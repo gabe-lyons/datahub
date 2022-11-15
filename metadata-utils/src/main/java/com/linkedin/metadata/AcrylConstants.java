@@ -26,6 +26,10 @@ public class AcrylConstants {
   public static final String PARENT_NODE_URN_KEY = "parentNodeUrn";
   public static final String DESCRIPTION_KEY = "description";
 
+  // For tests
+  public static final String PASSING_TESTS_FIELD = "passingTests";
+  public static final String FAILING_TESTS_FIELD = "failingTests";
+
   private AcrylConstants() {
   }
 }

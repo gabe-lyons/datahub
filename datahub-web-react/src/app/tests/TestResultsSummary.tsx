@@ -3,8 +3,9 @@ import { Button, Tag, Typography } from 'antd';
 import { useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { SUCCESS_COLOR_HEX } from '../entity/shared/tabs/Incident/incidentUtils';
-import { useGetSearchResultsForMultipleQuery } from '../../graphql/search.generated';
 import { navigateToSearchUrl } from '../search/utils/navigateToSearchUrl';
+import { useGetTestResultsSummaryQuery } from '../../graphql/test.generated';
+import { formatNumberWithoutAbbreviation } from '../shared/formatNumber';
 
 const StyledButton = styled(Button)`
     margin: 0px;
@@ -16,37 +17,22 @@ type Props = {
 };
 
 export const TestResultsSummary = ({ urn }: Props) => {
-    // TODO: Replace this
-
     const history = useHistory();
 
-    const { data: failingResultsData } = useGetSearchResultsForMultipleQuery({
+    const { data: results } = useGetTestResultsSummaryQuery({
         variables: {
-            input: {
-                query: '*',
-                filters: [
-                    {
-                        field: 'failingTests',
-                        values: [`${urn}`],
-                    },
-                ],
-            },
+            urn,
         },
     });
 
-    const { data: passingResultsData } = useGetSearchResultsForMultipleQuery({
-        variables: {
-            input: {
-                query: '*',
-                filters: [
-                    {
-                        field: 'passingTests',
-                        values: [`${urn}`],
-                    },
-                ],
-            },
-        },
-    });
+    const passingCount =
+        results?.test?.results?.passingCount !== undefined
+            ? formatNumberWithoutAbbreviation(results?.test?.results?.passingCount)
+            : '-';
+    const failingCount =
+        results?.test?.results?.failingCount !== undefined
+            ? formatNumberWithoutAbbreviation(results?.test?.results?.failingCount)
+            : '-';
 
     return (
         <>
@@ -66,9 +52,7 @@ export const TestResultsSummary = ({ urn }: Props) => {
             >
                 <Tag>
                     <Typography.Text style={{ color: SUCCESS_COLOR_HEX }} strong>
-                        {passingResultsData?.searchAcrossEntities
-                            ? passingResultsData?.searchAcrossEntities.total
-                            : '-'}{' '}
+                        {passingCount}{' '}
                     </Typography.Text>
                     passing{' '}
                 </Tag>
@@ -89,9 +73,7 @@ export const TestResultsSummary = ({ urn }: Props) => {
             >
                 <Tag>
                     <Typography.Text style={{ color: 'red' }} strong>
-                        {failingResultsData?.searchAcrossEntities
-                            ? failingResultsData?.searchAcrossEntities.total
-                            : '-'}{' '}
+                        {failingCount}{' '}
                     </Typography.Text>
                     failing
                 </Tag>

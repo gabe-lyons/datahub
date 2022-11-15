@@ -8,6 +8,13 @@ fragment testFields on Test {
     }
 }
 
+fragment testResultsSummaryFields on Test {
+    results {
+        passingCount
+        failingCount
+    }
+}
+
 query getTest($urn: String!) {
     test(urn: $urn) {
         ...testFields
@@ -40,5 +47,11 @@ mutation deleteTest($urn: String!) {
 mutation runTestDefinition($urn: String!, $test: TestDefinitionInput!) {
     runTestDefinition(urn: $urn, test: $test) {
         status
+    }
+}
+
+query getTestResultsSummary($urn: String!) {
+    test(urn: $urn) {
+        ...testResultsSummaryFields
     }
 }

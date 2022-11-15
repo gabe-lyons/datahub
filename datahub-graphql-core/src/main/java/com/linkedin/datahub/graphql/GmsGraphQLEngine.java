@@ -224,7 +224,8 @@ import com.linkedin.datahub.graphql.resolvers.test.DeleteTestResolver;
 import com.linkedin.datahub.graphql.resolvers.test.ListTestsResolver;
 import com.linkedin.datahub.graphql.resolvers.test.RunTestDefinitionResolver;
 import com.linkedin.datahub.graphql.resolvers.test.RunTestsResolver;
-import com.linkedin.datahub.graphql.resolvers.test.TestResultsResolver;
+import com.linkedin.datahub.graphql.resolvers.test.EntityTestResultsResolver;
+import com.linkedin.datahub.graphql.resolvers.test.TestResultsSummaryResolver;
 import com.linkedin.datahub.graphql.resolvers.test.UpdateTestResolver;
 import com.linkedin.datahub.graphql.resolvers.test.ValidateTestResolver;
 import com.linkedin.datahub.graphql.resolvers.timeline.GetSchemaBlameResolver;
@@ -1061,7 +1062,7 @@ public class GmsGraphQLEngine {
                 .dataFetcher("health", new DatasetHealthResolver(entityClient, graphClient, timeseriesAspectService))
                 .dataFetcher("schemaMetadata", new AspectResolver())
                 .dataFetcher("assertions", new EntityAssertionsResolver(entityClient, graphClient))
-                .dataFetcher("testResults", new TestResultsResolver(entityClient))
+                .dataFetcher("testResults", new EntityTestResultsResolver(entityClient))
                 .dataFetcher("aspects", new WeaklyTypedAspectsResolver(entityClient, entityRegistry))
                 .dataFetcher("subTypes", new SubTypesResolver(
                     this.entityClient,
@@ -1685,6 +1686,9 @@ public class GmsGraphQLEngine {
     private void configureTestResolvers(final RuntimeWiring.Builder builder) {
         builder.type("Mutation", typeWiring -> typeWiring
             .dataFetcher("runTestDefinition", new RunTestDefinitionResolver(testEngine))
+        );
+        builder.type("Test", typeWiring -> typeWiring
+            .dataFetcher("results", new TestResultsSummaryResolver(this.entitySearchService))
         );
     }
 }
