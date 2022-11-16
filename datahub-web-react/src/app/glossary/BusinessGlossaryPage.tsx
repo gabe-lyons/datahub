@@ -17,7 +17,6 @@ import { Message } from '../shared/Message';
 import { sortGlossaryTerms } from '../entity/glossaryTerm/utils';
 import { useEntityRegistry } from '../useEntityRegistry';
 import { sortGlossaryNodes } from '../entity/glossaryNode/utils';
-import { useGetAuthenticatedUser } from '../useGetAuthenticatedUser';
 
 export const HeaderWrapper = styled(TabToolbar)`
     padding: 15px 45px 10px 24px;
@@ -46,7 +45,6 @@ export const MIN_BROWSWER_WIDTH = 200;
 
 function BusinessGlossaryPage() {
     const [browserWidth, setBrowserWidth] = useState(window.innerWidth * 0.2);
-    const me = useGetAuthenticatedUser();
     const {
         data: termsData,
         refetch: refetchForTerms,
@@ -69,7 +67,6 @@ function BusinessGlossaryPage() {
     );
 
     const hasTermsOrNodes = !!nodes?.length || !!terms?.length;
-    const canManageGlossaries = me?.platformPrivileges.manageGlossaries;
 
     const [isCreateTermModalVisible, setIsCreateTermModalVisible] = useState(false);
     const [isCreateNodeModalVisible, setIsCreateNodeModalVisible] = useState(false);
@@ -114,7 +111,6 @@ function BusinessGlossaryPage() {
                             description="Create Terms and Term Groups to organize data assets using a shared vocabulary."
                             refetchForTerms={refetchForTerms}
                             refetchForNodes={refetchForNodes}
-                            canManageGlossaries={!!canManageGlossaries}
                         />
                     )}
                 </MainContentWrapper>
@@ -124,7 +120,6 @@ function BusinessGlossaryPage() {
                     entityType={EntityType.GlossaryTerm}
                     onClose={() => setIsCreateTermModalVisible(false)}
                     refetchData={refetchForTerms}
-                    canManageGlossaries={!!canManageGlossaries}
                 />
             )}
             {isCreateNodeModalVisible && (
@@ -132,7 +127,6 @@ function BusinessGlossaryPage() {
                     entityType={EntityType.GlossaryNode}
                     onClose={() => setIsCreateNodeModalVisible(false)}
                     refetchData={refetchForNodes}
-                    canManageGlossaries={!!canManageGlossaries}
                 />
             )}
         </>

@@ -19,11 +19,17 @@ source venv/bin/activate
 pip install --upgrade pip wheel setuptools
 pip install -r requirements.txt
 
+mkdir -p ~/.datahub/plugins/frontend/auth/
+echo "test_user:test_pass" >> ~/.datahub/plugins/frontend/auth/user.props
+
 echo "DATAHUB_VERSION = $DATAHUB_VERSION"
 
 #DATAHUB_TELEMETRY_ENABLED=false datahub docker quickstart --quickstart-compose-file ../docker/quickstart/docker-compose-without-neo4j.quickstart.yml --dump-logs-on-failure
 DATAHUB_TELEMETRY_ENABLED=false datahub docker quickstart --quickstart-compose-file ../docker/quickstart/docker-compose-without-neo4j.quickstart.yml --quickstart-compose-file ../docker/quickstart/docker-compose.consumers-without-neo4j.quickstart.yml --dump-logs-on-failure
 
 (cd ..; ./gradlew :smoke-test:yarnInstall)
+
+export CYPRESS_ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+export CYPRESS_ADMIN_PASSWORD=${ADMIN_PASSWORD:-mypass}
 
 pytest -rP --durations=20 -vv --continue-on-collection-errors --junit-xml=junit.smoke.xml

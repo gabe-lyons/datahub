@@ -9,12 +9,12 @@ import com.linkedin.gms.factory.entity.RestliEntityClientFactory;
 import com.linkedin.gms.factory.entityregistry.EntityRegistryFactory;
 import com.linkedin.gms.factory.notifications.SettingsProviderFactory;
 import com.linkedin.gms.factory.spring.YamlPropertySourceFactory;
-import com.linkedin.gms.factory.timeline.AspectDifferRegistryFactory;
+import com.linkedin.gms.factory.timeline.EntityChangeEventGeneratorRegistryFactory;
 import com.linkedin.metadata.event.EventProducer;
 import com.linkedin.metadata.graph.GraphClient;
 import com.linkedin.metadata.kafka.hook.notification.change.EntityChangeNotificationGenerator;
 import com.linkedin.metadata.models.registry.EntityRegistry;
-import com.linkedin.metadata.timeline.differ.AspectDifferRegistry;
+import com.linkedin.metadata.timeline.eventgenerator.EntityChangeEventGeneratorRegistry;
 import javax.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -26,12 +26,12 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 @Import({SystemAuthenticationFactory.class, RestliEntityClientFactory.class, GraphClientFactory.class,
-    SettingsProviderFactory.class, EntityRegistryFactory.class, AspectDifferRegistryFactory.class})
+    SettingsProviderFactory.class, EntityRegistryFactory.class, EntityChangeEventGeneratorRegistryFactory.class})
 @PropertySource(value = "classpath:/application.yml", factory = YamlPropertySourceFactory.class)
 public class EntityChangeNotificationGeneratorFactory {
   @Autowired
-  @Qualifier("aspectDifferRegistry")
-  private AspectDifferRegistry _aspectDifferRegistry;
+  @Qualifier("entityChangeEventGeneratorRegistry")
+  private EntityChangeEventGeneratorRegistry _entityChangeEventGeneratorRegistry;
 
   @Autowired
   @Qualifier("entityRegistry")
@@ -62,7 +62,7 @@ public class EntityChangeNotificationGeneratorFactory {
   @Nonnull
   protected EntityChangeNotificationGenerator getInstance() {
     return new EntityChangeNotificationGenerator(
-        _aspectDifferRegistry,
+        _entityChangeEventGeneratorRegistry,
         _entityRegistry,
         _eventProducer,
         _entityClient,

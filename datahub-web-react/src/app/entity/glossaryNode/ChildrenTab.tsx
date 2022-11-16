@@ -6,13 +6,10 @@ import { useEntityRegistry } from '../../useEntityRegistry';
 import { sortGlossaryTerms } from '../glossaryTerm/utils';
 import { useEntityData } from '../shared/EntityContext';
 import { sortGlossaryNodes } from './utils';
-import { useGetAuthenticatedUser } from '../../useGetAuthenticatedUser';
 
 function ChildrenTab() {
     const { entityData } = useEntityData();
     const entityRegistry = useEntityRegistry();
-    const me = useGetAuthenticatedUser();
-    const canManageGlossaries = me?.platformPrivileges.manageGlossaries;
 
     if (!entityData) return <></>;
 
@@ -36,7 +33,7 @@ function ChildrenTab() {
         );
     }
 
-    return <EmptyGlossarySection description="No Terms or Term Groups" canManageGlossaries={!!canManageGlossaries} />;
+    return <EmptyGlossarySection description="No Terms or Term Groups" />;
 }
 
 export default ChildrenTab;

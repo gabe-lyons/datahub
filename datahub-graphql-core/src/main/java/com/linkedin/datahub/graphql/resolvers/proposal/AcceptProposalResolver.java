@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableList;
 import com.linkedin.common.urn.CorpuserUrn;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.datahub.graphql.QueryContext;
-import com.linkedin.datahub.graphql.authorization.AuthorizationUtils;
 import com.linkedin.datahub.graphql.exception.AuthorizationException;
 import com.linkedin.datahub.graphql.generated.ActionRequest;
 import com.linkedin.datahub.graphql.generated.ActionRequestResult;
@@ -15,6 +14,7 @@ import com.linkedin.datahub.graphql.generated.ActionRequestType;
 import com.linkedin.datahub.graphql.generated.ResourceRefInput;
 import com.linkedin.datahub.graphql.generated.SubResourceType;
 import com.linkedin.datahub.graphql.resolvers.actionrequest.ActionRequestUtils;
+import com.linkedin.datahub.graphql.resolvers.mutate.util.GlossaryUtils;
 import com.linkedin.datahub.graphql.resolvers.mutate.util.LabelUtils;
 import com.linkedin.entity.Entity;
 import com.linkedin.metadata.entity.EntityService;
@@ -62,7 +62,7 @@ public class AcceptProposalResolver implements DataFetcher<CompletableFuture<Boo
         Urn actor = CorpuserUrn.createFromString(context.getActorUrn());
         String subResource = proposal.getSubResource();
         ActionRequestType actionRequestType = proposal.getType();
-        boolean canManageGlossaries = AuthorizationUtils.canManageGlossaries(context);
+        boolean canManageGlossaries = GlossaryUtils.canManageGlossaries(context);
 
         if (!proposal.getStatus().equals(ActionRequestStatus.PENDING)) {
           log.error("Cannot accept proposal- proposal has already been completed");

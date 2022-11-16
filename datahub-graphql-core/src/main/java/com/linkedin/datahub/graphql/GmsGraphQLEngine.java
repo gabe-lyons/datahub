@@ -119,6 +119,7 @@ import com.linkedin.datahub.graphql.resolvers.domain.ListDomainsResolver;
 import com.linkedin.datahub.graphql.resolvers.domain.SetDomainResolver;
 import com.linkedin.datahub.graphql.resolvers.domain.UnsetDomainResolver;
 import com.linkedin.datahub.graphql.resolvers.entity.EntityExistsResolver;
+import com.linkedin.datahub.graphql.resolvers.entity.EntityPrivilegesResolver;
 import com.linkedin.datahub.graphql.resolvers.glossary.AddRelatedTermsResolver;
 import com.linkedin.datahub.graphql.resolvers.glossary.CreateGlossaryNodeResolver;
 import com.linkedin.datahub.graphql.resolvers.glossary.CreateGlossaryTermResolver;
@@ -904,10 +905,10 @@ public class GmsGraphQLEngine {
             .dataFetcher("reportOperation", new ReportOperationResolver(this.entityClient))
             .dataFetcher("createGlossaryTerm", new CreateGlossaryTermResolver(this.entityClient, this.entityService))
             .dataFetcher("createGlossaryNode", new CreateGlossaryNodeResolver(this.entityClient, this.entityService))
-            .dataFetcher("updateParentNode", new UpdateParentNodeResolver(entityService))
+            .dataFetcher("updateParentNode", new UpdateParentNodeResolver(this.entityService, this.entityClient))
             .dataFetcher("deleteGlossaryEntity",
                 new DeleteGlossaryEntityResolver(this.entityClient, this.entityService))
-            .dataFetcher("updateName", new UpdateNameResolver(entityService))
+            .dataFetcher("updateName", new UpdateNameResolver(this.entityService, this.entityClient))
             .dataFetcher("addRelatedTerms", new AddRelatedTermsResolver(this.entityService))
             .dataFetcher("removeRelatedTerms", new RemoveRelatedTermsResolver(this.entityService))
             .dataFetcher("createNativeUserResetToken", new CreateNativeUserResetTokenResolver(this.nativeUserService))
@@ -1153,12 +1154,14 @@ public class GmsGraphQLEngine {
         builder.type("GlossaryTerm", typeWiring -> typeWiring
             .dataFetcher("schemaMetadata", new AspectResolver())
             .dataFetcher("parentNodes", new ParentNodesResolver(entityClient))
+            .dataFetcher("privileges", new EntityPrivilegesResolver(entityClient))
         );
     }
 
     private void configureGlossaryNodeResolvers(final RuntimeWiring.Builder builder) {
         builder.type("GlossaryNode", typeWiring -> typeWiring
             .dataFetcher("parentNodes", new ParentNodesResolver(entityClient))
+            .dataFetcher("privileges", new EntityPrivilegesResolver(entityClient))
         );
     }
 

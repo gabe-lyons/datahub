@@ -210,6 +210,9 @@ fragment nonSiblingDatasetFields on Dataset {
             }
         }
     }
+    siblings {
+      isPrimary
+    }
     termProposals: proposals(type: TERM_ASSOCIATION) {
         urn
         type
