@@ -47,7 +47,6 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -304,42 +303,6 @@ public class UpdateIndicesHook implements MetadataChangeLogHook {
     List<Edge> subtractiveDifference = oldEdges.stream()
             .filter(edge -> !newEdgeSet.contains(edge))
             .collect(Collectors.toList());
-
-    // Add new edges
-    if (additiveDifference.size() > 0) {
-      log.debug("Adding edges: {}", additiveDifference);
-      additiveDifference.forEach(_graphService::addEdge);
-    }
-
-    // Remove any old edges that no longer exist
-    if (subtractiveDifference.size() > 0) {
-      log.debug("Removing edges: {}", subtractiveDifference);
-      subtractiveDifference.forEach(_graphService::removeEdge);
-    }
-  }
-
-  private void updateGraphServiceDiff(Urn urn, AspectSpec aspectSpec, @Nullable RecordTemplate oldAspect, @Nonnull RecordTemplate newAspect) {
-    Pair<List<Edge>, HashMap<Urn, Set<String>>> oldEdgeAndRelationTypes = null;
-    if (oldAspect != null) {
-      oldEdgeAndRelationTypes = getEdgesAndRelationshipTypesFromAspect(urn, aspectSpec, oldAspect);
-    }
-
-    final List<Edge> oldEdges = oldEdgeAndRelationTypes != null ? oldEdgeAndRelationTypes.getFirst() : Collections.emptyList();
-    final Set<Edge> oldEdgeSet = new HashSet<>(oldEdges);
-
-    Pair<List<Edge>, HashMap<Urn, Set<String>>> newEdgeAndRelationTypes =
-        getEdgesAndRelationshipTypesFromAspect(urn, aspectSpec, newAspect);
-
-    final List<Edge> newEdges = newEdgeAndRelationTypes.getFirst();
-    final Set<Edge> newEdgeSet = new HashSet<>(newEdges);
-
-    List<Edge> additiveDifference = newEdges.stream()
-        .filter(edge -> !oldEdgeSet.contains(edge))
-        .collect(Collectors.toList());
-
-    List<Edge> subtractiveDifference = oldEdges.stream()
-        .filter(edge -> !newEdgeSet.contains(edge))
-        .collect(Collectors.toList());
 
     // Add new edges
     if (additiveDifference.size() > 0) {
