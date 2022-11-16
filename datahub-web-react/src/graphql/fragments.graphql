@@ -76,7 +76,11 @@ fragment parentContainersFields on ParentContainersResult {
 fragment parentNodesFields on ParentNodesResult {
     count
     nodes {
-        ...glossaryNode
+        urn
+        type
+        properties {
+            name
+        }
     }
 }
 
@@ -718,6 +722,7 @@ fragment nonRecursiveMLModel on MLModel {
     properties {
         description
         date
+        externalUrl
         version
         type
         trainingMetrics {
@@ -762,6 +767,9 @@ fragment nonRecursiveMLModel on MLModel {
     deprecation {
         ...deprecationFields
     }
+    institutionalMemory {
+        ...institutionalMemoryFields
+    }    
 }
 
 fragment nonRecursiveMLModelGroupFields on MLModelGroup {

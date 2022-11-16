@@ -1,5 +1,6 @@
 package com.linkedin.metadata.search.elasticsearch.indexbuilder;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.MapDifference;
@@ -62,6 +63,8 @@ public class ESIndexBuilder {
   @Getter
   private final boolean enableIndexSettingsReindex;
 
+  private final static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
   /*
     Most index settings are default values and populated by Elastic. This list is an include list to determine which
     settings we care about when a difference is present.
@@ -122,7 +125,7 @@ public class ESIndexBuilder {
     // If there are no updates to settings, and there are only pure additions to mappings (no updates to existing fields),
     // there is no need to reindex. Just update mappings
     if (isAnalysisEqual && isPureAddition(mappingsDiff) && isSettingsEqual) {
-      log.info("New fields have been added to index {}. Updating index in place", indexName);
+      log.info("New fields have been added to index {}. Updating index in place. Adding: {}", indexName, mappingsDiff);
       PutMappingRequest request = new PutMappingRequest(indexName).source(mappings);
       searchClient.indices().putMapping(request, RequestOptions.DEFAULT);
       log.info("Updated index {} with new mappings", indexName);
@@ -130,16 +133,18 @@ public class ESIndexBuilder {
     }
 
     if (!mappingsDiff.entriesDiffering().isEmpty()) {
-      log.info("There's diff between new mappings (left) and old mappings (right): {}", mappingsDiff.toString());
+      log.info("There's diff between new mappings (left) and old mappings (right): {}", mappingsDiff);
       reindex(indexName, mappings, finalSettings);
     } else {
       log.info("There's an update to settings");
       if (isSettingsReindexRequired) {
         if (enableIndexSettingsReindex) {
-          log.info("There's an update to settings that requires reindexing.");
+          log.info("There's an update to settings that requires reindexing. Target: {}",
+                  OBJECT_MAPPER.writeValueAsString(finalSettings));
           reindex(indexName, mappings, finalSettings);
         } else {
-          log.warn("There's an update to settings that requires reindexing, however reindexing is disabled.");
+          log.warn("There's an update to settings that requires reindexing, however reindexing is disabled. Existing: {} Target: {}",
+                  oldSettings, OBJECT_MAPPER.writeValueAsString(finalSettings));
         }
       }
 
@@ -162,7 +167,8 @@ public class ESIndexBuilder {
         if (!indexSettings.isEmpty()) {
           request.settings(indexSettings);
           boolean ack = searchClient.indices().putSettings(request, RequestOptions.DEFAULT).isAcknowledged();
-          log.info("Updated index {} with new settings. Acknowledged: {}", indexName, ack);
+          log.info("Updated index {} with new settings. Settings: {}, Acknowledged: {}", indexName,
+                  OBJECT_MAPPER.writeValueAsString(indexSettings), ack);
         }
       }
     }

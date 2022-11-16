@@ -1,5 +1,4 @@
 import pytest
-import requests
 import tenacity
 
 from tests.utils import (
