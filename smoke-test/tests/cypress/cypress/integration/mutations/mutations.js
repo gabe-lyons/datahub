@@ -9,7 +9,14 @@ describe("mutations", () => {
   it("can create and add a tag to dataset and visit new tag page", () => {
     cy.deleteUrn("urn:li:tag:CypressTestAddTag");
     cy.login();
+<<<<<<< Updated upstream
     cy.goToDataset("urn:li:dataset:(urn:li:dataPlatform:hive,cypress_logging_events,PROD)", "cypress_logging_events");
+=======
+    cy.goToDataset(
+      "urn:li:dataset:(urn:li:dataPlatform:hive,cypress_logging_events,PROD)"
+    );
+    cy.contains("cypress_logging_events");
+>>>>>>> Stashed changes
 
     cy.contains("Add Tag").click({ force: true });
 
@@ -63,7 +70,7 @@ describe("mutations", () => {
       "urn:li:dataset:(urn:li:dataPlatform:hive,cypress_logging_events,PROD)",
       "cypress_logging_events",
       "CypressTerm"
-    )
+    );
 
     cy.get(
       'a[href="/glossaryTerm/urn:li:glossaryTerm:CypressNode.CypressTerm"]'
@@ -76,8 +83,18 @@ describe("mutations", () => {
   it("can add and remove tags from a dataset field", () => {
     cy.login();
     cy.viewport(2000, 800);
+<<<<<<< Updated upstream
     cy.goToDataset("urn:li:dataset:(urn:li:dataPlatform:hive,cypress_logging_events,PROD)", "cypress_logging_events");
     cy.mouseover('[data-testid="schema-field-event_name-tags"]');
+=======
+    cy.goToDataset(
+      "urn:li:dataset:(urn:li:dataPlatform:hive,cypress_logging_events,PROD)"
+    );
+    cy.get('[data-testid="schema-field-event_name-tags"]').trigger(
+      "mouseover",
+      { force: true }
+    );
+>>>>>>> Stashed changes
     cy.get('[data-testid="schema-field-event_name-tags"]').within(() =>
       cy.contains("Add Tag").click()
     );
@@ -133,7 +150,13 @@ describe("mutations", () => {
     cy.login();
     // make space for the glossary term column
     cy.viewport(2000, 800);
+<<<<<<< Updated upstream
     cy.goToDataset("urn:li:dataset:(urn:li:dataPlatform:hive,cypress_logging_events,PROD)", "cypress_logging_events");
+=======
+    cy.goToDataset(
+      "urn:li:dataset:(urn:li:dataPlatform:hive,cypress_logging_events,PROD)"
+    );
+>>>>>>> Stashed changes
     cy.get('[data-testid="schema-field-event_name-terms"]').trigger(
       "mouseover",
       { force: true }
