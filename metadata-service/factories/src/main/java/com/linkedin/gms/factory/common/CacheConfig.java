@@ -59,6 +59,7 @@ public class CacheConfig {
         .setSize(cacheMaxSize)
         .setEvictionPolicy(EvictionPolicy.LFU);
     mapConfig.setEvictionConfig(evictionConfig);
+    mapConfig.setName("default");
     config.addMapConfig(mapConfig);
 
     config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
