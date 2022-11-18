@@ -1,16 +1,6 @@
 #!/bin/bash
 set -euxo pipefail
 
-# Runs a basic e2e test. It is not meant to be fully comprehensive,
-# but rather should catch obvious bugs before they make it into prod.
-#
-# Script assumptions:
-#   - The gradle build has already been run.
-#   - Python 3.6+ is installed and in the PATH.
-
-# Log the locally loaded images
-# docker images | grep "datahub-"
-
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$DIR"
 
@@ -27,9 +17,12 @@ DATAHUB_TELEMETRY_ENABLED=false \
 DOCKER_COMPOSE_BASE="file://$( dirname "$DIR" )" \
 datahub docker quickstart --build-locally --standalone_consumers --dump-logs-on-failure
 
-(cd ..; ./gradlew :smoke-test:yarnInstall)
+python -c 'from tests.cypress.integration_test import ingest_data; ingest_data()'
+
+cd tests/cypress
+npm install
 
 export CYPRESS_ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
 export CYPRESS_ADMIN_PASSWORD=${ADMIN_PASSWORD:-mypass}
 
-pytest -rP --durations=20 -vv --junit-xml=junit.smoke.xml $@
+npx cypress open

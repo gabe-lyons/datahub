@@ -1,5 +1,5 @@
 describe('analytics', () => {
-  it('can go to a chart and see analytics in Section Views', () => {
+  it.skip('can go to a chart and see analytics in Section Views', () => {
     cy.login();
 
     cy.goToAnalytics();

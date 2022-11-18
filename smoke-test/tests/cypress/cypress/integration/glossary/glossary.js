@@ -9,10 +9,10 @@ describe("glossary", () => {
         cy.goToGlossaryList();
 
         cy.clickOptionWithText("Add Term");
-        cy.addViaModel(glossaryTerm, "Create Glossary Term");
+        cy.addViaModelTestId(glossaryTerm, "Create Glossary Term", "add");
 
         cy.clickOptionWithText("Add Term Group");
-        cy.addViaModel(glossaryTermGroup, "Create Term Group");
+        cy.addViaModelTestId(glossaryTermGroup, "Create Term Group", "add");
 
         cy.addTermToDataset(urn, datasetName, glossaryTerm);
 
