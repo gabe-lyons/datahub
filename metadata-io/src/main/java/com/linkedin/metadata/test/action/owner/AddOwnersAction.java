@@ -26,7 +26,7 @@ public class AddOwnersAction implements Action {
 
   private static final OwnershipType DEFAULT_OWNERSHIP_TYPE = OwnershipType.TECHNICAL_OWNER;
   private static final String VALUES_PARAM = "values";
-  private static final String OWNERSHIP_TYPE_PARAM = "type";
+  private static final String OWNERSHIP_TYPE_PARAM = "ownerType";
 
   private final OwnerService ownerService;
 

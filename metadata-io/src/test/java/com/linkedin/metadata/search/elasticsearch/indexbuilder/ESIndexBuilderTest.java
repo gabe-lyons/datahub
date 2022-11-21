@@ -1,7 +1,7 @@
 package com.linkedin.metadata.search.elasticsearch.indexbuilder;
 
 import com.google.common.collect.ImmutableMap;
-import com.linkedin.metadata.ElasticTestUtils;
+import com.linkedin.metadata.ElasticSearchTestConfiguration;
 import com.linkedin.metadata.systemmetadata.SystemMetadataMappingsBuilder;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.alias.get.GetAliasesRequest;
@@ -13,6 +13,9 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.indices.GetIndexResponse;
 import org.elasticsearch.cluster.metadata.AliasMetadata;
 import org.elasticsearch.rest.RestStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -27,18 +30,18 @@ import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
 
+@Import(ElasticSearchTestConfiguration.class)
+public class ESIndexBuilderTest extends AbstractTestNGSpringContextTests {
 
-public class ESIndexBuilderTest {
-
-    private static RestHighLevelClient _searchClient;
+    @Autowired
+    private RestHighLevelClient _searchClient;
     private static IndicesClient _indexClient;
     private static final String TEST_INDEX_NAME = "esindex_builder_test";
     private static ESIndexBuilder testDefaultBuilder;
 
 
     @BeforeClass
-    public static void setup() {
-        _searchClient = ElasticTestUtils.getElasticsearchClient();
+    public void setup() {
         _indexClient = _searchClient.indices();
         testDefaultBuilder = new ESIndexBuilder(_searchClient, 1, 0, 0, 0, Map.of(), false);
     }
