@@ -103,6 +103,12 @@ Cypress.Commands.add("addViaModel", (text, modelHeader) => {
   cy.get(".ant-modal-footer > button:last-child").click();
 });
 
+Cypress.Commands.add("addViaModelTestId", (text, modelHeader, testId) => {
+  cy.waitTextVisible(modelHeader);
+  cy.get(".ant-form-item-control-input-content > input[type='text']").first().type(text);
+  cy.get(`.ant-modal-footer > button[data-testid="${testId}"]`).click()
+});
+
 Cypress.Commands.add("ensureTextNotPresent", (text) => {
   cy.contains(text).should("not.exist");
 });
