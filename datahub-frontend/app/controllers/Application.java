@@ -9,6 +9,8 @@ import com.datahub.authentication.AuthenticationConstants;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.linkedin.util.Pair;
 import com.typesafe.config.Config;
+
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -112,6 +114,11 @@ public class Application extends Controller {
 
     if (headers.containsKey(Http.HeaderNames.HOST) && !headers.containsKey(Http.HeaderNames.X_FORWARDED_HOST)) {
         headers.put(Http.HeaderNames.X_FORWARDED_HOST, headers.get(Http.HeaderNames.HOST));
+    }
+
+    if (!headers.containsKey(Http.HeaderNames.X_FORWARDED_PROTO)) {
+      final String schema = Optional.ofNullable(URI.create(request().uri()).getScheme()).orElse("http");
+      headers.put(Http.HeaderNames.X_FORWARDED_PROTO, List.of(schema));
     }
 
     return _ws.url(String.format("%s://%s:%s%s", protocol, metadataServiceHost, metadataServicePort, resolvedUri))
