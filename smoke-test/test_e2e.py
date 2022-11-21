@@ -148,7 +148,7 @@ def _ensure_group_not_present(
 @pytest.mark.dependency(depends=["test_healthchecks"])
 def test_ingestion_via_rest(wait_for_healthchecks):
     ingest_file_via_rest(bootstrap_sample_data)
-    _ensure_user_present(urn="urn:li:corpuser:datahub")
+    _ensure_user_present(urn="urn:li:corpuser:admin")
 
 
 @pytest.mark.dependency(depends=["test_healthchecks"])
@@ -481,7 +481,7 @@ def test_frontend_search_across_entities(frontend_session, query, min_expected_r
 @pytest.mark.dependency(depends=["test_healthchecks", "test_run_ingestion"])
 def test_frontend_user_info(frontend_session):
 
-    urn = "urn:li:corpuser:datahub"
+    urn = "urn:li:corpuser:admin"
     json = {
         "query": """query corpUser($urn: String!) {\n
             corpUser(urn: $urn) {\n
@@ -570,7 +570,7 @@ def test_ingest_with_system_metadata():
             "entity": {
                 "value": {
                     "com.linkedin.metadata.snapshot.CorpUserSnapshot": {
-                        "urn": "urn:li:corpuser:datahub",
+                        "urn": "urn:li:corpuser:admin",
                         "aspects": [
                             {
                                 "com.linkedin.identity.CorpUserInfo": {
@@ -603,7 +603,7 @@ def test_ingest_with_blank_system_metadata():
             "entity": {
                 "value": {
                     "com.linkedin.metadata.snapshot.CorpUserSnapshot": {
-                        "urn": "urn:li:corpuser:datahub",
+                        "urn": "urn:li:corpuser:admin",
                         "aspects": [
                             {
                                 "com.linkedin.identity.CorpUserInfo": {
@@ -633,7 +633,7 @@ def test_ingest_without_system_metadata():
             "entity": {
                 "value": {
                     "com.linkedin.metadata.snapshot.CorpUserSnapshot": {
-                        "urn": "urn:li:corpuser:datahub",
+                        "urn": "urn:li:corpuser:admin",
                         "aspects": [
                             {
                                 "com.linkedin.identity.CorpUserInfo": {
@@ -1140,7 +1140,7 @@ def test_home_page_recommendations(frontend_session):
             listRecommendations(input: $input) { modules { title } } }""",
         "variables": {
             "input": {
-                "userUrn": "urn:li:corpuser:datahub",
+                "userUrn": "urn:li:corpuser:admin",
                 "requestContext": {"scenario": "HOME"},
                 "limit": 5,
             }
@@ -1171,7 +1171,7 @@ def test_search_results_recommendations(frontend_session):
             listRecommendations(input: $input) { modules { title }  } }""",
         "variables": {
             "input": {
-                "userUrn": "urn:li:corpuser:datahub",
+                "userUrn": "urn:li:corpuser:admin",
                 "requestContext": {
                     "scenario": "SEARCH_RESULTS",
                     "searchRequestContext": {"query": "asdsdsdds", "filters": []},
