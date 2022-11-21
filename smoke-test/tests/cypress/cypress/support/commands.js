@@ -100,7 +100,7 @@ Cypress.Commands.add("deleteFromDropdown", () => {
 Cypress.Commands.add("addViaModel", (text, modelHeader) => {
   cy.waitTextVisible(modelHeader);
   cy.get(".ant-form-item-control-input-content > input[type='text']").first().type(text);
-  cy.get(".ant-modal-footer > button:nth-child(2)").click();
+  cy.get(".ant-modal-footer > button:last-child").click();
 });
 
 Cypress.Commands.add("ensureTextNotPresent", (text) => {

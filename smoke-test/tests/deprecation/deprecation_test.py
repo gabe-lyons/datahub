@@ -88,7 +88,7 @@ def test_update_deprecation_all_fields(frontend_session):
         "deprecated": True,
         "decommissionTime": 0,
         "note": "My test note",
-        "actor": "urn:li:corpuser:datahub",
+        "actor": "urn:li:corpuser:admin",
     }
 
 
@@ -144,6 +144,6 @@ def test_update_deprecation_partial_fields(frontend_session, ingest_cleanup_data
     assert res_data["data"]["dataset"]["deprecation"] == {
         "deprecated": False,
         "note": "",
-        "actor": "urn:li:corpuser:datahub",
+        "actor": "urn:li:corpuser:admin",
         "decommissionTime": None,
     }

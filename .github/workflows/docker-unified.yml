@@ -478,6 +478,12 @@ jobs:
         with:
           name: cypress-snapshots
           path: smoke-test/tests/cypress/cypress/screenshots/
+      - name: Upload videos
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-videos
+          path: smoke-test/tests/cypress/cypress/videos/
       - uses: actions/upload-artifact@v3
         if: always()
         with:
