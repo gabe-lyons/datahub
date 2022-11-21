@@ -1,6 +1,6 @@
 grafana:
   uri: ${GRAFANA_URI:https://grafana.admin.acryl.io}
-  token: ${GRAFANA_TOKEN}
-  namespace: ${NAMESPACE}
+  token: ${GRAFANA_TOKEN:}
+  namespace: ${GRAFANA_NAMESPACE}
   orgId: 1
   dashboards: '{"/customer-metrics":"/d/3fpDTED4k/customer-metrics"}'
