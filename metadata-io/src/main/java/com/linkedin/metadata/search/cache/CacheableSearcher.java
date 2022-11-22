@@ -6,6 +6,7 @@ import com.linkedin.metadata.search.SearchEntity;
 import com.linkedin.metadata.search.SearchEntityArray;
 import com.linkedin.metadata.search.SearchResult;
 import com.linkedin.metadata.utils.metrics.MetricUtils;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -33,7 +34,7 @@ public class CacheableSearcher<K> {
   private final boolean enableCache;
 
   @Value
-  public static class QueryPagination {
+  public static class QueryPagination implements Serializable {
     int from;
     int size;
   }
