@@ -1,6 +1,7 @@
 package com.linkedin.metadata.search.cache;
 
 import com.codahale.metrics.Timer;
+import com.linkedin.data.DataMap;
 import com.linkedin.metadata.query.SearchFlags;
 import com.linkedin.metadata.search.SearchEntity;
 import com.linkedin.metadata.search.SearchEntityArray;
@@ -92,12 +93,13 @@ public class CacheableSearcher<K> {
         try (Timer.Context ignored2 = MetricUtils.timer(this.getClass(), "getBatch_cache").time()) {
           Timer.Context cacheAccess = MetricUtils.timer(this.getClass(), "getBatch_cache_access").time();
           K cacheKey = cacheKeyGenerator.apply(batch);
-          result = cache.get(cacheKey, SearchResult.class);
+          DataMap dataMap = cache.get(cacheKey, DataMap.class);
+          result = dataMap != null ? new SearchResult(dataMap) : null;
           cacheAccess.stop();
           if (result == null) {
             Timer.Context cacheMiss = MetricUtils.timer(this.getClass(), "getBatch_cache_miss").time();
             result = searcher.apply(batch);
-            cache.put(cacheKey, result);
+            cache.put(cacheKey, result.data());
             cacheMiss.stop();
             MetricUtils.counter(this.getClass(), "getBatch_cache_miss_count").inc();
           }

@@ -88,10 +88,10 @@ public class LineageSearchService {
       maxHops = maxHops != null ? maxHops : 1000;
       lineageResult = _graphService.getLineage(sourceUrn, direction, 0, MAX_RELATIONSHIPS, maxHops);
       if (cacheEnabled) {
-        cache.put(Pair.of(sourceUrn, direction), new CachedEntityLineageResult(lineageResult, System.currentTimeMillis()));
+        cache.put(Pair.of(sourceUrn, direction), new CachedEntityLineageResult(lineageResult.data(), System.currentTimeMillis()));
       }
     } else {
-      lineageResult = cachedLineageResult.getEntityLineageResult();
+      lineageResult = new EntityLineageResult(cachedLineageResult.getEntityLineageResult());
       if (System.currentTimeMillis() - cachedLineageResult.getTimestamp() > DAY_IN_MS) {
         log.warn("Cached lineage entry for: {} is older than one day.", sourceUrn);
       }

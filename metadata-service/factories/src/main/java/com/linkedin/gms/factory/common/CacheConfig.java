@@ -65,6 +65,7 @@ public class CacheConfig {
     config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
     config.getNetworkConfig().getJoin().getKubernetesConfig().setEnabled(true)
         .setProperty("service-dns", hazelcastServiceName);
+
     HazelcastInstance hazelcastInstance = Hazelcast.newHazelcastInstance(config);
 
     return new HazelcastCacheManager(hazelcastInstance);

@@ -1,6 +1,7 @@
 package com.linkedin.metadata.search.client;
 
 import com.codahale.metrics.Timer;
+import com.linkedin.data.DataMap;
 import com.linkedin.metadata.browse.BrowseResult;
 import com.linkedin.metadata.query.AutoCompleteResult;
 import com.linkedin.metadata.query.SearchFlags;
@@ -143,12 +144,13 @@ public class CachingEntitySearchService {
         try (Timer.Context ignored2 = MetricUtils.timer(this.getClass(), "getCachedAutoCompleteResults_cache").time()) {
           Timer.Context cacheAccess = MetricUtils.timer(this.getClass(), "autocomplete_cache_access").time();
           Object cacheKey = Quintet.with(entityName, input, field, filters, limit);
-          result = cache.get(cacheKey, AutoCompleteResult.class);
+          DataMap dataMap = cache.get(cacheKey, DataMap.class);
+          result = dataMap != null ? new AutoCompleteResult(dataMap) : null;
           cacheAccess.stop();
           if (result == null) {
             Timer.Context cacheMiss = MetricUtils.timer(this.getClass(), "autocomplete_cache_miss").time();
             result = getRawAutoCompleteResults(entityName, input, field, filters, limit);
-            cache.put(cacheKey, result);
+            cache.put(cacheKey, result.data());
             cacheMiss.stop();
             MetricUtils.counter(this.getClass(), "autocomplete_cache_miss_count").inc();
           }
@@ -177,12 +179,13 @@ public class CachingEntitySearchService {
         try (Timer.Context ignored2 = MetricUtils.timer(this.getClass(), "getCachedBrowseResults_cache").time()) {
           Timer.Context cacheAccess = MetricUtils.timer(this.getClass(), "browse_cache_access").time();
           Object cacheKey = Quintet.with(entityName, path, filters, from, size);
-          result = cache.get(cacheKey, BrowseResult.class);
+          DataMap dataMap = cache.get(cacheKey, DataMap.class);
+          result = dataMap != null ? new BrowseResult(dataMap) : null;
           cacheAccess.stop();
           if (result == null) {
             Timer.Context cacheMiss = MetricUtils.timer(this.getClass(), "browse_cache_miss").time();
             result = getRawBrowseResults(entityName, path, filters, from, size);
-            cache.put(cacheKey, result);
+            cache.put(cacheKey, result.data());
             cacheMiss.stop();
             MetricUtils.counter(this.getClass(), "browse_cache_miss_count").inc();
           }
