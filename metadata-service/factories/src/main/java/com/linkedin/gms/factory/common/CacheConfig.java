@@ -55,7 +55,7 @@ public class CacheConfig {
     MapConfig mapConfig = new MapConfig().setMaxIdleSeconds(cacheTtlSeconds);
 
     EvictionConfig evictionConfig = new EvictionConfig()
-        // Default max size policy is entry count
+        .setMaxSizePolicy(MaxSizePolicy.PER_NODE)
         .setSize(cacheMaxSize)
         .setEvictionPolicy(EvictionPolicy.LFU);
     mapConfig.setEvictionConfig(evictionConfig);
