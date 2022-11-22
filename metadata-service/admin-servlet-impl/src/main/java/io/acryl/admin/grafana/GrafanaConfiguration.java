@@ -34,6 +34,9 @@ public class GrafanaConfiguration {
     @Value("${grafana.namespace}")
     private String namespace;
 
+    @Value("${grafana.logging}")
+    private String logging;
+
     @Value("${grafana.dashboards}")
     private String dashboards;
 
@@ -59,6 +62,23 @@ public class GrafanaConfiguration {
                 .build();
     }
 
+    @Bean("grafanaDeny")
+    public Set<String> grafanaDeny() {
+        return ImmutableSet.<String>builder()
+                .add("/public/build/AlertRuleListIndex")
+                .add("/api/alert-notifiers")
+                .add("/api/alertmanager")
+                .add("/api/playlists")
+                .build();
+    }
+
+    @Bean("grafanaRedirectDefault")
+    public Set<String> grafanaRedirectDefault() {
+        return ImmutableSet.<String>builder()
+                .add("/alerting/list")
+                .build();
+    }
+
     @Bean("grafanaRequiredParameters")
     public List<Map.Entry<String, String[]>> grafanaRequiredParameters() {
         return List.of(
@@ -69,12 +89,14 @@ public class GrafanaConfiguration {
     }
 
     @Bean("grafanaConfig")
-    public Config grafanaConfig() {
+    public Config grafanaConfig(@Qualifier("grafanaDashboards") Map<String, String> grafanaDashboards) {
         return Config.builder()
                 .grafanaUri(URI.create(uri))
                 .grafanaToken(token)
                 .orgId(orgId)
                 .namespace(namespace)
+                .defaultDashboard(grafanaDashboards.getOrDefault("/default", "/"))
+                .logging(logging)
                 .build();
     }
 
@@ -85,5 +107,7 @@ public class GrafanaConfiguration {
         private String grafanaToken;
         private String orgId;
         private String namespace;
+        private String defaultDashboard;
+        private String logging;
     }
 }

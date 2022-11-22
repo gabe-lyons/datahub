@@ -48,6 +48,14 @@ public class GrafanaServlet extends ProxyServlet {
     @Qualifier("grafanaAllow")
     private Set<String> grafanaAllow;
 
+    @Autowired
+    @Qualifier("grafanaDeny")
+    private Set<String> grafanaDeny;
+
+    @Autowired
+    @Qualifier("grafanaRedirectDefault")
+    private Set<String> grafanaRedirectDefault;
+
     private WebApplicationContext springContext;
 
     @Override
@@ -64,8 +72,9 @@ public class GrafanaServlet extends ProxyServlet {
             case P_TARGET_URI:
                 return grafanaConfig.getGrafanaUri().toString();
             case P_PRESERVEHOST:
-            case P_LOG:
                 return "false";
+            case P_LOG:
+                return grafanaConfig.getLogging();
             default:
                 return super.getConfigParam(key);
         }
@@ -146,6 +155,22 @@ public class GrafanaServlet extends ProxyServlet {
     protected void service(HttpServletRequest servletRequest, HttpServletResponse servletResponse)
             throws ServletException, IOException {
 
+        if (grafanaDeny.stream().anyMatch(deny -> servletRequest.getPathInfo().startsWith(deny))) {
+            if (doLog) {
+                log("proxy denied by rule: " + servletRequest.getRequestURI());
+            }
+            servletResponse.setStatus(403);
+            return;
+        }
+
+        if (grafanaRedirectDefault.stream().anyMatch(redirect -> servletRequest.getPathInfo().startsWith(redirect))) {
+            if (doLog) {
+                log("redirect default (" + grafanaConfig.getDefaultDashboard() + "): " + servletRequest.getRequestURI());
+            }
+            redirectVanity(servletRequest, servletResponse, grafanaConfig.getDefaultDashboard());
+            return;
+        }
+
         if (servletRequest.getMethod().equals("GET") && servletRequest.getPathInfo().startsWith("/d/")
                 && !hasRequiredParameters(servletRequest)) {
             /*
@@ -168,18 +193,30 @@ public class GrafanaServlet extends ProxyServlet {
                     .filter(vanity -> servletRequest.getPathInfo().equals(vanity.getKey()))
                     .map(Map.Entry::getValue)
                     .findFirst().get();
-            String[] splitDest = dest.split("[?]", 2);
-            String destPath = splitDest[0];
-            String destQuery = dest.contains("?") ? splitDest[1] : null;
 
-            servletResponse.sendRedirect(buildRedirect(servletRequest, destPath,
-                    buildForcedQueryParams(servletRequest, destQuery)));
+            redirectVanity(servletRequest, servletResponse, dest);
         } else if (servletRequest.getPathInfo() == null
                 || grafanaAllow.stream().anyMatch(servletRequest.getPathInfo()::startsWith)) {
             super.service(servletRequest, servletResponse);
-        } else if (doLog) {
-            log("proxy denied: " + servletRequest.getRequestURI());
+        } else if (servletRequest.getPathInfo().startsWith("/d/")) {
+            if (doLog) {
+                log("proxy denied non-allowed dashboard: " + servletRequest.getRequestURI());
+            }
+            servletResponse.setStatus(403);
+        } else {
+            if (doLog) {
+                log("proxy denied silent: " + servletRequest.getRequestURI());
+            }
         }
+    }
+
+    private void redirectVanity(HttpServletRequest servletRequest, HttpServletResponse servletResponse, String dest) throws IOException {
+        String[] splitDest = dest.split("[?]", 2);
+        String destPath = splitDest[0];
+        String destQuery = dest.contains("?") ? splitDest[1] : null;
+
+        servletResponse.sendRedirect(buildRedirect(servletRequest, destPath,
+                buildForcedQueryParams(servletRequest, destQuery)));
     }
 
     @Override
@@ -196,10 +233,10 @@ public class GrafanaServlet extends ProxyServlet {
         HttpEntity entity = proxyResponse.getEntity();
         if (entity != null) {
             OutputStream servletOutputStream = servletResponse.getOutputStream();
-            if (isRewritable(proxyResponse)) {
+            if (isRewritable(proxyResponse, "html")) {
                 try {
                     String body = modifyResponseBody(servletRequest, new String(entity.getContent().readAllBytes(),
-                            StandardCharsets.UTF_8));
+                            StandardCharsets.UTF_8), "html");
                     servletOutputStream.write(body.getBytes(StandardCharsets.UTF_8));
                 } finally {
                     servletOutputStream.flush();
@@ -211,24 +248,31 @@ public class GrafanaServlet extends ProxyServlet {
         }
     }
 
-    protected String modifyResponseBody(HttpServletRequest servletRequest, String body) {
-        // "appSubUrl":"/admin/dashboard","appUrl":"http://localhost:3000/admin/dashboard/"
-        body = body.replaceFirst("\"appUrl\":\".*?\"", "\"appUrl\":\""
-                + servletRequest.getScheme() + servletRequest.getHeader(HttpHeaders.HOST)
-                + servletRequest.getServletPath() + "\"");
-        body = body.replaceFirst("\"appSubUrl\":\".*?\"", "\"appSubUrl\":\""
-                + servletRequest.getServletPath() + "\"");
-        body = body.replaceFirst("<base href=\".*?\"/>", "<base href=\""
-                + servletRequest.getServletPath() + "/\"/>");
+    protected String modifyResponseBody(HttpServletRequest servletRequest, String body, String type) {
+        switch (type) {
+            case "html":
+                // "appSubUrl":"/admin/dashboard","appUrl":"http://localhost:3000/admin/dashboard/"
+                body = body.replaceFirst("\"appUrl\":\".*?\"", "\"appUrl\":\""
+                        + servletRequest.getScheme() + servletRequest.getHeader(HttpHeaders.HOST)
+                        + servletRequest.getServletPath() + "\"");
+                body = body.replaceFirst("\"appSubUrl\":\".*?\"", "\"appSubUrl\":\""
+                        + servletRequest.getServletPath() + "\"");
+                body = body.replaceFirst("<base href=\".*?\"/>", "<base href=\""
+                        + servletRequest.getServletPath() + "/\"/>");
+                break;
+            default:
+                break;
+        }
+
         return body;
     }
 
-    private boolean isRewritable(HttpResponse httpResponse) {
+    private boolean isRewritable(HttpResponse httpResponse, String type) {
         boolean rewriteable = false;
         Header[] contentTypeHeaders = httpResponse.getHeaders("Content-Type");
         for (Header header : contentTypeHeaders) {
             // May need to accept other types
-            if (header.getValue().contains("html")) {
+            if (header.getValue().contains(type)) {
                 rewriteable = true;
             }
         }
