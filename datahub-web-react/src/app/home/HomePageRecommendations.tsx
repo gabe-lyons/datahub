@@ -3,6 +3,7 @@ import styled from 'styled-components/macro';
 import { Button, Divider, Empty, Typography } from 'antd';
 import { RocketOutlined } from '@ant-design/icons';
 import {
+    CorpUser,
     EntityType,
     RecommendationModule as RecommendationModuleType,
     RecommendationRenderType,
@@ -74,7 +75,7 @@ const DomainsRecomendationContainer = styled.div`
 `;
 
 type Props = {
-    userUrn: string;
+    user: CorpUser;
 };
 
 const simpleViewEntityTypes = [
@@ -85,17 +86,17 @@ const simpleViewEntityTypes = [
     EntityType.GlossaryTerm,
 ];
 
-export const HomePageRecommendations = ({ userUrn }: Props) => {
+export const HomePageRecommendations = ({ user }: Props) => {
     // Entity Types
     const entityRegistry = useEntityRegistry();
     const browseEntityList = entityRegistry.getBrowseEntityTypes();
     const [showGettingStartedModal, setShowGettingStartedModal] = useState(false);
     const appConfig = useAppConfig();
     const authenticatedUser = useGetAuthenticatedUser();
-    const user = authenticatedUser?.corpUser;
     const canManageGlossary = !!authenticatedUser?.platformPrivileges?.manageGlossaries;
     const hideGlossary = !!appConfig?.config?.visualConfig?.hideGlossary;
     const showGlossary = shouldShowGlossary(canManageGlossary, hideGlossary);
+    const userUrn = user?.urn;
 
     const showSimplifiedHomepage = user?.settings?.appearance?.showSimplifiedHomepage;
 

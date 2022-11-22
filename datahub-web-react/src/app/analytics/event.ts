@@ -22,6 +22,7 @@ export enum EventType {
     RecommendationImpressionEvent,
     RecommendationClickEvent,
     HomePageRecommendationClickEvent,
+    HomePageExploreAllClickEvent,
     SearchAcrossLineageEvent,
     SearchAcrossLineageResultsViewEvent,
     DownloadAsCsvEvent,
@@ -340,6 +341,10 @@ export interface ShowStandardHomepageEvent extends BaseEvent {
     type: EventType.ShowStandardHomepageEvent;
 }
 
+export interface HomePageExploreAllClickEvent extends BaseEvent {
+    type: EventType.HomePageExploreAllClickEvent;
+}
+
 // Business glossary events
 
 export interface CreateGlossaryEntityEvent extends BaseEvent {
@@ -391,6 +396,7 @@ export type Event =
     | ResetCredentialsEvent
     | SearchEvent
     | HomePageSearchEvent
+    | HomePageExploreAllClickEvent
     | SearchResultsViewEvent
     | SearchResultClickEvent
     | BrowseResultClickEvent
