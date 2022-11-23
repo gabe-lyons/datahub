@@ -1,7 +1,6 @@
 package com.linkedin.metadata.search.cache;
 
 import com.codahale.metrics.Timer;
-import com.linkedin.data.DataMap;
 import com.linkedin.metadata.query.SearchFlags;
 import com.linkedin.metadata.search.SearchEntity;
 import com.linkedin.metadata.search.SearchEntityArray;
