@@ -39,6 +39,7 @@ dependencies {
   testImplementation externalDependency.springBootTest
   testCompile externalDependency.mockito
   testCompile externalDependency.testng
+  testCompile externalDependency.hazelcastTest
 
 }
 

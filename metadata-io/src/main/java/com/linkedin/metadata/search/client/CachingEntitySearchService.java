@@ -18,6 +18,8 @@ import org.javatuples.Quintet;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
+import static com.datahub.util.RecordUtils.*;
+
 
 @RequiredArgsConstructor
 public class CachingEntitySearchService {
@@ -144,13 +146,13 @@ public class CachingEntitySearchService {
         try (Timer.Context ignored2 = MetricUtils.timer(this.getClass(), "getCachedAutoCompleteResults_cache").time()) {
           Timer.Context cacheAccess = MetricUtils.timer(this.getClass(), "autocomplete_cache_access").time();
           Object cacheKey = Quintet.with(entityName, input, field, filters, limit);
-          DataMap dataMap = cache.get(cacheKey, DataMap.class);
-          result = dataMap != null ? new AutoCompleteResult(dataMap) : null;
+          String json = cache.get(cacheKey, String.class);
+          result = json != null ? toRecordTemplate(AutoCompleteResult.class, json) : null;
           cacheAccess.stop();
           if (result == null) {
             Timer.Context cacheMiss = MetricUtils.timer(this.getClass(), "autocomplete_cache_miss").time();
             result = getRawAutoCompleteResults(entityName, input, field, filters, limit);
-            cache.put(cacheKey, result.data());
+            cache.put(cacheKey, toJsonString(result));
             cacheMiss.stop();
             MetricUtils.counter(this.getClass(), "autocomplete_cache_miss_count").inc();
           }
@@ -179,13 +181,13 @@ public class CachingEntitySearchService {
         try (Timer.Context ignored2 = MetricUtils.timer(this.getClass(), "getCachedBrowseResults_cache").time()) {
           Timer.Context cacheAccess = MetricUtils.timer(this.getClass(), "browse_cache_access").time();
           Object cacheKey = Quintet.with(entityName, path, filters, from, size);
-          DataMap dataMap = cache.get(cacheKey, DataMap.class);
-          result = dataMap != null ? new BrowseResult(dataMap) : null;
+          String json = cache.get(cacheKey, String.class);
+          result = json != null ? toRecordTemplate(BrowseResult.class, json) : null;
           cacheAccess.stop();
           if (result == null) {
             Timer.Context cacheMiss = MetricUtils.timer(this.getClass(), "browse_cache_miss").time();
             result = getRawBrowseResults(entityName, path, filters, from, size);
-            cache.put(cacheKey, result.data());
+            cache.put(cacheKey, toJsonString(result));
             cacheMiss.stop();
             MetricUtils.counter(this.getClass(), "browse_cache_miss_count").inc();
           }
