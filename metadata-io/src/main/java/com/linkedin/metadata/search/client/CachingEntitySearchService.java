@@ -1,7 +1,6 @@
 package com.linkedin.metadata.search.client;
 
 import com.codahale.metrics.Timer;
-import com.linkedin.data.DataMap;
 import com.linkedin.metadata.browse.BrowseResult;
 import com.linkedin.metadata.query.AutoCompleteResult;
 import com.linkedin.metadata.query.SearchFlags;
