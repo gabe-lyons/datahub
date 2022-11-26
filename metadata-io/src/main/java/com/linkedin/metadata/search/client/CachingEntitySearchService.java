@@ -124,7 +124,8 @@ public class CachingEntitySearchService {
         cacheManager.getCache(ENTITY_SEARCH_SERVICE_SEARCH_CACHE_NAME),
         batchSize,
         querySize -> getRawSearchResults(entityName, query, filters, sortCriterion, querySize.getFrom(), querySize.getSize()),
-        querySize -> Quintet.with(entityName, query, filters, sortCriterion, querySize), flags, enableCache).getSearchResults(from, size);
+        querySize -> Quintet.with(entityName, query, filters != null ? toJsonString(filters) : null, sortCriterion, querySize),
+        flags, enableCache).getSearchResults(from, size);
   }
 
 
@@ -144,7 +145,7 @@ public class CachingEntitySearchService {
       if (enableCache(flags)) {
         try (Timer.Context ignored2 = MetricUtils.timer(this.getClass(), "getCachedAutoCompleteResults_cache").time()) {
           Timer.Context cacheAccess = MetricUtils.timer(this.getClass(), "autocomplete_cache_access").time();
-          Object cacheKey = Quintet.with(entityName, input, field, filters, limit);
+          Object cacheKey = Quintet.with(entityName, input, field, filters != null ? toJsonString(filters) : null, limit);
           String json = cache.get(cacheKey, String.class);
           result = json != null ? toRecordTemplate(AutoCompleteResult.class, json) : null;
           cacheAccess.stop();
@@ -179,7 +180,7 @@ public class CachingEntitySearchService {
       if (enableCache(flags)) {
         try (Timer.Context ignored2 = MetricUtils.timer(this.getClass(), "getCachedBrowseResults_cache").time()) {
           Timer.Context cacheAccess = MetricUtils.timer(this.getClass(), "browse_cache_access").time();
-          Object cacheKey = Quintet.with(entityName, path, filters, from, size);
+          Object cacheKey = Quintet.with(entityName, path, filters != null ? toJsonString(filters) : null, from, size);
           String json = cache.get(cacheKey, String.class);
           result = json != null ? toRecordTemplate(BrowseResult.class, json) : null;
           cacheAccess.stop();
