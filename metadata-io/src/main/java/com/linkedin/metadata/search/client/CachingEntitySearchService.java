@@ -124,8 +124,8 @@ public class CachingEntitySearchService {
         cacheManager.getCache(ENTITY_SEARCH_SERVICE_SEARCH_CACHE_NAME),
         batchSize,
         querySize -> getRawSearchResults(entityName, query, filters, sortCriterion, querySize.getFrom(), querySize.getSize()),
-        querySize -> Quintet.with(entityName, query, filters != null ? toJsonString(filters) : null, sortCriterion, querySize),
-        flags, enableCache).getSearchResults(from, size);
+        querySize -> Quintet.with(entityName, query, filters != null ? toJsonString(filters) : null,
+            sortCriterion != null ? toJsonString(sortCriterion) : null, querySize), flags, enableCache).getSearchResults(from, size);
   }
 
 
