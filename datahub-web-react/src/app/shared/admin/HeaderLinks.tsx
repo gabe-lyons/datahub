@@ -37,7 +37,7 @@ const LinksWrapper = styled.div<{ areLinksHidden?: boolean }>`
 const MenuItem = styled(Menu.Item)`
     font-size: 12px;
     font-weight: bold;
-    max-width: 240px;
+    max-width: 400px;
 `;
 
 const NavTitleContainer = styled.span`
@@ -83,10 +83,6 @@ export function HeaderLinks(props: Props) {
     // SaaS only
     const showActionRequests = (isActionRequestsEnabled && me && me.platformPrivileges.viewMetadataProposals) || false;
     const showTests = (isTestsEnabled && me?.platformPrivileges?.manageTests) || false;
-    console.log({
-        isTestsEnabled,
-        pp: me?.platformPrivileges?.manageTests,
-    });
 
     return (
         <LinksWrapper areLinksHidden={areLinksHidden}>
@@ -143,7 +139,13 @@ export function HeaderLinks(props: Props) {
                         {showTests && (
                             <MenuItem key="2">
                                 <Link to="/tests">
-                                    <FileDoneOutlined style={{ fontSize: '14px', fontWeight: 'bold' }} /> Tests
+                                    <NavTitleContainer>
+                                        <FileDoneOutlined style={{ fontSize: '14px', fontWeight: 'bold' }} />
+                                        <NavTitleText>Tests</NavTitleText>
+                                    </NavTitleContainer>
+                                    <NavTitleDescription>
+                                        Monitor policies & automate actions across data assets
+                                    </NavTitleDescription>
                                 </Link>
                             </MenuItem>
                         )}
