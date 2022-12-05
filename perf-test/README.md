@@ -28,6 +28,7 @@ Here, we have defined 4 common requests
 - Search: searches datasets with query "test"
 - Browse: browses datasets with path "/perf/test"
 - Graph: gets datasets owned by user "common"
+- Search GraphQL: Searches datasets using breadth{randInt} assuming the graph ingest has been used with 100 children
 
 We will continue adding more as more use cases arise, but feel free to play around with the default behavior to create a
 load test that matches your request pattern.
