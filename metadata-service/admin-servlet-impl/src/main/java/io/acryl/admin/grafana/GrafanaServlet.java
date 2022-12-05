@@ -108,6 +108,15 @@ public class GrafanaServlet extends ProxyServlet {
                         : paramEntry.getKey()));
     }
 
+    /**
+     * Force specific query parameters to always be present with specific value (configuration defined).
+     * Add the original parameters as long as they are not the forced parameters.
+     * Add any extra parameters, again as long as they are not the forced parameters.
+     *
+     * @param servletRequest original request
+     * @param extraQueryParams extra parameters to add to incoming parameters
+     * @return the query string
+     */
     private String buildForcedQueryParams(HttpServletRequest servletRequest, String extraQueryParams) {
         final Set<String> restricted = requiredParameters.stream().map(Map.Entry::getKey).collect(Collectors.toSet());
         Stream<String> originParams = reduceParams(servletRequest.getParameterMap().entrySet().stream()
@@ -133,11 +142,11 @@ public class GrafanaServlet extends ProxyServlet {
         uri.append(forward);
         uri.append(servletRequest.getServletPath());
         if (doLog) {
-            log("redirect: " + uri.toString());
+            log("redirect: " + uri);
         }
         uri.append(Optional.ofNullable(path).orElse(""));
         if (doLog) {
-            log("redirect: " + uri.toString());
+            log("redirect: " + uri);
         }
 
         // Handle the query string
@@ -145,7 +154,7 @@ public class GrafanaServlet extends ProxyServlet {
         // queryString is not decoded, so we need encodeUriQuery not to encode "%" characters, to avoid double-encoding
         uri.append(encodeUriQuery(queryParameters, false));
         if (doLog) {
-            log("redirect: " + uri.toString());
+            log("redirect: " + uri);
         }
 
         return uri.toString();

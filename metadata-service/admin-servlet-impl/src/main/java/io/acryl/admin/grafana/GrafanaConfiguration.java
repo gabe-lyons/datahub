@@ -62,6 +62,10 @@ public class GrafanaConfiguration {
                 .build();
     }
 
+    /**
+     * These are used to block off parts of the grafana ui
+     * @return list of blocked url paths
+     */
     @Bean("grafanaDeny")
     public Set<String> grafanaDeny() {
         return ImmutableSet.<String>builder()
@@ -72,6 +76,10 @@ public class GrafanaConfiguration {
                 .build();
     }
 
+    /**
+     * These url paths redirect to the default dashboard if accessed
+     * @return set of url paths
+     */
     @Bean("grafanaRedirectDefault")
     public Set<String> grafanaRedirectDefault() {
         return ImmutableSet.<String>builder()
@@ -79,6 +87,11 @@ public class GrafanaConfiguration {
                 .build();
     }
 
+    /**
+     * These parameters are forced on every call with the given values.
+     * Currently, we enforce the org id, namespace, and kiosk mode (escape is possible)
+     * @return list of parameters, multi-parameters are allow per http spec
+     */
     @Bean("grafanaRequiredParameters")
     public List<Map.Entry<String, String[]>> grafanaRequiredParameters() {
         return List.of(
@@ -88,6 +101,13 @@ public class GrafanaConfiguration {
         );
     }
 
+    /**
+     * If a /default dashboard is designated it is used as a forced redirect in a few cases
+     * where we need to protect the grafana endpoints. Otherwise, it is useful in case we want
+     * to define a per instance/client default dashboard.
+     * @param grafanaDashboards the configured dashboards
+     * @return configuration object
+     */
     @Bean("grafanaConfig")
     public Config grafanaConfig(@Qualifier("grafanaDashboards") Map<String, String> grafanaDashboards) {
         return Config.builder()
