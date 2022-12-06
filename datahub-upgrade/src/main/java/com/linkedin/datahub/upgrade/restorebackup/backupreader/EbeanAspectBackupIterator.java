@@ -12,11 +12,7 @@ import lombok.extern.slf4j.Slf4j;
  * Base interface for iterators that retrieves EbeanAspectV2 objects
  * This allows us to restore from backups of various format
  */
-<<<<<<< HEAD
-public interface EbeanAspectBackupIterator<T> extends Closeable {
 
-  T getNextReader();
-=======
 @Slf4j
 @RequiredArgsConstructor
 public class EbeanAspectBackupIterator<T extends ReaderWrapper> implements Closeable {
@@ -48,5 +44,4 @@ public class EbeanAspectBackupIterator<T extends ReaderWrapper> implements Close
       }
     });
   }
->>>>>>> oss_master
 }

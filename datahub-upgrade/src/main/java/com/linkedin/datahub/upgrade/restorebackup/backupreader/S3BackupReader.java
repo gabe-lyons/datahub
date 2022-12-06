@@ -152,7 +152,7 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
       log.error("No backup files on path {} in bucket {} were found. Did you mis-configure something?", path, bucket);
     }
 
-    return new ParquetEbeanAspectBackupIterator(readers);
+    return new EbeanAspectBackupIterator<>(readers);
   }
 
   private List<String> getFileKey(String bucket, String path) {

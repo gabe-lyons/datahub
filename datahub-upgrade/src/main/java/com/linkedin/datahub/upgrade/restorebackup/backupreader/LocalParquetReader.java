@@ -23,13 +23,10 @@ public class LocalParquetReader implements BackupReader<ParquetReaderWrapper> {
 
   public static final String READER_NAME = "LOCAL_PARQUET";
 
-<<<<<<< HEAD
-=======
   public static List<String> argNames() {
     return Collections.emptyList();
   }
 
->>>>>>> oss_master
   public LocalParquetReader(@Nonnull List<Optional<String>> args) {
     if (args.size() != argNames().size()) {
       throw new IllegalArgumentException("Incorrect number of arguments for LocalParquetReader.");
@@ -37,10 +34,6 @@ public class LocalParquetReader implements BackupReader<ParquetReaderWrapper> {
     // Need below to solve issue with hadoop path class not working in linux systems
     // https://stackoverflow.com/questions/41864985/hadoop-ioexception-failure-to-login
     UserGroupInformation.setLoginUser(UserGroupInformation.createRemoteUser("hduser"));
-  }
-
-  public static List<String> argNames() {
-    return Collections.emptyList();
   }
 
   @Override
@@ -60,11 +53,7 @@ public class LocalParquetReader implements BackupReader<ParquetReaderWrapper> {
 
     try {
       ParquetReader<GenericRecord> reader = AvroParquetReader.<GenericRecord>builder(new Path(path.get())).build();
-<<<<<<< HEAD
-      return new ParquetEbeanAspectBackupIterator(ImmutableList.of(new ParquetReaderWrapper(reader, path.get())));
-=======
       return new EbeanAspectBackupIterator<>(ImmutableList.of(new ParquetReaderWrapper(reader, path.get())));
->>>>>>> oss_master
     } catch (IOException e) {
       throw new RuntimeException(String.format("Failed to build ParquetReader: %s", e));
     }

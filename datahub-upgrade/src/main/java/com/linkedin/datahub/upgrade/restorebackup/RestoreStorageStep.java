@@ -43,31 +43,16 @@ public class RestoreStorageStep implements UpgradeStep {
 
   private final EntityService _entityService;
   private final EntityRegistry _entityRegistry;
-<<<<<<< HEAD
-  private final Map<String, Class<? extends BackupReader<ParquetReaderWrapper>>> _backupReaders;
-  private final ExecutorService _fileReaderThreadPool;
-=======
   private final Map<String, Class<? extends BackupReader<? extends ReaderWrapper<?>>>> _backupReaders;
   private final ExecutorService _fileReaderThreadPool;
   private final ExecutorService _gmsThreadPool;
->>>>>>> oss_master
 
   public RestoreStorageStep(final EntityService entityService, final EntityRegistry entityRegistry) {
     _entityService = entityService;
     _entityRegistry = entityRegistry;
-<<<<<<< HEAD
     _backupReaders = ImmutableBiMap.of(LocalParquetReader.READER_NAME, LocalParquetReader.class,
         S3BackupReader.READER_NAME, S3BackupReader.class);
-    String poolSize = System.getenv(RestoreIndices.READER_POOL_SIZE);
-    int intPoolSize;
-    try {
-      intPoolSize = Integer.parseInt(poolSize);
-    } catch (NumberFormatException e) {
-      intPoolSize = DEFAULT_THREAD_POOL;
-    }
-    _fileReaderThreadPool = Executors.newFixedThreadPool(intPoolSize);
-=======
-    _backupReaders = ImmutableBiMap.of(LocalParquetReader.READER_NAME, LocalParquetReader.class);
+
     final String readerPoolSize = System.getenv(RestoreIndices.READER_POOL_SIZE);
     final String writerPoolSize = System.getenv(RestoreIndices.WRITER_POOL_SIZE);
     int filePoolSize;
@@ -84,7 +69,6 @@ public class RestoreStorageStep implements UpgradeStep {
     }
     _fileReaderThreadPool = Executors.newFixedThreadPool(filePoolSize);
     _gmsThreadPool = Executors.newFixedThreadPool(gmsPoolSize);
->>>>>>> oss_master
   }
 
   @Override
@@ -111,24 +95,6 @@ public class RestoreStorageStep implements UpgradeStep {
         return new DefaultUpgradeStepResult(id(), UpgradeStepResult.Result.FAILED);
       }
 
-<<<<<<< HEAD
-      Class<? extends BackupReader<ParquetReaderWrapper>> clazz = _backupReaders.get(backupReaderName.get());
-      List<String> argNames = BackupReaderArgs.getArgNames(clazz);
-      List<Optional<String>> args = argNames.stream().map(argName -> context.parsedArgs().get(argName)).collect(
-          Collectors.toList());
-      BackupReader<ParquetReaderWrapper> backupReader;
-      try {
-        backupReader = clazz.getConstructor(List.class).newInstance(args);
-      } catch (InstantiationException | InvocationTargetException | IllegalAccessException | NoSuchMethodException e) {
-        context.report().addLine("Invalid BackupReader, not able to construct instance of " + clazz.getSimpleName());
-        throw new IllegalArgumentException("Invalid BackupReader: " + clazz.getSimpleName() + ", need to implement proper constructor.");
-      }
-      EbeanAspectBackupIterator<ParquetReaderWrapper> iterator = backupReader.getBackupIterator(context);
-      ParquetReaderWrapper reader;
-      List<Future<?>> futureList = new ArrayList<>();
-      while ((reader = iterator.getNextReader()) != null) {
-        final ParquetReaderWrapper readerRef = reader;
-=======
       Class<? extends BackupReader<? extends ReaderWrapper>> clazz = _backupReaders.get(backupReaderName.get());
       List<String> argNames = BackupReaderArgs.getArgNames(clazz);
       List<Optional<String>> args = argNames.stream().map(argName -> context.parsedArgs().get(argName)).collect(
@@ -146,7 +112,6 @@ public class RestoreStorageStep implements UpgradeStep {
       List<Future<?>> futureList = new ArrayList<>();
       while ((reader = iterator.getNextReader()) != null) {
         final ReaderWrapper readerRef = reader;
->>>>>>> oss_master
         futureList.add(_fileReaderThreadPool.submit(() -> readerExecutable(readerRef, context)));
       }
       for (Future<?> future : futureList) {
@@ -163,25 +128,16 @@ public class RestoreStorageStep implements UpgradeStep {
     };
   }
 
-<<<<<<< HEAD
-  private void readerExecutable(ParquetReaderWrapper reader, UpgradeContext context) {
-    EbeanAspectV2 aspect;
-    int numRows = 0;
-=======
+
   private void readerExecutable(ReaderWrapper reader, UpgradeContext context) {
     EbeanAspectV2 aspect;
     int numRows = 0;
     final ArrayList<Future<RecordTemplate>> futureList = new ArrayList<>();
->>>>>>> oss_master
     while ((aspect = reader.next()) != null) {
       numRows++;
 
       // 1. Extract an Entity type from the entity Urn
-<<<<<<< HEAD
-      Urn urn;
-=======
       final Urn urn;
->>>>>>> oss_master
       try {
         urn = Urn.createFromString(aspect.getKey().getUrn());
       } catch (Exception e) {
@@ -216,11 +172,7 @@ public class RestoreStorageStep implements UpgradeStep {
       }
 
       // 4. Verify that the aspect is a valid aspect associated with the entity
-<<<<<<< HEAD
-      AspectSpec aspectSpec;
-=======
       final AspectSpec aspectSpec;
->>>>>>> oss_master
       try {
         aspectSpec = entitySpec.getAspectSpec(aspectName);
       } catch (Exception e) {
@@ -231,13 +183,6 @@ public class RestoreStorageStep implements UpgradeStep {
       }
 
       // 5. Write the row back using the EntityService
-<<<<<<< HEAD
-      boolean emitMae = aspect.getKey().getVersion() == 0L;
-      _entityService.updateAspect(urn, entityName, aspectName, aspectSpec, aspectRecord, toAuditStamp(aspect),
-          aspect.getKey().getVersion(), emitMae);
-
-      if (numRows % REPORT_BATCH_SIZE == 0) {
-=======
       final long version = aspect.getKey().getVersion();
       final AuditStamp auditStamp = toAuditStamp(aspect);
       futureList.add(_gmsThreadPool.submit(() ->
@@ -253,7 +198,6 @@ public class RestoreStorageStep implements UpgradeStep {
           }
         }
         futureList.clear();
->>>>>>> oss_master
         context.report().addLine(String.format("Successfully inserted %d rows", numRows));
       }
     }

@@ -18,10 +18,7 @@ public final class BackupReaderArgs {
   static {
     ARGS_MAP = new HashMap<>();
     ARGS_MAP.put(LocalParquetReader.class, LocalParquetReader.argNames());
-<<<<<<< HEAD
     ARGS_MAP.put(S3BackupReader.class, S3BackupReader.argNames());
-=======
->>>>>>> oss_master
   }
 
   public static List<String> getArgNames(Class<? extends BackupReader> clazz) {
