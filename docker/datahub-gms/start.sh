@@ -1,5 +1,4 @@
 #!/bin/bash
-set -x
 
 
 : ${SKIP_EBEAN_CHECK:=true}
@@ -51,7 +50,7 @@ fi
 
 OTEL_AGENT=""
 if [[ $ENABLE_OTEL == true ]]; then
-  OTEL_AGENT="-javaagent:opentelemetry-javaagent-all.jar "
+  OTEL_AGENT="-javaagent:opentelemetry-javaagent.jar "
 fi
 
 PROMETHEUS_AGENT=""

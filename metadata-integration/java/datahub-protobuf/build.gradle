@@ -35,10 +35,11 @@ dependencies {
   implementation externalDependency.gson
   compileOnly externalDependency.commonsCli
 
-  compileOnly externalDependency.lombok
-  annotationProcessor externalDependency.lombok
-  testImplementation externalDependency.junitJupiterApi
-  testRuntimeOnly externalDependency.junitJupiterEngine
+    implementation externalDependency.slf4jApi
+    compileOnly externalDependency.lombok
+    annotationProcessor externalDependency.lombok
+    testImplementation externalDependency.junitJupiterApi
+    testRuntimeOnly externalDependency.junitJupiterEngine
 }
 
 import java.nio.file.Paths

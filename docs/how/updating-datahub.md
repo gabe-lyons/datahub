@@ -12,6 +12,22 @@ This file documents any backwards-incompatible changes in DataHub and assists pe
 
 ### Other notable Changes
 
+- #6611 - Snowflake `schema_pattern` now accepts pattern for fully qualified schema name in format `<catalog_name>.<schema_name>` by setting config `match_fully_qualified_names : True`. Current default `match_fully_qualified_names: False` is only to maintain backward compatibility. The config option `match_fully_qualified_names` will be deprecated in future and the default behavior will assume `match_fully_qualified_names: True`."
+
+## 0.9.3
+
+### Breaking Changes
+
+- The beta `datahub check graph-consistency` command has been removed. 
+
+### Potential Downtime
+
+### Deprecations
+
+- PowerBI source: `workspace_id_pattern` is introduced in place of `workspace_id`. `workspace_id` is now deprecated and set for removal in a future version.
+
+### Other notable Changes
+
 ## 0.9.2
 
 - LookML source will only emit views that are reachable from explores while scanning your git repo. Previous behavior can be achieved by setting `emit_reachable_views_only` to False.
@@ -21,6 +37,17 @@ This file documents any backwards-incompatible changes in DataHub and assists pe
 - The DataHub Airflow lineage backend and plugin no longer support Airflow 1.x. You can still run DataHub ingestion in Airflow 1.x using the [PythonVirtualenvOperator](https://airflow.apache.org/docs/apache-airflow/1.10.15/_api/airflow/operators/python_operator/index.html?highlight=pythonvirtualenvoperator#airflow.operators.python_operator.PythonVirtualenvOperator).
 
 ### Breaking Changes
+
+### Potential Downtime
+
+### Deprecations
+
+### Other notable Changes
+
+## 0.9.1
+
+### Breaking Changes
+- we have promoted `bigqery-beta` to `bigquery`. If you are using `bigquery-beta` then change your recipes to use the type `bigquery`
 
 ### Potential Downtime
 

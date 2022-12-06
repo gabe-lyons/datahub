@@ -13,7 +13,8 @@ dependencies {
     exclude group: 'net.minidev', module: 'json-smart'
     exclude group: 'com.nimbusds', module: 'nimbus-jose-jwt'
   }
-  compile externalDependency.lombok
+  implementation externalDependency.slf4jApi
+  compileOnly externalDependency.lombok
   compile externalDependency.picocli
   compile externalDependency.parquet
   compile externalDependency.springBeans
@@ -29,6 +30,8 @@ dependencies {
   runtime externalDependency.mariadbConnector
   runtime externalDependency.mysqlConnector
   runtime externalDependency.postgresql
+
+  implementation externalDependency.awsMskIamAuth
 
   annotationProcessor externalDependency.lombok
   annotationProcessor externalDependency.picocli
