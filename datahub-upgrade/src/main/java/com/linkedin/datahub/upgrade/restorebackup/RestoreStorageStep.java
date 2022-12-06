@@ -12,7 +12,6 @@ import com.linkedin.datahub.upgrade.restorebackup.backupreader.BackupReader;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.BackupReaderArgs;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.EbeanAspectBackupIterator;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.LocalParquetReader;
-import com.linkedin.datahub.upgrade.restorebackup.backupreader.ParquetReaderWrapper;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.S3BackupReader;
 import com.linkedin.datahub.upgrade.restorebackup.backupreader.ReaderWrapper;
 import com.linkedin.datahub.upgrade.restoreindices.RestoreIndices;
