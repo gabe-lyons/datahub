@@ -30,11 +30,11 @@ dependencies {
   implementation project(':metadata-models')
   implementation project(path: ':metadata-integration:java:datahub-client', configuration: 'shadow')
 
-  implementation externalDependency.protobuf
-  implementation externalDependency.jgrapht
-  implementation externalDependency.gson
-  compileOnly externalDependency.commonsCli
-
+    implementation externalDependency.protobuf
+    implementation externalDependency.jgrapht
+    implementation externalDependency.gson
+    implementation externalDependency.commonsCli
+    implementation externalDependency.httpAsyncClient
     implementation externalDependency.slf4jApi
     compileOnly externalDependency.lombok
     annotationProcessor externalDependency.lombok
