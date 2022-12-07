@@ -49,7 +49,7 @@ public class ConfigurationProvider {
   /**
    * DataHub top-level server configurations
    */
-  private DatahubConfiguration datahub;
+  private DataHubConfiguration datahub;
   /**
    * Viz related configs
    */
