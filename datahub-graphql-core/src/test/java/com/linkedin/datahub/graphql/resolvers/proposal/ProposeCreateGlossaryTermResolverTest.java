@@ -2,7 +2,7 @@ package com.linkedin.datahub.graphql.resolvers.proposal;
 
 import com.datahub.authentication.Authentication;
 import com.datahub.authentication.proposal.ProposalService;
-import com.datahub.authorization.Authorizer;
+import com.datahub.plugins.auth.authorization.Authorizer;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.generated.CreateGlossaryEntityInput;
 import graphql.schema.DataFetchingEnvironment;
