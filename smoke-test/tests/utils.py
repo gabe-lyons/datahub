@@ -28,7 +28,7 @@ def get_frontend_session():
 
 
 def get_admin_username() -> str:
-    return os.getenv("ADMIN_USERNAME", "datahub")
+    return os.getenv("ADMIN_USERNAME", "admin")
 
 
 def get_admin_credentials():
