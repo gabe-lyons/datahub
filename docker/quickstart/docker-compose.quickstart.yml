@@ -104,6 +104,7 @@ services:
     - MCE_CONSUMER_ENABLED=true
     - PE_CONSUMER_ENABLED=true
     - UI_INGESTION_ENABLED=true
+    - METADATA_SERVICE_AUTH_ENABLED=false
     hostname: datahub-gms
     image: ${DATAHUB_GMS_IMAGE:-795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-gms}:${DATAHUB_VERSION:-head}
     ports:

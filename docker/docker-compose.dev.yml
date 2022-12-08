@@ -42,6 +42,7 @@ services:
       - DATAHUB_SERVER_TYPE=${DATAHUB_SERVER_TYPE:-dev}
       - DATAHUB_TELEMETRY_ENABLED=${DATAHUB_TELEMETRY_ENABLED:-true}
       - GRAFANA_NAMESPACE=${GRAFANA_NAMESPACE:-}
+      - METADATA_SERVICE_AUTH_ENABLED=false
     volumes:
       - ./datahub-gms/start.sh:/datahub/datahub-gms/scripts/start.sh
       - ./datahub-gms/jetty.xml:/datahub/datahub-gms/scripts/jetty.xml

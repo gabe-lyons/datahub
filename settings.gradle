@@ -14,7 +14,8 @@ include 'metadata-service:restli-servlet-impl'
 include 'metadata-service:graphql-servlet-impl'
 include 'metadata-service:admin-servlet-impl'
 include 'metadata-service:openapi-servlet'
-include 'metadata-service:auth-ranger-impl'
+include 'metadata-service:plugin'
+include 'metadata-service:plugin:src:test:sample-test-plugins'
 include 'metadata-dao-impl:kafka-producer'
 include 'metadata-events:mxe-avro-1.7'
 include 'metadata-events:mxe-registration'
@@ -44,7 +45,6 @@ include 'metadata-integration:java:spark-lineage'
 include 'metadata-integration:java:datahub-client'
 include 'metadata-integration:java:datahub-protobuf'
 include 'ingestion-scheduler'
-include 'datahub-ranger-plugin'
 include 'metadata-ingestion-modules:airflow-plugin'
 include 'smoke-test'
 include 'notifications'
@@ -54,3 +54,4 @@ try {
 } catch (Exception e) {
     print("Could not set git hook config")
 }
+include 'metadata-auth:auth-api'

@@ -3,7 +3,7 @@ package com.linkedin.gms.factory.config;
 import com.datahub.authentication.AuthenticationConfiguration;
 import com.datahub.authorization.AuthorizationConfiguration;
 import com.linkedin.datahub.graphql.featureflags.FeatureFlags;
-import com.linkedin.metadata.config.DatahubConfiguration;
+import com.linkedin.metadata.config.DataHubConfiguration;
 import com.linkedin.metadata.config.IngestionConfiguration;
 import com.linkedin.metadata.config.TestsConfiguration;
 import com.linkedin.metadata.telemetry.TelemetryConfiguration;
@@ -49,7 +49,7 @@ public class ConfigurationProvider {
   /**
    * DataHub top-level server configurations
    */
-  private DatahubConfiguration datahub;
+  private DataHubConfiguration datahub;
   /**
    * Viz related configs
    */

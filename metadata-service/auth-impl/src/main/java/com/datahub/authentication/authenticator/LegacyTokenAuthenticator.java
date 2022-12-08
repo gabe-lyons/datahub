@@ -6,7 +6,7 @@ import com.datahub.authentication.Authentication;
 import com.datahub.authentication.AuthenticationRequest;
 import com.datahub.authentication.AuthenticatorContext;
 import com.datahub.authentication.AuthenticationException;
-import com.datahub.authentication.Authenticator;
+import com.datahub.plugins.auth.authentication.Authenticator;
 import com.datahub.authentication.token.TokenException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
