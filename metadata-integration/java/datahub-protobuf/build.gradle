@@ -33,7 +33,7 @@ dependencies {
     implementation externalDependency.protobuf
     implementation externalDependency.jgrapht
     implementation externalDependency.gson
-    implementation externalDependency.commonsCli
+    compileOnly externalDependency.commonsCli
     implementation externalDependency.httpAsyncClient
     implementation externalDependency.slf4jApi
     compileOnly externalDependency.lombok
