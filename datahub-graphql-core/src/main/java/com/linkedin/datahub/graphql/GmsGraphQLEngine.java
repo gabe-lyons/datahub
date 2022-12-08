@@ -217,6 +217,8 @@ import com.linkedin.datahub.graphql.resolvers.search.SearchAcrossLineageResolver
 import com.linkedin.datahub.graphql.resolvers.search.SearchResolver;
 import com.linkedin.datahub.graphql.resolvers.settings.GlobalSettingsResolver;
 import com.linkedin.datahub.graphql.resolvers.settings.UpdateGlobalSettingsResolver;
+import com.linkedin.datahub.graphql.resolvers.step.BatchGetStepStatesResolver;
+import com.linkedin.datahub.graphql.resolvers.step.BatchUpdateStepStatesResolver;
 import com.linkedin.datahub.graphql.resolvers.tag.CreateTagResolver;
 import com.linkedin.datahub.graphql.resolvers.tag.DeleteTagResolver;
 import com.linkedin.datahub.graphql.resolvers.tag.SetTagColorResolver;
@@ -612,6 +614,7 @@ public class GmsGraphQLEngine {
             .addSchema(fileBasedSchema(ACTIONS_SCHEMA_FILE))
             // Constraints not in OSS
             .addSchema(fileBasedSchema(CONSTRAINTS_SCHEMA_FILE))
+            .addSchema(fileBasedSchema(STEPS_SCHEMA_FILE))
             .addDataLoaders(loaderSuppliers(loadableTypes))
             .addDataLoader("Aspect", context -> createDataLoader(aspectType, context))
             .configureRuntimeWiring(this::configureRuntimeWiring);
@@ -792,6 +795,7 @@ public class GmsGraphQLEngine {
                 new ListActionRequestsResolver(entityClient))
             .dataFetcher("listRejectedActionRequests",
                 new ListRejectedActionRequestsResolver(entityClient, entityService))
+            .dataFetcher("batchGetStepStates", new BatchGetStepStatesResolver(this.entityClient))
         );
     }
 
@@ -929,6 +933,7 @@ public class GmsGraphQLEngine {
             .dataFetcher("raiseIncident", new RaiseIncidentResolver(this.entityClient))
             .dataFetcher("updateIncidentStatus", new UpdateIncidentStatusResolver(this.entityClient, this.entityService))
             .dataFetcher("batchAssignRole", new BatchAssignRoleResolver(this.roleService))
+            .dataFetcher("batchUpdateStepStates", new BatchUpdateStepStatesResolver(this.entityClient))
         );
     }
 

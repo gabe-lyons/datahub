@@ -6,7 +6,10 @@ import { SidebarHeader } from './SidebarHeader';
 import { useBaseEntity, useEntityData, useMutationUrn, useRefetch } from '../../../EntityContext';
 import { findTopLevelProposals } from '../../../../../shared/tags/utils/proposalUtils';
 import { GetDatasetQuery } from '../../../../../../graphql/dataset.generated';
-import ConstraintGroup from '../../../../../shared/constraints/ConstraintGroup';
+import {
+    ENTITY_PROFILE_GLOSSARY_TERMS_ID,
+    ENTITY_PROFILE_TAGS_ID,
+} from '../../../../../onboarding/config/EntityProfileOnboardingConfig';
 
 const TermSection = styled.div`
     margin-top: 20px;
@@ -25,26 +28,11 @@ export const SidebarTagsSection = ({ properties }: { properties?: any }) => {
 
     return (
         <div>
-            <SidebarHeader title="Tags" />
-            <TagTermGroup
-                editableTags={entityData?.globalTags}
-                canAddTag={canAddTag}
-                canRemove
-                showEmptyMessage
-                entityUrn={mutationUrn}
-                entityType={entityType}
-                refetch={refetch}
-                // eslint-disable-next-line
-                // @ts-ignore
-                // eslint-disable-next-line
-                proposedTags={findTopLevelProposals(baseEntity?.['dataset']?.['tagProposals'] || [])}
-            />
-            <TermSection>
-                <SidebarHeader title="Glossary Terms" />
-                <ConstraintGroup constraints={baseEntity?.dataset?.constraints || []} />
+            <span id={ENTITY_PROFILE_TAGS_ID}>
+                <SidebarHeader title="Tags" />
                 <TagTermGroup
-                    editableGlossaryTerms={entityData?.glossaryTerms}
-                    canAddTerm={canAddTerm}
+                    editableTags={entityData?.globalTags}
+                    canAddTag={canAddTag}
                     canRemove
                     showEmptyMessage
                     entityUrn={mutationUrn}
@@ -55,6 +43,20 @@ export const SidebarTagsSection = ({ properties }: { properties?: any }) => {
                     // eslint-disable-next-line
                     proposedGlossaryTerms={findTopLevelProposals(baseEntity?.dataset?.termProposals || [])}
                 />
+            </span>
+            <TermSection>
+                <span id={ENTITY_PROFILE_GLOSSARY_TERMS_ID}>
+                    <SidebarHeader title="Glossary Terms" />
+                    <TagTermGroup
+                        editableGlossaryTerms={entityData?.glossaryTerms}
+                        canAddTerm={canAddTerm}
+                        canRemove
+                        showEmptyMessage
+                        entityUrn={mutationUrn}
+                        entityType={entityType}
+                        refetch={refetch}
+                    />
+                </span>
             </TermSection>
         </div>
     );
