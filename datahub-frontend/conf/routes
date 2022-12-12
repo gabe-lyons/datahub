@@ -35,8 +35,8 @@ DELETE        /openapi/*path                                                   c
 PUT           /openapi/*path                                                   controllers.Application.proxy(path: String, request: Request)
 
 # Proxies Dashboard requests to the metadata service
-GET           /admin/dashboard/*path                                         controllers.Application.proxy(path)
-POST          /admin/dashboard/*path                                         controllers.Application.proxy(path)
+GET           /admin/dashboard/*path                                         controllers.Application.proxy(path: String, request: Request)
+POST          /admin/dashboard/*path                                         controllers.Application.proxy(path: String, request: Request)
 
 # Map static resources from the /public folder to the /assets URL path
 GET           /assets/*file                                                    controllers.Assets.at(path="/public", file)

@@ -121,7 +121,7 @@ public class Application extends Controller {
     }
 
     if (!headers.containsKey(Http.HeaderNames.X_FORWARDED_PROTO)) {
-      final String schema = Optional.ofNullable(URI.create(request().uri()).getScheme()).orElse("http");
+      final String schema = Optional.ofNullable(URI.create(request.uri()).getScheme()).orElse("http");
       headers.put(Http.HeaderNames.X_FORWARDED_PROTO, List.of(schema));
     }
 
