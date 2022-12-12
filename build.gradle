@@ -115,7 +115,7 @@ project.ext.externalDependency = [
     'jettyClient': "org.eclipse.jetty:jetty-client:$jettyVersion",
     'jettison': 'org.codehaus.jettison:jettison:1.5.2',
     'jgrapht': 'org.jgrapht:jgrapht-core:1.5.1',
-    'json': 'org.json:json:20220320',
+    'json': 'org.json:json:20220924',
     'jna': 'net.java.dev.jna:jna:5.12.1',
     'jsonPatch': 'com.github.java-json-tools:json-patch:1.13',
     'jsonSchemaAvro': 'com.github.fge:json-schema-avro:0.1.4',

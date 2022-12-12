@@ -5,6 +5,8 @@ import no.nav.security.mock.oauth2.MockOAuth2Server;
 import no.nav.security.mock.oauth2.token.DefaultOAuth2TokenCallback;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import org.awaitility.Awaitility;
+import org.awaitility.Durations;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -48,8 +50,8 @@ public class ApplicationTest extends WithBrowser {
   protected Application provideApplication() {
     return new GuiceApplicationBuilder()
             .configure("metadataService.port", String.valueOf(gmsServerPort()))
-           .configure("auth.baseUrl", "http://localhost:" +  providePort())
-           .configure("auth.oidc.discoveryUri", "http://localhost:" + oauthServerPort()
+            .configure("auth.baseUrl", "http://localhost:" +  providePort())
+            .configure("auth.oidc.discoveryUri", "http://localhost:" + oauthServerPort()
                    + "/testIssuer/.well-known/openid-configuration")
             .in(new Environment(Mode.TEST)).build();
   }
@@ -75,6 +77,9 @@ public class ApplicationTest extends WithBrowser {
   @BeforeAll
   public void init() throws IOException, InterruptedException {
     _gmsServer = new MockWebServer();
+    _gmsServer.enqueue(new MockResponse().setResponseCode(404)); // dynamic settings - not tested
+    _gmsServer.enqueue(new MockResponse().setResponseCode(404)); // dynamic settings - not tested
+    _gmsServer.enqueue(new MockResponse().setResponseCode(404)); // dynamic settings - not tested
     _gmsServer.enqueue(new MockResponse().setBody("{\"value\":\"urn:li:corpuser:testUser@myCompany.com\"}"));
     _gmsServer.enqueue(new MockResponse().setBody("{\"accessToken\":\"faketoken_YCpYIrjQH4sD3_rAc3VPPFg4\"}"));
     _gmsServer.start(gmsServerPort());
@@ -93,7 +98,7 @@ public class ApplicationTest extends WithBrowser {
 
     startServer();
     createBrowser();
-    Thread.sleep(5000);
+    Awaitility.await().timeout(Durations.TEN_SECONDS).until(() -> app != null);
   }
 
   @AfterAll
