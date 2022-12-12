@@ -63,7 +63,7 @@ public class UpgradeDefaultBrowsePathsStep extends UpgradeStep {
   @Nonnull
   @Override
   public ExecutionMode getExecutionMode() {
-    return ExecutionMode.BLOCKING; // ensure there are no write conflicts.
+    return ExecutionMode.ASYNC; // This can take a while to run in blocking mode.
   }
 
   private int getAndMigrateBrowsePaths(String entityType, int start, AuditStamp auditStamp)
