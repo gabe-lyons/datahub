@@ -29,6 +29,8 @@ public class AcrylConstants {
   // For tests
   public static final String PASSING_TESTS_FIELD = "passingTests";
   public static final String FAILING_TESTS_FIELD = "failingTests";
+  public static final String TESTS_CREATED_TIME_INDEX_FIELD_NAME = "createdTime";
+  public static final String TESTS_LAST_UPDATED_TIME_INDEX_FIELD_NAME = "lastUpdatedTime";
 
   private AcrylConstants() {
   }

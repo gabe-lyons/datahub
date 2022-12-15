@@ -49,6 +49,10 @@ export enum EventType {
     DeleteIngestionSourceEvent,
     ExecuteIngestionSourceEvent,
     SsoEvent,
+    // SaaS only events
+    CreateTestEvent,
+    UpdateTestEvent,
+    DeleteTestEvent,
 }
 
 /**
@@ -384,6 +388,19 @@ export interface SsoEvent extends BaseEvent {
     type: EventType.SsoEvent;
 }
 
+// SaaS only events
+export interface CreateTestEvent extends BaseEvent {
+    type: EventType.CreateTestEvent;
+}
+
+export interface UpdateTestEvent extends BaseEvent {
+    type: EventType.UpdateTestEvent;
+}
+
+export interface DeleteTestEvent extends BaseEvent {
+    type: EventType.DeleteTestEvent;
+}
+
 /**
  * Event consisting of a union of specific event types.
  */
@@ -432,4 +449,7 @@ export type Event =
     | DeleteIngestionSourceEvent
     | ExecuteIngestionSourceEvent
     | ShowStandardHomepageEvent
-    | SsoEvent;
+    | SsoEvent
+    | CreateTestEvent
+    | UpdateTestEvent
+    | DeleteTestEvent;

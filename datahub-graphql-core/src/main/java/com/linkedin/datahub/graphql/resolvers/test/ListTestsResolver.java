@@ -1,26 +1,29 @@
 package com.linkedin.datahub.graphql.resolvers.test;
 
+import com.datahub.authentication.Authentication;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.exception.AuthorizationException;
-import com.linkedin.datahub.graphql.generated.Test;
 import com.linkedin.datahub.graphql.generated.EntityType;
 import com.linkedin.datahub.graphql.generated.ListTestsInput;
 import com.linkedin.datahub.graphql.generated.ListTestsResult;
+import com.linkedin.datahub.graphql.generated.Test;
 import com.linkedin.entity.client.EntityClient;
 import com.linkedin.metadata.Constants;
+import com.linkedin.metadata.query.filter.SortCriterion;
+import com.linkedin.metadata.query.filter.SortOrder;
 import com.linkedin.metadata.search.SearchEntity;
 import com.linkedin.metadata.search.SearchEntityArray;
 import com.linkedin.metadata.search.SearchResult;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static com.linkedin.datahub.graphql.resolvers.ResolverUtils.*;
 import static com.linkedin.datahub.graphql.resolvers.test.TestUtils.*;
+import static com.linkedin.metadata.AcrylConstants.*;
 
 
 /**
@@ -39,8 +42,8 @@ public class ListTestsResolver implements DataFetcher<CompletableFuture<ListTest
 
   @Override
   public CompletableFuture<ListTestsResult> get(final DataFetchingEnvironment environment) throws Exception {
-
     final QueryContext context = environment.getContext();
+    final Authentication authentication = context.getAuthentication();
 
     return CompletableFuture.supplyAsync(() -> {
 
@@ -55,10 +58,11 @@ public class ListTestsResolver implements DataFetcher<CompletableFuture<ListTest
           final SearchResult gmsResult = _entityClient.search(
               Constants.TEST_ENTITY_NAME,
               query,
-              Collections.emptyMap(),
+              null,
+              new SortCriterion().setField(TESTS_LAST_UPDATED_TIME_INDEX_FIELD_NAME).setOrder(SortOrder.DESCENDING),
               start,
               count,
-              context.getAuthentication());
+              authentication);
 
           // Now that we have entities we can bind this to a result.
           final ListTestsResult result = new ListTestsResult();

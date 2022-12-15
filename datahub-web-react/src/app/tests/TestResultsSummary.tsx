@@ -6,6 +6,7 @@ import { SUCCESS_COLOR_HEX } from '../entity/shared/tabs/Incident/incidentUtils'
 import { navigateToSearchUrl } from '../search/utils/navigateToSearchUrl';
 import { useGetTestResultsSummaryQuery } from '../../graphql/test.generated';
 import { formatNumberWithoutAbbreviation } from '../shared/formatNumber';
+import { PLACEHOLDER_TEST_URN } from './utils';
 
 const StyledButton = styled(Button)`
     margin: 0px;
@@ -20,6 +21,7 @@ export const TestResultsSummary = ({ urn }: Props) => {
     const history = useHistory();
 
     const { data: results } = useGetTestResultsSummaryQuery({
+        skip: !urn || urn === PLACEHOLDER_TEST_URN,
         variables: {
             urn,
         },

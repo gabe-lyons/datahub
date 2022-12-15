@@ -20,6 +20,8 @@ import { TestResultsSummary } from './TestResultsSummary';
 import CopyUrn from '../shared/CopyUrn';
 import { TestDefinitionInput } from '../../types.generated';
 import { TestBuilderState } from './builder/types';
+import { addToListTestsCache, PLACEHOLDER_TEST_URN, removeFromListTestsCache } from './utils';
+import analytics, { EventType } from '../analytics';
 
 const DeleteButtonContainer = styled.div`
     display: flex;
@@ -56,16 +58,15 @@ export const TestsList = () => {
     const [deleteTestMutation] = useDeleteTestMutation();
     const [updateTestMutation] = useUpdateTestMutation();
     const [createTestMutation] = useCreateTestMutation();
-    const { loading, error, data, refetch } = useListTestsQuery({
+    const { loading, error, data, client, refetch } = useListTestsQuery({
         variables: {
             input: {
                 start,
                 count: pageSize,
                 query,
-                // filters: null,
             },
         },
-        fetchPolicy: 'no-cache',
+        fetchPolicy: 'cache-first',
     });
 
     const totalTests = data?.listTests?.total || 0;
@@ -74,10 +75,14 @@ export const TestsList = () => {
     const focusTest = (focusTestUrn && filteredTests.find((test) => test.urn === focusTestUrn)) || undefined;
 
     const deleteTest = async (urn: string) => {
+        removeFromListTestsCache(client, urn, page, pageSize, query);
         deleteTestMutation({
             variables: { urn },
         })
             .then(() => {
+                analytics.event({
+                    type: EventType.DeleteTestEvent,
+                });
                 message.success({ content: 'Removed test.', duration: 2 });
                 const newRemovedUrns = [...removedUrns, urn];
                 setRemovedUrns(newRemovedUrns);
@@ -104,14 +109,34 @@ export const TestsList = () => {
             description: state.description as string,
             definition: state.definition as TestDefinitionInput,
         };
-        const mutation = isEditing && focusTestUrn ? updateTestMutation : createTestMutation;
-        const variables = isEditing && focusTestUrn ? { urn: focusTestUrn, input } : { input };
+        const isUpdating = isEditing && focusTestUrn;
+        const mutation = isUpdating ? updateTestMutation : createTestMutation;
+        const analyticsEventType: EventType = isUpdating ? EventType.UpdateTestEvent : EventType.CreateTestEvent;
+        const variables = isUpdating ? { urn: focusTestUrn, input } : { input };
+        // If creating, add to the cache
+        if (!isUpdating) {
+            const newTest = {
+                __typename: 'Test',
+                urn: PLACEHOLDER_TEST_URN,
+                name: input.name || null,
+                category: input.category || null,
+                description: input.description || null,
+                definition: {
+                    __typename: 'TestDefinition',
+                    json: input.definition?.json || null,
+                },
+            };
+            addToListTestsCache(client, newTest, pageSize, query);
+        }
         (
             mutation({
                 variables: variables as any,
             }) as any
         )
             .then(() => {
+                analytics.event({
+                    type: analyticsEventType,
+                });
                 message.success({
                     content: `Successfully ${isEditing ? 'edited' : 'created'} Test!`,
                     duration: 3,
@@ -120,6 +145,10 @@ export const TestsList = () => {
                 setTimeout(() => refetch(), 3000);
             })
             .catch((_) => {
+                // If creating, remove from the cache
+                if (!isUpdating) {
+                    removeFromListTestsCache(client, PLACEHOLDER_TEST_URN, page, pageSize, query);
+                }
                 message.destroy();
                 message.error({
                     content: `Failed to save Test! Please review your test definition.`,
@@ -160,6 +189,7 @@ export const TestsList = () => {
             dataIndex: 'name',
             key: 'name',
             render: (name: string) => <Typography.Text strong>{name}</Typography.Text>,
+            sorter: (testA, testB) => testA.name.localeCompare(testB.name),
         },
         {
             title: 'Category',
@@ -172,6 +202,7 @@ export const TestsList = () => {
                     </>
                 );
             },
+            sorter: (testA, testB) => testA.category.localeCompare(testB.category),
         },
         {
             title: 'Description',
@@ -191,6 +222,11 @@ export const TestsList = () => {
                         <TestResultsSummary urn={record.urn} />
                     </>
                 );
+            },
+            sorter: (testA, testB) => {
+                const testAResults = testA.results?.passingCount || 0;
+                const testBResults = testB.results?.passingCount || 0;
+                return testAResults - testBResults;
             },
         },
         {

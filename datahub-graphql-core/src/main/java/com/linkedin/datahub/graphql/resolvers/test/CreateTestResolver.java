@@ -1,5 +1,9 @@
 package com.linkedin.datahub.graphql.resolvers.test;
 
+import com.datahub.authentication.Actor;
+import com.datahub.authentication.Authentication;
+import com.linkedin.common.AuditStamp;
+import com.linkedin.common.urn.UrnUtils;
 import com.linkedin.data.template.SetMode;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.exception.AuthorizationException;
@@ -20,9 +24,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 
-import static com.linkedin.datahub.graphql.resolvers.ResolverUtils.bindArgument;
-import static com.linkedin.datahub.graphql.resolvers.test.TestUtils.canManageTests;
-import static com.linkedin.datahub.graphql.resolvers.test.TestUtils.mapDefinition;
+import static com.linkedin.datahub.graphql.resolvers.ResolverUtils.*;
+import static com.linkedin.datahub.graphql.resolvers.test.TestUtils.*;
 
 
 /**
@@ -37,6 +40,8 @@ public class CreateTestResolver implements DataFetcher<CompletableFuture<String>
   @Override
   public CompletableFuture<String> get(final DataFetchingEnvironment environment) throws Exception {
     final QueryContext context = environment.getContext();
+    final Authentication authentication = context.getAuthentication();
+    final Actor actor = authentication.getActor();
     final CreateTestInput input = bindArgument(environment.getArgument("input"), CreateTestInput.class);
 
     return CompletableFuture.supplyAsync(() -> {
@@ -57,12 +62,13 @@ public class CreateTestResolver implements DataFetcher<CompletableFuture<String>
           key.setId(uuidStr);
           proposal.setEntityKeyAspect(GenericRecordUtils.serializeAspect(key));
 
-          if (_entityClient.exists(EntityKeyUtils.convertEntityKeyToUrn(key, Constants.TEST_ENTITY_NAME), context.getAuthentication())) {
+          if (_entityClient.exists(EntityKeyUtils.convertEntityKeyToUrn(key, Constants.TEST_ENTITY_NAME),
+              authentication)) {
             throw new IllegalArgumentException("This Test already exists!");
           }
 
           // Create the Test info.
-          final TestInfo info = mapCreateTestInput(input);
+          final TestInfo info = mapCreateTestInput(input, actor);
 
           // Validate test info
           ValidationResult validationResult = _testEngine.validateJson(info.getDefinition().getJson());
@@ -95,13 +101,19 @@ public class CreateTestResolver implements DataFetcher<CompletableFuture<String>
     });
   }
 
-  private static TestInfo mapCreateTestInput(final CreateTestInput input) {
+  private static TestInfo mapCreateTestInput(final CreateTestInput input, final Actor actor) {
     final TestInfo result = new TestInfo();
     result.setName(input.getName());
     result.setCategory(input.getCategory());
     result.setDescription(input.getDescription(), SetMode.IGNORE_NULL);
     result.setDefinition(mapDefinition(input.getDefinition()));
-    result.setLastUpdatedTimestamp(System.currentTimeMillis());
+
+    long currentTimeMillis = System.currentTimeMillis();
+    result.setLastUpdatedTimestamp(currentTimeMillis);
+    final AuditStamp auditStamp =
+        new AuditStamp().setTime(currentTimeMillis).setActor(UrnUtils.getUrn(actor.toUrnStr()));
+    result.setCreated(auditStamp);
+    result.setLastUpdated(auditStamp);
     return result;
   }
 }

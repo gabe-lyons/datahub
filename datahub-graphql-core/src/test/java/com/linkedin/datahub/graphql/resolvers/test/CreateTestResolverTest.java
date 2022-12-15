@@ -1,5 +1,7 @@
 package com.linkedin.datahub.graphql.resolvers.test;
 
+import com.datahub.authentication.Actor;
+import com.datahub.authentication.ActorType;
 import com.datahub.authentication.Authentication;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.generated.CreateTestInput;
@@ -20,33 +22,43 @@ import java.util.Collections;
 import java.util.concurrent.CompletionException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static com.linkedin.datahub.graphql.TestUtils.getMockAllowContext;
-import static com.linkedin.datahub.graphql.TestUtils.getMockDenyContext;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertThrows;
+import static com.linkedin.datahub.graphql.TestUtils.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 
 public class CreateTestResolverTest {
-
   private static final CreateTestInput TEST_INPUT =
       new CreateTestInput("test-id", "test-name", "test-category", "test-description", new TestDefinitionInput("{}"));
 
+  private EntityClient mockClient;
+  private TestEngine mockEngine;
+  private CreateTestResolver resolver;
+  private DataFetchingEnvironment mockEnv;
+  private Authentication authentication;
+
+  @BeforeMethod
+  public void setupTest() throws Exception {
+    mockClient = mock(EntityClient.class);
+    mockEngine = mock(TestEngine.class);
+    mockEnv = mock(DataFetchingEnvironment.class);
+    authentication = mock(Authentication.class);
+    resolver = new CreateTestResolver(mockClient, mockEngine);
+  }
+
   @Test
   public void testGetSuccess() throws Exception {
-    // Create resolver
-    EntityClient mockClient = Mockito.mock(EntityClient.class);
-    TestEngine mockEngine = Mockito.mock(TestEngine.class);
-    CreateTestResolver resolver = new CreateTestResolver(mockClient, mockEngine);
-
     // Execute resolver
     QueryContext mockContext = getMockAllowContext();
-    DataFetchingEnvironment mockEnv = Mockito.mock(DataFetchingEnvironment.class);
     Mockito.when(mockEnv.getArgument(Mockito.eq("input"))).thenReturn(TEST_INPUT);
     Mockito.when(mockEnv.getContext()).thenReturn(mockContext);
     Mockito.when(mockEngine.validateJson(anyString())).thenReturn(ValidationResult.validResult());
+    Mockito.when(mockContext.getAuthentication()).thenReturn(authentication);
+    Mockito.when(authentication.getActor()).thenReturn(new Actor(ActorType.USER, "test-user"));
 
     resolver.get(mockEnv).get();
 
@@ -73,13 +85,7 @@ public class CreateTestResolverTest {
 
   @Test
   public void testInvalidInput() throws Exception {
-    // Create resolver
-    EntityClient mockClient = Mockito.mock(EntityClient.class);
-    TestEngine mockEngine = Mockito.mock(TestEngine.class);
-    CreateTestResolver resolver = new CreateTestResolver(mockClient, mockEngine);
-
     // Execute resolver
-    DataFetchingEnvironment mockEnv = Mockito.mock(DataFetchingEnvironment.class);
     QueryContext mockContext = getMockAllowContext();
     Mockito.when(mockEnv.getArgument(Mockito.eq("input"))).thenReturn(TEST_INPUT);
     Mockito.when(mockEnv.getContext()).thenReturn(mockContext);
@@ -91,13 +97,7 @@ public class CreateTestResolverTest {
 
   @Test
   public void testGetUnauthorized() throws Exception {
-    // Create resolver
-    EntityClient mockClient = Mockito.mock(EntityClient.class);
-    TestEngine mockEngine = Mockito.mock(TestEngine.class);
-    CreateTestResolver resolver = new CreateTestResolver(mockClient, mockEngine);
-
     // Execute resolver
-    DataFetchingEnvironment mockEnv = Mockito.mock(DataFetchingEnvironment.class);
     QueryContext mockContext = getMockDenyContext();
     Mockito.when(mockEnv.getArgument(Mockito.eq("input"))).thenReturn(TEST_INPUT);
     Mockito.when(mockEnv.getContext()).thenReturn(mockContext);
@@ -108,16 +108,10 @@ public class CreateTestResolverTest {
 
   @Test
   public void testGetEntityClientException() throws Exception {
-    // Create resolver
-    EntityClient mockClient = Mockito.mock(EntityClient.class);
-    TestEngine mockEngine = Mockito.mock(TestEngine.class);
+    // Execute resolver
     Mockito.doThrow(RemoteInvocationException.class)
         .when(mockClient)
         .ingestProposal(Mockito.any(), Mockito.any(Authentication.class));
-    CreateTestResolver resolver = new CreateTestResolver(mockClient, mockEngine);
-
-    // Execute resolver
-    DataFetchingEnvironment mockEnv = Mockito.mock(DataFetchingEnvironment.class);
     QueryContext mockContext = getMockAllowContext();
     Mockito.when(mockEnv.getArgument(Mockito.eq("input"))).thenReturn(TEST_INPUT);
     Mockito.when(mockEnv.getContext()).thenReturn(mockContext);
