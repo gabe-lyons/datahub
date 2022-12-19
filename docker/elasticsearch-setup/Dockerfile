@@ -19,5 +19,5 @@ FROM base AS dev-install
 # See this excellent thread https://github.com/docker/cli/issues/1134
 
 FROM ${APP_ENV}-install AS final
-# remove RUN chmod a+rwx -R /index
+RUN chmod a+rwx -R /index
 CMD /create-indices.sh

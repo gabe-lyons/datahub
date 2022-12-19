@@ -15,8 +15,8 @@ Cypress.Commands.add('login', () => {
       method: 'POST',
       url: '/logIn',
       body: {
-        username: 'admin', // Cypress.env('ADMIN_USERNAME'),
-        password: 'mypass'// Cypress.env('ADMIN_PASSWORD'),
+        username: Cypress.env('ADMIN_USERNAME'),
+        password: Cypress.env('ADMIN_PASSWORD'),
       },
       retryOnStatusCodeFailure: true,
     });
