@@ -10,6 +10,7 @@ import {
     ENTITY_PROFILE_GLOSSARY_TERMS_ID,
     ENTITY_PROFILE_TAGS_ID,
 } from '../../../../../onboarding/config/EntityProfileOnboardingConfig';
+import ConstraintGroup from '../../../../../shared/constraints/ConstraintGroup';
 
 const TermSection = styled.div`
     margin-top: 20px;
@@ -41,12 +42,13 @@ export const SidebarTagsSection = ({ properties }: { properties?: any }) => {
                     // eslint-disable-next-line
                     // @ts-ignore
                     // eslint-disable-next-line
-                    proposedGlossaryTerms={findTopLevelProposals(baseEntity?.dataset?.termProposals || [])}
+                    proposedTags={findTopLevelProposals(baseEntity?.['dataset']?.['tagProposals'] || [])}
                 />
             </span>
             <TermSection>
                 <span id={ENTITY_PROFILE_GLOSSARY_TERMS_ID}>
                     <SidebarHeader title="Glossary Terms" />
+                    <ConstraintGroup constraints={baseEntity?.dataset?.constraints || []} />
                     <TagTermGroup
                         editableGlossaryTerms={entityData?.glossaryTerms}
                         canAddTerm={canAddTerm}
@@ -55,6 +57,10 @@ export const SidebarTagsSection = ({ properties }: { properties?: any }) => {
                         entityUrn={mutationUrn}
                         entityType={entityType}
                         refetch={refetch}
+                        // eslint-disable-next-line
+                        // @ts-ignore
+                        // eslint-disable-next-line
+                        proposedGlossaryTerms={findTopLevelProposals(baseEntity?.dataset?.termProposals || [])}
                     />
                 </span>
             </TermSection>
