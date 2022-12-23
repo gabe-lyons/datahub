@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import styled from 'styled-components/macro';
-import { Button, Divider, Empty, Typography } from 'antd';
-import { RocketOutlined } from '@ant-design/icons';
+import { Divider, Empty, Typography } from 'antd';
 import {
     CorpUser,
     EntityType,
@@ -14,12 +13,20 @@ import { RecommendationModule } from '../recommendations/RecommendationModule';
 import { BrowseEntityCard } from '../search/BrowseEntityCard';
 import { useEntityRegistry } from '../useEntityRegistry';
 import { useGetEntityCountsQuery } from '../../graphql/app.generated';
-import { GettingStartedModal } from './GettingStartedModal';
 import { ANTD_GRAY } from '../entity/shared/constants';
 import { useGetAuthenticatedUser } from '../useGetAuthenticatedUser';
 import { HomePagePosts } from './HomePagePosts';
 import { useAppConfig } from '../useAppConfig';
 import { shouldShowGlossary } from '../identity/user/UserUtils';
+import {
+    HOME_PAGE_DOMAINS_ID,
+    HOME_PAGE_MOST_POPULAR_ID,
+    HOME_PAGE_PLATFORMS_ID,
+} from '../onboarding/config/HomePageOnboardingConfig';
+import { useUpdateEducationStepIdsAllowlist } from '../onboarding/useUpdateEducationStepIdsAllowlist';
+
+const PLATFORMS_MODULE_ID = 'Platforms';
+const MOST_POPULAR_MODULE_ID = 'HighUsageEntities';
 
 const RecommendationsContainer = styled.div`
     margin-top: 32px;
@@ -51,10 +58,6 @@ const BrowseCardContainer = styled.div`
     flex-wrap: wrap;
 `;
 
-const ConnectSourcesButton = styled(Button)`
-    margin: 16px;
-`;
-
 const NoMetadataEmpty = styled(Empty)`
     font-size: 18px;
     color: ${ANTD_GRAY[8]};
@@ -74,6 +77,17 @@ const DomainsRecomendationContainer = styled.div`
     min-width: 750px;
 `;
 
+function getStepId(moduleId: string) {
+    switch (moduleId) {
+        case PLATFORMS_MODULE_ID:
+            return HOME_PAGE_PLATFORMS_ID;
+        case MOST_POPULAR_MODULE_ID:
+            return HOME_PAGE_MOST_POPULAR_ID;
+        default:
+            return undefined;
+    }
+}
+
 type Props = {
     user: CorpUser;
 };
@@ -90,7 +104,6 @@ export const HomePageRecommendations = ({ user }: Props) => {
     // Entity Types
     const entityRegistry = useEntityRegistry();
     const browseEntityList = entityRegistry.getBrowseEntityTypes();
-    const [showGettingStartedModal, setShowGettingStartedModal] = useState(false);
     const appConfig = useAppConfig();
     const authenticatedUser = useGetAuthenticatedUser();
     const canManageGlossary = !!authenticatedUser?.platformPrivileges?.manageGlossaries;
@@ -131,20 +144,25 @@ export const HomePageRecommendations = ({ user }: Props) => {
     const recommendationModules = data?.listRecommendations?.modules;
 
     // Determine whether metadata has been ingested yet.
-    const hasLoadedEntityCounts = orderedEntityCounts && orderedEntityCounts.length > 0;
     const hasIngestedMetadata =
         orderedEntityCounts && orderedEntityCounts.filter((entityCount) => entityCount.count > 0).length > 0;
-
-    useEffect(() => {
-        if (hasLoadedEntityCounts && !hasIngestedMetadata) {
-            setShowGettingStartedModal(true);
-        }
-    }, [hasLoadedEntityCounts, hasIngestedMetadata]);
 
     // we want to render the domain module first if it exists
     const domainRecommendationModule = recommendationModules?.find(
         (module) => module.renderType === RecommendationRenderType.DomainSearchList,
     );
+
+    // Render domain onboarding step if the domains module exists
+    const hasDomains = !!domainRecommendationModule;
+    useUpdateEducationStepIdsAllowlist(hasDomains, HOME_PAGE_DOMAINS_ID);
+
+    // Render platforms onboarding step if the platforms module exists
+    const hasPlatforms = !!recommendationModules?.some((module) => module?.moduleId === PLATFORMS_MODULE_ID);
+    useUpdateEducationStepIdsAllowlist(hasPlatforms, HOME_PAGE_PLATFORMS_ID);
+
+    // Render most popular onboarding step if the most popular module exists
+    const hasMostPopular = !!recommendationModules?.some((module) => module?.moduleId === MOST_POPULAR_MODULE_ID);
+    useUpdateEducationStepIdsAllowlist(hasMostPopular, HOME_PAGE_MOST_POPULAR_ID);
 
     return (
         <RecommendationsContainer>
@@ -153,7 +171,7 @@ export const HomePageRecommendations = ({ user }: Props) => {
                 <RecommendationContainer>
                     {domainRecommendationModule && (
                         <>
-                            <DomainsRecomendationContainer>
+                            <DomainsRecomendationContainer id={HOME_PAGE_DOMAINS_ID}>
                                 <RecommendationTitle level={4}>{domainRecommendationModule.title}</RecommendationTitle>
                                 <ThinDivider />
                                 <RecommendationModule
@@ -193,9 +211,6 @@ export const HomePageRecommendations = ({ user }: Props) => {
                     ) : (
                         <NoMetadataContainer>
                             <NoMetadataEmpty description="No Metadata Found 😢" />
-                            <ConnectSourcesButton onClick={() => setShowGettingStartedModal(true)}>
-                                <RocketOutlined /> Connect your data sources
-                            </ConnectSourcesButton>
                         </NoMetadataContainer>
                     )}
                 </RecommendationContainer>
@@ -204,7 +219,7 @@ export const HomePageRecommendations = ({ user }: Props) => {
                 recommendationModules
                     .filter((module) => module.renderType !== RecommendationRenderType.DomainSearchList)
                     .map((module) => (
-                        <RecommendationContainer>
+                        <RecommendationContainer id={getStepId(module.moduleId)}>
                             <RecommendationTitle level={4}>{module.title}</RecommendationTitle>
                             <ThinDivider />
                             <RecommendationModule
@@ -215,7 +230,6 @@ export const HomePageRecommendations = ({ user }: Props) => {
                             />
                         </RecommendationContainer>
                     ))}
-            <GettingStartedModal onClose={() => setShowGettingStartedModal(false)} visible={showGettingStartedModal} />
         </RecommendationsContainer>
     );
 };

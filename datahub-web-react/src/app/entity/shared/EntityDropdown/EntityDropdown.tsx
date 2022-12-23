@@ -62,12 +62,18 @@ const StyledMenuItem = styled(Menu.Item)<{ disabled?: boolean }>`
             : ''}
 `;
 
+interface Options {
+    hideDeleteMessage?: boolean;
+    skipDeleteWait?: boolean;
+}
+
 interface Props {
     urn: string;
     entityType: EntityType;
     entityData?: any;
     menuItems: Set<EntityMenuItems>;
     size?: number;
+    options?: Options;
     refetchForEntity?: () => void;
     refetchForTerms?: () => void;
     refetchForNodes?: () => void;
@@ -89,12 +95,20 @@ function EntityDropdown(props: Props) {
         refreshBrowser,
         onDeleteEntity: onDelete,
         size,
+        options,
     } = props;
 
     const entityRegistry = useEntityRegistry();
     const [updateDeprecation] = useUpdateDeprecationMutation();
     const isHideSiblingMode = useIsSeparateSiblingsMode();
-    const { onDeleteEntity, hasBeenDeleted } = useDeleteEntity(urn, entityType, entityData, onDelete);
+    const { onDeleteEntity, hasBeenDeleted } = useDeleteEntity(
+        urn,
+        entityType,
+        entityData,
+        onDelete,
+        options?.hideDeleteMessage,
+        options?.skipDeleteWait,
+    );
 
     const [isCreateTermModalVisible, setIsCreateTermModalVisible] = useState(false);
     const [isCreateNodeModalVisible, setIsCreateNodeModalVisible] = useState(false);

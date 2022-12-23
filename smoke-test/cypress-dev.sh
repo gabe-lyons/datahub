@@ -10,7 +10,7 @@ pip install --upgrade pip wheel setuptools
 pip install -r requirements.txt
 
 mkdir -p ~/.datahub/plugins/frontend/auth/
-echo "admin:mypass" > ~/.datahub/plugins/frontend/auth/user.props
+echo "test_user:test_pass" > ~/.datahub/plugins/frontend/auth/user.props
 
 echo "DATAHUB_VERSION = ${DATAHUB_VERSION:=acryl-datahub 0.0.0.dev0}"
 DATAHUB_TELEMETRY_ENABLED=false \
@@ -22,7 +22,7 @@ python -c 'from tests.cypress.integration_test import ingest_data; ingest_data()
 cd tests/cypress
 npm install
 
-export CYPRESS_ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
-export CYPRESS_ADMIN_PASSWORD=${ADMIN_PASSWORD:-mypass}
+export CYPRESS_ADMIN_USERNAME=${ADMIN_USERNAME:-test_user}
+export CYPRESS_ADMIN_PASSWORD=${ADMIN_PASSWORD:-test_pass}
 
 npx cypress open
