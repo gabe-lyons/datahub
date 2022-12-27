@@ -281,11 +281,6 @@ public class Constants {
   // Constraints
   public static final String CONSTRAINT_INFO_ASPECT_NAME = "constraintInfo";
 
-  // Settings
-  public static final String GLOBAL_SETTINGS_ENTITY_NAME = "globalSettings";
-  public static final String GLOBAL_SETTINGS_INFO_ASPECT_NAME = "globalSettingsInfo";
-  public static final Urn GLOBAL_SETTINGS_URN = Urn.createFromTuple(GLOBAL_SETTINGS_ENTITY_NAME, 0);
-
   // Events
   public static final String NOTIFICATION_REQUEST_EVENT_NAME = "notificationRequest";
 
