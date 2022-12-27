@@ -27,6 +27,7 @@ export enum PageRoutes {
     DOMAINS = '/domains',
     GLOSSARY = '/glossary',
     TESTS = '/tests',
+    SETTINGS_VIEWS = '/settings/views',
 }
 
 /**

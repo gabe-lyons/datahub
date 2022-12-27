@@ -31,6 +31,9 @@ import com.linkedin.metadata.recommendation.RecommendationsService;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.secret.SecretService;
 import com.linkedin.metadata.test.TestEngine;
+import com.linkedin.metadata.service.SettingsService;
+import com.linkedin.metadata.service.ViewService;
+import com.linkedin.metadata.service.LineageService;
 import com.linkedin.metadata.timeline.TimelineService;
 import com.linkedin.metadata.timeseries.TimeseriesAspectService;
 import com.linkedin.metadata.utils.elasticsearch.IndexConvention;
@@ -146,6 +149,18 @@ public class GraphQLEngineFactory {
   @Qualifier("postService")
   private PostService _postService;
 
+  @Autowired
+  @Qualifier("viewService")
+  private ViewService _viewService;
+
+  @Autowired
+  @Qualifier("settingsService")
+  private SettingsService _settingsService;
+
+  @Autowired
+  @Qualifier("lineageService")
+  private LineageService _lineageService;
+
   @Value("${platformAnalytics.enabled}") // TODO: Migrate to DATAHUB_ANALYTICS_ENABLED
   private Boolean isAnalyticsEnabled;
 
@@ -179,11 +194,15 @@ public class GraphQLEngineFactory {
           _configProvider.getTelemetry(),
           _configProvider.getMetadataTests(),
           _configProvider.getDatahub(),
+          _configProvider.getViews(),
           _siblingGraphService,
           _groupService,
           _roleService,
           _inviteTokenService,
           _postService,
+          _viewService,
+          _settingsService,
+          _lineageService,
           _configProvider.getFeatureFlags(),
           // Saas only
           _proposalService
@@ -213,11 +232,15 @@ public class GraphQLEngineFactory {
         _configProvider.getTelemetry(),
         _configProvider.getMetadataTests(),
         _configProvider.getDatahub(),
+        _configProvider.getViews(),
         _siblingGraphService,
         _groupService,
         _roleService,
         _inviteTokenService,
         _postService,
+        _viewService,
+        _settingsService,
+        _lineageService,
         _configProvider.getFeatureFlags(),
         // SaaS only
         _proposalService

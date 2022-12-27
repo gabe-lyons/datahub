@@ -353,6 +353,9 @@ fragment dataJobFields on DataJob {
     dataPlatformInstance {
         ...dataPlatformInstanceFields
     }
+    privileges {
+        canEditLineage
+    }
 }
 
 fragment dashboardFields on Dashboard {
@@ -439,6 +442,9 @@ fragment dashboardFields on Dashboard {
     }
     subTypes {
         typeNames
+    }
+    privileges {
+        canEditLineage
     }
 }
 

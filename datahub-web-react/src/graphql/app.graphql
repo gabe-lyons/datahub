@@ -48,6 +48,9 @@ query appConfig {
         testsConfig {
             enabled
         }
+        viewsConfig {
+            enabled
+        }
     }
 }
 
@@ -58,4 +61,14 @@ query getEntityCounts($input: EntityCountInput) {
             count
         }
     }
+}
+
+query getGlobalViewsSettings {
+    globalViewsSettings {
+        defaultView
+    }
+}
+
+mutation updateGlobalViewsSettings($input: UpdateGlobalViewsSettingsInput!) {
+    updateGlobalViewsSettings(input: $input)
 }

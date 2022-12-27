@@ -112,6 +112,10 @@ public class PoliciesConfig {
       "MANAGE_GLOBAL_SETTINGS",
       "Manage Platform Settings",
       "View and change platform-level settings, like integrations & notifications.");
+  public static final Privilege MANAGE_GLOBAL_VIEWS = Privilege.of(
+      "MANAGE_GLOBAL_VIEWS",
+      "Manage Public Views",
+      "Create, update, and delete any Public (shared) Views.");
 
   public static final List<Privilege> PLATFORM_PRIVILEGES = ImmutableList.of(
       MANAGE_POLICIES_PRIVILEGE,
@@ -131,7 +135,8 @@ public class PoliciesConfig {
       CREATE_TAGS_PRIVILEGE,
       CREATE_DOMAINS_PRIVILEGE,
       CREATE_GLOBAL_ANNOUNCEMENTS_PRIVILEGE,
-      MANAGE_GLOBAL_SETTINGS
+      MANAGE_GLOBAL_SETTINGS,
+      MANAGE_GLOBAL_VIEWS
   );
 
   // Resource Privileges //
@@ -225,6 +230,11 @@ public class PoliciesConfig {
       "DELETE_ENTITY",
       "Delete",
       "The ability to delete the delete this entity.");
+
+  public static final Privilege EDIT_LINEAGE_PRIVILEGE = Privilege.of(
+      "EDIT_LINEAGE",
+      "Edit Lineage",
+      "The ability to add and remove lineage edges for this entity.");
 
   public static final List<Privilege> COMMON_ENTITY_PRIVILEGES = ImmutableList.of(
       VIEW_ENTITY_PAGE_PRIVILEGE,
@@ -341,7 +351,8 @@ public class PoliciesConfig {
               PROPOSE_DATASET_COL_TAGS_PRIVILEGE,
               MANAGE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE,
               MANAGE_DATASET_COL_TAGS_PRIVILEGE,
-              EDIT_ENTITY_ASSERTIONS_PRIVILEGE
+              EDIT_ENTITY_ASSERTIONS_PRIVILEGE,
+              EDIT_LINEAGE_PRIVILEGE
               ))
           .flatMap(Collection::stream)
           .collect(Collectors.toList())
@@ -352,7 +363,10 @@ public class PoliciesConfig {
       "chart",
       "Charts",
       "Charts indexed by DataHub",
-      COMMON_ENTITY_PRIVILEGES
+      Stream.concat(
+          COMMON_ENTITY_PRIVILEGES.stream(),
+          ImmutableList.of(EDIT_LINEAGE_PRIVILEGE).stream())
+          .collect(Collectors.toList())
   );
 
   // Dashboard Privileges
@@ -360,7 +374,10 @@ public class PoliciesConfig {
       "dashboard",
       "Dashboards",
       "Dashboards indexed by DataHub",
-      COMMON_ENTITY_PRIVILEGES
+      Stream.concat(
+              COMMON_ENTITY_PRIVILEGES.stream(),
+              ImmutableList.of(EDIT_LINEAGE_PRIVILEGE).stream())
+          .collect(Collectors.toList())
   );
 
   // Data Doc Privileges
@@ -384,7 +401,10 @@ public class PoliciesConfig {
       "dataJob",
       "Data Tasks",
       "Data Tasks indexed by DataHub",
-      COMMON_ENTITY_PRIVILEGES
+      Stream.concat(
+              COMMON_ENTITY_PRIVILEGES.stream(),
+              ImmutableList.of(EDIT_LINEAGE_PRIVILEGE).stream())
+          .collect(Collectors.toList())
   );
 
   // Tag Privileges

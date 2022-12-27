@@ -321,5 +321,10 @@ entities:
     keyAspect: dataHubStepStateKey
     aspects:
       - dataHubStepStateProperties
+  - name: dataHubView
+    category: core
+    keyAspect: dataHubViewKey
+    aspects:
+      - dataHubViewInfo
 events:
   - name: notificationRequest
