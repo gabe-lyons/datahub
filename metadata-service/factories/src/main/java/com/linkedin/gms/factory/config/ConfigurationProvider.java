@@ -24,10 +24,6 @@ import org.springframework.context.annotation.PropertySource;
 @Data
 public class ConfigurationProvider {
   /**
-   * The base URL where DataHub is hosted.
-   */
-  private String baseUrl;
-  /**
    * Authentication related configs
    */
   private AuthenticationConfiguration authentication;
@@ -40,17 +36,9 @@ public class ConfigurationProvider {
    */
   private IngestionConfiguration ingestion;
   /**
-   * Notification related configs
-   */
-  private NotificationConfiguration notifications;
-  /**
    * Telemetry related configs
    */
   private TelemetryConfiguration telemetry;
-  /**
-   * DataHub top-level server configurations
-   */
-  private DataHubConfiguration datahub;
   /**
    * Viz related configs
    */
@@ -60,10 +48,9 @@ public class ConfigurationProvider {
    */
   private TestsConfiguration metadataTests;
   /**
-   * Event mirroring related configs
+   * DataHub top-level server configurations
    */
-  private EventSinksConfiguration eventSinks;
-
+  private DataHubConfiguration datahub;
   /**
    * Views feature related configs
    */
@@ -72,4 +59,19 @@ public class ConfigurationProvider {
    * Feature flags indicating what is turned on vs turned off
    */
   private FeatureFlags featureFlags;
+
+
+  // fork related configs go below this line
+  /**
+   * The base URL where DataHub is hosted.
+   */
+  private String baseUrl;
+  /**
+   * Event mirroring related configs
+   */
+  private EventSinksConfiguration eventSinks;
+  /**
+   * Notification related configs
+   */
+  private NotificationConfiguration notifications;
 }
