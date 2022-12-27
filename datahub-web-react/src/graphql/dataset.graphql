@@ -448,6 +448,7 @@ fragment siblingFields on Dataset {
             }
             type
         }
+    }
     privileges {
         canEditLineage
     }
