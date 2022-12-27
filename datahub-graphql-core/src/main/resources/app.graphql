@@ -790,6 +790,7 @@ input UpdateOidcSettingsInput {
   """
   extractJwtAccessTokenClaims: Boolean
 }
+"""
 Configurations related to DataHub Views feature
 """
 type ViewsConfig {
