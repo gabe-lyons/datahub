@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 import javax.inject.Named;
 
-import static org.testng.AssertJUnit.assertEquals;
+import static org.testng.AssertJUnit.assertTrue;
 
 @ActiveProfiles("test")
 @SpringBootTest(classes = {UpgradeCliApplication.class, UpgradeCliApplicationTestConfiguration.class})
@@ -24,6 +24,6 @@ public class UpgradeCliApplicationTest extends AbstractTestNGSpringContextTests 
         /*
           This might seem like a simple test however it does exercise the spring autowiring of the kafka health check bean
          */
-        assertEquals(3, restoreIndices.steps().size());
+        assertTrue(restoreIndices.steps().size() >= 3);
     }
 }

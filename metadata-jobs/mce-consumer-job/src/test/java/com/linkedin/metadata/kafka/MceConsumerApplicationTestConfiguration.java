@@ -8,13 +8,15 @@ import com.linkedin.metadata.graph.SiblingGraphService;
 import com.linkedin.metadata.models.registry.ConfigEntityRegistry;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.restli.DefaultRestliClientFactory;
-import com.linkedin.metadata.timeseries.elastic.ElasticSearchTimeseriesAspectService;
+import com.linkedin.metadata.test.TestEngine;
+import com.linkedin.metadata.timeseries.TimeseriesAspectService;
 import com.linkedin.parseq.retry.backoff.ExponentialBackoff;
 import com.linkedin.restli.client.Client;
 import io.ebean.EbeanServer;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -55,11 +57,8 @@ public class MceConsumerApplicationTestConfiguration {
         return Mockito.mock(EbeanServer.class);
     }
 
-    @Bean(name = "elasticSearchTimeseriesAspectService")
-    @Primary
-    protected ElasticSearchTimeseriesAspectService elasticSearchTimeseriesAspectService() {
-        return Mockito.mock(ElasticSearchTimeseriesAspectService.class);
-    }
+    @MockBean
+    protected TimeseriesAspectService timeseriesAspectService;
 
     @Bean("entityRegistry")
     @Primary
@@ -77,4 +76,8 @@ public class MceConsumerApplicationTestConfiguration {
     protected SiblingGraphService siblingGraphService() {
         return Mockito.mock(SiblingGraphService.class);
     }
+
+    // Saas Only
+    @MockBean
+    protected TestEngine testEngine;
 }

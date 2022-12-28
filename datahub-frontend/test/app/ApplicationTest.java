@@ -39,6 +39,7 @@ import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.fakeRequest;
 import static play.test.Helpers.route;
 
+
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SetEnvironmentVariable(key = "DATAHUB_SECRET", value = "test")
 @SetEnvironmentVariable(key = "KAFKA_BOOTSTRAP_SERVER", value = "")
@@ -52,6 +53,7 @@ public class ApplicationTest extends WithBrowser {
 
   @Override
   protected Application provideApplication() {
+
     return new GuiceApplicationBuilder()
             .configure("metadataService.port", String.valueOf(gmsServerPort()))
             .configure("auth.baseUrl", "http://localhost:" +  providePort())
@@ -86,6 +88,11 @@ public class ApplicationTest extends WithBrowser {
   @BeforeAll
   public void init() throws IOException {
     _gmsServer = new MockWebServer();
+    /* Start Saas Only */
+    _gmsServer.enqueue(new MockResponse().setResponseCode(404)); // dynamic settings - not tested
+    _gmsServer.enqueue(new MockResponse().setResponseCode(404)); // dynamic settings - not tested
+    _gmsServer.enqueue(new MockResponse().setResponseCode(404)); // dynamic settings - not tested
+    /* End Saas Only */
     _gmsServer.enqueue(new MockResponse().setBody(String.format("{\"value\":\"%s\"}", TEST_USER)));
     _gmsServer.enqueue(new MockResponse().setBody(String.format("{\"accessToken\":\"%s\"}", TEST_TOKEN)));
     _gmsServer.start(gmsServerPort());

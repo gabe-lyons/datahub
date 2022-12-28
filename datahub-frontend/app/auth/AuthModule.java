@@ -146,6 +146,20 @@ public class AuthModule extends AbstractModule {
 
     @Provides
     @Singleton
+    protected AuthServiceClient provideAuthClient(Authentication systemAuthentication, CloseableHttpClient httpClient) {
+        // Init a GMS auth client
+        final String metadataServiceHost = getMetadataServiceHost(_configs);
+
+        final int metadataServicePort = getMetadataServicePort(_configs);
+
+        final boolean metadataServiceUseSsl = doesMetadataServiceUseSsl(_configs);
+
+        return new AuthServiceClient(metadataServiceHost,
+                metadataServicePort, metadataServiceUseSsl, systemAuthentication, httpClient);
+    }
+
+    @Provides
+    @Singleton
     protected CloseableHttpClient provideHttpClient() {
         return HttpClients.createDefault();
     }

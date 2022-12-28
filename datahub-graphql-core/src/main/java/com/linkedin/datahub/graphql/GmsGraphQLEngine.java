@@ -472,11 +472,6 @@ public class GmsGraphQLEngine {
         this.settingsService = args.settingsService;
         this.lineageService = args.lineageService;
 
-        // SaaS only
-        this.entitySearchService = args.entitySearchService;
-        this.testEngine = args.testEngine;
-        this.proposalService = args.proposalService;
-
         this.ingestionConfiguration = Objects.requireNonNull(args.ingestionConfiguration);
         this.authenticationConfiguration = Objects.requireNonNull(args.authenticationConfiguration);
         this.authorizationConfiguration = Objects.requireNonNull(args.authorizationConfiguration);
@@ -560,7 +555,9 @@ public class GmsGraphQLEngine {
             .collect(Collectors.toList());
 
         // SaaS only
-        this.proposalService = proposalService;
+        this.entitySearchService = args.entitySearchService;
+        this.testEngine = args.testEngine;
+        this.proposalService = args.proposalService;
     }
 
     /**
