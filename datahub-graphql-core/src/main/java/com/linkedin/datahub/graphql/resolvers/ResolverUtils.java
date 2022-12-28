@@ -7,7 +7,6 @@ import com.linkedin.data.template.StringArray;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.exception.ValidationException;
 import com.linkedin.datahub.graphql.generated.FacetFilterInput;
-import com.linkedin.datahub.graphql.generated.OrFilter;
 import com.linkedin.datahub.graphql.generated.AndFilterInput;
 import com.linkedin.metadata.query.filter.Condition;
 import com.linkedin.metadata.query.filter.ConjunctiveCriterion;

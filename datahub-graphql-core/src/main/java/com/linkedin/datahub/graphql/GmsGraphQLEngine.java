@@ -1143,8 +1143,8 @@ public class GmsGraphQLEngine {
                         (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
                 )
                 // Incidents not in OSS
-                .dataFetcher("incidents", new EntityIncidentsResolver(entityClient)))
-                .dataFetcher("privileges", new EntityPrivilegesResolver(entityClient))
+                .dataFetcher("incidents", new EntityIncidentsResolver(entityClient))
+                .dataFetcher("privileges", new EntityPrivilegesResolver(entityClient)))
             .type("Owner", typeWiring -> typeWiring
                 .dataFetcher("owner", new OwnerTypeResolver<>(ownerTypes,
                     (env) -> ((Owner) env.getSource()).getOwner()))
@@ -1343,7 +1343,7 @@ public class GmsGraphQLEngine {
             )
             .dataFetcher("parentContainers", new ParentContainersResolver(entityClient))
             .dataFetcher("usageStats", new DashboardUsageStatsResolver(timeseriesAspectService))
-            .dataFetcher("statsSummary", new DashboardStatsSummaryResolver(timeseriesAspectService))
+            .dataFetcher("statsSummary", new DashboardStatsSummaryResolver(entityClient, timeseriesAspectService))
             .dataFetcher("privileges", new EntityPrivilegesResolver(entityClient))
         );
         builder.type("DashboardInfo", typeWiring -> typeWiring
@@ -1395,7 +1395,7 @@ public class GmsGraphQLEngine {
                 })
             )
             .dataFetcher("parentContainers", new ParentContainersResolver(entityClient))
-            .dataFetcher("statsSummary", new ChartStatsSummaryResolver(this.timeseriesAspectService))
+            .dataFetcher("statsSummary", new ChartStatsSummaryResolver(entityClient, this.timeseriesAspectService))
             .dataFetcher("privileges", new EntityPrivilegesResolver(entityClient))
         );
         builder.type("ChartInfo", typeWiring -> typeWiring

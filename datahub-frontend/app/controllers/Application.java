@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.linkedin.util.Pair;
 import com.typesafe.config.Config;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
