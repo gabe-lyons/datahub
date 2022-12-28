@@ -24,7 +24,6 @@ import com.linkedin.metadata.config.TestsConfiguration;
 import com.linkedin.metadata.config.ViewsConfiguration;
 import com.linkedin.metadata.telemetry.TelemetryConfiguration;
 import com.linkedin.metadata.config.VisualConfiguration;
-import com.linkedin.metadata.telemetry.TelemetryConfiguration;
 import com.linkedin.metadata.version.GitVersion;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
