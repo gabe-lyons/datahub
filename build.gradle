@@ -16,6 +16,8 @@ buildscript {
   ext.slf4jVersion = '1.7.32'
   ext.logbackClassic = '1.2.11'
 
+  ext.docker_registry = '795586375822.dkr.ecr.us-west-2.amazonaws.com'
+
   apply from: './repositories.gradle'
   buildscript.repositories.addAll(project.repositories)
   dependencies {
