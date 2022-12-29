@@ -10,12 +10,12 @@ record GlobalSettingsInfo {
   /**
    * Integrations between DataHub & other platforms.
    */
-  integrations: GlobalIntegrationSettings
+  integrations: optional GlobalIntegrationSettings
 
   /**
    * Global notifications settings
    */
-  notifications: GlobalNotificationSettings
+  notifications: optional GlobalNotificationSettings
 
   /**
    * SSO integrations between DataHub and identity providers
