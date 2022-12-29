@@ -16,5 +16,4 @@ echo "admin:mypass" > ~/.datahub/plugins/frontend/auth/user.props
 echo "DATAHUB_VERSION = ${DATAHUB_VERSION:=acryl-datahub 0.0.0.dev0}"
 DATAHUB_TELEMETRY_ENABLED=false  \
 DOCKER_COMPOSE_BASE="file://$( dirname "$DIR" )" \
-
 datahub docker quickstart --standalone_consumers --dump-logs-on-failure
