@@ -8,12 +8,11 @@ import com.linkedin.metadata.graph.SiblingGraphService;
 import com.linkedin.metadata.models.registry.ConfigEntityRegistry;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.restli.DefaultRestliClientFactory;
-import com.linkedin.metadata.test.TestEngine;
 import com.linkedin.metadata.timeseries.TimeseriesAspectService;
+import com.linkedin.metadata.test.TestEngine;
 import com.linkedin.parseq.retry.backoff.ExponentialBackoff;
 import com.linkedin.restli.client.Client;
 import io.ebean.EbeanServer;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -31,17 +30,11 @@ public class MceConsumerApplicationTestConfiguration {
     @Autowired
     private TestRestTemplate restTemplate;
 
-    @Bean("kafkaHealthChecker")
-    @Primary
-    public KafkaHealthChecker kafkaHealthChecker() {
-        return Mockito.mock(KafkaHealthChecker.class);
-    }
+    @MockBean
+    public KafkaHealthChecker kafkaHealthChecker;
 
-    @Bean("entityService")
-    @Primary
-    public EntityService entityService() {
-        return Mockito.mock(EntityService.class);
-    }
+    @MockBean
+    public EntityService entityService;
 
     @Bean("restliEntityClient")
     @Primary
@@ -51,31 +44,20 @@ public class MceConsumerApplicationTestConfiguration {
         return new RestliEntityClient(restClient, new ExponentialBackoff(1), 1);
     }
 
-    @Bean
-    @Primary
-    public EbeanServer ebeanServer() {
-        return Mockito.mock(EbeanServer.class);
-    }
+    @MockBean
+    public EbeanServer ebeanServer;
 
     @MockBean
     protected TimeseriesAspectService timeseriesAspectService;
 
-    @Bean("entityRegistry")
-    @Primary
-    protected EntityRegistry entityRegistry() {
-        return Mockito.mock(EntityRegistry.class);
-    }
+    @MockBean
+    protected EntityRegistry entityRegistry;
 
-    @Bean("configEntityRegistry")
-    protected ConfigEntityRegistry configEntityRegistry() {
-        return Mockito.mock(ConfigEntityRegistry.class);
-    }
+    @MockBean
+    protected ConfigEntityRegistry configEntityRegistry;
 
-    @Bean("siblingGraphService")
-    @Primary
-    protected SiblingGraphService siblingGraphService() {
-        return Mockito.mock(SiblingGraphService.class);
-    }
+    @MockBean
+    protected SiblingGraphService siblingGraphService;
 
     // Saas Only
     @MockBean
