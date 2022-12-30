@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import javax.annotation.Nonnull;
+
+import com.google.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -48,6 +50,7 @@ public class AuthServiceClient {
   private final Authentication systemAuthentication;
   private final CloseableHttpClient httpClient;
 
+  @Inject
   public AuthServiceClient(@Nonnull final String metadataServiceHost, @Nonnull final Integer metadataServicePort,
       @Nonnull final Boolean useSsl, @Nonnull final Authentication systemAuthentication,
       @Nonnull final CloseableHttpClient httpClient) {

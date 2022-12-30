@@ -7,7 +7,7 @@ from dateutil.relativedelta import relativedelta
 
 from datahub.emitter.mce_builder import make_dataset_urn_with_platform_instance
 from datahub.emitter.mcp_builder import wrap_aspect_as_workunit
-from datahub.ingestion.api.common import WorkUnit
+from datahub.ingestion.api.workunit import MetadataWorkUnit
 from datahub.ingestion.source.bigquery_v2.bigquery_audit import BigqueryTableIdentifier
 from datahub.ingestion.source.bigquery_v2.bigquery_config import BigQueryV2Config
 from datahub.ingestion.source.bigquery_v2.bigquery_report import BigQueryV2Report
@@ -20,6 +20,7 @@ from datahub.ingestion.source.sql.sql_generic_profiler import (
     GenericProfiler,
     TableProfilerRequest,
 )
+from datahub.ingestion.source.state.profiling_state_handler import ProfilingHandler
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +35,13 @@ class BigqueryProfiler(GenericProfiler):
     config: BigQueryV2Config
     report: BigQueryV2Report
 
-    def __init__(self, config: BigQueryV2Config, report: BigQueryV2Report) -> None:
-        super().__init__(config, report, "bigquery")
+    def __init__(
+        self,
+        config: BigQueryV2Config,
+        report: BigQueryV2Report,
+        state_handler: Optional[ProfilingHandler] = None,
+    ) -> None:
+        super().__init__(config, report, "bigquery", state_handler)
         self.config = config
         self.report = report
 
@@ -152,8 +158,7 @@ WHERE
 
     def get_workunits(
         self, tables: Dict[str, Dict[str, List[BigqueryTable]]]
-    ) -> Iterable[WorkUnit]:
-
+    ) -> Iterable[MetadataWorkUnit]:
         # Otherwise, if column level profiling is enabled, use  GE profiler.
         for project in tables.keys():
             if not self.config.project_id_pattern.allowed(project):
@@ -165,6 +170,9 @@ WHERE
                     continue
 
                 for table in tables[project][dataset]:
+                    normalized_table_name = BigqueryTableIdentifier(
+                        project_id=project, dataset=dataset, table=table.name
+                    ).get_table_name()
                     for column in table.columns:
                         # Profiler has issues with complex types (array, struct, geography, json), so we deny those types from profiling
                         # We also filter columns without data type as it means that column is part of a complex type.
@@ -173,8 +181,9 @@ WHERE
                             for word in ["array", "struct", "geography", "json"]
                         ):
                             self.config.profile_pattern.deny.append(
-                                f"^{project}.{dataset}.{table.name}.{column.field_path}$"
+                                f"^{normalized_table_name}.{column.field_path}$"
                             )
+
                     # Emit the profile work unit
                     profile_request = self.get_bigquery_profile_request(
                         project=project, dataset=dataset, table=table
@@ -184,40 +193,51 @@ WHERE
 
             if len(profile_requests) == 0:
                 continue
-            table_profile_requests = cast(List[TableProfilerRequest], profile_requests)
-            for request, profile in self.generate_profiles(
-                table_profile_requests,
-                self.config.profiling.max_workers,
-                platform=self.platform,
-                profiler_args=self.get_profile_args(),
-            ):
-                if request is None or profile is None:
-                    continue
+            yield from self.generate_wu_from_profile_requests(profile_requests)
 
-                request = cast(BigqueryProfilerRequest, request)
-                profile.sizeInBytes = request.table.size_in_bytes
-                # If table is partitioned we profile only one partition (if nothing set then the last one)
-                # but for table level we can use the rows_count from the table metadata
-                # This way even though column statistics only reflects one partition data but the rows count
-                # shows the proper count.
-                if profile.partitionSpec and profile.partitionSpec.partition:
-                    profile.rowCount = request.table.rows_count
+    def generate_wu_from_profile_requests(
+        self, profile_requests: List[BigqueryProfilerRequest]
+    ) -> Iterable[MetadataWorkUnit]:
+        table_profile_requests = cast(List[TableProfilerRequest], profile_requests)
+        for request, profile in self.generate_profiles(
+            table_profile_requests,
+            self.config.profiling.max_workers,
+            platform=self.platform,
+            profiler_args=self.get_profile_args(),
+        ):
+            if request is None or profile is None:
+                continue
 
-                dataset_name = request.pretty_name
-                dataset_urn = make_dataset_urn_with_platform_instance(
-                    self.platform,
-                    dataset_name,
-                    self.config.platform_instance,
-                    self.config.env,
+            request = cast(BigqueryProfilerRequest, request)
+            profile.sizeInBytes = request.table.size_in_bytes
+            # If table is partitioned we profile only one partition (if nothing set then the last one)
+            # but for table level we can use the rows_count from the table metadata
+            # This way even though column statistics only reflects one partition data but the rows count
+            # shows the proper count.
+            if profile.partitionSpec and profile.partitionSpec.partition:
+                profile.rowCount = request.table.rows_count
+
+            dataset_name = request.pretty_name
+            dataset_urn = make_dataset_urn_with_platform_instance(
+                self.platform,
+                dataset_name,
+                self.config.platform_instance,
+                self.config.env,
+            )
+            # We don't add to the profiler state if we only do table level profiling as it always happens
+            if self.state_handler and not request.profile_table_level_only:
+                self.state_handler.add_to_state(
+                    dataset_urn, int(datetime.datetime.utcnow().timestamp() * 1000)
                 )
-                wu = wrap_aspect_as_workunit(
-                    "dataset",
-                    dataset_urn,
-                    "datasetProfile",
-                    profile,
-                )
-                self.report.report_workunit(wu)
-                yield wu
+
+            wu = wrap_aspect_as_workunit(
+                "dataset",
+                dataset_urn,
+                "datasetProfile",
+                profile,
+            )
+            self.report.report_workunit(wu)
+            yield wu
 
     def get_bigquery_profile_request(
         self, project: str, dataset: str, table: BigqueryTable

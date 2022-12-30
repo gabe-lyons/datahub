@@ -92,24 +92,14 @@ public class BootstrapManagerFactory {
     final RestoreDbtSiblingsIndices restoreDbtSiblingsIndices =
         new RestoreDbtSiblingsIndices(_entityService, _entityRegistry);
     final RemoveClientIdAspectStep removeClientIdAspectStep = new RemoveClientIdAspectStep(_entityService);
+
     // acryl-main only
     final IngestDefaultGlobalSettingsStep ingestSettingsStep = new IngestDefaultGlobalSettingsStep(_entityService);
     final RestoreColumnLineageIndices restoreColumnLineageIndices = new RestoreColumnLineageIndices(_entityService, _entityRegistry);
 
-    final List<BootstrapStep> finalSteps =
-        new ArrayList<>(ImmutableList.of(
-            ingestRootUserStep,
-            ingestPoliciesStep,
-            ingestRolesStep,
-            ingestDataPlatformsStep,
-            ingestDataPlatformInstancesStep,
-            _ingestRetentionPoliciesStep,
-            ingestSettingsStep,
-            restoreGlossaryIndicesStep,
-            removeClientIdAspectStep,
-            restoreDbtSiblingsIndices,
-            indexDataPlatformsStep,
-            restoreColumnLineageIndices));
+    final List<BootstrapStep> finalSteps = new ArrayList<>(ImmutableList.of(ingestRootUserStep, ingestPoliciesStep, ingestRolesStep,
+        ingestDataPlatformsStep, ingestDataPlatformInstancesStep, _ingestRetentionPoliciesStep, ingestSettingsStep, restoreGlossaryIndicesStep,
+        removeClientIdAspectStep, restoreDbtSiblingsIndices, indexDataPlatformsStep, restoreColumnLineageIndices));
 
     if (_upgradeDefaultBrowsePathsEnabled) {
       finalSteps.add(new UpgradeDefaultBrowsePathsStep(_entityService));

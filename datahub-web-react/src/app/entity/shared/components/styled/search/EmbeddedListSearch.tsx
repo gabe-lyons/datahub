@@ -80,6 +80,8 @@ type Props = {
         error: ApolloError | undefined;
         refetch: (variables: GetSearchResultsParams['variables']) => Promise<SearchResultsInterface | undefined | null>;
     };
+    shouldRefetch?: boolean;
+    resetShouldRefetch?: () => void;
 };
 
 export const EmbeddedListSearch = ({
@@ -101,6 +103,8 @@ export const EmbeddedListSearch = ({
     searchBarInputStyle,
     entityAction,
     useGetSearchResults = useWrappedSearchResults,
+    shouldRefetch,
+    resetShouldRefetch,
 }: Props) => {
     // Adjust query based on props
     const finalQuery: string = addFixedQuery(query as string, fixedQuery as string, emptySearchQuery as string);
@@ -145,18 +149,28 @@ export const EmbeddedListSearch = ({
         return refetchForDownload(variables);
     };
 
+    const searchInput = {
+        types: entityFilters,
+        query: finalQuery,
+        start: (page - 1) * numResultsPerPage,
+        count: numResultsPerPage,
+        orFilters: finalFilters,
+    };
+
     const { data, loading, error, refetch } = useGetSearchResults({
         variables: {
-            input: {
-                types: entityFilters,
-                query: finalQuery,
-                start: (page - 1) * numResultsPerPage,
-                count: numResultsPerPage,
-                orFilters: finalFilters,
-            },
+            input: searchInput,
         },
     });
 
+    useEffect(() => {
+        if (shouldRefetch && resetShouldRefetch) {
+            refetch({
+                input: searchInput,
+            });
+            resetShouldRefetch();
+        }
+    });
     const searchResultEntities =
         data?.searchResults?.map((result) => ({ urn: result.entity.urn, type: result.entity.type })) || [];
     const searchResultUrns = searchResultEntities.map((entity) => entity.urn);

@@ -4,7 +4,12 @@ from typing import Dict, List, Optional
 
 from pydantic import Field, PositiveInt, root_validator
 
-from datahub.configuration.common import AllowDenyPattern, LineageConfig
+from datahub.configuration.common import AllowDenyPattern
+from datahub.ingestion.source.state.stateful_ingestion_base import (
+    LineageStatefulIngestionConfig,
+    ProfilingStatefulIngestionConfig,
+    UsageStatefulIngestionConfig,
+)
 from datahub.ingestion.source.usage.usage_common import BaseUsageConfig
 from datahub.ingestion.source_config.sql.bigquery import BigQueryConfig
 
@@ -23,7 +28,12 @@ class BigQueryUsageConfig(BaseUsageConfig):
     )
 
 
-class BigQueryV2Config(BigQueryConfig, LineageConfig):
+class BigQueryV2Config(
+    BigQueryConfig,
+    LineageStatefulIngestionConfig,
+    UsageStatefulIngestionConfig,
+    ProfilingStatefulIngestionConfig,
+):
     project_id_pattern: AllowDenyPattern = Field(
         default=AllowDenyPattern.allow_all(),
         description="Regex patterns for project_id to filter in ingestion.",
@@ -46,6 +56,16 @@ class BigQueryV2Config(BigQueryConfig, LineageConfig):
     dataset_pattern: AllowDenyPattern = Field(
         default=AllowDenyPattern.allow_all(),
         description="Regex patterns for dataset to filter in ingestion. Specify regex to only match the schema name. e.g. to match all tables in schema analytics, use the regex 'analytics'",
+    )
+
+    match_fully_qualified_names: bool = Field(
+        default=False,
+        description="Whether `dataset_pattern` is matched against fully qualified dataset name `<project_id>.<dataset_name>`.",
+    )
+
+    include_external_url: bool = Field(
+        default=True,
+        description="Whether to populate BigQuery Console url to Datasets/Tables",
     )
 
     debug_include_full_payloads: bool = Field(
@@ -83,9 +103,19 @@ class BigQueryV2Config(BigQueryConfig, LineageConfig):
         description="Sql parse view ddl to get lineage.",
     )
 
+    lineage_sql_parser_use_raw_names: bool = Field(
+        default=False,
+        description="This parameter ignores the lowercase pattern stipulated in the SQLParser. NOTE: Ignored if lineage_use_sql_parser is False.",
+    )
+
     convert_urns_to_lowercase: bool = Field(
         default=False,
         description="Convert urns to lowercase.",
+    )
+
+    enable_legacy_sharded_table_support: bool = Field(
+        default=True,
+        description="Use the legacy sharded table urn suffix added.",
     )
 
     @root_validator(pre=False)
@@ -127,6 +157,20 @@ class BigQueryV2Config(BigQueryConfig, LineageConfig):
         ):
             logging.warning(
                 "schema_pattern will be ignored in favour of dataset_pattern. schema_pattern will be deprecated, please use dataset_pattern only."
+            )
+
+        match_fully_qualified_names = values.get("match_fully_qualified_names")
+
+        if (
+            dataset_pattern is not None
+            and dataset_pattern != AllowDenyPattern.allow_all()
+            and match_fully_qualified_names is not None
+            and not match_fully_qualified_names
+        ):
+            logger.warning(
+                "Please update `dataset_pattern` to match against fully qualified schema name `<project_id>.<dataset_name>` and set config `match_fully_qualified_names : True`."
+                "Current default `match_fully_qualified_names: False` is only to maintain backward compatibility. "
+                "The config option `match_fully_qualified_names` will be deprecated in future and the default behavior will assume `match_fully_qualified_names: True`."
             )
         return values
 

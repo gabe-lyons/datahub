@@ -41,6 +41,7 @@ graphqlCodegen {
         // Constraints not in OSS
         "$projectDir/src/main/resources/constraints.graphql".toString(),
         "$projectDir/src/main/resources/step.graphql".toString(),
+        "$projectDir/src/main/resources/lineage.graphql".toString(),
     ]
     outputDir = new File("$projectDir/src/mainGeneratedGraphQL/java")
     packageName = "com.linkedin.datahub.graphql.generated"

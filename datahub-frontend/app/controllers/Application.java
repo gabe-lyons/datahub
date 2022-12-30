@@ -18,6 +18,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.Environment;
 import play.http.HttpEntity;
 import play.libs.ws.InMemoryBodyWritable;
@@ -45,6 +47,7 @@ import static auth.AuthUtils.SESSION_COOKIE_GMS_TOKEN_NAME;
 
 
 public class Application extends Controller {
+  private final Logger _logger = LoggerFactory.getLogger(Application.class.getName());
   private final Config _config;
   private final StandaloneWSClient _ws;
   private final Environment _environment;
@@ -65,10 +68,17 @@ public class Application extends Controller {
    */
   @Nonnull
   private Result serveAsset(@Nullable String path) {
-    InputStream indexHtml = _environment.resourceAsStream("public/index.html");
-    return ok(indexHtml)
-            .withHeader("Cache-Control", "no-cache")
-            .as("text/html");
+    try {
+      InputStream indexHtml = _environment.resourceAsStream("public/index.html");
+      return ok(indexHtml)
+              .withHeader("Cache-Control", "no-cache")
+              .as("text/html");
+    } catch (Exception e) {
+      _logger.warn("Cannot load public/index.html resource. Static assets or assets jar missing?");
+      return notFound()
+              .withHeader("Cache-Control", "no-cache")
+              .as("text/html");
+    }
   }
 
   @Nonnull

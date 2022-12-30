@@ -1,10 +1,13 @@
 package auth;
 
 import com.linkedin.common.urn.CorpuserUrn;
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import lombok.extern.slf4j.Slf4j;
 import play.mvc.Http;
+
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 public class AuthUtils {
@@ -97,8 +100,8 @@ public class AuthUtils {
      */
     public static boolean hasValidSessionCookie(final Http.Request req) {
         return req.session().data().containsKey(ACTOR)
-                && req.cookie(ACTOR) != null
-                && req.session().data().get(ACTOR).equals(req.cookie(ACTOR).value());
+                && req.getCookie(ACTOR).isPresent()
+                && req.session().data().get(ACTOR).equals(req.getCookie(ACTOR).get().value());
     }
 
     /**
@@ -121,6 +124,13 @@ public class AuthUtils {
             .build();
     }
 
-    private AuthUtils() {
+    public static Map<String, String> createSessionMap(final String userUrnStr, final String accessToken) {
+        final Map<String, String> sessionAttributes = new HashMap<>();
+        sessionAttributes.put(ACTOR, userUrnStr);
+        sessionAttributes.put(ACCESS_TOKEN, accessToken);
+        return sessionAttributes;
     }
+
+    private AuthUtils() { }
+
 }

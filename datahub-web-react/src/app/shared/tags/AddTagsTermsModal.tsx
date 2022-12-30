@@ -17,7 +17,7 @@ import ClickOutside from '../ClickOutside';
 import { useEntityRegistry } from '../../useEntityRegistry';
 import { useGetRecommendations } from '../recommendation';
 import { useProposeTagMutation, useProposeTermMutation } from '../../../graphql/proposals.generated';
-import { FORBIDDEN_URN_CHARS_REGEX } from '../../entity/shared/utils';
+import { FORBIDDEN_URN_CHARS_REGEX, handleBatchError } from '../../entity/shared/utils';
 import { TagTermLabel } from './TagTermLabel';
 import { ENTER_KEY_CODE } from '../constants';
 
@@ -339,7 +339,9 @@ export default function EditTagTermsModal({
             })
             .catch((e) => {
                 message.destroy();
-                message.error({ content: `Failed to add: \n ${e.message || ''}`, duration: 3 });
+                message.error(
+                    handleBatchError(urns, e, { content: `Failed to add: \n ${e.message || ''}`, duration: 3 }),
+                );
             })
             .finally(() => {
                 setDisableAction(false);
@@ -367,7 +369,9 @@ export default function EditTagTermsModal({
             })
             .catch((e) => {
                 message.destroy();
-                message.error({ content: `Failed to add: \n ${e.message || ''}`, duration: 3 });
+                message.error(
+                    handleBatchError(urns, e, { content: `Failed to add: \n ${e.message || ''}`, duration: 3 }),
+                );
             })
             .finally(() => {
                 setDisableAction(false);
@@ -395,7 +399,9 @@ export default function EditTagTermsModal({
             })
             .catch((e) => {
                 message.destroy();
-                message.error({ content: `Failed to remove: \n ${e.message || ''}`, duration: 3 });
+                message.error(
+                    handleBatchError(urns, e, { content: `Failed to remove: \n ${e.message || ''}`, duration: 3 }),
+                );
             })
             .finally(() => {
                 setDisableAction(false);
@@ -423,7 +429,9 @@ export default function EditTagTermsModal({
             })
             .catch((e) => {
                 message.destroy();
-                message.error({ content: `Failed to remove: \n ${e.message || ''}`, duration: 3 });
+                message.error(
+                    handleBatchError(urns, e, { content: `Failed to remove: \n ${e.message || ''}`, duration: 3 }),
+                );
             })
             .finally(() => {
                 setDisableAction(false);

@@ -24,7 +24,8 @@
         "MANAGE_GLOSSARIES",
         "MANAGE_USER_CREDENTIALS",
         "MANAGE_TAGS",
-        "MANAGE_GLOBAL_SETTINGS"
+        "MANAGE_GLOBAL_SETTINGS",
+        "MANAGE_GLOBAL_VIEWS"
       ],
       "displayName":"Root User - All Platform Privileges",
       "description":"Grants full platform privileges to root datahub super user.",
@@ -209,7 +210,8 @@
         "VIEW_METADATA_PROPOSALS",
         "MANAGE_TESTS",
         "MANAGE_GLOBAL_SETTINGS",
-        "CREATE_CONSTRAINTS"
+        "CREATE_CONSTRAINTS",
+        "MANAGE_GLOBAL_VIEWS"
       ],
       "displayName":"Admins - Platform Policy",
       "description":"Admins have all platform privileges.",

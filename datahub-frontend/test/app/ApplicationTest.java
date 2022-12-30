@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
 import org.openqa.selenium.Cookie;
+import org.openqa.selenium.htmlunit.HtmlUnitDriver;
 import play.Application;
 import play.Environment;
 import play.Mode;
@@ -26,14 +27,18 @@ import play.test.WithBrowser;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static play.mvc.Http.Status.NOT_FOUND;
 import static play.mvc.Http.Status.OK;
 import static play.test.Helpers.fakeRequest;
 import static play.test.Helpers.route;
+
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SetEnvironmentVariable(key = "DATAHUB_SECRET", value = "test")
@@ -48,12 +53,20 @@ public class ApplicationTest extends WithBrowser {
 
   @Override
   protected Application provideApplication() {
+
     return new GuiceApplicationBuilder()
             .configure("metadataService.port", String.valueOf(gmsServerPort()))
             .configure("auth.baseUrl", "http://localhost:" +  providePort())
             .configure("auth.oidc.discoveryUri", "http://localhost:" + oauthServerPort()
                    + "/testIssuer/.well-known/openid-configuration")
             .in(new Environment(Mode.TEST)).build();
+  }
+
+  @Override
+  protected TestBrowser provideBrowser(int port) {
+    HtmlUnitDriver webClient = new HtmlUnitDriver();
+    webClient.setJavascriptEnabled(false);
+    return Helpers.testBrowser(webClient, providePort());
   }
 
   public int oauthServerPort() {
@@ -64,24 +77,24 @@ public class ApplicationTest extends WithBrowser {
     return providePort() + 2;
   }
 
-  @Override
-  protected TestBrowser provideBrowser(int port) {
-    return Helpers.testBrowser(providePort());
-  }
-
   private MockOAuth2Server _oauthServer;
   private MockWebServer _gmsServer;
 
   private String _wellKnownUrl;
 
+  private static final String TEST_USER = "urn:li:corpuser:testUser@myCompany.com";
+  private static final String TEST_TOKEN = "faketoken_YCpYIrjQH4sD3_rAc3VPPFg4";
+
   @BeforeAll
-  public void init() throws IOException, InterruptedException {
+  public void init() throws IOException {
     _gmsServer = new MockWebServer();
+    /* Start Saas Only */
     _gmsServer.enqueue(new MockResponse().setResponseCode(404)); // dynamic settings - not tested
     _gmsServer.enqueue(new MockResponse().setResponseCode(404)); // dynamic settings - not tested
     _gmsServer.enqueue(new MockResponse().setResponseCode(404)); // dynamic settings - not tested
-    _gmsServer.enqueue(new MockResponse().setBody("{\"value\":\"urn:li:corpuser:testUser@myCompany.com\"}"));
-    _gmsServer.enqueue(new MockResponse().setBody("{\"accessToken\":\"faketoken_YCpYIrjQH4sD3_rAc3VPPFg4\"}"));
+    /* End Saas Only */
+    _gmsServer.enqueue(new MockResponse().setBody(String.format("{\"value\":\"%s\"}", TEST_USER)));
+    _gmsServer.enqueue(new MockResponse().setBody(String.format("{\"accessToken\":\"%s\"}", TEST_TOKEN)));
     _gmsServer.start(gmsServerPort());
 
     _oauthServer = new MockOAuth2Server();
@@ -145,8 +158,13 @@ public class ApplicationTest extends WithBrowser {
   public void testHappyPathOidc() throws InterruptedException {
     browser.goTo("/authenticate");
     assertEquals("", browser.url());
+
     Cookie actorCookie = browser.getCookie("actor");
-    assertEquals("urn:li:corpuser:testUser@myCompany.com", actorCookie.getValue());
+    assertEquals(TEST_USER, actorCookie.getValue());
+
+    Cookie sessionCookie = browser.getCookie("PLAY_SESSION");
+    assertTrue(sessionCookie.getValue().contains("token=" + TEST_TOKEN));
+    assertTrue(sessionCookie.getValue().contains("actor=" + URLEncoder.encode(TEST_USER, StandardCharsets.UTF_8)));
   }
 
 }

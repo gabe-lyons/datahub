@@ -11,6 +11,7 @@ import com.google.inject.Singleton;
 import com.linkedin.entity.client.EntityClient;
 import com.linkedin.entity.client.RestliEntityClient;
 import com.linkedin.metadata.restli.DefaultRestliClientFactory;
+import com.linkedin.parseq.retry.backoff.ExponentialBackoff;
 import com.linkedin.util.Configuration;
 import controllers.SsoCallbackController;
 import java.nio.charset.StandardCharsets;
@@ -49,6 +50,8 @@ public class AuthModule extends AbstractModule {
      */
     private static final String PAC4J_AES_KEY_BASE_CONF = "play.http.secret.key";
     private static final String PAC4J_SESSIONSTORE_PROVIDER_CONF = "pac4j.sessionStore.provider";
+    private static final String ENTITY_CLIENT_RETRY_INTERVAL = "entityClient.retryInterval";
+    private static final String ENTITY_CLIENT_NUM_RETRIES = "entityClient.numRetries";
     private static final String GET_SSO_SETTINGS_ENDPOINT = "auth/getSsoSettings";
 
     private final com.typesafe.config.Config _configs;
@@ -136,10 +139,13 @@ public class AuthModule extends AbstractModule {
     @Provides
     @Singleton
     protected EntityClient provideEntityClient() {
-        return new RestliEntityClient(buildRestliClient(_configs));
+        return new RestliEntityClient(buildRestliClient(),
+                new ExponentialBackoff(_configs.getInt(ENTITY_CLIENT_RETRY_INTERVAL)),
+                _configs.getInt(ENTITY_CLIENT_NUM_RETRIES));
     }
 
-    @Provides @Singleton
+    @Provides
+    @Singleton
     protected AuthServiceClient provideAuthClient(Authentication systemAuthentication, CloseableHttpClient httpClient) {
         // Init a GMS auth client
         final String metadataServiceHost = getMetadataServiceHost(_configs);
@@ -148,9 +154,8 @@ public class AuthModule extends AbstractModule {
 
         final boolean metadataServiceUseSsl = doesMetadataServiceUseSsl(_configs);
 
-        return new AuthServiceClient(
-            metadataServiceHost,
-            metadataServicePort, metadataServiceUseSsl, systemAuthentication, httpClient);
+        return new AuthServiceClient(metadataServiceHost,
+                metadataServicePort, metadataServiceUseSsl, systemAuthentication, httpClient);
     }
 
     @Provides
@@ -159,15 +164,26 @@ public class AuthModule extends AbstractModule {
         return HttpClients.createDefault();
     }
 
-    private com.linkedin.restli.client.Client buildRestliClient(com.typesafe.config.Config configs) {
-        final String metadataServiceHost = getMetadataServiceHost(configs);
-        final int metadataServicePort = getMetadataServicePort(configs);
-        final boolean metadataServiceUseSsl = doesMetadataServiceUseSsl(configs);
-        final String metadataServiceSslProtocol =
-            utils.ConfigUtil.getString(configs, utils.ConfigUtil.METADATA_SERVICE_SSL_PROTOCOL_CONFIG_PATH,
-                ConfigUtil.DEFAULT_METADATA_SERVICE_SSL_PROTOCOL);
-        return DefaultRestliClientFactory.getRestLiClient(metadataServiceHost, metadataServicePort,
-            metadataServiceUseSsl, metadataServiceSslProtocol);
+    private com.linkedin.restli.client.Client buildRestliClient() {
+        final String metadataServiceHost = utils.ConfigUtil.getString(
+                _configs,
+                METADATA_SERVICE_HOST_CONFIG_PATH,
+                utils.ConfigUtil.DEFAULT_METADATA_SERVICE_HOST);
+        final int metadataServicePort = utils.ConfigUtil.getInt(
+                _configs,
+                utils.ConfigUtil.METADATA_SERVICE_PORT_CONFIG_PATH,
+                utils.ConfigUtil.DEFAULT_METADATA_SERVICE_PORT);
+        final boolean metadataServiceUseSsl = utils.ConfigUtil.getBoolean(
+                _configs,
+                utils.ConfigUtil.METADATA_SERVICE_USE_SSL_CONFIG_PATH,
+                ConfigUtil.DEFAULT_METADATA_SERVICE_USE_SSL
+        );
+        final String metadataServiceSslProtocol = utils.ConfigUtil.getString(
+                _configs,
+                utils.ConfigUtil.METADATA_SERVICE_SSL_PROTOCOL_CONFIG_PATH,
+                ConfigUtil.DEFAULT_METADATA_SERVICE_SSL_PROTOCOL
+        );
+        return DefaultRestliClientFactory.getRestLiClient(metadataServiceHost, metadataServicePort, metadataServiceUseSsl, metadataServiceSslProtocol);
     }
 
     protected boolean doesMetadataServiceUseSsl(com.typesafe.config.Config configs) {

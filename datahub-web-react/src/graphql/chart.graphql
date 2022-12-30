@@ -97,6 +97,9 @@ query getChart($urn: String!) {
         inputFields {
             ...inputFieldsFields
         }
+        privileges {
+            canEditLineage
+        }
     }
 }
 

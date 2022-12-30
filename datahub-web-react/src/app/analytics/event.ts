@@ -1,4 +1,5 @@
-import { EntityType, RecommendationRenderType, ScenarioType } from '../../types.generated';
+import { DataHubViewType, EntityType, RecommendationRenderType, ScenarioType } from '../../types.generated';
+import { Direction } from '../lineage/types';
 
 /**
  * Valid event types.
@@ -53,6 +54,12 @@ export enum EventType {
     CreateTestEvent,
     UpdateTestEvent,
     DeleteTestEvent,
+    CreateViewEvent,
+    UpdateViewEvent,
+    SetGlobalDefaultViewEvent,
+    SetUserDefaultViewEvent,
+    ManuallyCreateLineageEvent,
+    ManuallyDeleteLineageEvent,
 }
 
 /**
@@ -400,6 +407,57 @@ export interface UpdateTestEvent extends BaseEvent {
 export interface DeleteTestEvent extends BaseEvent {
     type: EventType.DeleteTestEvent;
 }
+export interface ManuallyCreateLineageEvent extends BaseEvent {
+    type: EventType.ManuallyCreateLineageEvent;
+    direction: Direction;
+    sourceEntityType?: EntityType;
+    sourceEntityPlatform?: string;
+    destinationEntityType?: EntityType;
+    destinationEntityPlatform?: string;
+}
+
+export interface ManuallyDeleteLineageEvent extends BaseEvent {
+    type: EventType.ManuallyDeleteLineageEvent;
+    direction: Direction;
+    sourceEntityType?: EntityType;
+    sourceEntityPlatform?: string;
+    destinationEntityType?: EntityType;
+    destinationEntityPlatform?: string;
+}
+
+/**
+ * Emitted when a new View is created.
+ */
+export interface CreateViewEvent extends BaseEvent {
+    type: EventType.CreateViewEvent;
+    viewType: DataHubViewType;
+}
+
+/**
+ * Emitted when an existing View is updated.
+ */
+export interface UpdateViewEvent extends BaseEvent {
+    type: EventType.UpdateViewEvent;
+    viewType: DataHubViewType;
+    urn: string;
+}
+
+/**
+ * Emitted when a user sets or clears their personal default view.
+ */
+export interface SetUserDefaultViewEvent extends BaseEvent {
+    type: EventType.SetUserDefaultViewEvent;
+    urn: string | null;
+    viewType: DataHubViewType | null;
+}
+
+/**
+ * Emitted when a user sets or clears the global default view.
+ */
+export interface SetGlobalDefaultViewEvent extends BaseEvent {
+    type: EventType.SetGlobalDefaultViewEvent;
+    urn: string | null;
+}
 
 /**
  * Event consisting of a union of specific event types.
@@ -452,4 +510,10 @@ export type Event =
     | SsoEvent
     | CreateTestEvent
     | UpdateTestEvent
-    | DeleteTestEvent;
+    | DeleteTestEvent
+    | CreateViewEvent
+    | UpdateViewEvent
+    | SetUserDefaultViewEvent
+    | SetGlobalDefaultViewEvent
+    | ManuallyCreateLineageEvent
+    | ManuallyDeleteLineageEvent;

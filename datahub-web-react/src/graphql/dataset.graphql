@@ -449,6 +449,9 @@ fragment siblingFields on Dataset {
             type
         }
     }
+    privileges {
+        canEditLineage
+    }
 }
 
 mutation updateDataset($urn: String!, $input: DatasetUpdateInput!) {

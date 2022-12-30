@@ -8,6 +8,7 @@ import {
     BellOutlined,
     LoginOutlined,
     ToolOutlined,
+    FilterOutlined,
 } from '@ant-design/icons';
 import { Redirect, Route, useHistory, useLocation, useRouteMatch, Switch } from 'react-router';
 import styled from 'styled-components';
@@ -22,6 +23,7 @@ import { PlatformNotifications } from './platform/PlatformNotifications';
 import { PlatformSsoIntegrations } from './platform/PlatformSsoIntegrations';
 import { Preferences } from './Preferences';
 import { ManagePolicies } from '../permissions/policy/ManagePolicies';
+import { ManageViews } from '../entity/view/ManageViews';
 
 const PageContainer = styled.div`
     display: flex;
@@ -72,6 +74,7 @@ const PATHS = [
     /* acryl-main only */
     ...ACRYL_PATHS,
     { path: 'permissions', content: <ManagePermissions /> },
+    { path: 'views', content: <ManageViews /> },
 ];
 
 /**
@@ -95,10 +98,12 @@ export const SettingsPage = () => {
 
     const isPoliciesEnabled = config?.policiesConfig.enabled;
     const isIdentityManagementEnabled = config?.identityManagementConfig.enabled;
+    const isViewsEnabled = config?.viewsConfig.enabled;
 
     const showPolicies = (isPoliciesEnabled && me && me.platformPrivileges.managePolicies) || false;
     const showUsersGroups = (isIdentityManagementEnabled && me && me.platformPrivileges.manageIdentities) || false;
     const showGlobalSettings = (me && me.platformPrivileges.manageGlobalSettings) || false;
+    const showViews = isViewsEnabled || false;
 
     return (
         <PageContainer>
@@ -157,6 +162,13 @@ export const SettingsPage = () => {
                             </Menu.ItemGroup>
                         )
                     }
+                    {showViews && (
+                        <Menu.ItemGroup title="Manage">
+                            <Menu.Item key="views">
+                                <FilterOutlined /> <ItemTitle>My Views</ItemTitle>
+                            </Menu.Item>
+                        </Menu.ItemGroup>
+                    )}
                     <Menu.ItemGroup title="Preferences">
                         <Menu.Item key="preferences">
                             <ToolOutlined />

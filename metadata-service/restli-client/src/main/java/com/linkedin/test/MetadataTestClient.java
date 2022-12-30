@@ -4,6 +4,7 @@ import com.datahub.authentication.Authentication;
 import com.linkedin.common.client.BaseClient;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.data.template.StringArray;
+import com.linkedin.parseq.retry.backoff.ExponentialBackoff;
 import com.linkedin.r2.RemoteInvocationException;
 import com.linkedin.restli.client.Client;
 import java.util.List;
@@ -17,7 +18,7 @@ public class MetadataTestClient extends BaseClient {
   private static final TestRequestBuilders TEST_REQUEST_BUILDERS = new TestRequestBuilders();
 
   public MetadataTestClient(@Nonnull Client restliClient) {
-    super(restliClient);
+    super(restliClient, new ExponentialBackoff(1), 1);
   }
 
   /**
