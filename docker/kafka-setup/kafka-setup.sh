@@ -6,7 +6,7 @@
 
 : ${DATAHUB_ANALYTICS_ENABLED:=true}
 
-: ${KAFKA_HEAP_OPTS:=-Xmx64M}
+export KAFKA_HEAP_OPTS="-Xmx64M"
 
 CONNECTION_PROPERTIES_PATH=/tmp/connection.properties
 
@@ -63,14 +63,20 @@ fi
 
 cub kafka-ready -c $CONNECTION_PROPERTIES_PATH -b $KAFKA_BOOTSTRAP_SERVER 1 180
 
+# Create build indices topic with infinite retention
+kafka-topics.sh --create --if-not-exists --command-config $CONNECTION_PROPERTIES_PATH --bootstrap-server $KAFKA_BOOTSTRAP_SERVER --partitions $PARTITIONS --replication-factor $REPLICATION_FACTOR --config retention.ms=-1 --topic $BUILD_INDICES_HISTORY_TOPIC &
+
 kafka-topics.sh --create --if-not-exists --command-config $CONNECTION_PROPERTIES_PATH --bootstrap-server $KAFKA_BOOTSTRAP_SERVER --partitions $PARTITIONS --replication-factor $REPLICATION_FACTOR --topic $METADATA_AUDIT_EVENT_NAME &
 kafka-topics.sh --create --if-not-exists --command-config $CONNECTION_PROPERTIES_PATH --bootstrap-server $KAFKA_BOOTSTRAP_SERVER --partitions $PARTITIONS --replication-factor $REPLICATION_FACTOR --topic $METADATA_CHANGE_EVENT_NAME &
 kafka-topics.sh --create --if-not-exists --command-config $CONNECTION_PROPERTIES_PATH --bootstrap-server $KAFKA_BOOTSTRAP_SERVER --partitions $PARTITIONS --replication-factor $REPLICATION_FACTOR --topic $FAILED_METADATA_CHANGE_EVENT_NAME &
 kafka-topics.sh --create --if-not-exists --command-config $CONNECTION_PROPERTIES_PATH --bootstrap-server $KAFKA_BOOTSTRAP_SERVER --partitions $PARTITIONS --replication-factor $REPLICATION_FACTOR --topic $METADATA_CHANGE_LOG_VERSIONED_TOPIC &
 echo "Waiting for topic creation group 1."
-result=$(wait_ex)
+date
+result=$((wait_ex + 0))
 rc=$?
 if [ $rc -ne 0 ]; then exit $rc; fi
+if [ $result -ne $result ]; then exit $result; fi
+date
 echo "Finished topic creation group 1."
 
 # Set retention to 90 days
@@ -79,9 +85,12 @@ kafka-topics.sh --create --if-not-exists --command-config $CONNECTION_PROPERTIES
 kafka-topics.sh --create --if-not-exists --command-config $CONNECTION_PROPERTIES_PATH --bootstrap-server $KAFKA_BOOTSTRAP_SERVER --partitions $PARTITIONS --replication-factor $REPLICATION_FACTOR --topic $FAILED_METADATA_CHANGE_PROPOSAL_TOPIC &
 kafka-topics.sh --create --if-not-exists --command-config $CONNECTION_PROPERTIES_PATH --bootstrap-server $KAFKA_BOOTSTRAP_SERVER --partitions $PARTITIONS --replication-factor $REPLICATION_FACTOR --topic $PLATFORM_EVENT_TOPIC_NAME &
 echo "Waiting for topic creation group 2."
-result=$(wait_ex)
+date
+result=$((wait_ex + 0))
 rc=$?
 if [ $rc -ne 0 ]; then exit $rc; fi
+if [ $result -ne $result ]; then exit $result; fi
+date
 echo "Finished topic creation group 2."
 
 # Create topic for datahub usage event
