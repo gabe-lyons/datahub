@@ -1,5 +1,6 @@
 package com.linkedin.datahub.upgrade;
 
+import com.linkedin.datahub.upgrade.buildindices.BuildIndices;
 import com.linkedin.datahub.upgrade.impl.DefaultUpgradeManager;
 import com.linkedin.datahub.upgrade.nocode.NoCodeUpgrade;
 import com.linkedin.datahub.upgrade.nocodecleanup.NoCodeCleanupUpgrade;
@@ -53,6 +54,10 @@ public class UpgradeCli implements CommandLineRunner {
   @Named("removeUnknownAspects")
   private RemoveUnknownAspects removeUnknownAspects;
 
+  @Inject
+  @Named("buildIndices")
+  private BuildIndices buildIndices;
+
   // Saas-only
 
   @Inject
@@ -78,6 +83,7 @@ public class UpgradeCli implements CommandLineRunner {
     _upgradeManager.register(restoreIndices);
     _upgradeManager.register(restoreBackup);
     _upgradeManager.register(removeUnknownAspects);
+    _upgradeManager.register(buildIndices);
     _upgradeManager.register(restoreAspect);
     _upgradeManager.register(propagateTerms);
     _upgradeManager.register(rotateSecrets);

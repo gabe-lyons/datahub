@@ -17,6 +17,8 @@ import org.javatuples.Quintet;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 
+import java.util.Optional;
+
 import static com.datahub.util.RecordUtils.*;
 
 
@@ -120,10 +122,12 @@ public class CachingEntitySearchService {
       int from,
       int size,
       @Nullable SearchFlags flags) {
+    SearchFlags searchFlags = Optional.ofNullable(flags).orElse(new SearchFlags());
     return new CacheableSearcher<>(
         cacheManager.getCache(ENTITY_SEARCH_SERVICE_SEARCH_CACHE_NAME),
         batchSize,
-        querySize -> getRawSearchResults(entityName, query, filters, sortCriterion, querySize.getFrom(), querySize.getSize()),
+        querySize -> getRawSearchResults(entityName, query, filters, sortCriterion, querySize.getFrom(),
+                querySize.getSize(), searchFlags.isStructured()),
         querySize -> Quintet.with(entityName, query, filters != null ? toJsonString(filters) : null,
             sortCriterion != null ? toJsonString(sortCriterion) : null, querySize), flags, enableCache).getSearchResults(from, size);
   }
@@ -208,9 +212,26 @@ public class CachingEntitySearchService {
       final Filter filters,
       final SortCriterion sortCriterion,
       final int start,
-      final int count) {
+      final int count,
+      final boolean structured) {
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "getRawSearchResults").time()) {
-      return entitySearchService.search(entityName, input, filters, sortCriterion, start, count);
+      if (structured) {
+        return entitySearchService.structuredSearch(
+                entityName,
+                input,
+                filters,
+                sortCriterion,
+                start,
+                count);
+      } else {
+        return entitySearchService.fullTextSearch(
+                entityName,
+                input,
+                filters,
+                sortCriterion,
+                start,
+                count);
+      }
     }
   }
 
@@ -224,7 +245,12 @@ public class CachingEntitySearchService {
       final Filter filters,
       final int limit) {
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "getRawAutoCompleteResults").time()) {
-      return entitySearchService.autoComplete(entityName, input, field, filters, limit);
+      return entitySearchService.autoComplete(
+              entityName,
+              input,
+              field,
+              filters,
+              limit);
     }
   }
 
@@ -238,7 +264,12 @@ public class CachingEntitySearchService {
       final int start,
       final int count) {
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "getRawBrowseResults").time()) {
-      return entitySearchService.browse(entityName, input, filters, start, count);
+      return entitySearchService.browse(
+              entityName,
+              input,
+              filters,
+              start,
+              count);
     }
   }
 

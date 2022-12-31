@@ -4,7 +4,10 @@ plugins {
   id 'com.palantir.docker'
 }
 
+apply from: "../gradle/versioning/versioning.gradle"
+
 ext {
+  docker_registry = 'acryldata'
   docker_repo = 'datahub-upgrade'
 }
 
