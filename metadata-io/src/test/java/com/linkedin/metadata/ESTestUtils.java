@@ -11,6 +11,7 @@ import com.linkedin.datahub.graphql.resolvers.EntityTypeMapper;
 import com.linkedin.datahub.graphql.resolvers.ResolverUtils;
 import com.linkedin.datahub.graphql.types.SearchableEntityType;
 import com.linkedin.metadata.graph.LineageDirection;
+import com.linkedin.metadata.query.SearchFlags;
 import com.linkedin.metadata.search.LineageSearchResult;
 import com.linkedin.metadata.search.LineageSearchService;
 import com.linkedin.metadata.search.SearchResult;
@@ -54,7 +55,7 @@ public class ESTestUtils {
     static  {
         ES_CONTAINER = new ElasticsearchContainer(DOCKER_IMAGE_NAME);
         checkContainerEngine(ES_CONTAINER.getDockerClient());
-        ES_CONTAINER.withEnv("ES_JAVA_OPTS", "-Xms64m -Xmx200m -XX:MaxDirectMemorySize=268435456")
+        ES_CONTAINER.withEnv("ES_JAVA_OPTS", "-Xms64m -Xmx384m -XX:MaxDirectMemorySize=368435456")
                 .withStartupTimeout(Duration.ofMinutes(5)); // usually < 1min
     }
 
@@ -68,7 +69,12 @@ public class ESTestUtils {
 
     public static SearchResult search(SearchService searchService, String query) {
         return searchService.searchAcrossEntities(SEARCHABLE_ENTITIES, query, null, null, 0,
-                100, null);
+                100, new SearchFlags().setFulltext(true));
+    }
+
+    public static SearchResult searchStructured(SearchService searchService, String query) {
+        return searchService.searchAcrossEntities(SEARCHABLE_ENTITIES, query, null, null, 0,
+                100, new SearchFlags().setFulltext(false));
     }
 
     public static LineageSearchResult lineage(LineageSearchService lineageSearchService, Urn root, int hops) {

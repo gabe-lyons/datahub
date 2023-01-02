@@ -18,7 +18,7 @@ public class SearchQueryBuilderTest {
   public void testQueryBuilderFulltext() {
     FunctionScoreQueryBuilder result =
         (FunctionScoreQueryBuilder) SearchQueryBuilder.buildQuery(TestEntitySpecBuilder.getSpec(), "testQuery",
-                false);
+                true);
     BoolQueryBuilder mainQuery = (BoolQueryBuilder) result.query();
     List<QueryBuilder> shouldQueries = mainQuery.should();
     assertEquals(shouldQueries.size(), 2);
@@ -56,7 +56,7 @@ public class SearchQueryBuilderTest {
   public void testQueryBuilderStructured() {
     FunctionScoreQueryBuilder result =
             (FunctionScoreQueryBuilder) SearchQueryBuilder.buildQuery(TestEntitySpecBuilder.getSpec(), "testQuery",
-                    true);
+                    false);
     BoolQueryBuilder mainQuery = (BoolQueryBuilder) result.query();
     List<QueryBuilder> shouldQueries = mainQuery.should();
     assertEquals(shouldQueries.size(), 1);

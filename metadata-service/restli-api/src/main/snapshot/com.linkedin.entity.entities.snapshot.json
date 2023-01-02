@@ -6533,8 +6533,10 @@
           "name" : "count",
           "type" : "int"
         }, {
-          "name" : "structured",
-          "type" : "boolean"
+          "name" : "fulltext",
+          "type" : "boolean",
+          "default" : "true",
+          "optional" : true
         } ],
         "returns" : "com.linkedin.metadata.search.SearchResult"
       }, {

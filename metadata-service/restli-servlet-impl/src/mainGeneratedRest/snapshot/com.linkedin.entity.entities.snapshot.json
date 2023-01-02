@@ -6526,8 +6526,9 @@
           "name" : "count",
           "type" : "int"
         }, {
-          "name" : "structured",
-          "type" : "boolean"
+          "name" : "fulltext",
+          "type" : "boolean",
+          "optional" : true
         } ],
         "returns" : "com.linkedin.metadata.search.SearchResult"
       }, {
