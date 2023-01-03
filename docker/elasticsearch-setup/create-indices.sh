@@ -190,7 +190,8 @@ function create_aws_access_policy_role {
                  "${INDEX_PREFIX}_*"
              ],
              "allowed_actions": [
-                 "indices_all"
+                 "indices_all",
+                 "manage_aliases"
              ]
          }
      ]
