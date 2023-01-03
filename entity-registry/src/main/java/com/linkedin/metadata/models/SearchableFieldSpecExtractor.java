@@ -38,7 +38,7 @@ public class SearchableFieldSpecExtractor implements SchemaVisitor {
     SECONDARY_URN_SEARCH_PROPERTIES = new DataMap();
     SECONDARY_URN_SEARCH_PROPERTIES.put("enableAutocomplete", "false");
     SECONDARY_URN_SEARCH_PROPERTIES.put("fieldType", "URN");
-    SECONDARY_URN_SEARCH_PROPERTIES.put("boostScore", "0.4");
+    SECONDARY_URN_SEARCH_PROPERTIES.put("boostScore", "0.1");
   }
 
 
