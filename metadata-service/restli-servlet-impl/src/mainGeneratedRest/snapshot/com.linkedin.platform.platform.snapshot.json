@@ -1084,6 +1084,7 @@
       "doc" : "Tags associated with a given entity",
       "Searchable" : {
         "/*/tag" : {
+          "addToFilters" : true,
           "boostScore" : 0.5,
           "fieldName" : "tags",
           "fieldType" : "URN",

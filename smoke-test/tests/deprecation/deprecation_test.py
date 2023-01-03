@@ -17,7 +17,6 @@ def test_healthchecks(wait_for_healthchecks):
     pass
 
 
-@pytest.mark.skip(reason="currently failing in acryl-main")
 @pytest.mark.dependency(depends=["test_healthchecks"])
 def test_update_deprecation_all_fields(frontend_session):
     dataset_urn = (
