@@ -2635,7 +2635,9 @@
                     "doc" : "The name of the group.",
                     "optional" : true,
                     "Searchable" : {
-                      "fieldType" : "TEXT_PARTIAL"
+                      "boostScore" : 10.0,
+                      "fieldType" : "TEXT_PARTIAL",
+                      "queryByDefault" : true
                     }
                   }, {
                     "name" : "email",
@@ -2777,7 +2779,12 @@
                     "name" : "displayName",
                     "type" : "string",
                     "doc" : "displayName of this user ,  e.g.  Hang Zhang(DataHQ)",
-                    "optional" : true
+                    "optional" : true,
+                    "Searchable" : {
+                      "boostScore" : 10.0,
+                      "fieldType" : "TEXT_PARTIAL",
+                      "queryByDefault" : true
+                    }
                   }, {
                     "name" : "email",
                     "type" : "com.linkedin.common.EmailAddress",
