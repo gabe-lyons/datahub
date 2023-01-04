@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
@@ -72,6 +71,7 @@ public class ESIndexBuilder {
   @Getter
   private final boolean enableIndexMappingsReindex;
 
+  @Getter
   private final ElasticSearchConfiguration elasticSearchConfiguration;
 
 
