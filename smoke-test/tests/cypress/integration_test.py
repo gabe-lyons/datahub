@@ -16,6 +16,7 @@ CYPRESS_TEST_DATA_DIR = "tests/cypress"
 
 TEST_DATA_FILENAME = "data.json"
 ACRYL_MAIN_TEST_DATA_FILENAME = "acryl-main-data.json"
+ACRYL_MAIN_INCIDENT_DATA_FILENAME = "incidents_test.json"
 TEST_DBT_DATA_FILENAME = "cypress_dbt_data.json"
 TEST_SCHEMA_BLAME_DATA_FILENAME = "schema-blame-data.json"
 TEST_ONBOARDING_DATA_FILENAME: str = "onboarding.json"
@@ -117,10 +118,12 @@ def ingest_data():
     print_now()
     print("ingesting test data")
     ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{TEST_DATA_FILENAME}")
-    ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{ACRYL_MAIN_TEST_DATA_FILENAME}")
     ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{TEST_DBT_DATA_FILENAME}")
     ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{TEST_SCHEMA_BLAME_DATA_FILENAME}")
     ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{TEST_ONBOARDING_DATA_FILENAME}")
+    # acryl-main-data is for data specific to tests in the acryl-main-branch to avoid merge conflicts with OSS
+    ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{ACRYL_MAIN_TEST_DATA_FILENAME}")
+    ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{ACRYL_MAIN_INCIDENT_DATA_FILENAME}")
     print_now()
     print("completed ingesting test data")
 
@@ -132,10 +135,12 @@ def ingest_cleanup_data():
     print_now()
     print("removing test data")
     delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{TEST_DATA_FILENAME}")
-    delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{ACRYL_MAIN_TEST_DATA_FILENAME}")
     delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{TEST_DBT_DATA_FILENAME}")
     delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{TEST_SCHEMA_BLAME_DATA_FILENAME}")
     delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{TEST_ONBOARDING_DATA_FILENAME}")
+    # acryl-main-data is for data specific to tests in the acryl-main-branch to avoid merge conflicts with OSS
+    delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{ACRYL_MAIN_TEST_DATA_FILENAME}")
+    delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{ACRYL_MAIN_INCIDENT_DATA_FILENAME}")
 
     print_now()
     print("deleting onboarding data file")
