@@ -123,6 +123,7 @@ import com.linkedin.datahub.graphql.resolvers.domain.DomainEntitiesResolver;
 import com.linkedin.datahub.graphql.resolvers.domain.ListDomainsResolver;
 import com.linkedin.datahub.graphql.resolvers.domain.SetDomainResolver;
 import com.linkedin.datahub.graphql.resolvers.domain.UnsetDomainResolver;
+import com.linkedin.datahub.graphql.resolvers.embed.UpdateEmbedResolver;
 import com.linkedin.datahub.graphql.resolvers.entity.EntityExistsResolver;
 import com.linkedin.datahub.graphql.resolvers.entity.EntityPrivilegesResolver;
 import com.linkedin.datahub.graphql.resolvers.glossary.AddRelatedTermsResolver;
@@ -963,6 +964,7 @@ public class GmsGraphQLEngine {
             .dataFetcher("updateGlobalViewsSettings", new UpdateGlobalViewsSettingsResolver(this.settingsService))
             .dataFetcher("updateCorpUserViewsSettings", new UpdateCorpUserViewsSettingsResolver(this.settingsService))
             .dataFetcher("updateLineage", new UpdateLineageResolver(this.entityService, this.lineageService))
+            .dataFetcher("updateEmbed", new UpdateEmbedResolver(this.entityService))
         );
     }
 
