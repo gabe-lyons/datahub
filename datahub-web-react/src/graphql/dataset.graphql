@@ -211,7 +211,7 @@ fragment nonSiblingDatasetFields on Dataset {
         }
     }
     siblings {
-      isPrimary
+        isPrimary
     }
     termProposals: proposals(type: TERM_ASSOCIATION) {
         urn
@@ -451,6 +451,7 @@ fragment siblingFields on Dataset {
     }
     privileges {
         canEditLineage
+        canEditEmbed
     }
 }
 

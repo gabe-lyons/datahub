@@ -236,6 +236,11 @@ public class PoliciesConfig {
       "Edit Lineage",
       "The ability to add and remove lineage edges for this entity.");
 
+  public static final Privilege EDIT_ENTITY_EMBED_PRIVILEGE = Privilege.of(
+      "EDIT_ENTITY_EMBED",
+      "Edit Embedded Content",
+      "The ability to edit the embedded content for an entity.");
+
   public static final List<Privilege> COMMON_ENTITY_PRIVILEGES = ImmutableList.of(
       VIEW_ENTITY_PAGE_PRIVILEGE,
       EDIT_ENTITY_TAGS_PRIVILEGE,
@@ -352,8 +357,7 @@ public class PoliciesConfig {
               MANAGE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE,
               MANAGE_DATASET_COL_TAGS_PRIVILEGE,
               EDIT_ENTITY_ASSERTIONS_PRIVILEGE,
-              EDIT_LINEAGE_PRIVILEGE
-              ))
+              EDIT_LINEAGE_PRIVILEGE, EDIT_ENTITY_EMBED_PRIVILEGE))
           .flatMap(Collection::stream)
           .collect(Collectors.toList())
   );
@@ -365,7 +369,7 @@ public class PoliciesConfig {
       "Charts indexed by DataHub",
       Stream.concat(
           COMMON_ENTITY_PRIVILEGES.stream(),
-          ImmutableList.of(EDIT_LINEAGE_PRIVILEGE).stream())
+          ImmutableList.of(EDIT_LINEAGE_PRIVILEGE, EDIT_ENTITY_EMBED_PRIVILEGE).stream())
           .collect(Collectors.toList())
   );
 
@@ -376,7 +380,7 @@ public class PoliciesConfig {
       "Dashboards indexed by DataHub",
       Stream.concat(
               COMMON_ENTITY_PRIVILEGES.stream(),
-              ImmutableList.of(EDIT_LINEAGE_PRIVILEGE).stream())
+              ImmutableList.of(EDIT_LINEAGE_PRIVILEGE, EDIT_ENTITY_EMBED_PRIVILEGE).stream())
           .collect(Collectors.toList())
   );
 
