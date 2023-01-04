@@ -20,6 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
@@ -73,7 +74,11 @@ public class AutocompleteRequestHandler {
     MultiMatchQueryBuilder autocompleteQueryBuilder = QueryBuilders.multiMatchQuery(query)
             .type(MultiMatchQueryBuilder.Type.BOOL_PREFIX);
 
-    getAutocompleteFields(field).forEach(fieldName -> {
+    List<String> autoCompleteFields = Stream.concat(getAutocompleteFields(field).stream(), Stream.of("urn"))
+            .distinct()
+            .collect(Collectors.toList());
+
+    autoCompleteFields.forEach(fieldName -> {
       autocompleteQueryBuilder.field(fieldName + ".ngram");
       autocompleteQueryBuilder.field(fieldName + ".ngram._2gram");
       autocompleteQueryBuilder.field(fieldName + ".ngram._3gram");
