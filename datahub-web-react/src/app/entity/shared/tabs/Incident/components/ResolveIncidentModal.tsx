@@ -38,7 +38,7 @@ export const ResolveIncidentModal = ({
                     <Button type="text" onClick={handleClose}>
                         Cancel
                     </Button>,
-                    <Button form="resolveIncidentForm" key="submit" htmlType="submit">
+                    <Button form="resolveIncidentForm" key="submit" htmlType="submit" data-testid="confirm-resolve">
                         Resolve
                     </Button>,
                 ]}

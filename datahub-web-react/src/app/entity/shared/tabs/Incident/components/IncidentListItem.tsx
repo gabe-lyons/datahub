@@ -194,7 +194,9 @@ export default function IncidentListItem({ incident, refetch }: Props) {
     const menu = (
         <Menu>
             <Menu.Item key="0">
-                <MenuItem onClick={() => updateIncidentStatus(IncidentState.Active, '')}>Reopen incident</MenuItem>
+                <MenuItem onClick={() => updateIncidentStatus(IncidentState.Active, '')} data-testid="reopen-incident">
+                    Reopen incident
+                </MenuItem>
             </Menu.Item>
         </Menu>
     );
@@ -277,12 +279,16 @@ export default function IncidentListItem({ incident, refetch }: Props) {
                                 style={{ fontSize: '28px', color: SUCCESS_COLOR_HEX, marginLeft: '16px' }}
                             />
                             <Dropdown overlay={menu} trigger={['click']}>
-                                <MenuIcon />
+                                <MenuIcon data-testid="incident-menu" />
                             </Dropdown>
                         </IncidentResolvedTextContainer>
                     ) : (
                         <IncidentResolvedContainer>
-                            <IncidentResolvedButton icon={<CheckOutlined />} onClick={() => handleResolved()}>
+                            <IncidentResolvedButton
+                                icon={<CheckOutlined />}
+                                onClick={() => handleResolved()}
+                                data-testid="resolve-incident"
+                            >
                                 Resolve
                             </IncidentResolvedButton>
                             <WarningFilled style={{ fontSize: '28px', marginLeft: '16px', color: FAILURE_COLOR_HEX }} />
