@@ -37,6 +37,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.AllArgsConstructor;
@@ -124,12 +125,13 @@ public class SearchRequestHandler {
   }
 
   private Set<String> getDefaultQueryFieldNames() {
-    return _entitySpec.getSearchableFieldSpecs()
+    return Stream.concat(_entitySpec.getSearchableFieldSpecs()
         .stream()
         .map(SearchableFieldSpec::getSearchableAnnotation)
         .filter(SearchableAnnotation::isQueryByDefault)
-        .map(SearchableAnnotation::getFieldName)
-        .collect(Collectors.toSet());
+        .map(SearchableAnnotation::getFieldName),
+            Stream.of("urn"))
+            .collect(Collectors.toSet());
   }
 
   public static BoolQueryBuilder getFilterQuery(@Nullable Filter filter) {
@@ -284,7 +286,10 @@ public class SearchRequestHandler {
     highlightBuilder.preTags("");
     highlightBuilder.postTags("");
     // Check for each field name and any subfields
-    _defaultQueryFieldNames.forEach(fieldName -> highlightBuilder.field(fieldName).field(fieldName + ".*"));
+    _defaultQueryFieldNames.forEach(fieldName -> highlightBuilder
+            .field(fieldName)
+            .field(fieldName + ".*"));
+    highlightBuilder.field("urn.delimited");
     return highlightBuilder;
   }
 

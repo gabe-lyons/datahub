@@ -70,8 +70,7 @@ public class MappingsBuilder {
     );
     subFields.put(NGRAM, getPartialNgramConfigWithOverrides(
             ImmutableMap.of(
-                    ANALYZER, PARTIAL_URN_COMPONENT,
-                    SEARCH_ANALYZER, PARTIAL_URN_COMPONENT
+                    ANALYZER, PARTIAL_URN_COMPONENT
             )
     ));
     return ImmutableMap.<String, Object>builder()
@@ -101,8 +100,7 @@ public class MappingsBuilder {
       if (fieldType == FieldType.TEXT_PARTIAL) {
         subFields.put(NGRAM, getPartialNgramConfigWithOverrides(
                 ImmutableMap.of(
-                        ANALYZER, PARTIAL_ANALYZER,
-                        SEARCH_ANALYZER, PARTIAL_ANALYZER
+                        ANALYZER, PARTIAL_ANALYZER
                 )
         ));
       }
@@ -127,7 +125,11 @@ public class MappingsBuilder {
       mappingForField.put(SEARCH_ANALYZER, URN_SEARCH_ANALYZER);
       Map<String, Object> subFields = new HashMap<>();
       if (fieldType == FieldType.URN_PARTIAL) {
-        subFields.put(NGRAM, PARTIAL_NGRAM_CONFIG);
+        subFields.put(NGRAM, getPartialNgramConfigWithOverrides(
+                Map.of(
+                        ANALYZER, PARTIAL_URN_COMPONENT
+                )
+        ));
       }
       subFields.put(KEYWORD, KEYWORD_TYPE_MAP);
       mappingForField.put(FIELDS, subFields);

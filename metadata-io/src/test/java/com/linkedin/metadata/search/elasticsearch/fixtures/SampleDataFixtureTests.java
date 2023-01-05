@@ -361,7 +361,8 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
                     }
                 });
 
-        List.of("excess", "excess_", "excess_de", "excess_deaths", "excess_deaths_derived")
+        List.of("excess", "excess_", "excess_d", "excess_de", "excess_death", "excess_deaths", "excess_deaths_d",
+                        "excess_deaths_de", "excess_deaths_der", "excess_deaths_derived")
                 .forEach(query -> {
                     try {
                         AutoCompleteResults result = autocomplete(new DatasetType(entityClient), query);
