@@ -43,6 +43,7 @@ public class SettingsBuilder {
   public static final String PRESERVE_ORIGINAL = "preserve_original";
   public static final String SEARCH_ANALYZER = "search_analyzer";
   public static final String SPLIT_ON_NUMERICS = "split_on_numerics";
+  public static final String SPLIT_ON_CASE_CHANGE = "split_on_case_change";
   public static final String STOPWORDS = "stopwords";
   public static final String SYNONYMS = "synonyms";
   public static final String TOKENIZER = "tokenizer";
@@ -61,10 +62,12 @@ public class SettingsBuilder {
 
   // Filters
   public static final String ALPHA_ONLY = "alpha_only";
+  public static final String REMOVE_QUOTES = "remove_quotes";
   public static final String ASCII_FOLDING = "asciifolding";
   public static final String COLON_SUBWORD_DELIMITER = ": => SUBWORD_DELIM";
   public static final String CUSTOM_DELIMITER = "custom_delimiter";
   public static final String CUSTOM_DELIMITER_GRAPH = "custom_delimiter_graph";
+  public static final String STICKY_DELIMITER_GRAPH = "sticky_delimiter_graph";
   public static final String DEFAULT_SYN_GRAPH = "default_syn_graph";
   public static final String FLATTEN_GRAPH = "flatten_graph";
   public static final String LOWERCASE = "lowercase";
@@ -81,12 +84,14 @@ public class SettingsBuilder {
   public static final String WORD_DELIMITER_GRAPH = "word_delimiter_graph";
 
   // MultiFilters
-  public static final String MULTIFILTER_GRAPH_1 = String.join(",", CUSTOM_DELIMITER_GRAPH, URN_STOP);
-  public static final String MULTIFILTER_GRAPH_2 = String.join(",", LOWERCASE, DEFAULT_SYN_GRAPH);
-  public static final String MULTIFILTER_GRAPH_3 = String.join(",", LOWERCASE, ALPHA_ONLY, DEFAULT_SYN_GRAPH);
-  public static final String MULTIFILTER_1 = MULTIFILTER_GRAPH_1 + "," + FLATTEN_GRAPH;
-  public static final String MULTIFILTER_2 = MULTIFILTER_GRAPH_2 + "," + FLATTEN_GRAPH;
-  public static final String MULTIFILTER_3 = MULTIFILTER_GRAPH_3 + "," + FLATTEN_GRAPH;
+  public static final String MULTIFILTER_GRAPH_2 = String.join(",", LOWERCASE, ALPHA_ONLY, DEFAULT_SYN_GRAPH);
+  public static final String MULTIFILTER_GRAPH_3 = String.join(",", LOWERCASE, STICKY_DELIMITER_GRAPH);
+
+  // Only using case-sensitive version at *index*
+  public static final String MULTIFILTER_1 = String.join(",", CUSTOM_DELIMITER_GRAPH, FLATTEN_GRAPH);
+  public static final String MULTIFILTER_2 = String.join(",", MULTIFILTER_GRAPH_2, FLATTEN_GRAPH);
+  public static final String MULTIFILTER_3 = String.join(",", MULTIFILTER_GRAPH_3, FLATTEN_GRAPH);
+  public static final String MULTIFILTER_4 = String.join(",", LOWERCASE, CUSTOM_DELIMITER_GRAPH, FLATTEN_GRAPH);
 
   // Normalizers
   public static final String KEYWORD_NORMALIZER = "keyword_normalizer";
@@ -96,14 +101,14 @@ public class SettingsBuilder {
   public static final String MAIN_TOKENIZER = "main_tokenizer";
   public static final String PATH_HIERARCHY_TOKENIZER = "path_hierarchy";
   public static final String SLASH_TOKENIZER = "slash_tokenizer";
-
-  public static final List<String> ALPHA_ONLY_PATTERNS = ImmutableList.of("([a-z0-9]{2,})");
-  public static final String NUM_LENGTH_3_PATTERN = "(^[0-9]{1,3}$)";
+  // Do not remove the space, needed for multi-term synonyms
+  public static final List<String> ALPHA_ONLY_PATTERNS = ImmutableList.of("([a-z0-9 ]{2,})");
   public static final List<String> URN_STOP_WORDS = ImmutableList.of("urn", "li");
 
   public static final List<String> INDEX_TOKEN_FILTERS =  ImmutableList.of(
           ASCII_FOLDING,
           MULTIFILTER,
+          REMOVE_QUOTES,
           LOWERCASE,
           URN_STOP,
           STOP,
@@ -115,6 +120,7 @@ public class SettingsBuilder {
   public static final List<String> SEARCH_TOKEN_FILTERS =  ImmutableList.of(
           ASCII_FOLDING,
           MULTIFILTER_GRAPH,
+          REMOVE_QUOTES,
           LOWERCASE,
           URN_STOP,
           STOP,
@@ -164,6 +170,7 @@ public class SettingsBuilder {
     filters.put(CUSTOM_DELIMITER, ImmutableMap.<String, Object>builder()
             .put(TYPE, WORD_DELIMITER)
             .put(SPLIT_ON_NUMERICS, true)
+            .put(SPLIT_ON_CASE_CHANGE, true)
             .put(PRESERVE_ORIGINAL, true)
             .put(TYPE_TABLE, ImmutableList.of(
                     COLON_SUBWORD_DELIMITER
@@ -173,7 +180,18 @@ public class SettingsBuilder {
     filters.put(CUSTOM_DELIMITER_GRAPH, ImmutableMap.<String, Object>builder()
             .put(TYPE, WORD_DELIMITER_GRAPH)
             .put(SPLIT_ON_NUMERICS, true)
+            .put(SPLIT_ON_CASE_CHANGE, true)
             .put(PRESERVE_ORIGINAL, true)
+            .put(TYPE_TABLE, ImmutableList.of(
+                    COLON_SUBWORD_DELIMITER
+            ))
+            .build());
+
+    filters.put(STICKY_DELIMITER_GRAPH, ImmutableMap.<String, Object>builder()
+            .put(TYPE, WORD_DELIMITER_GRAPH)
+            .put(SPLIT_ON_NUMERICS, false)
+            .put(SPLIT_ON_CASE_CHANGE, false)
+            .put(PRESERVE_ORIGINAL, false)
             .put(TYPE_TABLE, ImmutableList.of(
                     COLON_SUBWORD_DELIMITER
             ))
@@ -207,21 +225,29 @@ public class SettingsBuilder {
             .put(PATTERNS, ALPHA_ONLY_PATTERNS)
             .build());
 
+    filters.put(REMOVE_QUOTES, ImmutableMap.<String, Object>builder()
+            .put(TYPE, "pattern_replace")
+            .put(PATTERN, "['\"]")
+            .put(REPLACEMENT, "")
+            .build());
+
+    // Index Time
     filters.put(MULTIFILTER, ImmutableMap.<String, Object>builder()
             .put(TYPE, "multiplexer")
             .put(FILTERS, ImmutableList.of(
-                    MULTIFILTER_1,
+                    MULTIFILTER_1, // splits with casing
                     MULTIFILTER_2,
-                    MULTIFILTER_3
+                    MULTIFILTER_3,
+                   MULTIFILTER_4 // splits lowercase
             ))
             .build());
 
+    // Search Time
     filters.put(MULTIFILTER_GRAPH, ImmutableMap.<String, Object>builder()
             .put(TYPE, "multiplexer")
             .put(FILTERS, ImmutableList.of(
-                    MULTIFILTER_GRAPH_1,
-                    MULTIFILTER_GRAPH_2,
-                    MULTIFILTER_GRAPH_3
+                    MULTIFILTER_GRAPH_2, // syns
+                    MULTIFILTER_GRAPH_3  // sticky delimiting
             ))
             .build());
 
@@ -256,7 +282,7 @@ public class SettingsBuilder {
     tokenizers.put(MAIN_TOKENIZER,
             ImmutableMap.<String, Object>builder()
                     .put(TYPE, PATTERN)
-                    .put(PATTERN, "[\\s(),./:]")
+                    .put(PATTERN, "[(),./:]")
                     .build());
 
     return tokenizers.build();
@@ -290,7 +316,7 @@ public class SettingsBuilder {
     // Analyzer for case-insensitive exact matching - Only used when building queries
     analyzers.put(KEYWORD_LOWERCASE_ANALYZER, ImmutableMap.<String, Object>builder()
             .put(TOKENIZER, KEYWORD_TOKENIZER)
-            .put(FILTER, ImmutableList.of("trim", LOWERCASE, ASCII_FOLDING, SNOWBALL))
+            .put(FILTER, ImmutableList.of("trim", LOWERCASE, ASCII_FOLDING, STEM_OVERRIDE, SNOWBALL))
             .build());
 
     // Analyzer for text tokenized into words (split by spaces, periods, and slashes)
@@ -300,7 +326,7 @@ public class SettingsBuilder {
             .build());
 
     analyzers.put(TEXT_SEARCH_ANALYZER, ImmutableMap.<String, Object>builder()
-            .put(TOKENIZER, StringUtils.isNotBlank(mainTokenizer) ? mainTokenizer : KEYWORD_TOKENIZER)
+            .put(TOKENIZER, StringUtils.isNotBlank(mainTokenizer) ? mainTokenizer : MAIN_TOKENIZER)
             .put(FILTER, SEARCH_TOKEN_FILTERS)
             .build());
 

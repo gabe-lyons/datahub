@@ -14,6 +14,7 @@ import javax.annotation.Nonnull;
 import org.elasticsearch.common.lucene.search.function.CombineFunction;
 import org.elasticsearch.common.lucene.search.function.FieldValueFactorFunction;
 import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery;
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -66,6 +67,7 @@ public class SearchQueryBuilder {
 
     QueryStringQueryBuilder escapedBuilder = QueryBuilders.queryStringQuery(query);
     escapedBuilder.defaultOperator(Operator.AND);
+    escapedBuilder.fuzziness(Fuzziness.build("AUTO:6,9"));
     escapedBuilder.escape(safeMode);
 
     if (exactMatch) {

@@ -183,6 +183,24 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
 
         AnalyzeRequest request = AnalyzeRequest.withIndexAnalyzer(
                 "smpldat_datasetindex_v2",
+                "urn_component",
+                "customer acquisition cost"
+        );
+        List<String> indexUrnTokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        expectedTokens.forEach(expected -> assertTrue(indexUrnTokens.contains(expected),
+                String.format("Expected token `%s` in %s", expected, indexUrnTokens)));
+
+        request = AnalyzeRequest.withIndexAnalyzer(
+                "smpldat_datasetindex_v2",
+                "query_urn_component",
+                "customer acquisition cost"
+        );
+        List<String> searchUrnTokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        expectedTokens.forEach(expected -> assertTrue(searchUrnTokens.contains(expected),
+                String.format("Expected token `%s` in %s", expected, searchUrnTokens)));
+
+        request = AnalyzeRequest.withIndexAnalyzer(
+                "smpldat_datasetindex_v2",
                 "word_delimited",
                 "mydatabase.myschema.cac_table"
         );
@@ -199,6 +217,8 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
         List<String> searchTokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
         expectedTokens.forEach(expected -> assertTrue(searchTokens.contains(expected),
                 String.format("Expected token `%s` in %s", expected, searchTokens)));
+
+
 
         // {"urn":"urn:li:dataset:(urn:li:dataPlatform:test_synonym,cac_table,TEST)","id":"cac_table",...
         List<String> testSet = List.of(
@@ -296,6 +316,34 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
     }
 
     @Test
+    public void testTokenizationQuote() throws IOException {
+        String testQuery = "test2";
+
+        AnalyzeRequest request = AnalyzeRequest.withIndexAnalyzer(
+                "smpldat_datasetindex_v2",
+                "urn_component",
+                testQuery
+        );
+        List<String> tokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        assertEquals(tokens, List.of(testQuery, "test"), String.format("Unexpected tokens. Found %s", tokens));
+        request = AnalyzeRequest.withIndexAnalyzer(
+                "smpldat_datasetindex_v2",
+                "query_urn_component",
+                testQuery
+        );
+        tokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        assertEquals(tokens, List.of(testQuery), String.format("Unexpected tokens. Found %s", tokens));
+
+        request = AnalyzeRequest.withIndexAnalyzer(
+                "smpldat_datasetindex_v2",
+                "urn_component",
+                "\"test2\""
+        );
+        tokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        assertEquals(tokens, List.of(testQuery, "test"), String.format("Unexpected tokens. Found %s", tokens));
+    }
+
+    @Test
     public void testTokenizationDataPlatform() throws IOException {
         AnalyzeRequest request = AnalyzeRequest.withIndexAnalyzer(
                 "smpldat_datasetindex_v2",
@@ -305,7 +353,7 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
         List<String> tokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
         assertEquals(tokens, List.of(
                         "dataset",
-                        "dataplatform", "data", "platform", "bigqueri", "big", "queri",
+                        "dataplatform", "data platform", "data", "platform", "bigqueri", "big queri", "big", "queri",
                         "harshal-playground-306419", "harshal", "playground", "306419",
                         "test_schema", "test", "schema",
                         "excess_deaths_deriv", "excess", "death", "deriv",
@@ -320,7 +368,7 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
         tokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
         assertEquals(tokens, List.of(
                         "dataset",
-                        "dataplatform", "data", "platform", "hive",
+                        "dataplatform", "data platform", "data", "platform", "hive",
                         "samplehivedataset-ac611929-c3ac-4b92-aafb-f4603ddb408a",
                         "samplehivedataset", "ac611929", "c3ac", "4b92", "aafb", "f4603ddb408a", "sampl",
                         "ac", "611929", "92", "4603", "ddb", "408",
@@ -335,7 +383,7 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
         tokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
         assertEquals(tokens, List.of(
                         "dataset",
-                        "dataplatform", "data", "platform",
+                        "dataplatform", "data platform", "data", "platform",
                         "test_rollback", "test", "rollback", "rollback_test_dataset"),
                 String.format("Unexpected tokens. Found %s", tokens));
     }
@@ -424,17 +472,58 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
 
     @Test
     public void testPartialUrns() throws IOException {
-        Set<String> expectedTokens = Set.of("dataplatform", "data", "platform", "hdfs", "samplehdfsdataset", "sampl",
+        Set<String> expectedQueryTokens = Set.of("dataplatform", "samplehdfsdataset", "prod", "production");
+        Set<String> expectedIndexTokens = Set.of("dataplatform", "data", "platform", "hdfs", "samplehdfsdataset", "sampl",
                 "dataset", "prod", "production");
+
         AnalyzeRequest request = AnalyzeRequest.withIndexAnalyzer(
                 "smpldat_datasetindex_v2",
                 "query_urn_component",
                 ":(urn:li:dataPlatform:hdfs,SampleHdfsDataset,PROD)"
         );
-        List<String> searchTokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
-        expectedTokens.forEach(expected -> assertTrue(searchTokens.contains(expected),
-                String.format("Expected token `%s` in %s", expected, searchTokens)));
+        List<String> searchQueryTokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        expectedQueryTokens.forEach(expected -> assertTrue(searchQueryTokens.contains(expected),
+                String.format("Expected token `%s` in %s", expected, searchQueryTokens)));
 
+        request = AnalyzeRequest.withIndexAnalyzer(
+                "smpldat_datasetindex_v2",
+                "urn_component",
+                ":(urn:li:dataPlatform:hdfs,SampleHdfsDataset,PROD)"
+        );
+        List<String> searchIndexTokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        expectedIndexTokens.forEach(expected -> assertTrue(searchIndexTokens.contains(expected),
+                String.format("Expected token `%s` in %s", expected, searchIndexTokens)));
+    }
+
+    @Test
+    public void testPartialUnderscoreUrns() throws IOException {
+        String testQuery = ":(urn:li:dataPlatform:hdfs,party_email,PROD)";
+        Set<String> expectedQueryTokens = Set.of("dataplatform", "hdfs", "party_email", "parti", "email", "prod",
+                "production");
+        Set<String> expectedIndexTokens = Set.of("dataplatform", "data", "platform", "hdfs", "party_email", "parti",
+                "email", "prod", "production");
+
+        AnalyzeRequest request = AnalyzeRequest.withIndexAnalyzer(
+                "smpldat_datasetindex_v2",
+                "query_urn_component",
+                testQuery
+        );
+        List<String> searchQueryTokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        expectedQueryTokens.forEach(expected -> assertTrue(searchQueryTokens.contains(expected),
+                String.format("Expected token `%s` in %s", expected, searchQueryTokens)));
+
+        request = AnalyzeRequest.withIndexAnalyzer(
+                "smpldat_datasetindex_v2",
+                "urn_component",
+                testQuery
+        );
+        List<String> searchIndexTokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        expectedIndexTokens.forEach(expected -> assertTrue(searchIndexTokens.contains(expected),
+                String.format("Expected token `%s` in %s", expected, searchIndexTokens)));
+    }
+
+    @Test
+    public void testFragmentUrns() {
         List<String> testSet = List.of(
                 ":(urn:li:dataPlatform:hdfs,SampleHdfsDataset,PROD)",
                 "(urn:li:dataPlatform:hdfs,SampleHdfsDataset,PROD)",

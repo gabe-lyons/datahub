@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.linkedin.metadata.search.utils.ESUtils;
 import com.linkedin.metadata.version.GitVersion;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -16,10 +17,13 @@ import javax.annotation.Nonnull;
 
 import com.linkedin.metadata.config.ElasticSearchConfiguration;
 import com.linkedin.util.Pair;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
+import io.github.resilience4j.retry.RetryRegistry;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.client.config.RequestConfig;
+import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.cluster.node.tasks.list.ListTasksRequest;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest;
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequest.AliasActions;
@@ -46,12 +50,10 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.elasticsearch.tasks.TaskId;
 import org.elasticsearch.tasks.TaskInfo;
 
 
 @Slf4j
-@RequiredArgsConstructor
 public class ESIndexBuilder {
 
   private final RestHighLevelClient searchClient;
@@ -86,6 +88,33 @@ public class ESIndexBuilder {
           .setRequestConfig(RequestConfig.custom()
                   .setSocketTimeout(180 * 1000).build()).build();
 
+  private final RetryRegistry retryRegistry;
+
+  public ESIndexBuilder(RestHighLevelClient searchClient, int numShards, int numReplicas, int numRetries,
+                        int refreshIntervalSeconds, Map<String, Map<String, String>> indexSettingOverrides,
+                        boolean enableIndexSettingsReindex, boolean enableIndexMappingsReindex,
+                        ElasticSearchConfiguration elasticSearchConfiguration, GitVersion gitVersion) {
+    this.searchClient = searchClient;
+    this.numShards = numShards;
+    this.numReplicas = numReplicas;
+    this.numRetries = numRetries;
+    this.refreshIntervalSeconds = refreshIntervalSeconds;
+    this.indexSettingOverrides = indexSettingOverrides;
+    this.enableIndexSettingsReindex = enableIndexSettingsReindex;
+    this.enableIndexMappingsReindex = enableIndexMappingsReindex;
+    this.elasticSearchConfiguration = elasticSearchConfiguration;
+    this.gitVersion = gitVersion;
+
+    RetryConfig config = RetryConfig.custom()
+            .maxAttempts(numRetries)
+            .waitDuration(Duration.ofSeconds(10))
+            .retryOnException(e -> e instanceof ElasticsearchException)
+            .failAfterMaxAttempts(true)
+            .build();
+
+    // Create a RetryRegistry with a custom global configuration
+    this.retryRegistry = RetryRegistry.of(config);
+  }
 
   public ReindexConfig buildReindexState(String indexName, Map<String, Object> mappings, Map<String, Object> settings) throws IOException {
     ReindexConfig.ReindexConfigBuilder builder = ReindexConfig.builder()
@@ -174,28 +203,26 @@ public class ESIndexBuilder {
                 ReindexConfig.OBJECT_MAPPER.writeValueAsString(indexSettings), ack);
       }
     } else {
-      reindex(indexState);
+      try {
+        reindex(indexState);
+      } catch (Throwable e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 
-  private void reindex(ReindexConfig indexState) throws IOException {
+  private void reindex(ReindexConfig indexState) throws Throwable {
     final long startTime = System.currentTimeMillis();
 
     final int maxReindexHours = 8;
     final long initialCheckIntervalMilli = 1000;
-    final long finalCheckIntervalMilli = 30000;
+    final long finalCheckIntervalMilli = 60000;
     final long timeoutAt = startTime + (1000 * 60 * 60 * maxReindexHours);
 
     String tempIndexName = indexState.name() + "_" + startTime;
 
     try {
-      ListTasksRequest listTasksRequest = new ListTasksRequest()
-              .setTimeout(TimeValue.timeValueSeconds(180))
-              .setDetailed(true);
-      List<TaskInfo> taskInfos = searchClient.tasks().list(listTasksRequest, REQUEST_OPTIONS).getTasks();
-      Optional<TaskInfo> previousTaskInfo = taskInfos.stream()
-          .filter(info -> ESUtils.prefixMatch(info.getHeaders().get(ESUtils.OPAQUE_ID_HEADER), gitVersion.getVersion(),
-                  indexState.name())).findFirst();
+      Optional<TaskInfo> previousTaskInfo = getTaskInfoByHeader(indexState.name());
 
       String parentTaskId;
       if (previousTaskInfo.isPresent()) {
@@ -221,78 +248,52 @@ public class ESIndexBuilder {
         parentTaskId = reindexTask.getTask();
       }
 
-      boolean reindexTaskCompleted = false;
       int count = 0;
+      boolean reindexTaskCompleted = false;
+      Pair<Long, Long> documentCounts = getDocumentCounts(indexState.name(), tempIndexName);
 
       while (System.currentTimeMillis() < timeoutAt) {
-
         log.info("Task: {} - Reindexing from {} to {} in progress...", parentTaskId, indexState.name(), tempIndexName);
-        ListTasksRequest request = new ListTasksRequest().setParentTaskId(new TaskId(parentTaskId));
-        Optional<TaskInfo> taskInfo = searchClient.tasks()
-                .list(request, REQUEST_OPTIONS).getTasks().stream()
-                .filter(task -> task.getTaskId().toString().equals(parentTaskId))
-                .findFirst();
 
-        if (taskInfo.isEmpty()) {
-          log.info("Task: {} - Is not running. Checking document counts.", parentTaskId);
+        documentCounts = getDocumentCounts(indexState.name(), tempIndexName);
+        if (documentCounts.getFirst().equals(documentCounts.getSecond())) {
+          log.info("Task: {} - Reindexing {} to {} task was successful", parentTaskId, indexState.name(), tempIndexName);
+          reindexTaskCompleted = true;
+          break;
 
-          // Either the reindex completed really fast or may not have started
-          boolean completed = false;
+        } else {
+          log.warn("Task: {} - Document counts do not match {} != {}. Complete: {}%", parentTaskId, documentCounts.getFirst(),
+                  documentCounts.getSecond(), (1.0f * documentCounts.getSecond()) / documentCounts.getFirst());
+
           try {
-            Pair<Long, Long> documentCounts = getDocumentCounts(indexState.name(), tempIndexName);
-            if (documentCounts.getFirst().equals(documentCounts.getSecond())) {
-              completed = true;
-            } else {
-              log.warn("Task: {} - Document counts do not match {} != {}.", parentTaskId, documentCounts.getFirst(),
-                      documentCounts.getSecond());
-            }
-          } catch (Exception e) {
-            log.warn("Task: {} - Error comparing document counts. Exception caught.", parentTaskId, e);
+            count = count + 1;
+            Thread.sleep(Math.min(finalCheckIntervalMilli, initialCheckIntervalMilli * count));
+          } catch (InterruptedException e) {
+            log.info("Trouble sleeping while reindexing {} to {}: Exception {}. Retrying...", indexState.name(), tempIndexName,
+                    e.toString());
           }
-
-          if (completed) {
-            log.info("Task: {} - Reindexing {} to {} task has completed, will now check if reindex was successful",
-                    parentTaskId, indexState.name(), tempIndexName);
-            reindexTaskCompleted = true;
-            break;
-          }
-        }
-
-        try {
-          count = count + 1;
-          Thread.sleep(Math.min(finalCheckIntervalMilli, initialCheckIntervalMilli * count));
-        } catch (InterruptedException e) {
-          log.info("Trouble sleeping while reindexing {} to {}: Exception {}. Retrying...", indexState.name(), tempIndexName,
-                  e.toString());
         }
       }
+
       if (!reindexTaskCompleted) {
-        throw new RuntimeException(
-                String.format("Reindex from %s to %s failed-- task exceeded time limit", indexState.name(), tempIndexName));
+        if (elasticSearchConfiguration.getBuildIndices().isAllowDocCountMismatch()
+                && elasticSearchConfiguration.getBuildIndices().isCloneIndices()) {
+          log.warn("Index: {} - Post-reindex document count is different, source_doc_count: {} reindex_doc_count: {}\n"
+                          + "This condition is explicitly ALLOWED, please refer to latest clone if original index is required.",
+                  indexState.name(), documentCounts.getFirst(), documentCounts.getSecond());
+        } else {
+          log.error("Index: {} - Post-reindex document count is different, source_doc_count: {} reindex_doc_count: {}",
+                  indexState.name(), documentCounts.getFirst(), documentCounts.getSecond());
+          diff(indexState.name(), tempIndexName, Math.max(documentCounts.getFirst(), documentCounts.getSecond()));
+          searchClient.indices().delete(new DeleteIndexRequest().indices(tempIndexName), RequestOptions.DEFAULT);
+          throw new RuntimeException(String.format("Reindex from %s to %s failed. Document count %s != %s", indexState.name(), tempIndexName,
+                  documentCounts.getFirst(), documentCounts.getSecond()));
+        }
       }
-
-    } catch (Exception e) {
+    } catch (Throwable e) {
       log.error("Failed to reindex {} to {}: Exception {}", indexState.name(), tempIndexName, e.toString());
       searchClient.indices().delete(new DeleteIndexRequest().indices(tempIndexName), RequestOptions.DEFAULT);
       throw e;
-    }
-
-    Pair<Long, Long> documentCounts = getDocumentCounts(indexState.name(), tempIndexName);
-
-    if (!documentCounts.getFirst().equals(documentCounts.getSecond())) {
-      if (elasticSearchConfiguration.getBuildIndices().isAllowDocCountMismatch()
-              && elasticSearchConfiguration.getBuildIndices().isCloneIndices()) {
-        log.warn("Index: {} - Post-reindex document count is different, source_doc_count: {} reindex_doc_count: {}\n"
-                + "This condition is explicitly ALLOWED, please refer to latest clone if original index is required.",
-                indexState.name(), documentCounts.getFirst(), documentCounts.getSecond());
-      } else {
-        log.error("Index: {} - Post-reindex document count is different, source_doc_count: {} reindex_doc_count: {}",
-                indexState.name(), documentCounts.getFirst(), documentCounts.getSecond());
-        diff(indexState.name(), tempIndexName, Math.max(documentCounts.getFirst(), documentCounts.getSecond()));
-        searchClient.indices().delete(new DeleteIndexRequest().indices(tempIndexName), RequestOptions.DEFAULT);
-        throw new RuntimeException(String.format("Reindex from %s to %s failed. Document count %s != %s", indexState.name(), tempIndexName,
-                documentCounts.getFirst(), documentCounts.getSecond()));
-      }
     }
 
     log.info("Reindex from {} to {} succeeded", indexState.name(), tempIndexName);
@@ -318,15 +319,17 @@ public class ESIndexBuilder {
     log.info("Finished setting up {}", indexState.name());
   }
 
-  private Pair<Long, Long> getDocumentCounts(String sourceIndex, String destinationIndex) throws IOException {
+  private Pair<Long, Long> getDocumentCounts(String sourceIndex, String destinationIndex) throws Throwable {
     // Check whether reindex succeeded by comparing document count
     // There can be some delay between the reindex finishing and count being fully up to date, so try multiple times
     long originalCount = 0;
     long reindexedCount = 0;
     for (int i = 0; i < this.numRetries; i++) {
       // Check if reindex succeeded by comparing document counts
-      originalCount = getCount(sourceIndex);
-      reindexedCount = getCount(destinationIndex);
+      originalCount = retryRegistry.retry("retrySourceIndexCount")
+              .executeCheckedSupplier(() -> getCount(sourceIndex));
+      reindexedCount = retryRegistry.retry("retryDestinationIndexCount")
+              .executeCheckedSupplier(() -> getCount(destinationIndex));
       if (originalCount == reindexedCount) {
         break;
       }
@@ -338,6 +341,18 @@ public class ESIndexBuilder {
     }
 
     return Pair.of(originalCount, reindexedCount);
+  }
+
+  private Optional<TaskInfo> getTaskInfoByHeader(String indexName) throws Throwable {
+    Retry retryWithDefaultConfig = retryRegistry.retry("getTaskInfoByHeader");
+
+    return retryWithDefaultConfig.executeCheckedSupplier(() -> {
+      ListTasksRequest listTasksRequest = new ListTasksRequest().setDetailed(true);
+      List<TaskInfo> taskInfos = searchClient.tasks().list(listTasksRequest, REQUEST_OPTIONS).getTasks();
+      return taskInfos.stream()
+              .filter(info -> ESUtils.prefixMatch(info.getHeaders().get(ESUtils.OPAQUE_ID_HEADER), gitVersion.getVersion(),
+                      indexName)).findFirst();
+    });
   }
 
   private void diff(String indexA, String indexB, long maxDocs) {
