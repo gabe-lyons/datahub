@@ -106,7 +106,7 @@ public class ESIndexBuilder {
     this.gitVersion = gitVersion;
 
     RetryConfig config = RetryConfig.custom()
-            .maxAttempts(numRetries)
+            .maxAttempts(Math.max(1, numRetries))
             .waitDuration(Duration.ofSeconds(10))
             .retryOnException(e -> e instanceof ElasticsearchException)
             .failAfterMaxAttempts(true)
