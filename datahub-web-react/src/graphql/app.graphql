@@ -41,6 +41,9 @@ query appConfig {
             logoUrl
             faviconUrl
             hideGlossary
+            queriesTab {
+                queriesTabResultSize
+            }
         }
         telemetryConfig {
             enableThirdPartyLogging

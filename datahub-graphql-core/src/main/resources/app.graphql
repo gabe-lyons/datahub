@@ -226,6 +226,21 @@ type VisualConfig {
   Boolean flag disabling viewing the Business Glossary page for users without the 'Manage Glossaries' privilege
   """
   hideGlossary: Boolean
+
+  """
+  Configuration for the queries tab
+  """
+  queriesTab: QueriesTabConfig
+}
+
+"""
+Configuration for the queries tab
+"""
+type QueriesTabConfig {
+  """
+  Number of queries to show in the queries tab
+  """
+  queriesTabResultSize: Int
 }
 
 """

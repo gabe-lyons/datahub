@@ -24,6 +24,9 @@ export const DEFAULT_APP_CONFIG = {
     },
     visualConfig: {
         logoUrl: undefined,
+        queriesTab: {
+            queriesTabResultSize: 5,
+        },
     },
     authConfig: {
         tokenAuthEnabled: false,

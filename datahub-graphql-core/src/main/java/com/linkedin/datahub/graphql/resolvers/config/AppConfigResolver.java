@@ -13,6 +13,7 @@ import com.linkedin.datahub.graphql.generated.LineageConfig;
 import com.linkedin.datahub.graphql.generated.ManagedIngestionConfig;
 import com.linkedin.datahub.graphql.generated.PoliciesConfig;
 import com.linkedin.datahub.graphql.generated.Privilege;
+import com.linkedin.datahub.graphql.generated.QueriesTabConfig;
 import com.linkedin.datahub.graphql.generated.ResourcePrivileges;
 import com.linkedin.datahub.graphql.generated.TelemetryConfig;
 import com.linkedin.datahub.graphql.generated.TestsConfig;
@@ -132,6 +133,11 @@ public class AppConfigResolver implements DataFetcher<CompletableFuture<AppConfi
         visualConfig.setFaviconUrl(_visualConfiguration.getAssets().getFaviconUrl());
       }
       visualConfig.setHideGlossary(_visualConfiguration.isHideGlossary());
+    }
+    if (_visualConfiguration != null && _visualConfiguration.getQueriesTab() != null) {
+      QueriesTabConfig queriesTabConfig = new QueriesTabConfig();
+      queriesTabConfig.setQueriesTabResultSize(_visualConfiguration.getQueriesTab().getQueriesTabResultSize());
+      visualConfig.setQueriesTab(queriesTabConfig);
     }
     appConfig.setVisualConfig(visualConfig);
 
