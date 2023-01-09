@@ -12,25 +12,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.ANALYZER;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.BROWSE_PATH_HIERARCHY_ANALYZER;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.DOC_VALUES;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.FIELDDATA;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.FIELDS;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.KEYWORD;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.KEYWORD_NORMALIZER;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.MAX_SHINGLE_SIZE;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.NGRAM;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.NORMALIZER;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.PARTIAL_ANALYZER;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.PARTIAL_URN_COMPONENT;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.SEARCH_ANALYZER;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.SLASH_PATTERN_ANALYZER;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.TEXT_ANALYZER;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.TEXT_SEARCH_ANALYZER;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.TYPE;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.URN_ANALYZER;
-import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.URN_SEARCH_ANALYZER;
+import static com.linkedin.metadata.search.elasticsearch.indexbuilder.SettingsBuilder.*;
 
 
 @Slf4j
