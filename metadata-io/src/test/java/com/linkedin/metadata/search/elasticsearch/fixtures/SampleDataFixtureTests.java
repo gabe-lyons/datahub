@@ -38,6 +38,7 @@ import static com.linkedin.metadata.ESTestUtils.searchStructured;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertSame;
 
 
 @Import(ESSampleDataFixture.class)
@@ -90,17 +91,17 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
     public void testDataPlatform() {
         Map<String, Integer> expected = ImmutableMap.<String, Integer>builder()
                 .put("urn:li:dataPlatform:BigQuery", 8)
-                .put("urn:li:dataPlatform:hive", 3)
+                .put("urn:li:dataPlatform:hive", 6)
                 .put("urn:li:dataPlatform:mysql", 5)
                 .put("urn:li:dataPlatform:s3", 1)
-                .put("urn:li:dataPlatform:hdfs", 1)
+                .put("urn:li:dataPlatform:hdfs", 2)
                 .put("urn:li:dataPlatform:graph", 1)
                 .put("urn:li:dataPlatform:dbt", 9)
                 .put("urn:li:dataplatform:BigQuery", 8)
-                .put("urn:li:dataplatform:hive", 3)
+                .put("urn:li:dataplatform:hive", 6)
                 .put("urn:li:dataplatform:mysql", 5)
                 .put("urn:li:dataplatform:s3", 1)
-                .put("urn:li:dataplatform:hdfs", 1)
+                .put("urn:li:dataplatform:hdfs", 2)
                 .put("urn:li:dataplatform:graph", 1)
                 .put("urn:li:dataplatform:dbt", 9)
                 .build();
@@ -306,7 +307,7 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
 
     @Test
     public void testTokenizationQuote() throws IOException {
-        String testQuery = "test2";
+        String testQuery = "\"test2\"";
 
         AnalyzeRequest request = AnalyzeRequest.withIndexAnalyzer(
                 "smpldat_datasetindex_v2",
@@ -314,14 +315,44 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
                 testQuery
         );
         List<String> tokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
-        assertEquals(tokens, List.of(testQuery), String.format("Unexpected tokens. Found %s", tokens));
+        assertEquals(tokens, List.of("test2"), String.format("Unexpected tokens. Found %s", tokens));
+
         request = AnalyzeRequest.withIndexAnalyzer(
                 "smpldat_datasetindex_v2",
                 "query_urn_component",
                 testQuery
         );
         tokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
-        assertEquals(tokens, List.of(testQuery), String.format("Unexpected tokens. Found %s", tokens));
+        assertEquals(tokens, List.of("test2"), String.format("Unexpected tokens. Found %s", tokens));
+    }
+
+    @Test
+    public void testTokenizationQuoteUnderscore() throws IOException {
+        String testQuery = "\"raw_orders\"";
+
+        AnalyzeRequest request = AnalyzeRequest.withIndexAnalyzer(
+                "smpldat_datasetindex_v2",
+                "word_delimited",
+                testQuery
+        );
+        List<String> tokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        assertEquals(tokens, List.of("raw_orders", "raw_ord", "raw", "order"), String.format("Unexpected tokens. Found %s", tokens));
+
+        request = AnalyzeRequest.withIndexAnalyzer(
+                "smpldat_datasetindex_v2",
+                "query_word_delimited",
+                testQuery
+        );
+        tokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        assertEquals(tokens, List.of("raw_orders", "raw_ord", "raw", "order"), String.format("Unexpected tokens. Found %s", tokens));
+
+        request = AnalyzeRequest.withIndexAnalyzer(
+                "smpldat_datasetindex_v2",
+                "quote_analyzer",
+                testQuery
+        );
+        tokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
+        assertEquals(tokens, List.of("raw_orders"), String.format("Unexpected tokens. Found %s", tokens));
     }
 
     @Test
@@ -416,8 +447,9 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
     @Test
     public void testSmokeTestQueries() {
         Map<String, Integer> expectedMinimums = Map.of(
-                "sample", 1,
-                "covid19", 1
+                "sample", 3,
+                "covid", 2,
+                "\"raw_orders\"", 1
         );
 
         Map<String, SearchResult> results = expectedMinimums.entrySet().stream()
@@ -426,9 +458,9 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
         results.forEach((key, value) -> {
             Integer actualCount = value.getEntities().size();
             Integer expectedCount = expectedMinimums.get(key);
-            assertTrue(actualCount >= expectedCount,
-                    String.format("Search term `%s` has %s fulltext results, expected %s results.", key,
-                            actualCount, expectedCount));
+            assertSame(actualCount, expectedCount,
+                    String.format("Search term `%s` has %s fulltext results, expected %s results.", key, actualCount,
+                            expectedCount));
         });
 
         results = expectedMinimums.entrySet().stream()
@@ -437,9 +469,9 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
         results.forEach((key, value) -> {
             Integer actualCount = value.getEntities().size();
             Integer expectedCount = expectedMinimums.get(key);
-            assertTrue(actualCount >= expectedCount,
-                    String.format("Search term `%s` has %s structured results, expected %s results.", key,
-                            actualCount, expectedCount));
+            assertSame(actualCount, expectedCount,
+                    String.format("Search term `%s` has %s structured results, expected %s results.", key, actualCount,
+                            expectedCount));
         });
     }
 
@@ -559,7 +591,7 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
                 "\"test_BYTES_LIST_feature\""
         );
         searchQuotedQueryTokens = getTokens(request).map(AnalyzeResponse.AnalyzeToken::getTerm).collect(Collectors.toList());
-        assertEquals(List.of("test_bytes_list_featur"), searchQuotedQueryTokens);
+        assertEquals(List.of("test_bytes_list_feature"), searchQuotedQueryTokens);
 
         request = AnalyzeRequest.withIndexAnalyzer(
                 "smpldat_datasetindex_v2",
