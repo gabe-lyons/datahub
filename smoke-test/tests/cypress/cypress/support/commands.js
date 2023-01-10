@@ -232,7 +232,7 @@ Cypress.Commands.add("mouseover", (selector) => {
 Cypress.Commands.add('typeSearchDisableCache', {prevSubject: 'element'}, (subject, input) => {
     const randomStrGenerator = () => Cypress._.random(0, 1e9);
     const randomStr = randomStrGenerator();
-    const combinedStr = `${input} OR ${randomStr}{enter}`
+    const combinedStr = `${input} | ${randomStr}{enter}`
     cy.get(subject.selector).type(combinedStr);
 })
 

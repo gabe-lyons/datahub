@@ -15,7 +15,7 @@ python -c 'from tests.cypress.integration_test import ingest_data; ingest_data()
 cd tests/cypress
 npm install
 
-export CYPRESS_ADMIN_USERNAME=${ADMIN_USERNAME:-datahub}
-export CYPRESS_ADMIN_PASSWORD=${ADMIN_PASSWORD:-datahub}
+export CYPRESS_ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+export CYPRESS_ADMIN_PASSWORD=${ADMIN_PASSWORD:-mypass}
 
 npx cypress open
