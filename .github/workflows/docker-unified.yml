@@ -106,6 +106,11 @@ jobs:
           image: ${{ env.DATAHUB_GMS_IMAGE }}:${{ needs.setup.outputs.unique_tag }}
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_OFFLINE_SCAN: true
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
         with:
           image-ref: ${{ env.DATAHUB_GMS_IMAGE }}:${{ needs.setup.outputs.unique_tag }}
           format: 'template'
@@ -114,10 +119,6 @@ jobs:
           ignore-unfixed: true
           vuln-type: "os,library"
           severity: "CRITICAL,HIGH"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-west-2
       - name: Upload Trivy scan results to GitHub Security tab
         if: ${{ false }}
         uses: github/codeql-action/upload-sarif@v2
@@ -171,6 +172,11 @@ jobs:
           image: ${{ env.DATAHUB_MAE_CONSUMER_IMAGE }}:${{ needs.setup.outputs.unique_tag }}
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_OFFLINE_SCAN: true
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
         with:
           image-ref: ${{ env.DATAHUB_MAE_CONSUMER_IMAGE }}:${{ needs.setup.outputs.unique_tag }}
           format: 'template'
@@ -179,10 +185,6 @@ jobs:
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
           vuln-type: "os,library"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-west-2
       - name: Upload Trivy scan results to GitHub Security tab
         if: ${{ false }}
         uses: github/codeql-action/upload-sarif@v2
@@ -236,6 +238,11 @@ jobs:
           image: ${{ env.DATAHUB_MCE_CONSUMER_IMAGE }}:${{ needs.setup.outputs.unique_tag }}
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_OFFLINE_SCAN: true
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
         with:
           image-ref: ${{ env.DATAHUB_MCE_CONSUMER_IMAGE }}:${{ needs.setup.outputs.unique_tag }}
           format: 'template'
@@ -244,10 +251,6 @@ jobs:
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
           vuln-type: "os,library"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-west-2
       - name: Upload Trivy scan results to GitHub Security tab
         if: ${{ false }}
         uses: github/codeql-action/upload-sarif@v2
@@ -301,6 +304,11 @@ jobs:
           image: ${{ env.DATAHUB_UPGRADE_IMAGE }}:${{ needs.setup.outputs.unique_tag }}
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_OFFLINE_SCAN: true
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
         with:
           image-ref: ${{ env.DATAHUB_UPGRADE_IMAGE }}:${{ needs.setup.outputs.unique_tag }}
           format: 'template'
@@ -309,10 +317,6 @@ jobs:
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
           vuln-type: "os,library"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-west-2
       - name: Upload Trivy scan results to GitHub Security tab
         if: ${{ false }}
         uses: github/codeql-action/upload-sarif@v2
@@ -365,6 +369,11 @@ jobs:
           image: ${{ env.DATAHUB_FRONTEND_IMAGE }}:${{ needs.setup.outputs.unique_tag }}
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
+        env:
+          TRIVY_OFFLINE_SCAN: true
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-west-2
         with:
           image-ref: ${{ env.DATAHUB_FRONTEND_IMAGE }}:${{ needs.setup.outputs.unique_tag }}
           format: 'template'
@@ -373,10 +382,6 @@ jobs:
           severity: 'CRITICAL,HIGH'
           ignore-unfixed: true
           vuln-type: "os,library"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-west-2
       - name: Upload Trivy scan results to GitHub Security tab
         if: ${{ false }}
         uses: github/codeql-action/upload-sarif@v2
