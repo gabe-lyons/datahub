@@ -10,6 +10,7 @@ import com.linkedin.metadata.search.ScrollResult;
 import com.linkedin.metadata.search.SearchEntity;
 import com.linkedin.metadata.test.TestEngine;
 import com.linkedin.test.TestResults;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,7 +47,7 @@ public class EvaluateTestsStep implements UpgradeStep {
       int batchSize =
           context.parsedArgs().getOrDefault("BATCH_SIZE", Optional.empty()).map(Integer::parseInt).orElse(1000);
 
-      Set<String> entityTypesToEvaluate = _testEngine.getEntityTypesToEvaluate();
+      Set<String> entityTypesToEvaluate = new HashSet<>(_testEngine.getEntityTypesToEvaluate());
       context.report().addLine(String.format("Evaluating tests for entities %s", entityTypesToEvaluate));
 
       for (String entityType : entityTypesToEvaluate) {
