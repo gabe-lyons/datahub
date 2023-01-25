@@ -16,7 +16,12 @@ public enum DataHubUsageEventType {
   ENTITY_SECTION_VIEW_EVENT("EntitySectionViewEvent"),
   ENTITY_ACTION_EVENT("EntityActionEvent"),
   RECOMMENDATION_IMPRESSION_EVENT("RecommendationImpressionEvent"),
-  RECOMMENDATION_CLICK_EVENT("RecommendationClickEvent");
+  RECOMMENDATION_CLICK_EVENT("RecommendationClickEvent"),
+  
+  // SaaS only events
+  CREATE_TEST_EVENT("CreateTestEvent"),
+  UPDATE_TEST_EVENT("UpdateTestEvent"),
+  DELETE_TEST_EVENT("DeleteTestEvent");
 
   private final String type;
 
