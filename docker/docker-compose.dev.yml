@@ -12,7 +12,7 @@ version: '3.8'
 services:
   # Pre-creates the search indices using local mapping/settings.json
   elasticsearch-setup:
-    image: 795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-elasticsearch-setup:debug
+    image: linkedin/datahub-elasticsearch-setup:debug
     build:
       context: elasticsearch-setup
       dockerfile: Dockerfile
@@ -24,19 +24,8 @@ services:
       - ./elasticsearch-setup/create-indices.sh:/create-indices.sh
       - ../metadata-service/restli-servlet-impl/src/main/resources/index/:/index
 
-  kafka-setup:
-    image: 795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-kafka-setup:debug
-    build:
-      context: ../
-      dockerfile: ./docker/kafka-setup/Dockerfile
-      args:
-        APP_ENV: dev
-    depends_on:
-      - broker
-      - schema-registry
-
   datahub-gms:
-    image: 795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-gms:debug
+    image: linkedin/datahub-gms:debug
     build:
       context: datahub-gms
       dockerfile: Dockerfile
@@ -46,7 +35,6 @@ services:
       - SKIP_ELASTICSEARCH_CHECK=false
       - DATAHUB_SERVER_TYPE=${DATAHUB_SERVER_TYPE:-dev}
       - DATAHUB_TELEMETRY_ENABLED=${DATAHUB_TELEMETRY_ENABLED:-true}
-      - GRAFANA_NAMESPACE=${GRAFANA_NAMESPACE:-}
       - METADATA_SERVICE_AUTH_ENABLED=false
     volumes:
       - ./datahub-gms/start.sh:/datahub/datahub-gms/scripts/start.sh
@@ -57,7 +45,7 @@ services:
       - ${HOME}/.datahub/plugins:/etc/datahub/plugins
 
   datahub-frontend-react:
-    image: 795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-frontend-react:debug
+    image: linkedin/datahub-frontend-react:debug
     build:
       context: ../
       dockerfile: docker/datahub-frontend/Dockerfile
@@ -65,4 +53,3 @@ services:
         APP_ENV: dev
     volumes:
       - ../datahub-frontend/build/stage/playBinary:/datahub-frontend
-      - ./datahub-frontend/start.sh:/scripts/start.sh
