@@ -5,6 +5,23 @@ import lombok.Getter;
 
 @Getter
 public enum DataHubUsageEventType {
+  PAGE_VIEW_EVENT("PageViewEvent"),
+  HOME_PAGE_VIEW_EVENT("HomePageViewEvent"),
+  LOG_IN_EVENT("LogInEvent"),
+  LOG_OUT_EVENT("LogOutEvent"),
+  SEARCH_EVENT("SearchEvent"),
+  HOME_PAGE_SEARCH_EVENT("HomePageSearchEvent"),
+  SEARCH_RESULTS_VIEW_EVENT("SearchResultsViewEvent"),
+  SEARCH_RESULT_CLICK_EVENT("SearchResultClickEvent"),
+  ENTITY_SEARCH_RESULT_CLICK_EVENT("EntitySearchResultClickEvent"),
+  BROWSE_RESULT_CLICK_EVENT("BrowseResultClickEvent"),
+  HOME_PAGE_BROWSE_RESULT_CLICK_EVENT("HomePageBrowseResultClickEvent"),
+  ENTITY_VIEW_EVENT("EntityViewEvent"),
+  ENTITY_SECTION_VIEW_EVENT("EntitySectionViewEvent"),
+  ENTITY_ACTION_EVENT("EntityActionEvent"),
+  BATCH_ENTITY_ACTION_EVENT("BatchEntityActionEvent"),
+  RECOMMENDATION_IMPRESSION_EVENT("RecommendationImpressionEvent"),
+  RECOMMENDATION_CLICK_EVENT("RecommendationClickEvent"),
   HOME_PAGE_RECOMMENDATION_CLICK_EVENT("HomePageRecommendationClickEvent"),
   HOME_PAGE_EXPLORE_ALL_CLICK_EVENT("HomePageExploreAllClickEvent"),
   SEARCH_ACROSS_LINEAGE_EVENT("SearchAcrossLineageEvent"),
