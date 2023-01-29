@@ -1,7 +1,11 @@
+<<<<<<< HEAD
 import { Modal, Tag, Typography, Button, message, Tooltip } from 'antd';
+=======
+import { Typography, Button } from 'antd';
+>>>>>>> oss_master
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+<<<<<<< HEAD
 import { BookOutlined, ClockCircleOutlined, PlusOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import Highlight from 'react-highlighter';
 
@@ -17,14 +21,24 @@ import {
     TagAssociation,
 } from '../../../types.generated';
 import { StyledTag } from '../../entity/shared/components/styled/StyledTag';
+=======
+import { PlusOutlined } from '@ant-design/icons';
+import Highlight from 'react-highlighter';
+
+import { useEntityRegistry } from '../../useEntityRegistry';
+import { Domain, EntityType, GlobalTags, GlossaryTerms, SubResourceType } from '../../../types.generated';
+>>>>>>> oss_master
 import { EMPTY_MESSAGES, ANTD_GRAY } from '../../entity/shared/constants';
-import { useRemoveTagMutation, useRemoveTermMutation } from '../../../graphql/mutations.generated';
 import { DomainLink } from './DomainLink';
+<<<<<<< HEAD
 import { TagProfileDrawer } from './TagProfileDrawer';
 import { useAcceptProposalMutation, useRejectProposalMutation } from '../../../graphql/actionRequest.generated';
 import ProposalModal from './ProposalModal';
+=======
+>>>>>>> oss_master
 import EditTagTermsModal from './AddTagsTermsModal';
-import { HoverEntityTooltip } from '../../recommendations/renderer/component/HoverEntityTooltip';
+import StyledTerm from './term/StyledTerm';
+import Tag from './tag/Tag';
 
 const PropagateThunderbolt = styled(ThunderboltOutlined)`
     color: rgba(0, 143, 100, 0.95);
@@ -50,20 +64,14 @@ type Props = {
     entitySubresource?: string;
     highlightText?: string;
     refetch?: () => Promise<any>;
+<<<<<<< HEAD
 
     proposedGlossaryTerms?: ActionRequest[];
     proposedTags?: ActionRequest[];
+=======
+    readOnly?: boolean;
+>>>>>>> oss_master
 };
-
-const TermLink = styled(Link)`
-    display: inline-block;
-    margin-bottom: 8px;
-`;
-
-const TagLink = styled.span`
-    display: inline-block;
-    margin-bottom: 8px;
-`;
 
 const NoElementButton = styled(Button)`
     :not(:last-child) {
@@ -104,10 +112,12 @@ export default function TagTermGroup({
     entitySubresource,
     highlightText,
     refetch,
+    readOnly,
 }: Props) {
     const entityRegistry = useEntityRegistry();
     const [showAddModal, setShowAddModal] = useState(false);
     const [addModalType, setAddModalType] = useState(EntityType.Tag);
+<<<<<<< HEAD
 
     const [acceptProposalMutation] = useAcceptProposalMutation();
     const [rejectProposalMutation] = useRejectProposalMutation();
@@ -244,6 +254,13 @@ export default function TagTermGroup({
         refetch?.();
     };
 
+=======
+    const tagsEmpty = !editableTags?.tags?.length && !uneditableTags?.tags?.length;
+    const termsEmpty = !editableGlossaryTerms?.terms?.length && !uneditableGlossaryTerms?.terms?.length;
+
+    let renderedTags = 0;
+
+>>>>>>> oss_master
     return (
         <>
             {domain && (
@@ -264,26 +281,20 @@ export default function TagTermGroup({
                 if (maxShow && renderedTags > maxShow) return null;
 
                 return (
-                    <HoverEntityTooltip entity={term.term}>
-                        <TermLink
-                            to={entityRegistry.getEntityUrl(EntityType.GlossaryTerm, term.term.urn)}
-                            key={term.term.urn}
-                        >
-                            <Tag closable={false} style={{ cursor: 'pointer' }}>
-                                <BookOutlined style={{ marginRight: '3%' }} />
-                                <Highlight
-                                    style={{ marginLeft: 0 }}
-                                    matchStyle={highlightMatchStyle}
-                                    search={highlightText}
-                                >
-                                    {entityRegistry.getDisplayName(EntityType.GlossaryTerm, term.term)}
-                                </Highlight>
-                            </Tag>
-                        </TermLink>
-                    </HoverEntityTooltip>
+                    <StyledTerm
+                        term={term}
+                        entityUrn={entityUrn}
+                        entitySubresource={entitySubresource}
+                        canRemove={false}
+                        readOnly={readOnly}
+                        highlightText={highlightText}
+                        onOpenModal={onOpenModal}
+                        refetch={refetch}
+                    />
                 );
             })}
             {editableGlossaryTerms?.terms?.map((term) => (
+<<<<<<< HEAD
                 <HoverEntityTooltip entity={term.term}>
                     <TermLink
                         to={entityRegistry.getEntityUrl(EntityType.GlossaryTerm, term.term.urn)}
@@ -309,6 +320,18 @@ export default function TagTermGroup({
                         </Tag>
                     </TermLink>
                 </HoverEntityTooltip>
+=======
+                <StyledTerm
+                    term={term}
+                    entityUrn={entityUrn}
+                    entitySubresource={entitySubresource}
+                    canRemove={canRemove}
+                    readOnly={readOnly}
+                    highlightText={highlightText}
+                    onOpenModal={onOpenModal}
+                    refetch={refetch}
+                />
+>>>>>>> oss_master
             ))}
             {proposedGlossaryTerms?.map((actionRequest) => (
                 <Tooltip overlay="Pending approval from owners">
@@ -349,27 +372,17 @@ export default function TagTermGroup({
                     );
                 if (maxShow && renderedTags > maxShow) return null;
 
-                const displayName = entityRegistry.getDisplayName(EntityType.Tag, tag.tag);
                 return (
-                    <HoverEntityTooltip entity={tag?.tag}>
-                        <TagLink key={tag?.tag?.urn} data-testid={`tag-${displayName}`}>
-                            <StyledTag
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => showTagProfileDrawer(tag?.tag?.urn)}
-                                $colorHash={tag?.tag?.urn}
-                                $color={tag?.tag?.properties?.colorHex}
-                                closable={false}
-                            >
-                                <Highlight
-                                    style={{ marginLeft: 0 }}
-                                    matchStyle={highlightMatchStyle}
-                                    search={highlightText}
-                                >
-                                    {displayName}
-                                </Highlight>
-                            </StyledTag>
-                        </TagLink>
-                    </HoverEntityTooltip>
+                    <Tag
+                        tag={tag}
+                        entityUrn={entityUrn}
+                        entitySubresource={entitySubresource}
+                        canRemove={false}
+                        readOnly={readOnly}
+                        highlightText={highlightText}
+                        onOpenModal={onOpenModal}
+                        refetch={refetch}
+                    />
                 );
             })}
             {/* editable tags may be provided by ingestion pipelines or the UI */}
@@ -377,33 +390,20 @@ export default function TagTermGroup({
                 renderedTags += 1;
                 if (maxShow && renderedTags > maxShow) return null;
 
-                const displayName = entityRegistry.getDisplayName(EntityType.Tag, tag.tag);
                 return (
-                    <HoverEntityTooltip entity={tag?.tag}>
-                        <TagLink data-testid={`tag-${displayName}`}>
-                            <StyledTag
-                                style={{ cursor: 'pointer' }}
-                                onClick={() => showTagProfileDrawer(tag?.tag?.urn)}
-                                $colorHash={tag?.tag?.urn}
-                                $color={tag?.tag?.properties?.colorHex}
-                                closable={canRemove}
-                                onClose={(e) => {
-                                    e.preventDefault();
-                                    removeTag(tag);
-                                }}
-                            >
-                                <Highlight
-                                    style={{ marginLeft: 0 }}
-                                    matchStyle={highlightMatchStyle}
-                                    search={highlightText}
-                                >
-                                    {displayName}
-                                </Highlight>
-                            </StyledTag>
-                        </TagLink>
-                    </HoverEntityTooltip>
+                    <Tag
+                        tag={tag}
+                        entityUrn={entityUrn}
+                        entitySubresource={entitySubresource}
+                        canRemove={canRemove}
+                        readOnly={readOnly}
+                        highlightText={highlightText}
+                        onOpenModal={onOpenModal}
+                        refetch={refetch}
+                    />
                 );
             })}
+<<<<<<< HEAD
             {proposedTags?.map((actionRequest) => (
                 <Tooltip overlay="Pending approval from owners">
                     <StyledTag
@@ -435,17 +435,19 @@ export default function TagTermGroup({
                     urn={addTagUrn}
                 />
             )}
+=======
+>>>>>>> oss_master
             {showEmptyMessage && canAddTag && tagsEmpty && (
                 <Typography.Paragraph type="secondary">
                     {EMPTY_MESSAGES.tags.title}. {EMPTY_MESSAGES.tags.description}
                 </Typography.Paragraph>
             )}
-            {showEmptyMessage && canAddTerm && tagsEmpty && (
+            {showEmptyMessage && canAddTerm && termsEmpty && (
                 <Typography.Paragraph type="secondary">
                     {EMPTY_MESSAGES.terms.title}. {EMPTY_MESSAGES.terms.description}
                 </Typography.Paragraph>
             )}
-            {canAddTag && (
+            {canAddTag && !readOnly && (
                 <NoElementButton
                     type={showEmptyMessage && tagsEmpty ? 'default' : 'text'}
                     onClick={() => {
@@ -458,9 +460,9 @@ export default function TagTermGroup({
                     <span>Add Tags</span>
                 </NoElementButton>
             )}
-            {canAddTerm && (
+            {canAddTerm && !readOnly && (
                 <NoElementButton
-                    type={showEmptyMessage && tagsEmpty ? 'default' : 'text'}
+                    type={showEmptyMessage && termsEmpty ? 'default' : 'text'}
                     onClick={() => {
                         setAddModalType(EntityType.GlossaryTerm);
                         setShowAddModal(true);

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Divider } from 'antd';
 import styled from 'styled-components';
 
 import TagTermGroup from '../../../../../shared/tags/TagTermGroup';
@@ -12,11 +13,16 @@ import {
 } from '../../../../../onboarding/config/EntityProfileOnboardingConfig';
 import ConstraintGroup from '../../../../../shared/constraints/ConstraintGroup';
 
-const TermSection = styled.div`
-    margin-top: 20px;
+const StyledDivider = styled(Divider)`
+    margin: 16px 0;
 `;
 
-export const SidebarTagsSection = ({ properties }: { properties?: any }) => {
+interface Props {
+    properties?: any;
+    readOnly?: boolean;
+}
+
+export const SidebarTagsSection = ({ properties, readOnly }: Props) => {
     const canAddTag = properties?.hasTags;
     const canAddTerm = properties?.hasTerms;
 
@@ -39,6 +45,7 @@ export const SidebarTagsSection = ({ properties }: { properties?: any }) => {
                     entityUrn={mutationUrn}
                     entityType={entityType}
                     refetch={refetch}
+<<<<<<< HEAD
                     // eslint-disable-next-line
                     // @ts-ignore
                     // eslint-disable-next-line
@@ -64,6 +71,25 @@ export const SidebarTagsSection = ({ properties }: { properties?: any }) => {
                     />
                 </span>
             </TermSection>
+=======
+                    readOnly={readOnly}
+                />
+            </span>
+            <StyledDivider />
+            <span id={ENTITY_PROFILE_GLOSSARY_TERMS_ID}>
+                <SidebarHeader title="Glossary Terms" />
+                <TagTermGroup
+                    editableGlossaryTerms={entityData?.glossaryTerms}
+                    canAddTerm={canAddTerm}
+                    canRemove
+                    showEmptyMessage
+                    entityUrn={mutationUrn}
+                    entityType={entityType}
+                    refetch={refetch}
+                    readOnly={readOnly}
+                />
+            </span>
+>>>>>>> oss_master
         </div>
     );
 };
