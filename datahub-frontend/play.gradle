@@ -83,6 +83,9 @@ dependencies {
   implementation externalDependency.logbackClassic
 
   annotationProcessor externalDependency.lombok
+
+  implementation externalDependency.sentry
+  implementation externalDependency.sentryLogback
 }
 
 play {

@@ -15,6 +15,7 @@ buildscript {
   ext.log4jVersion = '2.19.0'
   ext.slf4jVersion = '1.7.32'
   ext.logbackClassic = '1.2.11'
+  ext.sentry = '6.13.0'
 
   ext.docker_registry = '795586375822.dkr.ecr.us-west-2.amazonaws.com'
 
@@ -181,7 +182,8 @@ project.ext.externalDependency = [
     'resilience4j': 'io.github.resilience4j:resilience4j-retry:1.7.1',
     'rythmEngine': 'org.rythmengine:rythm-engine:1.3.0',
     'servletApi': 'javax.servlet:javax.servlet-api:3.1.0',
-    'sentry': 'io.sentry:sentry:6.12.1',
+    'sentry': "io.sentry:sentry:$sentry",
+    'sentryLogback': "io.sentry:sentry-logback:$sentry",
     'shiroCore': 'org.apache.shiro:shiro-core:1.10.0',
     'snakeYaml': 'org.yaml:snakeyaml:1.33',
     'sparkSql' : 'org.apache.spark:spark-sql_2.11:2.4.8',

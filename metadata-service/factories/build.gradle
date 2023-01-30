@@ -48,6 +48,7 @@ dependencies {
   testCompile externalDependency.hazelcastTest
 
   implementation externalDependency.sentry
+  implementation externalDependency.sentryLogback
 }
 
 processResources.configure {
