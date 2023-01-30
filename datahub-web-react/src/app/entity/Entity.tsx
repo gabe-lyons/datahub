@@ -176,7 +176,7 @@ export interface Entity<T> {
      * Returns the graph name of the entity, as it appears in the GMS entity registry
      */
     getGraphName: () => string;
-    
+
     /**
      * Returns the profile component to be displayed in our Chrome extension
      */

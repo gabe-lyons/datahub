@@ -260,7 +260,7 @@ export class DashboardEntity implements Entity<Dashboard> {
     };
 
     getGraphName = () => this.getPathName();
-    
+
     renderEmbeddedProfile = (urn: string) => (
         <EmbeddedProfile
             urn={urn}

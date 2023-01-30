@@ -45,39 +45,17 @@ export const SidebarTagsSection = ({ properties, readOnly }: Props) => {
                     entityUrn={mutationUrn}
                     entityType={entityType}
                     refetch={refetch}
-<<<<<<< HEAD
+                    readOnly={readOnly}
                     // eslint-disable-next-line
                     // @ts-ignore
                     // eslint-disable-next-line
                     proposedTags={findTopLevelProposals(baseEntity?.['dataset']?.['tagProposals'] || [])}
                 />
             </span>
-            <TermSection>
-                <span id={ENTITY_PROFILE_GLOSSARY_TERMS_ID}>
-                    <SidebarHeader title="Glossary Terms" />
-                    <ConstraintGroup constraints={baseEntity?.dataset?.constraints || []} />
-                    <TagTermGroup
-                        editableGlossaryTerms={entityData?.glossaryTerms}
-                        canAddTerm={canAddTerm}
-                        canRemove
-                        showEmptyMessage
-                        entityUrn={mutationUrn}
-                        entityType={entityType}
-                        refetch={refetch}
-                        // eslint-disable-next-line
-                        // @ts-ignore
-                        // eslint-disable-next-line
-                        proposedGlossaryTerms={findTopLevelProposals(baseEntity?.dataset?.termProposals || [])}
-                    />
-                </span>
-            </TermSection>
-=======
-                    readOnly={readOnly}
-                />
-            </span>
             <StyledDivider />
             <span id={ENTITY_PROFILE_GLOSSARY_TERMS_ID}>
                 <SidebarHeader title="Glossary Terms" />
+                <ConstraintGroup constraints={baseEntity?.dataset?.constraints || []} />
                 <TagTermGroup
                     editableGlossaryTerms={entityData?.glossaryTerms}
                     canAddTerm={canAddTerm}
@@ -87,9 +65,12 @@ export const SidebarTagsSection = ({ properties, readOnly }: Props) => {
                     entityType={entityType}
                     refetch={refetch}
                     readOnly={readOnly}
+                    // eslint-disable-next-line
+                    // @ts-ignore
+                    // eslint-disable-next-line
+                    proposedGlossaryTerms={findTopLevelProposals(baseEntity?.dataset?.termProposals || [])}
                 />
             </span>
->>>>>>> oss_master
         </div>
     );
 };

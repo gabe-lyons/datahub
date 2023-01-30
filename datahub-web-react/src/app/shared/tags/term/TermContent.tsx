@@ -1,12 +1,21 @@
-import { BookOutlined } from '@ant-design/icons';
+import { BookOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { message, Modal, Tag } from 'antd';
 import React from 'react';
 import Highlight from 'react-highlighter';
+import styled from 'styled-components';
 import { useRemoveTermMutation } from '../../../../graphql/mutations.generated';
 import { EntityType, GlossaryTermAssociation, SubResourceType } from '../../../../types.generated';
 import { useEntityRegistry } from '../../../useEntityRegistry';
 
+const PROPAGATOR_URN = 'urn:li:corpuser:__datahub_propagator';
+
 const highlightMatchStyle = { background: '#ffe58f', padding: '0' };
+
+const PropagateThunderbolt = styled(ThunderboltOutlined)`
+    color: rgba(0, 143, 100, 0.95);
+    margin-right: -4px;
+    font-weight: bold;
+`;
 
 interface Props {
     term: GlossaryTermAssociation;
@@ -82,6 +91,7 @@ export default function TermContent({
             <Highlight style={{ marginLeft: 0 }} matchStyle={highlightMatchStyle} search={highlightText}>
                 {entityRegistry.getDisplayName(EntityType.GlossaryTerm, term.term)}
             </Highlight>
+            {term.actor?.urn === PROPAGATOR_URN && <PropagateThunderbolt />}
         </Tag>
     );
 }
