@@ -73,7 +73,8 @@ public class MetadataTestHook implements MetadataChangeLogHook {
           Constants.INGESTION_SOURCE_ENTITY_NAME,
           Constants.EXECUTION_REQUEST_ENTITY_NAME,
           Constants.SECRETS_ENTITY_NAME,
-          Constants.DATA_PROCESS_INSTANCE_ENTITY_NAME);
+          Constants.DATA_PROCESS_INSTANCE_ENTITY_NAME,
+          Constants.DATAHUB_STEP_STATE_ENTITY_NAME);
 
   // Set of aspects to ignore a.k.a do not run tests when these aspects change
   // TestResults needs to be ignored, because otherwise tests will always trigger twice
