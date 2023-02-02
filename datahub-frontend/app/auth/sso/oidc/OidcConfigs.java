@@ -40,6 +40,7 @@ public class OidcConfigs extends SsoConfigs {
     public static final String OIDC_CUSTOM_PARAM_RESOURCE = "auth.oidc.customParam.resource";
     public static final String OIDC_READ_TIMEOUT = "auth.oidc.readTimeout";
     public static final String OIDC_EXTRACT_JWT_ACCESS_TOKEN_CLAIMS = "auth.oidc.extractJwtAccessTokenClaims";
+    public static final String OIDC_PREFERRED_JWS_ALGORITHM = "auth.oidc.preferredJwsAlgorithm";
 
     /**
      * Default values
@@ -75,6 +76,7 @@ public class OidcConfigs extends SsoConfigs {
     private Optional<String> customParamResource;
     private String readTimeout;
     private Optional<Boolean> extractJwtAccessTokenClaims;
+    private Optional<String> preferredJwsAlgorithm;
 
     public OidcConfigs(Builder builder) {
         super(builder);
@@ -96,6 +98,7 @@ public class OidcConfigs extends SsoConfigs {
         this.customParamResource = builder.customParamResource;
         this.readTimeout = builder.readTimeout;
         this.extractJwtAccessTokenClaims = builder.extractJwtAccessTokenClaims;
+        this.preferredJwsAlgorithm = builder.preferredJwsAlgorithm;
     }
 
     public static class Builder extends SsoConfigs.Builder<Builder> {
@@ -117,6 +120,7 @@ public class OidcConfigs extends SsoConfigs {
         private Optional<String> customParamResource = Optional.empty();
         private String readTimeout = DEFAULT_OIDC_READ_TIMEOUT;
         private Optional<Boolean> extractJwtAccessTokenClaims = Optional.empty();
+        private Optional<String> preferredJwsAlgorithm = Optional.empty();
 
         public Builder from(final com.typesafe.config.Config configs) {
             super.from(configs);
@@ -146,6 +150,7 @@ public class OidcConfigs extends SsoConfigs {
             readTimeout = getOptional(configs, OIDC_READ_TIMEOUT, DEFAULT_OIDC_READ_TIMEOUT);
             extractJwtAccessTokenClaims =
                 getOptional(configs, OIDC_EXTRACT_JWT_ACCESS_TOKEN_CLAIMS).map(Boolean::parseBoolean);
+            preferredJwsAlgorithm = Optional.ofNullable(getOptional(configs, OIDC_PREFERRED_JWS_ALGORITHM, null));
             return this;
         }
 
@@ -201,6 +206,9 @@ public class OidcConfigs extends SsoConfigs {
             }
             if (jsonNode.has(EXTRACT_JWT_ACCESS_TOKEN_CLAIMS)) {
                 extractJwtAccessTokenClaims = Optional.of(jsonNode.get(EXTRACT_JWT_ACCESS_TOKEN_CLAIMS).asBoolean());
+            }
+            if (jsonNode.has(OIDC_PREFERRED_JWS_ALGORITHM)) {
+                preferredJwsAlgorithm = Optional.of(jsonNode.get(OIDC_PREFERRED_JWS_ALGORITHM).asText());
             }
 
             return this;
