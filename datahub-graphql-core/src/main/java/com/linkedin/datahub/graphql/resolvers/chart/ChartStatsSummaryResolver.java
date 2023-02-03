@@ -57,11 +57,14 @@ public class ChartStatsSummaryResolver implements DataFetcher<CompletableFuture<
       try {
         // acryl-main only - first see if we can populate stats based on the UsageFeatures aspect
         UsageFeatures maybeUsageFeatures = getUsageFeatures(resourceUrn, context);
-        return getSummaryFromUsageFeatures(maybeUsageFeatures);
+        if (maybeUsageFeatures != null) {
+          return getSummaryFromUsageFeatures(maybeUsageFeatures);
+        }
       } catch (Exception e) {
-        log.error(String.format("Failed to load dashboard usage summary for resource %s", resourceUrn.toString()), e);
+        log.error(String.format("Failed to load chart usage summary for resource %s", resourceUrn.toString()), e);
         return null; // Do not throw when loading usage summary fails.
       }
+      return null;
     });
   }
 
