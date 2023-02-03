@@ -29,8 +29,10 @@ public class SsoManager {
   private final Authentication _authentication; // Authentication used to fetch SSO settings from GMS
   private final String _ssoSettingsRequestUrl; // SSO settings request URL.
   private final CloseableHttpClient _httpClient; // HTTP client for making requests to GMS.
+  private com.typesafe.config.Config _configs;
 
-  public SsoManager(Authentication authentication, String ssoSettingsRequestUrl, CloseableHttpClient httpClient) {
+  public SsoManager(com.typesafe.config.Config configs, Authentication authentication, String ssoSettingsRequestUrl, CloseableHttpClient httpClient) {
+    _configs = configs;
     _authentication = Objects.requireNonNull(authentication, "authentication cannot be null");
     _ssoSettingsRequestUrl = Objects.requireNonNull(ssoSettingsRequestUrl, "ssoSettingsRequestUrl cannot be null");
     _httpClient = Objects.requireNonNull(httpClient, "httpClient cannot be null");
@@ -57,6 +59,10 @@ public class SsoManager {
     _provider = provider;
   }
 
+  public void setConfigs(final com.typesafe.config.Config configs) {
+    _configs = configs;
+  }
+
   public void clearSsoProvider() {
     _provider = null;
   }
@@ -72,20 +78,20 @@ public class SsoManager {
     return _provider;
   }
 
-  public void initializeSsoProvider(@Nonnull final com.typesafe.config.Config configs) {
+  public void initializeSsoProvider() {
     SsoConfigs ssoConfigs = null;
     try {
-      ssoConfigs = new SsoConfigs.Builder().from(configs).build();
+      ssoConfigs = new SsoConfigs.Builder().from(_configs).build();
     } catch (Exception e) {
-      log.error(String.format("Error building SsoConfigs from configs %s, reusing previous settings", configs), e);
+      log.error(String.format("Error building SsoConfigs from configs %s, reusing previous settings", _configs), e);
     }
 
     if (ssoConfigs != null && ssoConfigs.isOidcEnabled()) {
       try {
-        OidcConfigs oidcConfigs = new OidcConfigs.Builder().from(configs).build();
+        OidcConfigs oidcConfigs = new OidcConfigs.Builder().from(_configs).build();
         maybeUpdateOidcProvider(oidcConfigs);
       } catch (IllegalArgumentException e) {
-        log.error(String.format("Error building OidcConfigs from configs %s, reusing previous settings", configs), e);
+        log.error(String.format("Error building OidcConfigs from configs %s, reusing previous settings", _configs), e);
         return;
       }
     } else {
@@ -115,7 +121,7 @@ public class SsoManager {
 
     if (ssoConfigs != null && ssoConfigs.isOidcEnabled()) {
       try {
-        OidcConfigs oidcConfigs = new OidcConfigs.Builder().from(ssoSettingsJsonStr).build();
+        OidcConfigs oidcConfigs = new OidcConfigs.Builder().from(_configs, ssoSettingsJsonStr).build();
         maybeUpdateOidcProvider(oidcConfigs);
       } catch (Exception e) {
         log.error(

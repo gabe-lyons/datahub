@@ -2,7 +2,6 @@ package auth.sso;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Objects;
 
 import static auth.AuthUtils.*;
 import static auth.ConfigUtil.*;
@@ -76,7 +75,7 @@ public class SsoConfigs {
   }
 
   public static class Builder<T extends Builder<T>> {
-    private String _authBaseUrl = null;
+    protected String _authBaseUrl = null;
     private String _authBaseCallbackPath = DEFAULT_BASE_CALLBACK_PATH;
     private String _authSuccessRedirectPath = DEFAULT_SUCCESS_REDIRECT_PATH;
     private Integer _sessionTtlInHours = DEFAULT_SESSION_TTL_HOURS;
@@ -132,7 +131,6 @@ public class SsoConfigs {
     }
 
     public SsoConfigs build() {
-      Objects.requireNonNull(this._authBaseUrl, "authBaseUrl is required");
       return new SsoConfigs(this);
     }
   }

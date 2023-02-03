@@ -3,6 +3,7 @@ package app.auth.sso;
 import auth.sso.SsoManager;
 import auth.sso.oidc.OidcProvider;
 import com.datahub.authentication.Authentication;
+import com.typesafe.config.Config;
 import org.apache.http.HttpStatus;
 import org.apache.http.StatusLine;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -53,7 +54,7 @@ public class SsoManagerTest {
     when(_httpResponse.getStatusLine()).thenReturn(statusLine);
     when(statusLine.getStatusCode()).thenReturn(HttpStatus.SC_OK);
 
-    _ssoManager = new SsoManager(authentication, SSO_SETTINGS_REQUEST_URL, httpClient);
+    _ssoManager = new SsoManager(mock(Config.class), authentication, SSO_SETTINGS_REQUEST_URL, httpClient);
   }
 
   @Test
@@ -134,7 +135,8 @@ public class SsoManagerTest {
     when(configs.getString(OIDC_DISCOVERY_URI_CONFIG_PATH)).thenReturn(DISCOVERY_URI_VALUE);
     when(_httpResponse.getEntity()).thenReturn(null);
 
-    _ssoManager.initializeSsoProvider(configs);
+    _ssoManager.setConfigs(configs);
+    _ssoManager.initializeSsoProvider();
     assertFalse(_ssoManager.isSsoEnabled());
   }
 
@@ -151,7 +153,8 @@ public class SsoManagerTest {
     when(configs.getString(OIDC_CLIENT_SECRET_CONFIG_PATH)).thenReturn(CLIENT_SECRET_VALUE);
     when(_httpResponse.getEntity()).thenReturn(null);
 
-    _ssoManager.initializeSsoProvider(configs);
+    _ssoManager.setConfigs(configs);
+    _ssoManager.initializeSsoProvider();
     assertFalse(_ssoManager.isSsoEnabled());
   }
 
@@ -172,7 +175,8 @@ public class SsoManagerTest {
     when(_httpResponse.getStatusLine()).thenReturn(statusLine);
     when(statusLine.getStatusCode()).thenReturn(HttpStatus.SC_NOT_FOUND);
 
-    _ssoManager.initializeSsoProvider(configs);
+    _ssoManager.setConfigs(configs);
+    _ssoManager.initializeSsoProvider();
     assertTrue(_ssoManager.isSsoEnabled());
     assertTrue(_ssoManager.getSsoProvider() instanceof OidcProvider);
   }

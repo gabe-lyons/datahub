@@ -154,7 +154,7 @@ public class OidcConfigs extends SsoConfigs {
             return this;
         }
 
-        public Builder from(final String ssoSettingsJsonStr) {
+        public Builder from(final com.typesafe.config.Config configs, final String ssoSettingsJsonStr) {
             super.from(ssoSettingsJsonStr);
             if (jsonNode.has(CLIENT_ID)) {
                 clientId = jsonNode.get(CLIENT_ID).asText();
@@ -207,6 +207,11 @@ public class OidcConfigs extends SsoConfigs {
             if (jsonNode.has(EXTRACT_JWT_ACCESS_TOKEN_CLAIMS)) {
                 extractJwtAccessTokenClaims = Optional.of(jsonNode.get(EXTRACT_JWT_ACCESS_TOKEN_CLAIMS).asBoolean());
             }
+            if (jsonNode.has(OIDC_PREFERRED_JWS_ALGORITHM)) {
+                preferredJwsAlgorithm = Optional.of(jsonNode.get(OIDC_PREFERRED_JWS_ALGORITHM).asText());
+            } else {
+                preferredJwsAlgorithm = Optional.ofNullable(getOptional(configs, OIDC_PREFERRED_JWS_ALGORITHM, null));
+            }
 
             return this;
         }
@@ -216,6 +221,7 @@ public class OidcConfigs extends SsoConfigs {
             Objects.requireNonNull(clientId, "clientId is required");
             Objects.requireNonNull(clientSecret, "clientSecret is required");
             Objects.requireNonNull(discoveryUri, "discoveryUri is required");
+            Objects.requireNonNull(_authBaseUrl, "authBaseUrl is required");
 
             return new OidcConfigs(this);
         }
