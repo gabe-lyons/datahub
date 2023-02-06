@@ -11,12 +11,20 @@ record UsageFeatures {
    * Usage count in the last 30 days
    * This field is for Dashboard usage
    */
+  @Searchable = {
+    "fieldName": "viewCountLast30DaysFeature",
+    "fieldType": "COUNT"
+  }
   viewCountLast30Days: optional long
 
   /**
    * View count total 
    * This field is for Dashboard usage
    */
+  @Searchable = {
+    "fieldName": "viewCountFeature",
+    "fieldType": "COUNT"
+  }
   viewCountTotal: optional long
 
   /**
@@ -28,21 +36,42 @@ record UsageFeatures {
   viewCountPercentileLast30Days: optional int
 
   /**
-   * Usage count in the last 30 days
+   * Deprecated - Use queryCountLast30Days instead. Usage count in the last 30 days
    */
   @SearchScore = {
     "modifier": "LOG"
   }
+  @Searchable = {
+    "fieldName": "usageCountLast30DaysFeature",
+    "fieldType": "COUNT"
+  }
   usageCountLast30Days: optional long
-  
+
+  /**
+   * Dataset Query count in the last 30 days
+   */
+  @Searchable = {
+    "fieldName": "queryCountLast30DaysFeature",
+    "fieldType": "COUNT"
+  }
+  queryCountLast30Days: optional long
+
   /**
    * Unique user count in the last 30 days
    */
+  @Searchable = {
+    "fieldName": "uniqueUserCountLast30DaysFeature",
+    "fieldType": "COUNT"
+  }
   uniqueUserCountLast30Days: optional long
 
   /**
    * Write (insert/update) count in the last 30 days
    */
+  @Searchable = {
+    "fieldName": "writeCountLast30DaysFeature",
+    "fieldType": "COUNT"
+  }
   writeCountLast30Days: optional long
 
   /**
@@ -94,17 +123,17 @@ record UsageFeatures {
   topUsersLast30Days: optional array[Urn]
 
   /**
-   * The percentile of size in bytes relative to other assets from the data plaform instance.
+   * Deprecated - use StorageFeatures.pdl instead. The percentile of size in bytes relative to other assets from the data plaform instance.
    */
   sizeInBytesPercentile: optional long
 
   /**
-   * The percentile of size in bytes relative to other assets from the data plaform instance.
+   * Deprecated - use StorageFeatures.pdl instead. The percentile of size in bytes relative to other assets from the data plaform instance.
    */
   sizeInBytesRank: optional long
 
   /**
-   * The precentile
+   * Deprecated - use StorageFeatures.pdl instead. The percentile of row count relative to other assets from the data platform instance.
    */
   rowCountPercentile: optional int
 }

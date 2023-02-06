@@ -24,17 +24,6 @@ services:
       - ./elasticsearch-setup/create-indices.sh:/create-indices.sh
       - ../metadata-service/restli-servlet-impl/src/main/resources/index/:/index
 
-  kafka-setup:
-    image: 795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-kafka-setup:debug
-    build:
-      context: ../
-      dockerfile: ./docker/kafka-setup/Dockerfile
-      args:
-        APP_ENV: dev
-    depends_on:
-      - broker
-      - schema-registry
-
   datahub-gms:
     image: 795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-gms:debug
     build:
@@ -46,8 +35,10 @@ services:
       - SKIP_ELASTICSEARCH_CHECK=false
       - DATAHUB_SERVER_TYPE=${DATAHUB_SERVER_TYPE:-dev}
       - DATAHUB_TELEMETRY_ENABLED=${DATAHUB_TELEMETRY_ENABLED:-true}
-      - GRAFANA_NAMESPACE=${GRAFANA_NAMESPACE:-}
       - METADATA_SERVICE_AUTH_ENABLED=false
+      - SENTRY_ENVIRONMENT=dev
+      # Copy DSN from here https://sentry.io/settings/acryl-data/projects/gms/keys/ in case you wish to try this locally
+      - SENTRY_DSN=
     volumes:
       - ./datahub-gms/start.sh:/datahub/datahub-gms/scripts/start.sh
       - ./datahub-gms/jetty.xml:/datahub/datahub-gms/scripts/jetty.xml
@@ -63,9 +54,12 @@ services:
       dockerfile: docker/datahub-frontend/Dockerfile
       args:
         APP_ENV: dev
+    environment:
+      - SENTRY_ENVIRONMENT=dev
+      # copy DSN from here https://sentry.io/settings/acryl-data/projects/frontend/keys/ in case you wish to try this locally
+      - SENTRY_DSN=
     volumes:
       - ../datahub-frontend/build/stage/playBinary:/datahub-frontend
-      - ./datahub-frontend/start.sh:/scripts/start.sh
 
   datahub-upgrade:
     image: 795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-upgrade:debug

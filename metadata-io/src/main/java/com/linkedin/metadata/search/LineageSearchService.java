@@ -37,10 +37,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
+import org.javatuples.Triplet;
 import org.springframework.cache.Cache;
 
 import static com.datahub.util.RecordUtils.*;
+import static com.linkedin.metadata.search.utils.GZIPUtil.*;
 
 
 @RequiredArgsConstructor
@@ -83,7 +84,7 @@ public class LineageSearchService {
       @Nonnull List<String> entities, @Nullable String input, @Nullable Integer maxHops, @Nullable Filter inputFilters,
       @Nullable SortCriterion sortCriterion, int from, int size) {
     // Cache multihop result for faster performance
-    Pair<String, LineageDirection> cacheKey = Pair.of(sourceUrn.toString(), direction);
+    Triplet<String, LineageDirection, Integer> cacheKey = Triplet.with(sourceUrn.toString(), direction, maxHops);
     CachedEntityLineageResult cachedLineageResult = cacheEnabled
         ? cache.get(cacheKey, CachedEntityLineageResult.class) : null;
     EntityLineageResult lineageResult;
@@ -91,10 +92,10 @@ public class LineageSearchService {
       maxHops = maxHops != null ? maxHops : 1000;
       lineageResult = _graphService.getLineage(sourceUrn, direction, 0, MAX_RELATIONSHIPS, maxHops);
       if (cacheEnabled) {
-        cache.put(cacheKey, new CachedEntityLineageResult(toJsonString(lineageResult), System.currentTimeMillis()));
+        cache.put(cacheKey, new CachedEntityLineageResult(lineageResult, System.currentTimeMillis()));
       }
     } else {
-      lineageResult = toRecordTemplate(EntityLineageResult.class, cachedLineageResult.getEntityLineageResult());
+      lineageResult = cachedLineageResult.getEntityLineageResult();
       if (System.currentTimeMillis() - cachedLineageResult.getTimestamp() > DAY_IN_MS) {
         log.warn("Cached lineage entry for: {} is older than one day.", sourceUrn);
       }

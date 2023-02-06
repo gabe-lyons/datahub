@@ -304,11 +304,6 @@ entities:
     keyAspect: globalSettingsKey
     aspects:
       - globalSettingsInfo
-  - name: telemetry
-    category: internal
-    keyAspect: telemetryKey
-    aspects:
-      - telemetryClientId
   - name: dataHubRole
     category: core
     keyAspect: dataHubRoleKey

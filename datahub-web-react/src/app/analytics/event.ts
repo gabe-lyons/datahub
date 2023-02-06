@@ -50,16 +50,17 @@ export enum EventType {
     DeleteIngestionSourceEvent,
     ExecuteIngestionSourceEvent,
     SsoEvent,
-    // SaaS only events
-    CreateTestEvent,
-    UpdateTestEvent,
-    DeleteTestEvent,
     CreateViewEvent,
     UpdateViewEvent,
     SetGlobalDefaultViewEvent,
     SetUserDefaultViewEvent,
     ManuallyCreateLineageEvent,
     ManuallyDeleteLineageEvent,
+
+    // SaaS only events
+    CreateTestEvent,
+    UpdateTestEvent,
+    DeleteTestEvent,
 }
 
 /**

@@ -30,6 +30,10 @@ import static com.linkedin.metadata.AcrylConstants.*;
 @Slf4j
 public class TestResultsSummaryResolver implements DataFetcher<CompletableFuture<TestResultsSummary>> {
 
+  // The max number of aggregations when fetching test results.
+  // If a customer ever has more than 100 tests this WILL NEED TO BE INCREASED.
+  static final int MAX_AGGREGATION_LIMIT = 100;
+
   private final EntitySearchService entitySearchService;
 
   public TestResultsSummaryResolver(@Nonnull final EntitySearchService entitySearchService) {
@@ -56,7 +60,7 @@ public class TestResultsSummaryResolver implements DataFetcher<CompletableFuture
           null,
           fieldName,
           buildFilter(testUrn, fieldName),
-          1
+          MAX_AGGREGATION_LIMIT
       );
       return aggregations.getOrDefault(testUrn.toString(), 0L);
     } catch (Exception e) {

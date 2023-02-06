@@ -52,6 +52,12 @@
     </encoder>
   </appender>
 
+  <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+    <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+      <level>WARN</level>
+    </filter>
+  </appender>
+
   <!-- Change this to disable logging debug -->
   <logger name="com.linkedin" level="DEBUG">
     <appender-ref ref="DEBUG_FILE"/>
@@ -75,5 +81,6 @@
   <root level="INFO">
     <appender-ref ref="STDOUT"/>
     <appender-ref ref="FILE"/>
+    <appender-ref ref="Sentry"/>
   </root>
 </configuration>

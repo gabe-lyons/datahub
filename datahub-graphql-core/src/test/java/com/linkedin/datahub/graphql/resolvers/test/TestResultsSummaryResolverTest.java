@@ -44,7 +44,7 @@ public class TestResultsSummaryResolverTest {
         Mockito.eq(
             buildFilter(PASSING_TESTS_FIELD)
         ),
-        Mockito.eq(1)
+        Mockito.eq(MAX_AGGREGATION_LIMIT)
     )).thenReturn(ImmutableMap.of(
         TEST_URN.toString(),
         50L
@@ -57,7 +57,7 @@ public class TestResultsSummaryResolverTest {
         Mockito.eq(
             buildFilter(FAILING_TESTS_FIELD)
         ),
-        Mockito.eq(1)
+        Mockito.eq(MAX_AGGREGATION_LIMIT)
     )).thenReturn(ImmutableMap.of(
         TEST_URN.toString(),
         20L
@@ -91,7 +91,7 @@ public class TestResultsSummaryResolverTest {
         Mockito.eq(
             buildFilter(PASSING_TESTS_FIELD)
         ),
-        Mockito.eq(1)
+        Mockito.eq(MAX_AGGREGATION_LIMIT)
     )).thenThrow(new RuntimeException("Error!"));
 
     // set up failing mock
@@ -101,7 +101,7 @@ public class TestResultsSummaryResolverTest {
         Mockito.eq(
             buildFilter(FAILING_TESTS_FIELD)
         ),
-        Mockito.eq(1)
+        Mockito.eq(MAX_AGGREGATION_LIMIT)
     )).thenThrow(new RuntimeException("Error!"));
 
     TestResultsSummaryResolver resolver = new TestResultsSummaryResolver(mockService);

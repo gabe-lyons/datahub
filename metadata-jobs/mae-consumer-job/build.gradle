@@ -20,6 +20,9 @@ dependencies {
     }
     compile externalDependency.springBootStarterJetty
     compile externalDependency.springKafka
+
+    implementation externalDependency.sentry
+    implementation externalDependency.sentryLogback
 }
 
 bootJar {

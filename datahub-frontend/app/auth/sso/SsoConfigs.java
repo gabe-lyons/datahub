@@ -2,9 +2,9 @@ package auth.sso;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.Objects;
 
 import static auth.AuthUtils.*;
+import static auth.ConfigUtil.*;
 
 
 /**
@@ -33,6 +33,8 @@ public class SsoConfigs {
   private final String _authSuccessRedirectPath;
   private final Integer _sessionTtlInHours;
   private final Boolean _oidcEnabled;
+  private final String _authCookieSameSite;
+  private final Boolean _authCookieSecure;
 
   public SsoConfigs(Builder<?> builder) {
     _authBaseUrl = builder._authBaseUrl;
@@ -40,6 +42,8 @@ public class SsoConfigs {
     _authSuccessRedirectPath = builder._authSuccessRedirectPath;
     _sessionTtlInHours = builder._sessionTtlInHours;
     _oidcEnabled = builder._oidcEnabled;
+    _authCookieSameSite = builder._authCookieSameSite;
+    _authCookieSecure = builder._authCookieSecure;
   }
 
   public String getAuthBaseUrl() {
@@ -58,19 +62,28 @@ public class SsoConfigs {
     return _sessionTtlInHours;
   }
 
+  public String getAuthCookieSameSite() {
+    return _authCookieSameSite;
+  }
+
+  public boolean getAuthCookieSecure() {
+    return _authCookieSecure;
+  }
+
   public Boolean isOidcEnabled() {
     return _oidcEnabled;
   }
 
   public static class Builder<T extends Builder<T>> {
-    private String _authBaseUrl = null;
+    protected String _authBaseUrl = null;
     private String _authBaseCallbackPath = DEFAULT_BASE_CALLBACK_PATH;
     private String _authSuccessRedirectPath = DEFAULT_SUCCESS_REDIRECT_PATH;
     private Integer _sessionTtlInHours = DEFAULT_SESSION_TTL_HOURS;
     protected Boolean _oidcEnabled = false;
+    private String _authCookieSameSite = DEFAULT_AUTH_COOKIE_SAME_SITE;
+    private Boolean _authCookieSecure = DEFAULT_AUTH_COOKIE_SECURE;
     private final ObjectMapper _objectMapper = new ObjectMapper();
     protected JsonNode jsonNode = null;
-
 
     // No need to check if changes are made since this method is only called at start-up.
     public Builder from(final com.typesafe.config.Config configs) {
@@ -89,6 +102,14 @@ public class SsoConfigs {
       if (configs.hasPath(SESSION_TTL_CONFIG_PATH)) {
         _sessionTtlInHours = Integer.parseInt(configs.getString(SESSION_TTL_CONFIG_PATH));
       }
+      _authCookieSameSite = getOptional(
+          configs,
+          AUTH_COOKIE_SAME_SITE,
+          DEFAULT_AUTH_COOKIE_SAME_SITE);
+      _authCookieSecure = Boolean.parseBoolean(getOptional(
+          configs,
+          AUTH_COOKIE_SECURE,
+          String.valueOf(DEFAULT_AUTH_COOKIE_SECURE)));
       return this;
     }
 
@@ -110,7 +131,6 @@ public class SsoConfigs {
     }
 
     public SsoConfigs build() {
-      Objects.requireNonNull(this._authBaseUrl, "authBaseUrl is required");
       return new SsoConfigs(this);
     }
   }
