@@ -58,6 +58,7 @@ public class Constants {
   public static final String SCHEMA_FIELD_ENTITY_NAME = "schemaField";
   public static final String DATAHUB_STEP_STATE_ENTITY_NAME = "dataHubStepState";
   public static final String DATAHUB_VIEW_ENTITY_NAME = "dataHubView";
+  public static final String TELEMETRY_ENTITY_NAME = "telemetry";
 
   /**
    * Aspects
