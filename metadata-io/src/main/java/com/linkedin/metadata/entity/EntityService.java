@@ -885,7 +885,7 @@ private Map<Urn, List<EnvelopedAspect>> getCorrespondingAspects(Set<EntityAspect
       } else {
         // When async is turned on, we write to proposal log and return without waiting
         _producer.produceMetadataChangeProposal(entityUrn, mcp);
-        return new IngestProposalResult(mcp.getEntityUrn(), false, true);
+        return new IngestProposalResult(entityUrn, false, true);
       }
     } else {
       // For timeseries aspects
