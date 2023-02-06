@@ -67,45 +67,13 @@ public class ESSearchDAO {
 
   private ScrollResult buildScrollResult(@Nonnull SearchResult searchResult, @Nullable String scrollId) {
     ScrollResult result = new ScrollResult().setEntities(searchResult.getEntities())
-        .setMetadata(searchResult.getMetadata())
-        .setNumEntities(searchResult.getNumEntities())
-        .setPageSize(searchResult.getPageSize());
+            .setMetadata(searchResult.getMetadata())
+            .setNumEntities(searchResult.getNumEntities())
+            .setPageSize(searchResult.getPageSize());
     if (scrollId != null) {
       result.setScrollId(scrollId);
     }
     return result;
-  }
-
-  @Nonnull
-  @WithSpan
-  private ScrollResult executeSearchScrollRequestAndExtract(@Nonnull EntitySpec entitySpec,
-      @Nullable Filter filters,
-      @Nonnull SearchRequest searchRequest, int size) {
-    try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "esSearch").time()) {
-      final SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
-      // extract results, validated against document model as well
-      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpec).extractResult(searchResponse, filters, 0, size);
-      return buildScrollResult(searchResult, searchResponse.getScrollId());
-    } catch (Exception e) {
-      log.error("Search Scroll query failed", e);
-      throw new ESQueryException("Search Scroll query failed:", e);
-    }
-  }
-
-  @Nonnull
-  @WithSpan
-  private ScrollResult executeScrollRequestAndExtract(@Nonnull EntitySpec entitySpec,
-      @Nullable Filter filters,
-      @Nonnull SearchScrollRequest searchScrollRequest, int size) {
-    try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "esSearch").time()) {
-      final SearchResponse searchResponse = client.scroll(searchScrollRequest, RequestOptions.DEFAULT);
-      // extract results, validated against document model as well
-      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpec).extractResult(searchResponse, filters, 0, size);
-      return buildScrollResult(searchResult, searchResponse.getScrollId());
-    } catch (Exception e) {
-      log.error("Search query failed", e);
-      throw new ESQueryException("Search query failed:", e);
-    }
   }
 
   /**

@@ -7,11 +7,13 @@ import {
     TableOutlined,
     TeamOutlined,
     QuestionCircleOutlined,
+    HddOutlined,
 } from '@ant-design/icons';
 import { formatNumberWithoutAbbreviation } from '../../../shared/formatNumber';
 import { ANTD_GRAY } from '../../shared/constants';
 import { toLocalDateTimeString, toRelativeTimeString } from '../../../shared/time/timeUtils';
 import { StatsSummary } from '../../shared/components/styled/StatsSummary';
+import { FormattedBytesStat } from './FormattedBytesStat';
 import { PercentileLabel } from '../../shared/stats/PercentileLabel';
 
 const StatText = styled.span`
@@ -25,6 +27,8 @@ const HelpIcon = styled(QuestionCircleOutlined)`
 
 type Props = {
     rowCount?: number | null;
+    columnCount?: number | null;
+    sizeInBytes?: number | null;
     queryCountLast30Days?: number | null;
     queryCountPercentileLast30Days?: number | null;
     uniqueUserCountLast30Days?: number | null;
@@ -34,6 +38,8 @@ type Props = {
 
 export const DatasetStatsSummary = ({
     rowCount,
+    columnCount,
+    sizeInBytes,
     queryCountLast30Days,
     queryCountPercentileLast30Days,
     uniqueUserCountLast30Days,
@@ -41,14 +47,24 @@ export const DatasetStatsSummary = ({
     lastUpdatedMs,
 }: Props) => {
     const statsViews = [
-        (!!rowCount && (
+        !!rowCount && (
             <StatText>
                 <TableOutlined style={{ marginRight: 8, color: ANTD_GRAY[7] }} />
                 <b>{formatNumberWithoutAbbreviation(rowCount)}</b> rows
+                {!!columnCount && (
+                    <>
+                        , `<b>{formatNumberWithoutAbbreviation(columnCount)}</b> columns
+                    </>
+                )}
             </StatText>
-        )) ||
-            undefined,
-        (!!queryCountLast30Days && (
+        ),
+        !!sizeInBytes && (
+            <StatText>
+                <HddOutlined style={{ marginRight: 8, color: ANTD_GRAY[7] }} />
+                <FormattedBytesStat bytes={sizeInBytes} />
+            </StatText>
+        ),
+        !!queryCountLast30Days && (
             <StatText>
                 <ConsoleSqlOutlined style={{ marginRight: 8, color: ANTD_GRAY[7] }} />
                 <b>{formatNumberWithoutAbbreviation(queryCountLast30Days)}</b> queries last month
@@ -62,9 +78,8 @@ export const DatasetStatsSummary = ({
                     </Typography.Text>
                 )}
             </StatText>
-        )) ||
-            undefined,
-        (!!uniqueUserCountLast30Days && (
+        ),
+        !!uniqueUserCountLast30Days && (
             <StatText>
                 <TeamOutlined style={{ marginRight: 8, color: ANTD_GRAY[7] }} />
                 <b>{formatNumberWithoutAbbreviation(uniqueUserCountLast30Days)}</b> unique users
@@ -78,9 +93,8 @@ export const DatasetStatsSummary = ({
                     </Typography.Text>
                 )}
             </StatText>
-        )) ||
-            undefined,
-        (!!lastUpdatedMs && (
+        ),
+        !!lastUpdatedMs && (
             <Popover
                 content={
                     <div>
@@ -96,9 +110,8 @@ export const DatasetStatsSummary = ({
                     Changed {toRelativeTimeString(lastUpdatedMs)}
                 </StatText>
             </Popover>
-        )) ||
-            undefined,
-    ].filter((stat) => stat !== undefined);
+        ),
+    ].filter((stat) => stat);
 
     return <>{statsViews.length > 0 && <StatsSummary stats={statsViews} />}</>;
 };

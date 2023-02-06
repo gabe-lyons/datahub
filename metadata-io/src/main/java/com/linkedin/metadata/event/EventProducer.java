@@ -5,7 +5,7 @@ import com.linkedin.data.template.RecordTemplate;
 import com.linkedin.metadata.models.AspectSpec;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.snapshot.Snapshot;
-import com.linkedin.mxe.BuildIndicesHistoryEvent;
+import com.linkedin.mxe.DataHubUpgradeHistoryEvent;
 import com.linkedin.mxe.MetadataChangeLog;
 import com.linkedin.mxe.MetadataAuditOperation;
 import com.linkedin.mxe.MetadataChangeProposal;
@@ -63,7 +63,8 @@ public interface EventProducer {
    * @param metadataChangeProposal metadata change proposal to push into MCP kafka topic
    */
   @WithSpan
-  void produceMetadataChangeProposal(@Nonnull MetadataChangeProposal metadataChangeProposal);
+  void produceMetadataChangeProposal(@Nonnull final Urn urn, @Nonnull final MetadataChangeProposal
+      metadataChangeProposal);
 
   /**
    * Produces a generic platform "event".
@@ -81,9 +82,9 @@ public interface EventProducer {
   /**
    * Creates an entry on the history log of when the indices were last rebuilt with the latest configuration.
    *
-   * @param event the history event to send to the build indices history topic
+   * @param event the history event to send to the DataHub Upgrade history topic
    */
-  void produceBuildIndicesHistoryEvent(
-      @Nonnull BuildIndicesHistoryEvent event
+  void produceDataHubUpgradeHistoryEvent(
+      @Nonnull DataHubUpgradeHistoryEvent event
   );
 }

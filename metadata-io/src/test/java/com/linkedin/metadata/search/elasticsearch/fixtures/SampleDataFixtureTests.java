@@ -37,8 +37,8 @@ import static com.linkedin.metadata.ESTestUtils.search;
 import static com.linkedin.metadata.ESTestUtils.searchStructured;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.assertSame;
+import static org.testng.Assert.assertTrue;
 
 
 @Import(ESSampleDataFixture.class)

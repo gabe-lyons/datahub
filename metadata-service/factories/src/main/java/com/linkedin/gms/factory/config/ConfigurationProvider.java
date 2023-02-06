@@ -6,8 +6,10 @@ import com.linkedin.datahub.graphql.featureflags.FeatureFlags;
 import com.linkedin.metadata.config.DataHubConfiguration;
 import com.linkedin.metadata.config.ElasticSearchConfiguration;
 import com.linkedin.metadata.config.IngestionConfiguration;
+import com.linkedin.metadata.config.SystemUpdateConfiguration;
 import com.linkedin.metadata.config.TestsConfiguration;
 import com.linkedin.metadata.config.ViewsConfiguration;
+import com.linkedin.metadata.config.VisualConfiguration;
 import com.linkedin.metadata.telemetry.TelemetryConfiguration;
 import com.linkedin.gms.factory.spring.YamlPropertySourceFactory;
 import com.linkedin.metadata.config.events.EventSinksConfiguration;
@@ -65,6 +67,11 @@ public class ConfigurationProvider {
    * ElasticSearch configurations
    */
   private ElasticSearchConfiguration elasticSearch;
+
+  /**
+   * System Update configurations
+   */
+  private SystemUpdateConfiguration systemUpdate;
 
   // fork related configs go below this line
   /**

@@ -23,7 +23,7 @@ import com.linkedin.metadata.boot.steps.RestoreColumnLineageIndices;
 import com.linkedin.metadata.boot.steps.RestoreDbtSiblingsIndices;
 import com.linkedin.metadata.boot.steps.RestoreGlossaryIndices;
 import com.linkedin.metadata.boot.steps.UpgradeDefaultBrowsePathsStep;
-import com.linkedin.metadata.boot.steps.WaitForBuildIndicesStep;
+import com.linkedin.metadata.boot.steps.WaitForSystemUpdateStep;
 import com.linkedin.metadata.entity.AspectMigrationsDao;
 import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.models.registry.EntityRegistry;
@@ -71,18 +71,19 @@ public class BootstrapManagerFactory {
   private IngestRetentionPoliciesStep _ingestRetentionPoliciesStep;
 
   @Autowired
-  @Qualifier("buildIndicesKafkaListener")
-  private BootstrapDependency _buildIndicesKafkaListener;
+  @Qualifier("dataHubUpgradeKafkaListener")
+  private BootstrapDependency _dataHubUpgradeKafkaListener;
 
   @Autowired
   private ConfigurationProvider _configurationProvider;
 
+  @Value("${bootstrap.upgradeDefaultBrowsePaths.enabled}")
+  private Boolean _upgradeDefaultBrowsePathsEnabled;
+
+  // Saas-only
   @Autowired
   @Qualifier("ingestMetadataTestsStep")
   private IngestMetadataTestsStep _ingestMetadataTestsStep;
-
-  @Value("${bootstrap.upgradeDefaultBrowsePaths.enabled}")
-  private Boolean _upgradeDefaultBrowsePathsEnabled;
 
   @Bean(name = "bootstrapManager")
   @Scope("singleton")
@@ -102,14 +103,13 @@ public class BootstrapManagerFactory {
     final RestoreDbtSiblingsIndices restoreDbtSiblingsIndices =
         new RestoreDbtSiblingsIndices(_entityService, _entityRegistry);
     final RemoveClientIdAspectStep removeClientIdAspectStep = new RemoveClientIdAspectStep(_entityService);
-
-    // acryl-main only
-    final IngestDefaultGlobalSettingsStep ingestSettingsStep = new IngestDefaultGlobalSettingsStep(_entityService);
     final RestoreColumnLineageIndices restoreColumnLineageIndices = new RestoreColumnLineageIndices(_entityService, _entityRegistry);
-    final WaitForBuildIndicesStep waitForBuildIndicesStep = new WaitForBuildIndicesStep(_buildIndicesKafkaListener, _configurationProvider);
+    final IngestDefaultGlobalSettingsStep ingestSettingsStep = new IngestDefaultGlobalSettingsStep(_entityService);
+    final WaitForSystemUpdateStep waitForSystemUpdateStep = new WaitForSystemUpdateStep(_dataHubUpgradeKafkaListener,
+        _configurationProvider);
 
     final List<BootstrapStep> finalSteps = new ArrayList<>(ImmutableList.of(
-            waitForBuildIndicesStep,
+            waitForSystemUpdateStep,
             ingestRootUserStep,
             ingestPoliciesStep,
             ingestRolesStep,
@@ -121,7 +121,9 @@ public class BootstrapManagerFactory {
             removeClientIdAspectStep,
             restoreDbtSiblingsIndices,
             indexDataPlatformsStep,
-            restoreColumnLineageIndices));
+            restoreColumnLineageIndices,
+            // Saas-only
+            _ingestMetadataTestsStep));
 
     if (_upgradeDefaultBrowsePathsEnabled) {
       finalSteps.add(new UpgradeDefaultBrowsePathsStep(_entityService));
