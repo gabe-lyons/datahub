@@ -77,7 +77,8 @@ public class SsoManager {
     try {
       ssoConfigs = new SsoConfigs.Builder().from(configs).build();
     } catch (Exception e) {
-      log.error(String.format("Error building SsoConfigs from configs %s, reusing previous settings", configs), e);
+      // Debug-level logging since this is expected to fail if SSO has not been configured.
+      log.debug(String.format("Missing SSO settings in static configs %s", configs), e);
     }
 
     if (ssoConfigs != null && ssoConfigs.isOidcEnabled()) {
@@ -85,8 +86,8 @@ public class SsoManager {
         OidcConfigs oidcConfigs = new OidcConfigs.Builder().from(configs).build();
         maybeUpdateOidcProvider(oidcConfigs);
       } catch (IllegalArgumentException e) {
-        log.error(String.format("Error building OidcConfigs from configs %s, reusing previous settings", configs), e);
-        return;
+        // Error-level logging since this is unexpected to fail if SSO has been configured.
+        log.error(String.format("Error building OidcConfigs from static configs %s", configs), e);
       }
     } else {
       // Clear the SSO Provider since no SSO is enabled.
@@ -98,17 +99,17 @@ public class SsoManager {
 
   private void refreshSsoProvider() {
     final Optional<String> maybeSsoSettingsJsonStr = getDynamicSsoSettings();
-    if (!maybeSsoSettingsJsonStr.isPresent()) {
+    if (maybeSsoSettingsJsonStr.isEmpty()) {
       return;
     }
 
+    // If we receive a non-empty response, try to update the SSO provider.
     final String ssoSettingsJsonStr = maybeSsoSettingsJsonStr.get();
-
     SsoConfigs ssoConfigs;
     try {
       ssoConfigs = new SsoConfigs.Builder().from(ssoSettingsJsonStr).build();
     } catch (Exception e) {
-      log.error(String.format("Error building SsoConfigs from json %s, reusing previous settings", ssoSettingsJsonStr),
+      log.error(String.format("Error building SsoConfigs from invalid json %s, reusing previous settings", ssoSettingsJsonStr),
           e);
       return;
     }
@@ -119,7 +120,7 @@ public class SsoManager {
         maybeUpdateOidcProvider(oidcConfigs);
       } catch (Exception e) {
         log.error(
-            String.format("Error building OidcConfigs from json %s, reusing previous settings", ssoSettingsJsonStr), e);
+            String.format("Error building OidcConfigs from invalid json %s, reusing previous settings", ssoSettingsJsonStr), e);
       }
     } else {
       // Clear the SSO Provider since no SSO is enabled.
@@ -162,7 +163,7 @@ public class SsoManager {
         // Successfully received the SSO settings
         return Optional.of(EntityUtils.toString(entity));
       } else {
-        log.warn("Failed to get SSO settings, reusing previous settings");
+        log.debug("No SSO settings received from Auth Service, reusing previous settings");
       }
     } catch (Exception e) {
       log.warn("Failed to get SSO settings due to exception, reusing previous settings", e);
