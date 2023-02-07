@@ -58,24 +58,24 @@ public class OidcConfigs extends SsoConfigs {
     private static final String DEFAULT_OIDC_GROUPS_CLAIM = "groups";
     private static final String DEFAULT_OIDC_READ_TIMEOUT = "5000";
 
-    private String clientId;
-    private String clientSecret;
-    private String discoveryUri;
-    private String userNameClaim;
-    private String userNameClaimRegex;
-    private String scope;
-    private String clientName;
-    private String clientAuthenticationMethod;
-    private boolean jitProvisioningEnabled;
-    private boolean preProvisioningRequired;
-    private boolean extractGroupsEnabled;
-    private String groupsClaimName;
-    private Optional<String> responseType;
-    private Optional<String> responseMode;
-    private Optional<Boolean> useNonce;
-    private Optional<String> customParamResource;
-    private String readTimeout;
-    private Optional<Boolean> extractJwtAccessTokenClaims;
+    private final String clientId;
+    private final String clientSecret;
+    private final String discoveryUri;
+    private final String userNameClaim;
+    private final String userNameClaimRegex;
+    private final String scope;
+    private final String clientName;
+    private final String clientAuthenticationMethod;
+    private final boolean jitProvisioningEnabled;
+    private final boolean preProvisioningRequired;
+    private final boolean extractGroupsEnabled;
+    private final String groupsClaimName;
+    private final Optional<String> responseType;
+    private final Optional<String> responseMode;
+    private final Optional<Boolean> useNonce;
+    private final Optional<String> customParamResource;
+    private final String readTimeout;
+    private final Optional<Boolean> extractJwtAccessTokenClaims;
     private Optional<String> preferredJwsAlgorithm;
 
     public OidcConfigs(Builder builder) {

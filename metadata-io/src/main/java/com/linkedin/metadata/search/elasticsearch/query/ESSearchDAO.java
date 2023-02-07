@@ -20,12 +20,15 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequest;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
+
+import static com.linkedin.metadata.search.utils.SearchUtils.EMPTY_SCROLL_RESULT;
 
 
 /**
@@ -74,6 +77,54 @@ public class ESSearchDAO {
       result.setScrollId(scrollId);
     }
     return result;
+  }
+
+  @Nonnull
+  @WithSpan
+  private ScrollResult executeSearchScrollRequestAndExtract(@Nonnull EntitySpec entitySpec,
+      @Nullable Filter filters,
+      @Nonnull SearchRequest searchRequest, int size) {
+    try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "esSearch").time()) {
+      final SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+      // extract results, validated against document model as well
+      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpec).extractResult(searchResponse, filters, 0, size);
+      return buildScrollResult(searchResult, searchResponse.getScrollId());
+    } catch (Exception e) {
+      if (e instanceof ElasticsearchStatusException) {
+        final ElasticsearchStatusException statusException = (ElasticsearchStatusException) e;
+        if (statusException.status().getStatus() == 400) {
+          // Malformed query -- Could indicate bad search syntax. Return empty response.
+          log.warn("Received 400 from Elasticsearch. Returning empty search response", e);
+          return EMPTY_SCROLL_RESULT;
+        }
+      }
+      log.error("Search Scroll query failed", e);
+      throw new ESQueryException("Search Scroll query failed:", e);
+    }
+  }
+
+  @Nonnull
+  @WithSpan
+  private ScrollResult executeScrollRequestAndExtract(@Nonnull EntitySpec entitySpec,
+      @Nullable Filter filters,
+      @Nonnull SearchScrollRequest searchScrollRequest, int size) {
+    try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "esSearch").time()) {
+      final SearchResponse searchResponse = client.scroll(searchScrollRequest, RequestOptions.DEFAULT);
+      // extract results, validated against document model as well
+      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpec).extractResult(searchResponse, filters, 0, size);
+      return buildScrollResult(searchResult, searchResponse.getScrollId());
+    } catch (Exception e) {
+      if (e instanceof ElasticsearchStatusException) {
+        final ElasticsearchStatusException statusException = (ElasticsearchStatusException) e;
+        if (statusException.status().getStatus() == 400) {
+          // Malformed query -- Could indicate bad search syntax. Return empty response.
+          log.warn("Received 400 from Elasticsearch. Returning empty search response", e);
+          return EMPTY_SCROLL_RESULT;
+        }
+      }
+      log.error("Search query failed", e);
+      throw new ESQueryException("Search query failed:", e);
+    }
   }
 
   /**

@@ -28,6 +28,9 @@ record StorageFeatures {
   /**
    * The total row count.
    */
+  @SearchScore = {
+    "modifier": "LOG"
+  }
   @Searchable = {
     "fieldName": "rowCountFeature",
     "fieldType": "COUNT"

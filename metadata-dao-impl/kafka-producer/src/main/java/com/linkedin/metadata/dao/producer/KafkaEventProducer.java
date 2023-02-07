@@ -118,8 +118,8 @@ public class KafkaEventProducer implements EventProducer {
 
   @Override
   @WithSpan
-  public void produceMetadataChangeProposal(@Nonnull final Urn urn, @Nonnull final MetadataChangeProposal
-      metadataChangeProposal) {
+  public void produceMetadataChangeProposal(@Nonnull final Urn urn,
+                                            @Nonnull final MetadataChangeProposal metadataChangeProposal) {
     GenericRecord record;
 
     try {

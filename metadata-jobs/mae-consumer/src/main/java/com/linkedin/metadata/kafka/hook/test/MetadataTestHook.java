@@ -2,6 +2,7 @@ package com.linkedin.metadata.kafka.hook.test;
 
 import com.codahale.metrics.Timer;
 import com.datahub.authentication.Authentication;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.RemovalCause;
@@ -18,6 +19,7 @@ import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.kafka.hook.MetadataChangeLogHook;
 import com.linkedin.metadata.models.EntitySpec;
 import com.linkedin.metadata.models.registry.EntityRegistry;
+import com.linkedin.metadata.test.util.TestUtils;
 import com.linkedin.metadata.utils.EntityKeyUtils;
 import com.linkedin.metadata.utils.metrics.MetricUtils;
 import com.linkedin.mxe.MetadataChangeLog;
@@ -54,52 +56,43 @@ public class MetadataTestHook implements MetadataChangeLogHook {
   private final MetadataTestClient _testClient;
   private final Authentication _systemAuthentication;
   private final Cache<Urn, Long> _urnObserverCache;
+  private final Set<String> _supportedEntityTypes;
   private final boolean _isEnabled;
-
-  private static final Set<String> ENTITIES_TO_IGNORE =
-      ImmutableSet.of(
-          Constants.TEST_ENTITY_NAME,
-          Constants.POLICY_ENTITY_NAME,
-          Constants.DATA_PLATFORM_ENTITY_NAME,
-          Constants.GLOSSARY_NODE_ENTITY_NAME,
-          Constants.GLOSSARY_TERM_ENTITY_NAME,
-          Constants.DOMAIN_ENTITY_NAME,
-          Constants.TAG_ENTITY_NAME,
-          Constants.ASSERTION_ENTITY_NAME,
-          Constants.ACCESS_TOKEN_ENTITY_NAME,
-          Constants.ACTION_REQUEST_ENTITY_NAME,
-          Constants.CORP_GROUP_ENTITY_NAME,
-          Constants.CORP_USER_ENTITY_NAME,
-          Constants.INGESTION_SOURCE_ENTITY_NAME,
-          Constants.EXECUTION_REQUEST_ENTITY_NAME,
-          Constants.SECRETS_ENTITY_NAME,
-          Constants.DATA_PROCESS_INSTANCE_ENTITY_NAME,
-          Constants.DATAHUB_STEP_STATE_ENTITY_NAME);
 
   // Set of aspects to ignore a.k.a do not run tests when these aspects change
   // TestResults needs to be ignored, because otherwise tests will always trigger twice
   // (once when aspect changes -> once when test results changes when the test is evaluated)
   // Status is ignored for now, as massive delete operations can cause massive test triggering
-  private static final Set<String> ASPECTS_TO_IGNORE =
-      ImmutableSet.of(Constants.TEST_RESULTS_ASPECT_NAME, Constants.STATUS_ASPECT_NAME);
-
+  private static final Set<String> ASPECTS_TO_IGNORE = ImmutableSet.of(Constants.TEST_RESULTS_ASPECT_NAME, Constants.STATUS_ASPECT_NAME);
 
   @Autowired
   public MetadataTestHook(@Nonnull final EntityRegistry entityRegistry, @Nonnull final MetadataTestClient testClient,
       @Nonnull final Authentication systemAuthentication,
       @Nonnull @Value("${metadataTests.enabled:true}") Boolean isEnabled) {
+    this(entityRegistry, testClient, systemAuthentication, isEnabled, 2, TimeUnit.SECONDS);
+  }
+
+  @VisibleForTesting
+  MetadataTestHook(
+      @Nonnull final EntityRegistry entityRegistry,
+      @Nonnull final MetadataTestClient testClient,
+      @Nonnull final Authentication systemAuthentication,
+      @Nonnull @Value("${metadataTests.enabled:true}") Boolean isEnabled,
+      final int cacheExpirationTime,
+      final TimeUnit cacheExpirationUnit) {
     _entityRegistry = entityRegistry;
     _testClient = testClient;
     _systemAuthentication = systemAuthentication;
     _isEnabled = isEnabled;
     _urnObserverCache = CacheBuilder.newBuilder()
-        .expireAfterWrite(2, TimeUnit.SECONDS)
+        .expireAfterWrite(cacheExpirationTime, cacheExpirationUnit)
         .removalListener(RemovalListeners.asynchronous((RemovalListener<Urn, Long>) removalNotification -> {
           if (removalNotification.getCause() == RemovalCause.EXPIRED) {
             evaluateTest(removalNotification.getKey());
           }
         }, Executors.newCachedThreadPool()))
         .build();
+    _supportedEntityTypes = TestUtils.getSupportedEntityTypes(entityRegistry);
     ScheduledExecutorService cleanUpService = Executors.newScheduledThreadPool(1);
     cleanUpService.scheduleAtFixedRate(_urnObserverCache::cleanUp, 0, 5, TimeUnit.SECONDS);
   }
@@ -123,7 +116,7 @@ public class MetadataTestHook implements MetadataChangeLogHook {
   @Override
   public void invoke(@NotNull MetadataChangeLog event) throws Exception {
     // Only trigger tests if the change is an UPSERT, change is not for test entity
-    if (event.getChangeType() != ChangeType.UPSERT || ENTITIES_TO_IGNORE.contains(event.getEntityType())) {
+    if (event.getChangeType() != ChangeType.UPSERT || !_supportedEntityTypes.contains(event.getEntityType())) {
       return;
     }
     // Do not trigger tests if the change is for an aspect among the aspects to ignore set
@@ -138,10 +131,16 @@ public class MetadataTestHook implements MetadataChangeLogHook {
       log.error("Error while processing entity type {}: {}", event.getEntityType(), e.toString());
       return;
     }
+
     // Put the urn in the observer cache, signifying that the entity for the given urn has been updated
     // This will eventually run the process that evaluates the tests
     // We take this approach to make sure tests are not run for a given urn multiple times when a batch of ingestion events come in
     _urnObserverCache.put(EntityKeyUtils.getUrnFromLog(event, entitySpec.getKeyAspectSpec()),
         System.currentTimeMillis());
+  }
+
+  @VisibleForTesting
+  void cleanUpCache() {
+    _urnObserverCache.cleanUp();
   }
 }

@@ -23,6 +23,7 @@ import com.linkedin.metadata.test.exception.TestDefinitionParsingException;
 import com.linkedin.metadata.test.query.QueryEngine;
 import com.linkedin.metadata.test.query.TestQuery;
 import com.linkedin.metadata.test.query.TestQueryResponse;
+import com.linkedin.metadata.test.util.TestUtils;
 import com.linkedin.metadata.utils.GenericRecordUtils;
 import com.linkedin.mxe.MetadataChangeProposal;
 import com.linkedin.test.TestResult;
@@ -74,6 +75,7 @@ public class TestEngine {
 
   private final ScheduledExecutorService _refreshExecutorService = Executors.newScheduledThreadPool(1);
   private final TestRefreshRunnable _testRefreshRunnable;
+  private final Set<String> _supportedEntityTypes;
 
   /**
    * The test engine evaluation mode.
@@ -114,6 +116,7 @@ public class TestEngine {
     _refreshExecutorService.scheduleAtFixedRate(_testRefreshRunnable, delayIntervalSeconds, refreshIntervalSeconds,
         TimeUnit.SECONDS);
     _refreshExecutorService.execute(_testRefreshRunnable);
+    _supportedEntityTypes = TestUtils.getSupportedEntityTypes(entityService.getEntityRegistry());
   }
 
   /**
@@ -154,12 +157,23 @@ public class TestEngine {
 
   /**
    * Evaluate all eligible tests for the given urn, optionally write the results to GMS.
+   * If no eligible tests are found for the urn, an empty set of test results will be returned.
    *
    * @param urn Entity urn to evaluate
    * @param mode The evaluation mode.
    * @return Test results
+   *
+   * @throws UnsupportedOperationException if the provided entity type is not supported.
    */
+  @Nonnull
   public TestResults evaluateTestsForEntity(@Nonnull final Urn urn, EvaluationMode mode) {
+    if (!_supportedEntityTypes.contains(urn.getEntityType())) {
+      log.warn(String.format("Attempted to evaluate tests for an unsupported entity type %s. Returning null results.", urn.getEntityType()));
+      throw new UnsupportedOperationException(
+          String.format("Attempted to evaluate tests for an unsupported entity type %s. Returning null results.",
+              urn.getEntityType()));
+    }
+
     // Step 1: Retrieve eligible tests.
     List<TestDefinition> testsEligibleForEntityType = _testPerEntityTypeCache.getOrDefault(
         urn.getEntityType(),
@@ -177,14 +191,24 @@ public class TestEngine {
   }
 
   /**
-   * Evaluate input tests for the given urn
+   * Evaluate input tests for the given urn, then optionally write results to GMS.
+   * If no eligible tests are found for the urn, an empty set of test results will be returned.
    *
    * @param urn Entity urn to evaluate
    * @param testUrns Tests to evaluate
    * @param mode Whether or not to push the test results into DataHub
-   * @return Test results
+   * @return Test results.
+   *
+   * @throws UnsupportedOperationException if the provided entity type is not supported.
    */
+  @Nonnull
   public TestResults evaluateTests(Urn urn, List<Urn> testUrns, EvaluationMode mode) {
+    if (!_supportedEntityTypes.contains(urn.getEntityType())) {
+      log.warn(String.format("Attempted to evaluate tests for an unsupported entity type %s. Returning null results.", urn.getEntityType()));
+      throw new UnsupportedOperationException(
+          String.format("Attempted to evaluate tests for an unsupported entity type %s. Returning null results.",
+          urn.getEntityType()));
+    }
     TestResults results = evaluateTests(urn, fetchDefinitions(testUrns));
     if (!EvaluationMode.EVALUATE_ONLY.equals(mode)) {
       ingestPartialResults(urn, testUrns, results);
@@ -203,6 +227,7 @@ public class TestEngine {
    * @return the results of running the tests
    */
   @WithSpan
+  @Nonnull
   public TestResults evaluateTests(@Nonnull final Urn urn, @Nonnull final List<TestDefinition> tests) {
     if (tests.isEmpty()) {
       return EMPTY_RESULTS;
