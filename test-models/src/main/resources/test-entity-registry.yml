@@ -3,3 +3,8 @@ entities:
     keyAspect: testEntityKey
     aspects:
       - testEntityProfile
+      - testResults
+  - name: testEntityWithoutTests
+    keyAspect: testEntityKey
+    aspects:
+      - testEntityProfile

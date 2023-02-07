@@ -17,6 +17,7 @@ entities:
     keyAspect: datasetKey
     aspects:
       - upstreamLineage
+      - testResults
   - name: chart
     keyAspect: chartKey
     aspects:

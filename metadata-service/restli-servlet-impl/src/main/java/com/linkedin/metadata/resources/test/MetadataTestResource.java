@@ -61,11 +61,10 @@ public class MetadataTestResource extends SimpleResourceTaskTemplate<TestInfo> {
         return _testEngine.evaluateTestsForEntity(urn, shouldPush != null && shouldPush
             ? TestEngine.EvaluationMode.DEFAULT
             : TestEngine.EvaluationMode.EVALUATE_ONLY);
-      } else {
-        return _testEngine.evaluateTests(urn, tests, shouldPush != null && shouldPush
-            ? TestEngine.EvaluationMode.DEFAULT
-            : TestEngine.EvaluationMode.EVALUATE_ONLY);
       }
+      return _testEngine.evaluateTests(urn, tests, shouldPush != null && shouldPush
+          ? TestEngine.EvaluationMode.DEFAULT
+          : TestEngine.EvaluationMode.EVALUATE_ONLY);
     }, MetricRegistry.name(this.getClass(), "evaluate"));
   }
 
