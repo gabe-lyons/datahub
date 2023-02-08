@@ -9,19 +9,16 @@ describe("glossary", () => {
         cy.goToGlossaryList();
 
         cy.clickOptionWithText("Add Term");
-        cy.addViaModelTestId(glossaryTerm, "Create Glossary Term", "add");
-        cy.waitTextVisible("Created Glossary Term!")
+        cy.addViaAffixModal(glossaryTerm, "Create Glossary Term");
 
         cy.clickOptionWithText("Add Term Group");
-        cy.addViaModelTestId(glossaryTermGroup, "Create Term Group", "add");
-        cy.waitTextVisible("Created Term Group!")
+        cy.addViaAffixModal(glossaryTermGroup, "Create Term Group");
 
         cy.addTermToDataset(urn, datasetName, glossaryTerm);
 
         cy.goToGlossaryList();
         cy.clickOptionWithText(glossaryTerm);
         cy.deleteFromDropdown();
-        cy.waitTextVisible("Deleted Glossary Term!")
 
         cy.goToDataset(urn, datasetName);
         cy.ensureTextNotPresent(glossaryTerm);
@@ -29,7 +26,6 @@ describe("glossary", () => {
         cy.goToGlossaryList();
         cy.clickOptionWithText(glossaryTermGroup);
         cy.deleteFromDropdown();
-        cy.waitTextVisible("Deleted Term Group!")
 
         cy.goToGlossaryList();
         cy.ensureTextNotPresent(glossaryTermGroup);

@@ -137,10 +137,10 @@ Cypress.Commands.add("addViaFormModal", (text, modelHeader) => {
   cy.get(".ant-modal-footer > button:last-child").click();
 });
 
-Cypress.Commands.add("addViaModelTestId", (text, modelHeader, testId) => {
+Cypress.Commands.add("addViaAffixModal", (text, modelHeader) => {
   cy.waitTextVisible(modelHeader);
-  cy.get(".ant-form-item-control-input-content > input[type='text']").first().type(text);
-  cy.get(`.ant-modal-footer > button[data-testid="${testId}"]`).click()
+  cy.get(".ant-input-affix-wrapper > input[type='text']").first().type(text);
+  cy.get(".ant-modal-footer > button:last-child").click();
 });
 
 Cypress.Commands.add("addViaModal", (text, modelHeader) => {
