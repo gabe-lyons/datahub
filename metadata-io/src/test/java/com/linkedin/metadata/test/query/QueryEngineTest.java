@@ -1,5 +1,6 @@
 package com.linkedin.metadata.test.query;
 
+import com.linkedin.common.AuditStamp;
 import com.linkedin.common.FabricType;
 import com.linkedin.common.GlossaryTermAssociation;
 import com.linkedin.common.GlossaryTermAssociationArray;
@@ -9,6 +10,7 @@ import com.linkedin.common.urn.DatasetUrn;
 import com.linkedin.common.urn.GlossaryNodeUrn;
 import com.linkedin.common.urn.GlossaryTermUrn;
 import com.linkedin.common.urn.Urn;
+import com.linkedin.common.urn.UrnUtils;
 import com.linkedin.dataset.DatasetProperties;
 import com.linkedin.entity.Aspect;
 import com.linkedin.entity.AspectType;
@@ -18,7 +20,12 @@ import com.linkedin.entity.EnvelopedAspectMap;
 import com.linkedin.glossary.GlossaryTermInfo;
 import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.entity.EntityService;
+import com.linkedin.metadata.key.DatasetKey;
+import com.linkedin.metadata.models.registry.ConfigEntityRegistry;
+import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.models.registry.SnapshotEntityRegistry;
+import com.linkedin.metadata.snapshot.Snapshot;
+import com.linkedin.mxe.SystemMetadata;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,16 +37,20 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableSet;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.testng.Assert.assertEquals;
+import static com.linkedin.metadata.Constants.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.any;
+import static org.testng.Assert.*;
 
 
 public class QueryEngineTest {
-  EntityService _entityService = Mockito.mock(EntityService.class);
-  QueryVersionedAspectEvaluator _queryVersionedAspectEvaluator =
+  final EntityService _entityService = Mockito.mock(EntityService.class);
+  final QueryVersionedAspectEvaluator _queryVersionedAspectEvaluator =
       new QueryVersionedAspectEvaluator(SnapshotEntityRegistry.getInstance(), _entityService);
-  EntityUrnTypeEvaluator _urnTypeEvaluator = new EntityUrnTypeEvaluator();
-  QueryEngine _queryEngine = new QueryEngine(ImmutableList.of(_urnTypeEvaluator, _queryVersionedAspectEvaluator));
+  final EntityUrnTypeEvaluator _urnTypeEvaluator = new EntityUrnTypeEvaluator();
+  final SystemAspectEvaluator _systemAspectEvaluator = new SystemAspectEvaluator(_entityService);
+  final QueryEngine _queryEngine = new QueryEngine(ImmutableList.of(_urnTypeEvaluator, _queryVersionedAspectEvaluator,
+      _systemAspectEvaluator));
 
   static final DatasetUrn DATASET_URN = new DatasetUrn(new DataPlatformUrn("bigquery"), "test_dataset", FabricType.DEV);
   static final GlossaryTermUrn GLOSSARY_TERM_WITH_PARENT = new GlossaryTermUrn("term_with_parent");
@@ -153,6 +164,81 @@ public class QueryEngineTest {
     assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
         ImmutableMap.of(DATASET_URN, ImmutableMap.of(testQuery,
             new TestQueryResponse(ImmutableList.of(GLOSSARY_TERM_WITH_PARENT.getEntityType())))));
+  }
+
+  @SneakyThrows
+  @Test
+  public void testSystemAspectQueries() {
+    final EntityRegistry entityRegistry =
+        new ConfigEntityRegistry(Snapshot.class.getClassLoader().getResourceAsStream("entity-registry.yml"));
+
+    Mockito.when(_entityService.getEntityRegistry()).thenReturn(entityRegistry);
+
+    TestQuery testQuery = new TestQuery("firstSynchronized");
+    Mockito.when(_entityService.getEntitiesV2(eq(Constants.DATASET_ENTITY_NAME), eq(ImmutableSet.of(DATASET_URN)),
+            any())).thenReturn(ImmutableMap.of());
+    assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
+        Collections.emptyMap());
+
+    final EntityResponse entityResponse = new EntityResponse();
+    final DatasetKey datasetKey = new DatasetKey().setName(DATASET_URN.toString());
+    final DatasetProperties datasetProperties = new DatasetProperties()
+        .setDescription("test description");
+
+    final EnvelopedAspect keyAspect = new EnvelopedAspect()
+        .setName(Constants.DATASET_KEY_ASPECT_NAME)
+        .setValue(new Aspect(datasetKey.data()))
+        .setSystemMetadata(new SystemMetadata()
+            .setRunId("ingestion-1")
+            .setLastObserved(0))
+        .setCreated(new AuditStamp()
+            .setActor(UrnUtils.getUrn(SYSTEM_ACTOR))
+            .setTime(0));
+
+    final EnvelopedAspect propertiesAspect = new EnvelopedAspect()
+        .setName(Constants.DATASET_PROPERTIES_ASPECT_NAME)
+        .setValue(new Aspect(datasetProperties.data()))
+        .setSystemMetadata(new SystemMetadata()
+            .setRunId("ingestion-2")
+            .setLastObserved(10))
+        .setCreated(new AuditStamp()
+            .setActor(UrnUtils.getUrn(SYSTEM_ACTOR))
+            .setTime(10));
+
+    final EnvelopedAspect glossartyTermInfoAspect = createGlossaryTermInfo(GLOSSARY_TERM_WITHOUT_PARENT)
+        .getAspects()
+        .get(Constants.GLOSSARY_TERM_INFO_ASPECT_NAME)
+        .setSystemMetadata(new SystemMetadata()
+            .setRunId(Constants.DEFAULT_RUN_ID)
+            .setLastObserved(11))
+        .setCreated(new AuditStamp()
+            .setActor(UrnUtils.getUrn(SYSTEM_ACTOR))
+            .setTime(11));
+
+    entityResponse.setAspects(new EnvelopedAspectMap(ImmutableMap.of(
+        Constants.DATASET_PROPERTIES_ASPECT_NAME, propertiesAspect,
+        Constants.DATASET_KEY_ASPECT_NAME, keyAspect,
+        Constants.GLOSSARY_TERM_INFO_ASPECT_NAME, glossartyTermInfoAspect
+    )));
+
+    Mockito.when(_entityService.getEntitiesV2(eq(Constants.DATASET_ENTITY_NAME), eq(ImmutableSet.of(DATASET_URN)),
+            any())).thenReturn(ImmutableMap.of(DATASET_URN, entityResponse));
+
+    assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
+        ImmutableMap.of(DATASET_URN,
+            ImmutableMap.of(testQuery, new TestQueryResponse(ImmutableList.of("0")))));
+
+    testQuery = new TestQuery("lastSynchronized");
+    assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
+        ImmutableMap.of(DATASET_URN,
+            ImmutableMap.of(testQuery, new TestQueryResponse(ImmutableList.of("10")))));
+
+    testQuery = new TestQuery("lastUpdated");
+    assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
+        ImmutableMap.of(DATASET_URN,
+            ImmutableMap.of(testQuery, new TestQueryResponse(ImmutableList.of("11")))));
+
+
   }
 
   private EntityResponse emptyEntityResponse() {

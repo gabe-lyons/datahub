@@ -134,7 +134,7 @@ public class MockEntityService extends EntityService {
 
   @Override
   public EnvelopedAspect getEnvelopedAspect(@Nonnull String entityName, @Nonnull Urn urn, @Nonnull String aspectName,
-      long version) throws Exception {
+      long version) {
     return null;
   }
 

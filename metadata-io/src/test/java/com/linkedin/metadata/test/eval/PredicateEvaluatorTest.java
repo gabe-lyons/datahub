@@ -77,7 +77,6 @@ public class PredicateEvaluatorTest {
     assertFalse((boolean) _evaluator.evaluatePredicate(equalsRule, queryResponses));
   }
 
-
   @Test
   public void testEvaluateContainsAnyPredicate() {
     Predicate containsAnyRule = new Predicate(OperatorType.CONTAINS_ANY,
