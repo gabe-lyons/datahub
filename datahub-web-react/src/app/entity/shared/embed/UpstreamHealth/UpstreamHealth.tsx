@@ -85,7 +85,7 @@ export default function UpstreamHealth() {
     return (
         <div>
             <StyledQuestion />
-            <UnknownText>0 upstream assertions</UnknownText>
+            <UnknownText>Unknown data input health</UnknownText>
         </div>
     );
 }
