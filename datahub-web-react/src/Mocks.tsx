@@ -239,6 +239,9 @@ export const dataset1 = {
             ],
         },
     ],
+    activeIncidents: {
+        total: 0,
+    },
     domain: null,
     container: null,
     upstream: null,
@@ -334,6 +337,9 @@ export const dataset2 = {
             ],
         },
     ],
+    activeIncidents: {
+        total: 0,
+    },
     domain: null,
     container: null,
     upstream: null,
@@ -568,6 +574,9 @@ export const dataset3 = {
             },
         },
     ],
+    activeIncidents: {
+        total: 0,
+    },
     domain: null,
     container: null,
     lineage: null,
