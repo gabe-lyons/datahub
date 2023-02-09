@@ -33,6 +33,7 @@ export function extractUpstreamSummary(upstreams: Entity[]) {
     upstreams.forEach((entity) => {
         if (entity.type === EntityType.Dataset) {
             const { numAssertionsPassing, numAssertionsFailing } = getAssertionsSummary(entity as Dataset);
+            // getIncidentsSummary here
 
             if (numAssertionsFailing) {
                 failingUpstreams += 1;

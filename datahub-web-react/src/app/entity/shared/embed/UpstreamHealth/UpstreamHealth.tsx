@@ -51,6 +51,7 @@ export default function UpstreamHealth() {
                 orFilters: [{ and: [{ field: 'degree', condition: FilterOperator.Equal, values: ['1', '2', '3+'] }] }],
             },
             includeAssertions: true,
+            includeIncidents: true,
         },
     });
 
