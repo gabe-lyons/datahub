@@ -48,7 +48,7 @@ public class TestFetcher {
       throws RemoteInvocationException, URISyntaxException {
     log.debug("Batch fetching tests. start: {}, count: {}", start, count);
     // First fetch all test urns from start - start + count
-    SearchResult result = _entitySearchService.search(TEST_ENTITY_NAME, query, null, SORT_CRITERION, start, count);
+    SearchResult result = _entitySearchService.structuredSearch(TEST_ENTITY_NAME, query, null, SORT_CRITERION, start, count);
     List<Urn> testUrns = result.getEntities().stream().map(SearchEntity::getEntity).collect(Collectors.toList());
 
     if (testUrns.isEmpty()) {

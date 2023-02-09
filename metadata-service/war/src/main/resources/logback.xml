@@ -8,11 +8,20 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>INFO</level>
         </filter>
+        <filter class="com.linkedin.metadata.utils.log.LogMessageFilter">
+            <excluded>scanned from multiple locations</excluded>
+        </filter>
     </appender>
 
     <appender name="Sentry" class="io.sentry.logback.SentryAppender">
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
             <level>WARN</level>
+        </filter>
+        <encoder>
+            <pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <filter class="com.linkedin.metadata.utils.log.LogMessageFilter">
+            <excluded>scanned from multiple locations</excluded>
         </filter>
     </appender>
 

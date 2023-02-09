@@ -4,14 +4,16 @@ import com.datahub.authentication.AuthenticationConfiguration;
 import com.datahub.authorization.AuthorizationConfiguration;
 import com.linkedin.datahub.graphql.featureflags.FeatureFlags;
 import com.linkedin.metadata.config.DataHubConfiguration;
+import com.linkedin.metadata.config.ElasticSearchConfiguration;
 import com.linkedin.metadata.config.IngestionConfiguration;
+import com.linkedin.metadata.config.SystemUpdateConfiguration;
 import com.linkedin.metadata.config.TestsConfiguration;
 import com.linkedin.metadata.config.ViewsConfiguration;
+import com.linkedin.metadata.config.VisualConfiguration;
 import com.linkedin.metadata.telemetry.TelemetryConfiguration;
 import com.linkedin.gms.factory.spring.YamlPropertySourceFactory;
 import com.linkedin.metadata.config.events.EventSinksConfiguration;
 import com.linkedin.metadata.config.notification.NotificationConfiguration;
-import com.linkedin.metadata.config.VisualConfiguration;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -60,6 +62,15 @@ public class ConfigurationProvider {
    */
   private FeatureFlags featureFlags;
 
+  /**
+   * ElasticSearch configurations
+   */
+  private ElasticSearchConfiguration elasticSearch;
+
+  /**
+   * System Update configurations
+   */
+  private SystemUpdateConfiguration systemUpdate;
 
   // fork related configs go below this line
   /**

@@ -19,6 +19,8 @@ export const DatasetStatsSummarySubHeader = () => {
         ((dataset?.operations?.length || 0) > 0 && (dataset?.operations![0] as Operation)) || undefined;
 
     const rowCount = maybeLastProfile?.rowCount;
+    const columnCount = maybeLastProfile?.columnCount;
+    const sizeInBytes = maybeLastProfile?.sizeInBytes;
     const queryCountLast30Days = maybeStatsSummary?.queryCountLast30Days;
     const queryCountPercentileLast30Days = maybeStatsSummary?.queryCountPercentileLast30Days;
     const uniqueUserCountLast30Days = maybeStatsSummary?.uniqueUserCountLast30Days;
@@ -29,6 +31,8 @@ export const DatasetStatsSummarySubHeader = () => {
     return (
         <DatasetStatsSummary
             rowCount={rowCount}
+            columnCount={columnCount}
+            sizeInBytes={sizeInBytes}
             queryCountLast30Days={queryCountLast30Days}
             queryCountPercentileLast30Days={queryCountPercentileLast30Days}
             uniqueUserCountLast30Days={uniqueUserCountLast30Days}

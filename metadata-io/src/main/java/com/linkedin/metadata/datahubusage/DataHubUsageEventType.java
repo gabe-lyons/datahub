@@ -56,7 +56,9 @@ public enum DataHubUsageEventType {
   SET_USER_DEFAULT_VIEW_EVENT("SetUserDefaultViewEvent"),
   MANUALLY_CREATE_LINEAGE_EVENT("ManuallyCreateLineageEvent"),
   MANUALLY_DELETE_LINEAGE_EVENT("ManuallyDeleteLineageEvent"),
-  
+  LINEAGE_GRAPH_TIME_RANGE_SELECTION_EVENT("LineageGraphTimeRangeSelectionEvent"),
+  LINEAGE_TAB_TIME_RANGE_SELECTION_EVENT("LineageTabTimeRangeSelectionEvent"),
+
   // SaaS only events
   CREATE_TEST_EVENT("CreateTestEvent"),
   UPDATE_TEST_EVENT("UpdateTestEvent"),
