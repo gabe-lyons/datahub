@@ -1,4 +1,4 @@
-package com.linkedin.metadata.kafka.boot;
+package com.linkedin.metadata.boot.kafka;
 
 import com.linkedin.gms.factory.config.ConfigurationProvider;
 import com.linkedin.metadata.EventUtils;
@@ -55,7 +55,7 @@ public class DataHubUpgradeKafkaListener implements ConsumerSeekAware, Bootstrap
   @Value(TOPIC_NAME)
   private String topicName;
 
-  private AtomicBoolean isUpdated = new AtomicBoolean(false);
+  private static AtomicBoolean isUpdated = new AtomicBoolean(false);
 
 
   // Constructs a consumer to read determine final offset to assign, prevents re-reading whole topic to get the latest version
@@ -71,7 +71,7 @@ public class DataHubUpgradeKafkaListener implements ConsumerSeekAware, Bootstrap
     }
   }
 
-  @KafkaListener(id = CONSUMER_GROUP, topics = {TOPIC_NAME}, containerFactory = "kafkaEventConsumer")
+  @KafkaListener(id = CONSUMER_GROUP, topics = {TOPIC_NAME}, containerFactory = "kafkaEventConsumer", concurrency = "1")
   public void checkSystemVersion(final ConsumerRecord<String, GenericRecord> consumerRecord) {
     final GenericRecord record = consumerRecord.value();
     final String expectedVersion = String.format("%s-%s", _gitVersion.getVersion(), revision);
