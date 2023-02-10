@@ -51,6 +51,7 @@ export default function UpstreamHealth() {
                 orFilters: [{ and: [{ field: 'degree', condition: FilterOperator.Equal, values: ['1', '2', '3+'] }] }],
             },
             includeAssertions: true,
+            includeIncidents: true,
         },
     });
 
@@ -84,7 +85,7 @@ export default function UpstreamHealth() {
     return (
         <div>
             <StyledQuestion />
-            <UnknownText>0 upstream assertions</UnknownText>
+            <UnknownText>Unknown data input health</UnknownText>
         </div>
     );
 }

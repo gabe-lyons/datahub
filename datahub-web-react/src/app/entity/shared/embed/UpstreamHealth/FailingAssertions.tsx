@@ -4,13 +4,13 @@ import { useEntityRegistry } from '../../../../useEntityRegistry';
 import FailingEntity from './FailingEntity';
 import { getNumAssertionsFailing, UpstreamSummary } from './utils';
 
-const FailingSectionWrapper = styled.div`
+export const FailingSectionWrapper = styled.div`
     margin: 5px 0 0 34px;
     font-size: 14px;
     color: black;
 `;
 
-const FailingDataWrapper = styled.div`
+export const FailingDataWrapper = styled.div`
     margin-left: 20px;
 `;
 

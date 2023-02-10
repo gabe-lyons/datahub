@@ -3,6 +3,7 @@ import { DownOutlined, WarningFilled } from '@ant-design/icons';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { ANTD_GRAY } from '../../constants';
+import ActiveIncidents from './ActiveIncidents';
 import FailingAssertions from './FailingAssertions';
 import { UpstreamSummary } from './utils';
 
@@ -52,7 +53,16 @@ export default function FailingInputs({ upstreamSummary }: Props) {
             <FailingDetailsWrapper onClick={() => setAreFailingDetailsVisible(!areFailingDetailsVisible)}>
                 view details <StyledArrow isOpen={areFailingDetailsVisible} />
             </FailingDetailsWrapper>
-            {areFailingDetailsVisible && <FailingAssertions upstreamSummary={upstreamSummary} />}
+            {areFailingDetailsVisible && (
+                <>
+                    {upstreamSummary.datasetsWithActiveIncidents.length > 0 && (
+                        <ActiveIncidents upstreamSummary={upstreamSummary} />
+                    )}
+                    {upstreamSummary.datasetsWithFailingAssertions.length > 0 && (
+                        <FailingAssertions upstreamSummary={upstreamSummary} />
+                    )}
+                </>
+            )}
         </div>
     );
 }
