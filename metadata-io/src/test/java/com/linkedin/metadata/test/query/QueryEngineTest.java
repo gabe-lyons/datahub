@@ -174,7 +174,7 @@ public class QueryEngineTest {
 
     Mockito.when(_entityService.getEntityRegistry()).thenReturn(entityRegistry);
 
-    TestQuery testQuery = new TestQuery("firstSynchronized");
+    TestQuery testQuery = new TestQuery("__firstSynchronized");
     Mockito.when(_entityService.getEntitiesV2(eq(Constants.DATASET_ENTITY_NAME), eq(ImmutableSet.of(DATASET_URN)),
             any())).thenReturn(ImmutableMap.of());
     assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
@@ -205,7 +205,7 @@ public class QueryEngineTest {
             .setActor(UrnUtils.getUrn(SYSTEM_ACTOR))
             .setTime(10));
 
-    final EnvelopedAspect glossartyTermInfoAspect = createGlossaryTermInfo(GLOSSARY_TERM_WITHOUT_PARENT)
+    final EnvelopedAspect glossaryTermInfoAspect = createGlossaryTermInfo(GLOSSARY_TERM_WITHOUT_PARENT)
         .getAspects()
         .get(Constants.GLOSSARY_TERM_INFO_ASPECT_NAME)
         .setSystemMetadata(new SystemMetadata()
@@ -218,22 +218,23 @@ public class QueryEngineTest {
     entityResponse.setAspects(new EnvelopedAspectMap(ImmutableMap.of(
         Constants.DATASET_PROPERTIES_ASPECT_NAME, propertiesAspect,
         Constants.DATASET_KEY_ASPECT_NAME, keyAspect,
-        Constants.GLOSSARY_TERM_INFO_ASPECT_NAME, glossartyTermInfoAspect
+        Constants.GLOSSARY_TERM_INFO_ASPECT_NAME, glossaryTermInfoAspect
     )));
 
     Mockito.when(_entityService.getEntitiesV2(eq(Constants.DATASET_ENTITY_NAME), eq(ImmutableSet.of(DATASET_URN)),
             any())).thenReturn(ImmutableMap.of(DATASET_URN, entityResponse));
 
+    // Validate firstSynchronized query (createdOn time for key aspect)
     assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
         ImmutableMap.of(DATASET_URN,
             ImmutableMap.of(testQuery, new TestQueryResponse(ImmutableList.of("0")))));
 
-    testQuery = new TestQuery("lastSynchronized");
+    testQuery = new TestQuery("__lastSynchronized");
     assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
         ImmutableMap.of(DATASET_URN,
             ImmutableMap.of(testQuery, new TestQueryResponse(ImmutableList.of("10")))));
 
-    testQuery = new TestQuery("lastUpdated");
+    testQuery = new TestQuery("__lastUpdated");
     assertEquals(_queryEngine.batchEvaluateQueries(ImmutableSet.of(DATASET_URN), ImmutableSet.of(testQuery)),
         ImmutableMap.of(DATASET_URN,
             ImmutableMap.of(testQuery, new TestQueryResponse(ImmutableList.of("11")))));
