@@ -69,6 +69,18 @@ Cypress.Commands.add("goToDataset", (urn, dataset_name) => {
     "/dataset/" + urn
   );
   cy.waitTextVisible(dataset_name);
+});
+
+Cypress.Commands.add("goToEntityLineageGraph", (entity_type, urn) => {
+  cy.visit(
+    `/${entity_type}/${urn}?is_lineage_mode=true`
+  );
+})
+
+Cypress.Commands.add("goToEntityLineageGraph", (entity_type, urn, start_time_millis, end_time_millis) => {
+  cy.visit(
+    `/${entity_type}/${urn}?is_lineage_mode=true&start_time_millis=${start_time_millis}&end_time_millis=${end_time_millis}`
+  );
 })
 
 Cypress.Commands.add("goToChart", (urn) => {
@@ -119,16 +131,22 @@ Cypress.Commands.add("deleteFromDropdown", () => {
   cy.clickOptionWithText("Yes");
 });
 
-Cypress.Commands.add("addViaModel", (text, modelHeader) => {
+Cypress.Commands.add("addViaFormModal", (text, modelHeader) => {
   cy.waitTextVisible(modelHeader);
   cy.get(".ant-form-item-control-input-content > input[type='text']").first().type(text);
   cy.get(".ant-modal-footer > button:last-child").click();
 });
 
-Cypress.Commands.add("addViaModelTestId", (text, modelHeader, testId) => {
+Cypress.Commands.add("addViaAffixModal", (text, modelHeader) => {
   cy.waitTextVisible(modelHeader);
-  cy.get(".ant-form-item-control-input-content > input[type='text']").first().type(text);
-  cy.get(`.ant-modal-footer > button[data-testid="${testId}"]`).click()
+  cy.get(".ant-input-affix-wrapper > input[type='text']").first().type(text);
+  cy.get(".ant-modal-footer > button:last-child").click();
+});
+
+Cypress.Commands.add("addViaModal", (text, modelHeader) => {
+  cy.waitTextVisible(modelHeader);
+  cy.get(".ant-input-affix-wrapper > input[type='text']").first().type(text);
+  cy.get(".ant-modal-footer > button:nth-child(2)").click();
 });
 
 Cypress.Commands.add("ensureTextNotPresent", (text) => {
@@ -233,7 +251,7 @@ Cypress.Commands.add("mouseover", (selector) => {
 Cypress.Commands.add('typeSearchDisableCache', {prevSubject: 'element'}, (subject, input) => {
     const randomStrGenerator = () => Cypress._.random(0, 1e9);
     const randomStr = randomStrGenerator();
-    const combinedStr = `${input} OR ${randomStr}{enter}`
+    const combinedStr = `${input} | ${randomStr}{enter}`
     cy.get(subject.selector).type(combinedStr);
 })
 

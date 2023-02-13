@@ -232,6 +232,7 @@ export const dataset1 = {
             timestampMillis: 0,
             rowCount: 10,
             columnCount: 5,
+            sizeInBytes: 10,
             fieldProfiles: [
                 {
                     fieldPath: 'testColumn',
@@ -239,6 +240,9 @@ export const dataset1 = {
             ],
         },
     ],
+    activeIncidents: {
+        total: 0,
+    },
     domain: null,
     container: null,
     upstream: null,
@@ -321,6 +325,7 @@ export const dataset2 = {
             timestampMillis: 0,
             rowCount: 10,
             columnCount: 5,
+            sizeInBytes: 10000,
             fieldProfiles: [
                 {
                     fieldPath: 'testColumn',
@@ -334,6 +339,9 @@ export const dataset2 = {
             ],
         },
     ],
+    activeIncidents: {
+        total: 0,
+    },
     domain: null,
     container: null,
     upstream: null,
@@ -537,6 +545,7 @@ export const dataset3 = {
         {
             rowCount: 10,
             columnCount: 5,
+            sizeInBytes: 10000,
             timestampMillis: 0,
             fieldProfiles: [
                 {
@@ -568,6 +577,9 @@ export const dataset3 = {
             },
         },
     ],
+    activeIncidents: {
+        total: 0,
+    },
     domain: null,
     container: null,
     lineage: null,

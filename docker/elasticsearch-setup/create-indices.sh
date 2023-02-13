@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -e
+eval "$(sentry-cli bash-hook)"
 
 : "${DATAHUB_ANALYTICS_ENABLED:=true}"
 : "${USE_AWS_ELASTICSEARCH:=false}"
@@ -55,6 +56,7 @@ else
   PREFIX="${INDEX_PREFIX}_"
   echo -e "going to use prefix: '$PREFIX'"
 fi
+ROLE="${INDEX_PREFIX}_access"
 
 # path where index definitions are stored
 INDEX_DEFINITIONS_ROOT=/index/usage-event
@@ -80,7 +82,7 @@ function create_if_not_exists() {
     # use the file at given path as definition, but first replace all occurences of `PREFIX`
     # placeholder within the file with the actual prefix value
     TMP_SOURCE_PATH="/tmp/$RESOURCE_DEFINITION_NAME"
-    sed -e "s/PREFIX/$PREFIX/g" "$INDEX_DEFINITIONS_ROOT/$RESOURCE_DEFINITION_NAME" | tee -a "$TMP_SOURCE_PATH"
+    sed -e "s/PREFIX/$PREFIX/g; s/ELASTICSEARCH_PASSWORD/$ELASTICSEARCH_PASSWORD/g; s/ROLE/$ROLE/g" "$INDEX_DEFINITIONS_ROOT/$RESOURCE_DEFINITION_NAME" | tee -a "$TMP_SOURCE_PATH"
     curl "${CURL_ARGS[@]}" -XPUT "$ELASTICSEARCH_URL/$RESOURCE_ADDRESS" -H 'Content-Type: application/json' --data "@$TMP_SOURCE_PATH"
 
   elif [ "$RESOURCE_STATUS" -eq 403 ]; then
@@ -156,82 +158,19 @@ function create_datahub_usage_event_aws_elasticsearch() {
   create_if_not_exists "${PREFIX}datahub_usage_event-$INDEX_SUFFIX" aws_es_index.json
 }
 
-function create_access_policy_data_es_cloud {
-  cat << EOF
-{
-    "cluster":[ "monitor" ],
-    "indices":[
-       {
-          "names":["${INDEX_PREFIX}_*"],
-          "privileges":["all"]
-       }
-    ]
- }
-EOF
-}
-
-function create_user_data_es_cloud {
-  cat <<EOF
-{
-    "password": "${ELASTICSEARCH_PASSWORD}",
- 	  "roles":["${INDEX_PREFIX}_access"]
- }
-EOF
-}
-
-function create_aws_access_policy_role {
-  cat << EOF
-{
-     "cluster_permissions": [
-         "indices:*",
-         "cluster:monitor/tasks/lists"
-     ],
-     "index_permissions": [
-         {
-             "index_patterns": [
-                 "${INDEX_PREFIX}_*"
-             ],
-             "allowed_actions": [
-                 "indices_all"
-             ]
-         }
-     ]
- }
-EOF
-}
-
-function create_aws_data_user {
-  cat << EOF
-{
-     "password": "${ELASTICSEARCH_PASSWORD}",
-     "opendistro_security_roles": [
-         "${ROLE}"
-     ]
- }
-EOF
-}
-
 function create_user_es_cloud {
   # Tested with Elastic 7.17
-  ROLE="${INDEX_PREFIX}_access"
-
-  create_access_policy_data_es_cloud > $INDEX_DEFINITIONS_ROOT/access_policy_data_es_cloud.json
   create_if_not_exists "_security/role/${ROLE}" access_policy_data_es_cloud.json
   echo -e "\nAccess policy created"
 
-  create_user_data_es_cloud > $INDEX_DEFINITIONS_ROOT/user_data_es_cloud.json
   create_if_not_exists "_security/user/${ELASTICSEARCH_USERNAME}" user_data_es_cloud.json
   echo -e "\nData User created"
 }
 
 function create_aws_user {
-  ROLE="${INDEX_PREFIX}_access"
-
-  create_aws_access_policy_role > $INDEX_DEFINITIONS_ROOT/aws_role.json
   create_if_not_exists "_opendistro/_security/api/roles/${ROLE}" aws_role.json
   echo -e "\nAWS Access policy created"
 
-  create_aws_data_user > $INDEX_DEFINITIONS_ROOT/aws_user.json
   create_if_not_exists "_opendistro/_security/api/internalusers/${ELASTICSEARCH_USERNAME}" aws_user.json
   echo -e "\nAWS Data User created"
 }

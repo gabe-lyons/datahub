@@ -100,6 +100,8 @@ function getArrayMergeFunction(key) {
             return mergeIncidents;
         case 'fields':
             return mergeFields;
+        case 'editableSchemaFieldInfo':
+            return mergeFields;
         default:
             return undefined;
     }
@@ -126,7 +128,8 @@ const customMerge = (isPrimary, key) => {
         key === 'customProperties' ||
         key === 'owners' ||
         key === 'incidents' ||
-        key === 'fields'
+        key === 'fields' ||
+        key === 'editableSchemaFieldInfo'
     ) {
         return (secondary, primary) => {
             return merge(secondary, primary, {

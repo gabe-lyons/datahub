@@ -53,7 +53,8 @@ public class ListTestsResolverTest {
         any(SortCriterion.class),
         Mockito.eq(0),
         Mockito.eq(20),
-        Mockito.any(Authentication.class)
+        Mockito.any(Authentication.class),
+        Mockito.eq(Boolean.TRUE)
     )).thenReturn(
         new SearchResult()
             .setFrom(0)
@@ -90,7 +91,8 @@ public class ListTestsResolverTest {
         Mockito.anyMap(),
         Mockito.anyInt(),
         Mockito.anyInt(),
-        Mockito.any(Authentication.class));
+        Mockito.any(Authentication.class),
+        Mockito.eq(Boolean.TRUE));
   }
 
   @Test
@@ -101,7 +103,9 @@ public class ListTestsResolverTest {
         Mockito.anyMap(),
         Mockito.anyInt(),
         Mockito.anyInt(),
-        Mockito.any(Authentication.class));
+        Mockito.any(Authentication.class),
+        Mockito.eq(Boolean.TRUE));
+    ListTestsResolver resolver = new ListTestsResolver(mockClient);
 
     // Execute resolver
     QueryContext mockContext = getMockAllowContext();

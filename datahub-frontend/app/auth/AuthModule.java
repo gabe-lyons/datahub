@@ -119,8 +119,8 @@ public class AuthModule extends AbstractModule {
     @Provides
     @Singleton
     protected SsoManager provideSsoManager(Authentication systemAuthentication, CloseableHttpClient httpClient) {
-        SsoManager manager = new SsoManager(systemAuthentication, getSsoSettingsRequestUrl(_configs), httpClient);
-        manager.initializeSsoProvider(_configs);
+        SsoManager manager = new SsoManager(_configs, systemAuthentication, getSsoSettingsRequestUrl(_configs), httpClient);
+        manager.initializeSsoProvider();
         return manager;
     }
 

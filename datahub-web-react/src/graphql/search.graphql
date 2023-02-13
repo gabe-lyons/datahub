@@ -259,6 +259,8 @@ fragment searchResultFields on Entity {
         }
         lastProfile: datasetProfiles(limit: 1) {
             rowCount
+            columnCount
+            sizeInBytes
             timestampMillis
         }
         lastOperation: operations(limit: 1) {
@@ -802,6 +804,9 @@ fragment searchAcrossRelationshipResults on SearchAcrossLineageResults {
                         }
                     }
                 }
+                activeIncidents: incidents(start: 0, count: 1, state: ACTIVE) @include(if: $includeIncidents) {
+                    total
+                }
             }
         }
         matchedFields {
@@ -839,7 +844,7 @@ query getSearchResultsForMultiple($input: SearchAcrossEntitiesInput!) {
     }
 }
 
-query searchAcrossLineage($input: SearchAcrossLineageInput!, $includeAssertions: Boolean = false) {
+query searchAcrossLineage($input: SearchAcrossLineageInput!, $includeAssertions: Boolean = false, $includeIncidents: Boolean = false) {
     searchAcrossLineage(input: $input) {
         ...searchAcrossRelationshipResults
     }
