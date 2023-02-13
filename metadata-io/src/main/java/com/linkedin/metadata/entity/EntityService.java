@@ -374,8 +374,7 @@ public class EntityService {
         .map(UrnUtils::getUrn).collect(Collectors.toSet()));
   }
 
-  private Map<Urn, List<EnvelopedAspect>> getCorrespondingAspects(Set<EntityAspectIdentifier> dbKeys, Set<Urn> urns)
-      throws URISyntaxException {
+  private Map<Urn, List<EnvelopedAspect>> getCorrespondingAspects(Set<EntityAspectIdentifier> dbKeys, Set<Urn> urns) {
 
     final Map<EntityAspectIdentifier, EnvelopedAspect> envelopedAspectMap = getEnvelopedAspects(dbKeys);
 
