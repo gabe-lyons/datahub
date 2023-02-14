@@ -93,11 +93,11 @@ public class SystemAspectEvaluator extends BaseQueryEvaluator {
         final String keyAspectCreatedTime = computeFirstSynchronized(urn, entityResponse);
         return new TestQueryResponse(Collections.singletonList(keyAspectCreatedTime));
       case LAST_SYNCHRONIZED_FIELD_NAME:
-        final String __lastSynchronizedTime = SystemMetadataUtils.getLastIngested(entityResponse.getAspects()).toString();
-        return new TestQueryResponse(Collections.singletonList(__lastSynchronizedTime));
+        final String lastSynchronizedTime = SystemMetadataUtils.getLastIngested(entityResponse.getAspects()).toString();
+        return new TestQueryResponse(Collections.singletonList(lastSynchronizedTime));
       case LAST_UPDATED_FIELD_NAME:
-        final String __lastUpdatedTime = computeLastUpdated(urn, entityResponse);
-        return new TestQueryResponse(Collections.singletonList(__lastUpdatedTime));
+        final String lastUpdatedTime = computeLastUpdated(urn, entityResponse);
+        return new TestQueryResponse(Collections.singletonList(lastUpdatedTime));
       default:
         log.error("Unknown query {}", queryName);
         throw new RuntimeException(String.format("Unknown query %s", queryName));
@@ -105,7 +105,7 @@ public class SystemAspectEvaluator extends BaseQueryEvaluator {
   }
 
   private static String computeLastUpdated(Urn urn, EntityResponse entityResponse) {
-    final String __lastUpdatedTime = entityResponse.getAspects()
+    return entityResponse.getAspects()
         .values()
         .stream()
         .map(aspect -> aspect.getCreated().getTime())
@@ -115,7 +115,6 @@ public class SystemAspectEvaluator extends BaseQueryEvaluator {
           return new RuntimeException(String.format("Unable to compute max aspect createdAt for urn %s", urn));
         })
         .toString();
-    return __lastUpdatedTime;
   }
 
   private String computeFirstSynchronized(Urn urn, EntityResponse entityResponse) {
@@ -126,8 +125,7 @@ public class SystemAspectEvaluator extends BaseQueryEvaluator {
       log.error("Unable to retrieve key aspect for urn: {}. Maybe this entity was recently deleted?", urn);
       throw new RuntimeException(String.format("Unable to retrieve key aspect for urn: %s", urn));
     }
-    final String keyAspectCreatedTime = keyAspect.getCreated().getTime().toString();
-    return keyAspectCreatedTime;
+    return keyAspect.getCreated().getTime().toString();
   }
 }
 
