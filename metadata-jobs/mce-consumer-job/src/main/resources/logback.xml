@@ -33,6 +33,9 @@
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
         <level>WARN</level>
         </filter>
+        <filter class="com.linkedin.metadata.utils.log.LogMessageFilter">
+            <excluded>scanned from multiple locations</excluded>
+        </filter>
     </appender>
 
     <root level="info">
