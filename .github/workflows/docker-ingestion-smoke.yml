@@ -16,7 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE: acryldata/datahub-ingestion-smoke
+  IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/acryl-private-smoke-tests'
 
 jobs:
   setup:
@@ -59,8 +59,8 @@ jobs:
           images: |
             ${{ env.IMAGE }}
           tags: ${{ needs.setup.outputs.tag }}
-          username: ${{ secrets.ACRYL_DOCKER_USERNAME }}
-          password: ${{ secrets.ACRYL_DOCKER_PASSWORD }}
+          username: ${{ secrets.AWS_ECR_ACCESS_KEY_ID }}
+          password: ${{ secrets.AWS_ECR_SECRET_ACCESS_KEY }}
           publish: ${{ needs.setup.outputs.publish }}
           context: .
           file: ./docker/datahub-ingestion/smoke.Dockerfile
