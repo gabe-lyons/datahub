@@ -96,11 +96,14 @@ public class AuthModule extends AbstractModule {
         }
 
         try {
-            bind(SsoCallbackController.class).toConstructor(
-                SsoCallbackController.class.getConstructor(SsoManager.class, Authentication.class, EntityClient.class,
-                    AuthServiceClient.class, Config.class));
+            bind(SsoCallbackController.class).toConstructor(SsoCallbackController.class.getConstructor(
+                SsoManager.class,
+                Authentication.class,
+                EntityClient.class,
+                AuthServiceClient.class,
+                com.typesafe.config.Config.class));
         } catch (NoSuchMethodException | SecurityException e) {
-            throw new RuntimeException("Failed to bind to SsoCallbackController. Cannot find constructor, e");
+            throw new RuntimeException("Failed to bind to SsoCallbackController. Cannot find constructor", e);
         }
         // logout
         final LogoutController logoutController = new LogoutController();
