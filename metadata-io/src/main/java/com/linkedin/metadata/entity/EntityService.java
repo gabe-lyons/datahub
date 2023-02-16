@@ -374,8 +374,7 @@ public class EntityService {
         .map(UrnUtils::getUrn).collect(Collectors.toSet()));
   }
 
-  private Map<Urn, List<EnvelopedAspect>> getCorrespondingAspects(Set<EntityAspectIdentifier> dbKeys, Set<Urn> urns)
-      throws URISyntaxException {
+  private Map<Urn, List<EnvelopedAspect>> getCorrespondingAspects(Set<EntityAspectIdentifier> dbKeys, Set<Urn> urns) {
 
     final Map<EntityAspectIdentifier, EnvelopedAspect> envelopedAspectMap = getEnvelopedAspects(dbKeys);
 
@@ -432,7 +431,7 @@ public class EntityService {
       String entityName,
       @Nonnull Urn urn,
       @Nonnull String aspectName,
-      long version) throws Exception {
+      long version) {
     log.debug(String.format("Invoked getEnvelopedAspect with entityName: %s, urn: %s, aspectName: %s, version: %s",
         urn.getEntityType(),
         urn,
