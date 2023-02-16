@@ -1,13 +1,9 @@
 package auth.sso;
 
-<<<<<<< HEAD
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static auth.AuthUtils.*;
-=======
->>>>>>> oss_master
-import static auth.ConfigUtil.*;
 
 
 /**
@@ -36,30 +32,11 @@ public class SsoConfigs {
   private final String _authSuccessRedirectPath;
   private final Boolean _oidcEnabled;
 
-<<<<<<< HEAD
   public SsoConfigs(Builder<?> builder) {
     _authBaseUrl = builder._authBaseUrl;
     _authBaseCallbackPath = builder._authBaseCallbackPath;
     _authSuccessRedirectPath = builder._authSuccessRedirectPath;
-    _sessionTtlInHours = builder._sessionTtlInHours;
     _oidcEnabled = builder._oidcEnabled;
-    _authCookieSameSite = builder._authCookieSameSite;
-    _authCookieSecure = builder._authCookieSecure;
-=======
-  public SsoConfigs(final com.typesafe.config.Config configs) {
-    _authBaseUrl = getRequired(configs, AUTH_BASE_URL_CONFIG_PATH);
-    _authBaseCallbackPath = getOptional(
-        configs,
-        AUTH_BASE_CALLBACK_PATH_CONFIG_PATH,
-        DEFAULT_BASE_CALLBACK_PATH);
-    _authSuccessRedirectPath = getOptional(
-        configs,
-        AUTH_SUCCESS_REDIRECT_PATH_CONFIG_PATH,
-        DEFAULT_SUCCESS_REDIRECT_PATH);
-    _oidcEnabled =  configs.hasPath(OIDC_ENABLED_CONFIG_PATH)
-        && Boolean.TRUE.equals(
-        Boolean.parseBoolean(configs.getString(OIDC_ENABLED_CONFIG_PATH)));
->>>>>>> oss_master
   }
 
   public String getAuthBaseUrl() {
@@ -82,10 +59,7 @@ public class SsoConfigs {
     protected String _authBaseUrl = null;
     private String _authBaseCallbackPath = DEFAULT_BASE_CALLBACK_PATH;
     private String _authSuccessRedirectPath = DEFAULT_SUCCESS_REDIRECT_PATH;
-    private Integer _sessionTtlInHours = DEFAULT_SESSION_TTL_HOURS;
     protected Boolean _oidcEnabled = false;
-    private String _authCookieSameSite = DEFAULT_AUTH_COOKIE_SAME_SITE;
-    private Boolean _authCookieSecure = DEFAULT_AUTH_COOKIE_SECURE;
     private final ObjectMapper _objectMapper = new ObjectMapper();
     protected JsonNode jsonNode = null;
 
@@ -103,17 +77,6 @@ public class SsoConfigs {
       if (configs.hasPath(AUTH_SUCCESS_REDIRECT_PATH_CONFIG_PATH)) {
         _authSuccessRedirectPath = configs.getString(AUTH_SUCCESS_REDIRECT_PATH_CONFIG_PATH);
       }
-      if (configs.hasPath(SESSION_TTL_CONFIG_PATH)) {
-        _sessionTtlInHours = Integer.parseInt(configs.getString(SESSION_TTL_CONFIG_PATH));
-      }
-      _authCookieSameSite = getOptional(
-          configs,
-          AUTH_COOKIE_SAME_SITE,
-          DEFAULT_AUTH_COOKIE_SAME_SITE);
-      _authCookieSecure = Boolean.parseBoolean(getOptional(
-          configs,
-          AUTH_COOKIE_SECURE,
-          String.valueOf(DEFAULT_AUTH_COOKIE_SECURE)));
       return this;
     }
 
