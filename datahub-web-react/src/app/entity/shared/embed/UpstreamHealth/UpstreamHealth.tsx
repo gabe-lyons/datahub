@@ -86,11 +86,7 @@ export default function UpstreamHealth() {
 
     return (
         <div>
-<<<<<<< HEAD
-            <StyledQuestion />
-=======
             <StyledIcon component={SubtractIcon} />
->>>>>>> oss_master
             <UnknownText>Unknown data input health</UnknownText>
         </div>
     );
