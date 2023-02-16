@@ -946,3 +946,64 @@ fragment inputFieldsFields on InputFields {
         }
     }
 }
+
+fragment proposalsFragment on ActionRequest {
+    urn
+    type
+    status
+    result
+    subResourceType
+    subResource
+    params {
+        glossaryTermProposal {
+            glossaryTerm {
+                ...glossaryTerm
+            }
+        }
+        tagProposal {
+            tag {
+                urn
+                type
+                name
+                description
+                properties {
+                    colorHex
+                }
+            }
+        }
+    }
+    created {
+        time
+        actor {
+            urn
+            type
+            username
+            info {
+                displayName
+                firstName
+                lastName
+                fullName
+            }
+            editableInfo {
+                pictureLink
+            }
+        }
+    }
+    lastModified {
+        time
+        actor {
+            urn
+            type
+            username
+            info {
+                displayName
+                firstName
+                lastName
+                fullName
+            }
+            editableInfo {
+                pictureLink
+            }
+        }
+    }
+}

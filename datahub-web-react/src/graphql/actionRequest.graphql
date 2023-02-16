@@ -28,11 +28,9 @@ query listActionRequests($input: ListActionRequestsInput!) {
                 }
                 ... on Dashboard {
                     tool
-                    info {
-                        name
-                    }
                     properties {
                         description
+                        name
                     }
                     editableProperties {
                         description
@@ -40,21 +38,23 @@ query listActionRequests($input: ListActionRequestsInput!) {
                 }
                 ... on Chart {
                     tool
-                    info {
-                        name
-                    }
                     properties {
                         description
+                        name
                     }
                     editableProperties {
                         description
                     }
                 }
-                ... on DataJob {
-                    info {
-                        name
-                    }
+                ... on Container {
                     properties {
+                        name
+                        qualifiedName
+                    }
+                }
+                ... on DataJob {
+                    properties {
+                        name
                         description
                     }
                     editableProperties {
@@ -63,15 +63,16 @@ query listActionRequests($input: ListActionRequestsInput!) {
                 }
                 ... on DataFlow {
                     orchestrator
-                    info {
-                        name
-                    }
                     properties {
+                        name
                         description
                     }
                     editableProperties {
                         description
                     }
+                }
+                ... on MLFeature {
+                    name
                 }
                 ... on MLFeatureTable {
                     name
@@ -117,6 +118,9 @@ query listActionRequests($input: ListActionRequestsInput!) {
                     editableProperties {
                         description
                     }
+                }
+                ... on MLPrimaryKey {
+                    name
                 }
                 ... on GlossaryNode {
                     properties {
