@@ -13,8 +13,10 @@ import { EntityType } from '../../../../../../types.generated';
 import { DescriptionEditorToolbar } from './DescriptionEditorToolbar';
 import { Editor } from './editor/Editor';
 
+const PROPOSAL_ENTITY_TYPES = [EntityType.GlossaryTerm, EntityType.GlossaryNode, EntityType.Dataset];
+
 export function getShouldShowProposeButton(entityType: EntityType) {
-    return entityType === EntityType.GlossaryTerm || entityType === EntityType.GlossaryNode;
+    return PROPOSAL_ENTITY_TYPES.includes(entityType);
 }
 
 const EditorContainer = styled.div`
@@ -128,6 +130,7 @@ export const DescriptionEditor = ({ onComplete }: DescriptionEditorProps) => {
                 const editedDescriptionsLocal = (localStorageDictionary && JSON.parse(localStorageDictionary)) || {};
                 delete editedDescriptionsLocal[mutationUrn];
                 localStorage.setItem(EDITED_DESCRIPTIONS_CACHE_NAME, JSON.stringify(editedDescriptionsLocal));
+                if (onComplete) onComplete();
             })
             .catch((e) => {
                 message.destroy();
@@ -171,7 +174,7 @@ export const DescriptionEditor = ({ onComplete }: DescriptionEditorProps) => {
                 onPropose={proposeUpdate}
                 onClose={handleConfirmClose}
                 disableSave={!isDescriptionUpdated}
-                showPropose={shouldShowProposeButton}
+                showPropose={shouldShowProposeButton || true}
             />
             <EditorContainer>
                 <Editor content={updatedDescription} onChange={handleEditorChange} />

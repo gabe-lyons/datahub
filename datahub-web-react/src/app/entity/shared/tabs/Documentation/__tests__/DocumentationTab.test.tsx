@@ -90,18 +90,14 @@ describe('markdown sanitization', () => {
 });
 
 describe('DescriptionEditor', () => {
-    it('should show the propose button for Glossary Terms', () => {
-        const shouldShowProposeButton = getShouldShowProposeButton(EntityType.GlossaryTerm);
-        expect(shouldShowProposeButton).toBe(true);
-    });
-
-    it('should show the propose button for Glossary Nodes', () => {
-        const shouldShowProposeButton = getShouldShowProposeButton(EntityType.GlossaryNode);
-        expect(shouldShowProposeButton).toBe(true);
+    it('should show the propose button for entity types that support description proposals', () => {
+        expect(getShouldShowProposeButton(EntityType.GlossaryTerm)).toBe(true);
+        expect(getShouldShowProposeButton(EntityType.GlossaryNode)).toBe(true);
+        expect(getShouldShowProposeButton(EntityType.Dataset)).toBe(true);
     });
 
     it('should not show the propose button for non-Glossary entities', () => {
-        const shouldShowProposeButton = getShouldShowProposeButton(EntityType.Dataset);
+        const shouldShowProposeButton = getShouldShowProposeButton(EntityType.Domain);
         expect(shouldShowProposeButton).toBe(false);
     });
 });
