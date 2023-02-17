@@ -4,7 +4,9 @@ import com.datahub.authentication.proposal.ProposalService;
 import com.linkedin.common.urn.CorpuserUrn;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.datahub.graphql.QueryContext;
+import com.linkedin.datahub.graphql.exception.AuthorizationException;
 import com.linkedin.datahub.graphql.generated.DescriptionUpdateInput;
+import com.linkedin.datahub.graphql.generated.SubResourceType;
 import com.linkedin.metadata.Constants;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -27,9 +29,10 @@ public class ProposeUpdateDescriptionResolver implements DataFetcher<Completable
     Urn resourceUrn = Urn.createFromString(input.getResourceUrn());
     String description = input.getDescription();
     String subresource = input.getSubResource();
+    SubResourceType subresourceType = input.getSubResourceType();
 
-    if (subresource != null) {
-      throw new IllegalArgumentException("Proposing an update to a column description is currently not supported");
+    if (!ProposalUtils.isAuthorizedToProposeDescription(environment.getContext(), resourceUrn, subresource)) {
+      throw new AuthorizationException("Unauthorized to perform this action. Please contact your DataHub administrator.");
     }
 
     Urn actor = CorpuserUrn.createFromString(context.getActorUrn());
@@ -41,7 +44,8 @@ public class ProposeUpdateDescriptionResolver implements DataFetcher<Completable
         switch (entityType) {
           case Constants.GLOSSARY_TERM_ENTITY_NAME:
           case Constants.GLOSSARY_NODE_ENTITY_NAME:
-            return _proposalService.proposeUpdateResourceDescription(actor, resourceUrn, description,
+          case Constants.DATASET_ENTITY_NAME:
+            return _proposalService.proposeUpdateResourceDescription(actor, resourceUrn, subresource, subresourceType != null ? subresourceType.toString() : null, description,
                 context.getAuthorizer());
           default:
             log.warn(String.format("Proposing an update to a description is currently not supported for entity type %s",
