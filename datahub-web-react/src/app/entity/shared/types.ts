@@ -34,6 +34,7 @@ import {
     FineGrainedLineage,
     EntityPrivileges,
     Embed,
+    ActionRequest,
 } from '../../../types.generated';
 import { FetchedEntity } from '../../lineage/types';
 
@@ -104,6 +105,8 @@ export type GenericEntityProperties = {
     privileges?: Maybe<EntityPrivileges>;
     embed?: Maybe<Embed>;
     exists?: boolean;
+    tagProposals?: Maybe<ActionRequest[]>;
+    termProposals?: Maybe<ActionRequest[]>;
 };
 
 export type GenericEntityUpdate = {
