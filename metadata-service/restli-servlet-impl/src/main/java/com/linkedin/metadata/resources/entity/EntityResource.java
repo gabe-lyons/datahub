@@ -442,29 +442,39 @@ public class EntityResource extends CollectionResourceTaskTemplate<String, Entit
       @ActionParam(PARAM_END_TIME_MILLIS) @Optional Long endTimeMillis) throws URISyntaxException {
     Urn urn = Urn.createFromString(urnStr);
     return RestliUtil.toTask(() -> {
-      // Find the timeseries aspects to delete. If aspectName is null, delete all.
-      List<String> timeseriesAspectNames =
-          EntitySpecUtils.getEntityTimeseriesAspectNames(_entityService.getEntityRegistry(), urn.getEntityType());
-      if (aspectName != null && !timeseriesAspectNames.contains(aspectName)) {
-        throw new UnsupportedOperationException(
-            String.format("Not supported for non-timeseries aspect '{}'.", aspectName));
-      }
-      List<String> timeseriesAspectsToDelete =
-          (aspectName == null) ? timeseriesAspectNames : ImmutableList.of(aspectName);
 
+      // Temporary fix
       DeleteEntityResponse response = new DeleteEntityResponse();
-      if (aspectName == null) {
-        RollbackRunResult result = _entityService.deleteUrn(urn);
-        response.setRows(result.getRowsDeletedFromEntityDeletion());
-      }
-      Long numTimeseriesDocsDeleted =
-          deleteTimeseriesAspects(urn, startTimeMills, endTimeMillis, timeseriesAspectsToDelete);
-      log.info("Total number of timeseries aspect docs deleted: {}", numTimeseriesDocsDeleted);
-
       response.setUrn(urnStr);
-      response.setTimeseriesRows(numTimeseriesDocsDeleted);
-
+      response.setRows(0);
+      response.setTimeseriesRows(0);
       return response;
+
+      /*
+        // Find the timeseries aspects to delete. If aspectName is null, delete all.
+        List<String> timeseriesAspectNames =
+            EntitySpecUtils.getEntityTimeseriesAspectNames(_entityService.getEntityRegistry(), urn.getEntityType());
+        if (aspectName != null && !timeseriesAspectNames.contains(aspectName)) {
+          throw new UnsupportedOperationException(
+              String.format("Not supported for non-timeseries aspect '{}'.", aspectName));
+        }
+        List<String> timeseriesAspectsToDelete =
+            (aspectName == null) ? timeseriesAspectNames : ImmutableList.of(aspectName);
+
+        DeleteEntityResponse response = new DeleteEntityResponse();
+        if (aspectName == null) {
+          RollbackRunResult result = _entityService.deleteUrn(urn);
+          response.setRows(result.getRowsDeletedFromEntityDeletion());
+        }
+        Long numTimeseriesDocsDeleted =
+            deleteTimeseriesAspects(urn, startTimeMills, endTimeMillis, timeseriesAspectsToDelete);
+        log.info("Total number of timeseries aspect docs deleted: {}", numTimeseriesDocsDeleted);
+
+        response.setUrn(urnStr);
+        response.setTimeseriesRows(numTimeseriesDocsDeleted);
+
+        return response;
+      */
     }, MetricRegistry.name(this.getClass(), "delete"));
   }
 
