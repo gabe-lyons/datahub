@@ -780,7 +780,8 @@ public class EntityService {
     }
 
     // Produce MCL after a successful update
-    if (oldValue != updatedValue || _alwaysEmitChangeLog) {
+    boolean isNoOp = oldValue == updatedValue;
+    if (!isNoOp || _alwaysEmitChangeLog) {
       log.debug(String.format("Producing MetadataChangeLog for ingested aspect %s, urn %s", aspectName, urn));
       String entityName = urnToEntityName(urn);
       EntitySpec entitySpec = getEntityRegistry().getEntitySpec(entityName);
@@ -792,7 +793,7 @@ public class EntityService {
 
       Timer.Context produceMCLTimer = MetricUtils.timer(this.getClass(), "produceMCL").time();
       produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, oldValue, updatedValue, oldSystemMetadata,
-          updatedSystemMetadata, result.getAuditStamp(), ChangeType.UPSERT);
+          updatedSystemMetadata, result.getAuditStamp(), isNoOp ? ChangeType.RESTATE : ChangeType.UPSERT);
       produceMCLTimer.stop();
 
       // For legacy reasons, keep producing to the MAE event stream without blocking ingest
