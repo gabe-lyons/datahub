@@ -444,12 +444,7 @@ public class EntityResource extends CollectionResourceTaskTemplate<String, Entit
     return RestliUtil.toTask(() -> {
 
       // Temporary fix
-      DeleteEntityResponse response = new DeleteEntityResponse();
-      response.setUrn(urnStr);
-      response.setRows(0);
-      response.setTimeseriesRows(0);
-      return response;
-
+      throw new RestLiServiceException(HttpStatus.S_405_METHOD_NOT_ALLOWED, "Endpoint is temporarily unavailable");
       /*
         // Find the timeseries aspects to delete. If aspectName is null, delete all.
         List<String> timeseriesAspectNames =
@@ -475,6 +470,7 @@ public class EntityResource extends CollectionResourceTaskTemplate<String, Entit
 
         return response;
       */
+
     }, MetricRegistry.name(this.getClass(), "delete"));
   }
 
