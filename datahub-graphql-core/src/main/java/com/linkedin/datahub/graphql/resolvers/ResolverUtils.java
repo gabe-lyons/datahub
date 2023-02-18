@@ -180,6 +180,6 @@ public class ResolverUtils {
         if (KEYWORD_EXCLUDED_FILTERS.contains(originalField)) {
             return originalField;
         }
-        return originalField + ESUtils.KEYWORD_SUFFIX;
+        return ESUtils.toKeywordField(originalField);
     }
 }

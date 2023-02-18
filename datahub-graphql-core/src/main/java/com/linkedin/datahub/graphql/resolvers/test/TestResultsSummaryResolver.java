@@ -71,7 +71,7 @@ public class TestResultsSummaryResolver implements DataFetcher<CompletableFuture
 
   private Filter buildFilter(@Nonnull final Urn testUrn, @Nonnull final String fieldName) {
     final Filter result = new Filter();
-    final String fieldNameWithSuffix = fieldName + ESUtils.KEYWORD_SUFFIX;
+    final String fieldNameWithSuffix = ESUtils.toKeywordField(fieldName);
     result.setOr(new ConjunctiveCriterionArray(ImmutableList.of(
         new ConjunctiveCriterion()
           .setAnd(new CriterionArray(ImmutableList.of(

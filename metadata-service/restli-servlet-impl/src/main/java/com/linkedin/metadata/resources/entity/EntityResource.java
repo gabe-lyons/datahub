@@ -437,40 +437,34 @@ public class EntityResource extends CollectionResourceTaskTemplate<String, Entit
   @Nonnull
   @WithSpan
   public Task<DeleteEntityResponse> deleteEntity(@ActionParam(PARAM_URN) @Nonnull String urnStr,
-      @ActionParam(PARAM_ASPECT_NAME) @Optional String aspectName,
-      @ActionParam(PARAM_START_TIME_MILLIS) @Optional Long startTimeMills,
-      @ActionParam(PARAM_END_TIME_MILLIS) @Optional Long endTimeMillis) throws URISyntaxException {
+                                                 @ActionParam(PARAM_ASPECT_NAME) @Optional String aspectName,
+                                                 @ActionParam(PARAM_START_TIME_MILLIS) @Optional Long startTimeMills,
+                                                 @ActionParam(PARAM_END_TIME_MILLIS) @Optional Long endTimeMillis) throws URISyntaxException {
     Urn urn = Urn.createFromString(urnStr);
     return RestliUtil.toTask(() -> {
+      // Find the timeseries aspects to delete. If aspectName is null, delete all.
+      List<String> timeseriesAspectNames =
+              EntitySpecUtils.getEntityTimeseriesAspectNames(_entityService.getEntityRegistry(), urn.getEntityType());
+      if (aspectName != null && !timeseriesAspectNames.contains(aspectName)) {
+        throw new UnsupportedOperationException(
+                String.format("Not supported for non-timeseries aspect '{}'.", aspectName));
+      }
+      List<String> timeseriesAspectsToDelete =
+              (aspectName == null) ? timeseriesAspectNames : ImmutableList.of(aspectName);
 
-      // Temporary fix
-      throw new RestLiServiceException(HttpStatus.S_405_METHOD_NOT_ALLOWED, "Endpoint is temporarily unavailable");
-      /*
-        // Find the timeseries aspects to delete. If aspectName is null, delete all.
-        List<String> timeseriesAspectNames =
-            EntitySpecUtils.getEntityTimeseriesAspectNames(_entityService.getEntityRegistry(), urn.getEntityType());
-        if (aspectName != null && !timeseriesAspectNames.contains(aspectName)) {
-          throw new UnsupportedOperationException(
-              String.format("Not supported for non-timeseries aspect '{}'.", aspectName));
-        }
-        List<String> timeseriesAspectsToDelete =
-            (aspectName == null) ? timeseriesAspectNames : ImmutableList.of(aspectName);
+      DeleteEntityResponse response = new DeleteEntityResponse();
+      if (aspectName == null) {
+        RollbackRunResult result = _entityService.deleteUrn(urn);
+        response.setRows(result.getRowsDeletedFromEntityDeletion());
+      }
+      Long numTimeseriesDocsDeleted =
+              deleteTimeseriesAspects(urn, startTimeMills, endTimeMillis, timeseriesAspectsToDelete);
+      log.info("Total number of timeseries aspect docs deleted: {}", numTimeseriesDocsDeleted);
 
-        DeleteEntityResponse response = new DeleteEntityResponse();
-        if (aspectName == null) {
-          RollbackRunResult result = _entityService.deleteUrn(urn);
-          response.setRows(result.getRowsDeletedFromEntityDeletion());
-        }
-        Long numTimeseriesDocsDeleted =
-            deleteTimeseriesAspects(urn, startTimeMills, endTimeMillis, timeseriesAspectsToDelete);
-        log.info("Total number of timeseries aspect docs deleted: {}", numTimeseriesDocsDeleted);
+      response.setUrn(urnStr);
+      response.setTimeseriesRows(numTimeseriesDocsDeleted);
 
-        response.setUrn(urnStr);
-        response.setTimeseriesRows(numTimeseriesDocsDeleted);
-
-        return response;
-      */
-
+      return response;
     }, MetricRegistry.name(this.getClass(), "delete"));
   }
 

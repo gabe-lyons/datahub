@@ -7,6 +7,7 @@ import com.linkedin.metadata.query.filter.Criterion;
 import com.linkedin.metadata.query.filter.Filter;
 import com.linkedin.metadata.query.filter.SortCriterion;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nonnull;
@@ -28,7 +29,7 @@ import static com.linkedin.metadata.search.utils.SearchUtils.isUrn;
 public class ESUtils {
 
   private static final String DEFAULT_SEARCH_RESULTS_SORT_BY_FIELD = "urn";
-
+  public static final String KEYWORD_ANALYZER = "keyword";
   public static final String KEYWORD_SUFFIX = ".keyword";
   public static final int MAX_RESULT_SIZE = 10000;
   public static final String OPAQUE_ID_HEADER = "X-Opaque-Id";
@@ -143,7 +144,7 @@ public class ESUtils {
         criterionToQuery.setCondition(criterion.getCondition());
         criterionToQuery.setNegated(criterion.isNegated());
         criterionToQuery.setValue(criterion.getValue());
-        criterionToQuery.setField(field + KEYWORD_SUFFIX);
+        criterionToQuery.setField(toKeywordField(field));
         orQueryBuilder.should(getQueryBuilderFromCriterionForSingleField(criterionToQuery));
       }
       return orQueryBuilder;
@@ -162,17 +163,22 @@ public class ESUtils {
         if (BOOLEAN_FIELDS.contains(fieldName) && criterion.getValues().size() == 1) {
           return QueryBuilders.termQuery(fieldName, Boolean.parseBoolean(criterion.getValues().get(0)));
         }
-        return QueryBuilders.termsQuery(criterion.getField(), criterion.getValues());
+        return QueryBuilders.termsQuery(toKeywordField(criterion.getField()), criterion.getValues());
       }
 
       // TODO(https://github.com/datahub-project/datahub-gma/issues/51): support multiple values a field can take without using
       // delimiters like comma. This is a hack to support equals with URN that has a comma in it.
       if (isUrn(criterion.getValue())) {
-        return QueryBuilders.matchQuery(criterion.getField(), criterion.getValue().trim());
+        return QueryBuilders.matchQuery(toKeywordField(criterion.getField()), criterion.getValue().trim());
       }
       BoolQueryBuilder filters = new BoolQueryBuilder();
+      // Cannot assume the existence of a .keyword or other subfield (unless contains `.`)
+      // Cannot assume the type of the underlying field or subfield thus KEYWORD_ANALYZER is forced
+      List<String> fields = criterion.getField().contains(".") ? List.of(criterion.getField())
+              : List.of(criterion.getField(), criterion.getField() + ".*");
       Arrays.stream(criterion.getValue().trim().split("\\s*,\\s*"))
-          .forEach(elem -> filters.should(QueryBuilders.matchQuery(criterion.getField(), elem)));
+          .forEach(elem -> filters.should(QueryBuilders.multiMatchQuery(elem, fields.toArray(new String[0]))
+                  .analyzer(KEYWORD_ANALYZER)));
       return filters;
     } else if (condition == Condition.IS_NULL) {
       return QueryBuilders.boolQuery().mustNot(QueryBuilders.existsQuery(criterion.getField()));
@@ -185,13 +191,13 @@ public class ESUtils {
     } else if (condition == Condition.LESS_THAN_OR_EQUAL_TO) {
       return QueryBuilders.rangeQuery(criterion.getField()).lte(criterion.getValue().trim());
     } else if (condition == Condition.CONTAIN) {
-      return QueryBuilders.wildcardQuery(criterion.getField(),
+      return QueryBuilders.wildcardQuery(toKeywordField(criterion.getField()),
           "*" + ESUtils.escapeReservedCharacters(criterion.getValue().trim()) + "*");
     } else if (condition == Condition.START_WITH) {
-      return QueryBuilders.wildcardQuery(criterion.getField(),
+      return QueryBuilders.wildcardQuery(toKeywordField(criterion.getField()),
           ESUtils.escapeReservedCharacters(criterion.getValue().trim()) + "*");
     } else if (condition == Condition.END_WITH) {
-      return QueryBuilders.wildcardQuery(criterion.getField(),
+      return QueryBuilders.wildcardQuery(toKeywordField(criterion.getField()),
           "*" + ESUtils.escapeReservedCharacters(criterion.getValue().trim()));
     }
     throw new UnsupportedOperationException("Unsupported condition: " + condition);
@@ -241,6 +247,13 @@ public class ESUtils {
   @Nullable
   public static String toFacetField(@Nonnull final String filterField) {
     return filterField.replace(ESUtils.KEYWORD_SUFFIX, "");
+  }
+
+  @Nonnull
+  public static String toKeywordField(@Nonnull final String filterField) {
+    return filterField.endsWith(ESUtils.KEYWORD_SUFFIX)
+            || "urn".equals(filterField)
+            || filterField.contains(".") ? filterField : filterField + ESUtils.KEYWORD_SUFFIX;
   }
 
   public static RequestOptions buildReindexTaskRequestOptions(String version, String indexName, String tempIndexName) {
