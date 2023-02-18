@@ -176,7 +176,7 @@ public class PropagateTermsStep implements UpgradeStep {
         if (keyValue.get(0).equals(URN_FILTER)) {
           criteria.add(QueryUtils.newCriterion(keyValue.get(0), keyValue.get(1)));
         } else {
-          criteria.add(QueryUtils.newCriterion(ESUtils.toKeywordField(keyValue.get(0)), keyValue.get(1)));
+          criteria.add(QueryUtils.newCriterion(ESUtils.toKeywordField(keyValue.get(0), false), keyValue.get(1)));
         }
       }
       conjunctiveCriteria.add(new ConjunctiveCriterion().setAnd(criteria));

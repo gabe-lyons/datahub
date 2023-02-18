@@ -135,7 +135,7 @@ public class MostPopularSource implements RecommendationSourceWithOffline {
 
     // Find the entities with the most views
     AggregationBuilder aggregation = AggregationBuilders.terms(ENTITY_AGG_NAME)
-        .field(ESUtils.toKeywordField(DataHubUsageEventConstants.ENTITY_URN))
+        .field(ESUtils.toKeywordField(DataHubUsageEventConstants.ENTITY_URN, true))
         .size(MAX_CONTENT * 2);
     source.aggregation(aggregation);
     source.size(0);
