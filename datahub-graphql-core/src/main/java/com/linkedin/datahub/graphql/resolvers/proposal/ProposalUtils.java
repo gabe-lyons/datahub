@@ -332,7 +332,7 @@ public class ProposalUtils {
     final MetadataChangeProposal metadataChangeProposal = new MetadataChangeProposal();
     metadataChangeProposal.setAspect(GenericRecordUtils.serializeAspect(proposals));
     metadataChangeProposal.setEntityUrn(targetUrn);
-    metadataChangeProposal.setEntityType(DATASET_ENTITY_NAME);
+    metadataChangeProposal.setEntityType(targetUrn.getEntityType());
     metadataChangeProposal.setAspectName(PROPOSALS_ASPECT_NAME);
     metadataChangeProposal.setChangeType(ChangeType.UPSERT);
 

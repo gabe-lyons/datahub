@@ -687,6 +687,11 @@ public class GmsGraphQLEngine {
                             return container.getDataPlatformInstance() != null ? container.getDataPlatformInstance().getUrn() : null;
                         })
                 )
+                // Proposals not in OSS
+                .dataFetcher("proposals",
+                    new ProposalsResolver(
+                        (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
+                )
             );
     }
 
@@ -1309,6 +1314,11 @@ public class GmsGraphQLEngine {
                   return notebook.getDataPlatformInstance() != null ? notebook.getDataPlatformInstance().getUrn() : null;
                 })
         )
+        // Proposals not in OSS
+        .dataFetcher("proposals",
+            new ProposalsResolver(
+                (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
+        )
     );
   }
 
@@ -1340,6 +1350,11 @@ public class GmsGraphQLEngine {
             .dataFetcher("statsSummary", new DashboardStatsSummaryResolver(entityClient, timeseriesAspectService))
             .dataFetcher("privileges", new EntityPrivilegesResolver(entityClient))
             .dataFetcher("exists", new EntityExistsResolver(entityService))
+            // Proposals not in OSS
+            .dataFetcher("proposals",
+                new ProposalsResolver(
+                    (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
+            )
         );
         builder.type("DashboardInfo", typeWiring -> typeWiring
             .dataFetcher("charts", new LoadableTypeBatchResolver<>(chartType,
@@ -1393,6 +1408,11 @@ public class GmsGraphQLEngine {
             .dataFetcher("statsSummary", new ChartStatsSummaryResolver(entityClient, this.timeseriesAspectService))
             .dataFetcher("privileges", new EntityPrivilegesResolver(entityClient))
             .dataFetcher("exists", new EntityExistsResolver(entityService))
+            // Proposals not in OSS
+            .dataFetcher("proposals",
+                new ProposalsResolver(
+                    (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
+            )
         );
         builder.type("ChartInfo", typeWiring -> typeWiring
             .dataFetcher("inputs", new LoadableTypeBatchResolver<>(datasetType,
@@ -1483,6 +1503,11 @@ public class GmsGraphQLEngine {
                 .dataFetcher("incidents", new EntityIncidentsResolver(entityClient))
                 .dataFetcher("privileges", new EntityPrivilegesResolver(entityClient))
                 .dataFetcher("exists", new EntityExistsResolver(entityService))
+                // Proposals not in OSS
+                .dataFetcher("proposals",
+                    new ProposalsResolver(
+                        (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
+                )
             )
             .type("DataJobInputOutput", typeWiring -> typeWiring
                 .dataFetcher("inputDatasets", new LoadableTypeBatchResolver<>(datasetType,
@@ -1521,6 +1546,11 @@ public class GmsGraphQLEngine {
                 )
                 // Not in OSS
                 .dataFetcher("incidents", new EntityIncidentsResolver(entityClient))
+                // Proposals not in OSS
+                .dataFetcher("proposals",
+                    new ProposalsResolver(
+                        (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
+                )
             );
     }
 
@@ -1543,6 +1573,11 @@ public class GmsGraphQLEngine {
                             final MLFeatureTable entity = env.getSource();
                             return entity.getDataPlatformInstance() != null ? entity.getDataPlatformInstance().getUrn() : null;
                         })
+                )
+                // Proposals not in OSS
+                .dataFetcher("proposals",
+                    new ProposalsResolver(
+                        (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
                 )
             )
             .type("MLFeatureTableProperties", typeWiring -> typeWiring
@@ -1599,6 +1634,11 @@ public class GmsGraphQLEngine {
                             return mlModel.getDataPlatformInstance() != null ? mlModel.getDataPlatformInstance().getUrn() : null;
                         })
                 )
+                // Proposals not in OSS
+                .dataFetcher("proposals",
+                    new ProposalsResolver(
+                        (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
+                )
             )
             .type("MLModelProperties", typeWiring -> typeWiring
                 .dataFetcher("groups", new LoadableTypeBatchResolver<>(mlModelGroupType,
@@ -1635,6 +1675,11 @@ public class GmsGraphQLEngine {
                             return entity.getDataPlatformInstance() != null ? entity.getDataPlatformInstance().getUrn() : null;
                         })
                 )
+                // Proposals not in OSS
+                .dataFetcher("proposals",
+                    new ProposalsResolver(
+                        (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
+                )
             )
             .type("MLFeature", typeWiring -> typeWiring
                 .dataFetcher("relationships", new EntityRelationshipsResultResolver(graphClient))
@@ -1647,6 +1692,11 @@ public class GmsGraphQLEngine {
                             return entity.getDataPlatformInstance() != null ? entity.getDataPlatformInstance().getUrn() : null;
                         })
                 )
+                // Proposals not in OSS
+                .dataFetcher("proposals",
+                    new ProposalsResolver(
+                        (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
+                )
             )
             .type("MLPrimaryKey", typeWiring -> typeWiring
                 .dataFetcher("relationships", new EntityRelationshipsResultResolver(graphClient))
@@ -1658,6 +1708,11 @@ public class GmsGraphQLEngine {
                             final MLPrimaryKey entity = env.getSource();
                             return entity.getDataPlatformInstance() != null ? entity.getDataPlatformInstance().getUrn() : null;
                         })
+                )
+                // Proposals not in OSS
+                .dataFetcher("proposals",
+                    new ProposalsResolver(
+                        (env) -> ((Entity) env.getSource()).getUrn(), entityClient)
                 )
             );
     }

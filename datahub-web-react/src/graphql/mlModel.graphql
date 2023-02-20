@@ -24,5 +24,11 @@ query getMLModel($urn: String!) {
                 }
             }
         }
+        termProposals: proposals(type: TERM_ASSOCIATION) {
+            ...proposalsFragment
+        }
+        tagProposals: proposals(type: TAG_ASSOCIATION) {
+            ...proposalsFragment
+        }
     }
 }

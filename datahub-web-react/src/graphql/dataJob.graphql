@@ -12,6 +12,12 @@ query getDataJob($urn: String!) {
             start
             total
         }
+        termProposals: proposals(type: TERM_ASSOCIATION) {
+            ...proposalsFragment
+        }
+        tagProposals: proposals(type: TAG_ASSOCIATION) {
+            ...proposalsFragment
+        }
     }
 }
 
