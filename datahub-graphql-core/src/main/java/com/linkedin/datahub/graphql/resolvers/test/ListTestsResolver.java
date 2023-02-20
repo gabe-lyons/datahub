@@ -62,8 +62,9 @@ public class ListTestsResolver implements DataFetcher<CompletableFuture<ListTest
               new SortCriterion().setField(TESTS_LAST_UPDATED_TIME_INDEX_FIELD_NAME).setOrder(SortOrder.DESCENDING),
               start,
               count,
-              authentication,
-                  true);
+              context.getAuthentication(),
+                  true,
+              null);
 
           // Now that we have entities we can bind this to a result.
           final ListTestsResult result = new ListTestsResult();
