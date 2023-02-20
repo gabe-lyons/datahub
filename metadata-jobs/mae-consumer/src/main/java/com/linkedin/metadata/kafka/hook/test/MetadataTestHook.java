@@ -70,7 +70,7 @@ public class MetadataTestHook implements MetadataChangeLogHook {
   @Autowired
   public MetadataTestHook(@Nonnull final EntityRegistry entityRegistry, @Nonnull final MetadataTestClient testClient,
       @Nonnull final Authentication systemAuthentication,
-      @Nonnull @Value("${metadataTests.enabled:true}") Boolean isEnabled) {
+      @Nonnull @Value("${metadataTests.hook.enabled:true}") Boolean isEnabled) {
     this(entityRegistry, testClient, systemAuthentication, isEnabled, 2, TimeUnit.SECONDS);
   }
 
@@ -79,7 +79,7 @@ public class MetadataTestHook implements MetadataChangeLogHook {
       @Nonnull final EntityRegistry entityRegistry,
       @Nonnull final MetadataTestClient testClient,
       @Nonnull final Authentication systemAuthentication,
-      @Nonnull @Value("${metadataTests.enabled:true}") Boolean isEnabled,
+      @Nonnull @Value("${metadataTests.hook.enabled:true}") Boolean isEnabled,
       final int cacheExpirationTime,
       final TimeUnit cacheExpirationUnit) {
     _entityRegistry = entityRegistry;
