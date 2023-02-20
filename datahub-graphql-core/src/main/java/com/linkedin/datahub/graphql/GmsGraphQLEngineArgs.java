@@ -25,6 +25,7 @@ import com.linkedin.metadata.recommendation.RecommendationsService;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.secret.SecretService;
 import com.linkedin.metadata.service.LineageService;
+import com.linkedin.metadata.service.QueryService;
 import com.linkedin.metadata.service.SettingsService;
 import com.linkedin.metadata.service.ViewService;
 import com.linkedin.metadata.telemetry.TelemetryConfiguration;
@@ -67,6 +68,7 @@ public class GmsGraphQLEngineArgs {
     ViewService viewService;
     SettingsService settingsService;
     LineageService lineageService;
+    QueryService queryService;
     FeatureFlags featureFlags;
 
     //any fork specific args should go below this line

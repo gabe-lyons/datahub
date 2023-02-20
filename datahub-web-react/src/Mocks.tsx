@@ -168,6 +168,7 @@ export const dataset1 = {
     privileges: {
         canEditLineage: false,
         canEditEmbed: false,
+        canEditQueries: false,
     },
     properties: {
         name: 'The Great Test Dataset',
@@ -275,6 +276,7 @@ export const dataset2 = {
     privileges: {
         canEditLineage: false,
         canEditEmbed: false,
+        canEditQueries: false,
     },
     lastIngested: null,
     exists: true,
@@ -376,6 +378,7 @@ export const dataset3 = {
     privileges: {
         canEditLineage: false,
         canEditEmbed: false,
+        canEditQueries: false,
     },
     exists: true,
     lastIngested: null,

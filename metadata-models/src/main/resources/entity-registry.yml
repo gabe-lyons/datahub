@@ -339,5 +339,12 @@ entities:
     keyAspect: dataHubViewKey
     aspects:
       - dataHubViewInfo
+  - name: query
+    category: core
+    keyAspect: queryKey
+    aspects:
+      - queryProperties
+      - querySubjects
+      - status
 events:
   - name: notificationRequest
