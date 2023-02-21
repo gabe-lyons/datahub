@@ -718,7 +718,8 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
             // Test field variations with/without .keyword
             List<SearchResult> entityClientResults = testFilters.stream().map(filter -> {
                 try {
-                    return entityClient.search("dataset", "*", filter, null, 0, 100, AUTHENTICATION, fulltextFlag);
+                    return entityClient.search("dataset", "*", filter, null, 0, 100,
+                            AUTHENTICATION, fulltextFlag, null);
                 } catch (RemoteInvocationException e) {
                     throw new RuntimeException(e);
                 }
@@ -731,7 +732,6 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
         }
     }
 
-    @Test
     public void testStructQueryFieldMatch() {
         String query = STRUCTURED_QUERY_PREFIX + "name: customers";
         SearchResult result = search(searchService, query);
