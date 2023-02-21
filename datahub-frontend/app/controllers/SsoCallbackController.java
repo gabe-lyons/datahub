@@ -47,6 +47,7 @@ public class SsoCallbackController extends CallbackController {
       @Nonnull Authentication systemAuthentication,
       @Nonnull EntityClient entityClient,
       @Nonnull AuthServiceClient authClient,
+      @Nonnull Config config,
       @Nonnull com.typesafe.config.Config configs) {
     _ssoManager = ssoManager;
     _config = config;

@@ -101,6 +101,7 @@ public class AuthModule extends AbstractModule {
                 Authentication.class,
                 EntityClient.class,
                 AuthServiceClient.class,
+                org.pac4j.core.config.Config.class,
                 com.typesafe.config.Config.class));
         } catch (NoSuchMethodException | SecurityException e) {
             throw new RuntimeException("Failed to bind to SsoCallbackController. Cannot find constructor", e);
