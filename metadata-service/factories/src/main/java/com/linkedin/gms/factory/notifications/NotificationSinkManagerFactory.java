@@ -8,7 +8,10 @@ import com.datahub.notification.NotificationSink;
 import com.datahub.notification.NotificationSinkConfig;
 import com.datahub.notification.NotificationSinkManager;
 import com.linkedin.entity.client.EntityClient;
+import com.linkedin.gms.factory.auth.SystemAuthenticationFactory;
 import com.linkedin.gms.factory.config.ConfigurationProvider;
+import com.linkedin.gms.factory.entity.RestliEntityClientFactory;
+import com.linkedin.gms.factory.secret.SecretServiceFactory;
 import com.linkedin.gms.factory.spring.YamlPropertySourceFactory;
 import com.linkedin.metadata.config.notification.NotificationSinkConfiguration;
 import java.util.ArrayList;
@@ -22,11 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 
 @Slf4j
 @Configuration
 @PropertySource(value = "classpath:/application.yml", factory = YamlPropertySourceFactory.class)
+@Import({RestliEntityClientFactory.class, SettingsProviderFactory.class, IdentityProviderFactory.class,
+    SecretProviderFactory.class, SystemAuthenticationFactory.class})
 public class NotificationSinkManagerFactory {
 
   @Autowired
