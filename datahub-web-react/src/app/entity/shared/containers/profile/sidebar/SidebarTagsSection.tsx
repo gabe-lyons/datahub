@@ -46,10 +46,7 @@ export const SidebarTagsSection = ({ properties, readOnly }: Props) => {
                     entityType={entityType}
                     refetch={refetch}
                     readOnly={readOnly}
-                    // eslint-disable-next-line
-                    // @ts-ignore
-                    // eslint-disable-next-line
-                    proposedTags={findTopLevelProposals(baseEntity?.['dataset']?.['tagProposals'] || [])}
+                    proposedTags={findTopLevelProposals(entityData?.tagProposals || [])}
                 />
             </span>
             <StyledDivider />
@@ -65,10 +62,7 @@ export const SidebarTagsSection = ({ properties, readOnly }: Props) => {
                     entityType={entityType}
                     refetch={refetch}
                     readOnly={readOnly}
-                    // eslint-disable-next-line
-                    // @ts-ignore
-                    // eslint-disable-next-line
-                    proposedGlossaryTerms={findTopLevelProposals(baseEntity?.dataset?.termProposals || [])}
+                    proposedGlossaryTerms={findTopLevelProposals(entityData?.termProposals || [])}
                 />
             </span>
         </div>

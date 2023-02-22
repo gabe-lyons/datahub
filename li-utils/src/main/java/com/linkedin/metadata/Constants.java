@@ -58,6 +58,7 @@ public class Constants {
   public static final String SCHEMA_FIELD_ENTITY_NAME = "schemaField";
   public static final String DATAHUB_STEP_STATE_ENTITY_NAME = "dataHubStepState";
   public static final String DATAHUB_VIEW_ENTITY_NAME = "dataHubView";
+  public static final String QUERY_ENTITY_NAME = "query";
   public static final String TELEMETRY_ENTITY_NAME = "telemetry";
 
   /**
@@ -146,6 +147,7 @@ public class Constants {
 
   // DataPlatformInstance
   public static final String DATA_PLATFORM_INSTANCE_KEY_ASPECT_NAME = "dataPlatformInstanceKey";
+  public static final String DATA_PLATFORM_INSTANCE_PROPERTIES_ASPECT_NAME = "dataPlatformInstanceProperties";
 
   // ML Feature
   public static final String ML_FEATURE_KEY_ASPECT_NAME = "mlFeatureKey";
@@ -270,6 +272,10 @@ public class Constants {
   public static final String DATAHUB_VIEW_KEY_ASPECT_NAME = "dataHubViewKey";
   public static final String DATAHUB_VIEW_INFO_ASPECT_NAME = "dataHubViewInfo";
 
+  // Query
+  public static final String QUERY_PROPERTIES_ASPECT_NAME = "queryProperties";
+  public static final String QUERY_SUBJECTS_ASPECT_NAME = "querySubjects";
+
   // Settings
   public static final String GLOBAL_SETTINGS_ENTITY_NAME = "globalSettings";
   public static final String GLOBAL_SETTINGS_INFO_ASPECT_NAME = "globalSettingsInfo";
@@ -301,6 +307,12 @@ public class Constants {
 
   public static final String CHANGE_EVENT_PLATFORM_EVENT_NAME = "entityChangeEvent";
 
+  /**
+   * Retention
+   */
+  public static final String DATAHUB_RETENTION_ENTITY = "dataHubRetention";
+  public static final String DATAHUB_RETENTION_ASPECT = "dataHubRetentionConfig";
+  public static final String DATAHUB_RETENTION_KEY_ASPECT = "dataHubRetentionKey";
   /**
    * User Status
    */

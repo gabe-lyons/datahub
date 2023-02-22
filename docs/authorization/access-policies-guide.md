@@ -117,18 +117,17 @@ In this step, we can select the actors who should be granted Privileges appearin
 
 To do so, simply search and select the Users or Groups that the Policy should apply to.
 
+**Assigning a Policy to a User**
+
 <p align="center">
   <img width="80%"  src="https://raw.githubusercontent.com/datahub-project/static-assets/main/imgs/policies-select-users.png"/>
 </p>
 
-**Assigning a Policy to a User**
+**Assigning a Policy to a Group**
 
 <p align="center">
   <img width="80%"  src="https://raw.githubusercontent.com/datahub-project/static-assets/main/imgs/policies-select-groups.png"/>
 </p>
-
-**Assigning a Policy to a Group**
-
 
 ### Creating a Metadata Policy
 
@@ -201,7 +200,9 @@ The common Metadata Privileges, which span across entity types, include:
 | Edit Domain         | Allow actor to edit the Domain of an entity.                                                                                     |
 | Edit Deprecation    | Allow actor to edit the Deprecation status of an entity.                                                                         |
 | Edit Assertions     | Allow actor to add and remove assertions from an entity.                                                                         |
+| Edit Lineage        | Allow actor to edit lineage edges to and from the entity, e.g. from the Lineage tab.                                             |
 | Edit All            | Allow actor to edit any information about an entity. Super user privileges.                                                      |
+
 
 **Specific Metadata Privileges** include
 
@@ -210,6 +211,7 @@ The common Metadata Privileges, which span across entity types, include:
 | Dataset      | Edit Dataset Column Tags           | Allow actor to edit the column (field) tags associated with a dataset schema.                                                                                              |
 | Dataset      | Edit Dataset Column Glossary Terms | Allow actor to edit the column (field) glossary terms associated with a dataset schema.                                                                                    |
 | Dataset      | Edit Dataset Column Descriptions   | Allow actor to edit the column (field) descriptions associated with a dataset schema.                                                                                      |
+| Dataset      | Edit Dataset Queries               | Allow actor to edit the Highlighted Queries on the Queries tab of the dataset.                                                                                             |
 | Dataset      | View Dataset Usage                 | Allow actor to access usage metadata about a dataset both in the UI and in the GraphQL API. This includes example queries, number of queries, etc.                         |
 | Dataset      | View Dataset Profile               | Allow actor to access a dataset's profile both in the UI and in the GraphQL API. This   includes snapshot statistics like #rows, #columns, null percentage per field, etc. |
 | Tag          | Edit Tag Color                     | Allow actor to change the color of a Tag.                                                                                                                                  |

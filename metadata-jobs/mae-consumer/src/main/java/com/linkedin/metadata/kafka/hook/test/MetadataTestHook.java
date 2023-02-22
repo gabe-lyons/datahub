@@ -40,6 +40,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
 
+import static com.linkedin.metadata.Constants.*;
+
 
 /**
  * This hook evaluates tests when updates to entities come in
@@ -68,7 +70,7 @@ public class MetadataTestHook implements MetadataChangeLogHook {
   @Autowired
   public MetadataTestHook(@Nonnull final EntityRegistry entityRegistry, @Nonnull final MetadataTestClient testClient,
       @Nonnull final Authentication systemAuthentication,
-      @Nonnull @Value("${metadataTests.enabled:true}") Boolean isEnabled) {
+      @Nonnull @Value("${metadataTests.hook.enabled:true}") Boolean isEnabled) {
     this(entityRegistry, testClient, systemAuthentication, isEnabled, 2, TimeUnit.SECONDS);
   }
 
@@ -77,7 +79,7 @@ public class MetadataTestHook implements MetadataChangeLogHook {
       @Nonnull final EntityRegistry entityRegistry,
       @Nonnull final MetadataTestClient testClient,
       @Nonnull final Authentication systemAuthentication,
-      @Nonnull @Value("${metadataTests.enabled:true}") Boolean isEnabled,
+      @Nonnull @Value("${metadataTests.hook.enabled:true}") Boolean isEnabled,
       final int cacheExpirationTime,
       final TimeUnit cacheExpirationUnit) {
     _entityRegistry = entityRegistry;
@@ -121,6 +123,11 @@ public class MetadataTestHook implements MetadataChangeLogHook {
     }
     // Do not trigger tests if the change is for an aspect among the aspects to ignore set
     if (event.getAspectName() != null && ASPECTS_TO_IGNORE.contains(event.getAspectName())) {
+      return;
+    }
+    // Do not trigger tests if the change comes from an ingestion
+    if (event.hasSystemMetadata() && event.getSystemMetadata().hasRunId()
+        && !event.getSystemMetadata().getRunId().equals(DEFAULT_RUN_ID)) {
       return;
     }
 

@@ -46,14 +46,14 @@ public class QueryVersionedAspectEvaluator extends BaseQueryEvaluator {
       return false;
     }
 
-    EntitySpec entitySpec;
     try {
-      entitySpec = entityRegistry.getEntitySpec(entityType);
+      final EntitySpec entitySpec = entityRegistry.getEntitySpec(entityType);
+      return entitySpec.hasAspect(query.getQueryParts().get(0));
     } catch (Exception e) {
       log.info("Unknown entity type {} while evaluating {}", entityType, this.getClass().getSimpleName());
       return false;
     }
-    return entitySpec.hasAspect(query.getQueryParts().get(0));
+
   }
 
   private ValidationResult invalidResultWithMessage(String message) {
@@ -62,7 +62,7 @@ public class QueryVersionedAspectEvaluator extends BaseQueryEvaluator {
 
   @Override
   public ValidationResult validateQuery(String entityType, TestQuery query) {
-    EntitySpec entitySpec;
+    final EntitySpec entitySpec;
     try {
       entitySpec = entityRegistry.getEntitySpec(entityType);
     } catch (Exception e) {

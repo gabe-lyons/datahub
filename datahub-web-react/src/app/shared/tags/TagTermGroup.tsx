@@ -21,6 +21,7 @@ import ProposalModal from './ProposalModal';
 import EditTagTermsModal from './AddTagsTermsModal';
 import StyledTerm from './term/StyledTerm';
 import Tag from './tag/Tag';
+import { shouldShowProposeButton } from './utils/proposalUtils';
 
 type Props = {
     uneditableTags?: GlobalTags | null;
@@ -325,7 +326,7 @@ export default function TagTermGroup({
                             subResourceType: entitySubresource ? SubResourceType.DatasetField : null,
                         },
                     ]}
-                    showPropose={entityType === EntityType.Dataset}
+                    showPropose={shouldShowProposeButton(entityType)}
                 />
             )}
         </>

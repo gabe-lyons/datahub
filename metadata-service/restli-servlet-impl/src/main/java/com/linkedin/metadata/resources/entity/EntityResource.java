@@ -270,14 +270,17 @@ public class EntityResource extends CollectionResourceTaskTemplate<String, Entit
   public Task<SearchResult> search(@ActionParam(PARAM_ENTITY) @Nonnull String entityName,
       @ActionParam(PARAM_INPUT) @Nonnull String input, @ActionParam(PARAM_FILTER) @Optional @Nullable Filter filter,
       @ActionParam(PARAM_SORT) @Optional @Nullable SortCriterion sortCriterion, @ActionParam(PARAM_START) int start,
-      @ActionParam(PARAM_COUNT) int count, @Optional @Nullable @ActionParam(PARAM_FULLTEXT) Boolean fulltext) {
+      @ActionParam(PARAM_COUNT) int count, @Optional @Deprecated @Nullable @ActionParam(PARAM_FULLTEXT) Boolean fulltext,
+      @Optional @Nullable @ActionParam(PARAM_SEARCH_FLAGS) SearchFlags searchFlags) {
 
     log.info("GET SEARCH RESULTS for {} with query {}", entityName, input);
     // TODO - change it to use _searchService once we are confident on it's latency
     return RestliUtil.toTask(
             () -> {
               final SearchResult result;
-              if (Boolean.TRUE.equals(fulltext)) {
+              // This API is not used by the frontend for search bars so we default to structured
+              final SearchFlags finalFlags = searchFlags != null ? searchFlags : new SearchFlags().setFulltext(false);
+              if (Boolean.TRUE.equals(finalFlags.isFulltext()) || Boolean.TRUE.equals(fulltext)) {
                 result = _entitySearchService.fullTextSearch(entityName, input, filter, sortCriterion, start, count);
               } else {
                 result = _entitySearchService.structuredSearch(entityName, input, filter, sortCriterion, start, count);
@@ -293,12 +296,12 @@ public class EntityResource extends CollectionResourceTaskTemplate<String, Entit
   public Task<SearchResult> searchAcrossEntities(@ActionParam(PARAM_ENTITIES) @Optional @Nullable String[] entities,
       @ActionParam(PARAM_INPUT) @Nonnull String input, @ActionParam(PARAM_FILTER) @Optional @Nullable Filter filter,
       @ActionParam(PARAM_SORT) @Optional @Nullable SortCriterion sortCriterion, @ActionParam(PARAM_START) int start,
-      @ActionParam(PARAM_COUNT) int count) {
+      @ActionParam(PARAM_COUNT) int count, @ActionParam(PARAM_SEARCH_FLAGS) @Optional SearchFlags searchFlags) {
     List<String> entityList = entities == null ? Collections.emptyList() : Arrays.asList(entities);
     log.info("GET SEARCH RESULTS ACROSS ENTITIES for {} with query {}", entityList, input);
+    final SearchFlags finalFlags = searchFlags != null ? searchFlags :  new SearchFlags().setFulltext(true);
     return RestliUtil.toTask(() -> validateSearchResult(
-        _searchService.searchAcrossEntities(entityList, input, filter, sortCriterion, start, count,
-                new SearchFlags().setFulltext(true)),
+        _searchService.searchAcrossEntities(entityList, input, filter, sortCriterion, start, count, finalFlags),
         _entityService), "searchAcrossEntities");
   }
 
@@ -312,14 +315,16 @@ public class EntityResource extends CollectionResourceTaskTemplate<String, Entit
       @ActionParam(PARAM_MAX_HOPS) @Optional @Nullable Integer maxHops,
       @ActionParam(PARAM_FILTER) @Optional @Nullable Filter filter,
       @ActionParam(PARAM_SORT) @Optional @Nullable SortCriterion sortCriterion, @ActionParam(PARAM_START) int start,
-      @ActionParam(PARAM_COUNT) int count) throws URISyntaxException {
+      @ActionParam(PARAM_COUNT) int count,
+      @Optional @Nullable @ActionParam(PARAM_SEARCH_FLAGS) SearchFlags searchFlags) throws URISyntaxException {
     Urn urn = Urn.createFromString(urnStr);
     List<String> entityList = entities == null ? Collections.emptyList() : Arrays.asList(entities);
     log.info("GET SEARCH RESULTS ACROSS RELATIONSHIPS for source urn {}, direction {}, entities {} with query {}",
         urnStr, direction, entityList, input);
+    final SearchFlags finalFlags = searchFlags != null ? searchFlags : new SearchFlags().setSkipCache(true);
     return RestliUtil.toTask(() -> validateLineageSearchResult(
         _lineageSearchService.searchAcrossLineage(urn, LineageDirection.valueOf(direction), entityList, input, maxHops,
-            filter, sortCriterion, start, count, null, null), _entityService), "searchAcrossRelationships");
+            filter, sortCriterion, start, count, null, null, searchFlags), _entityService), "searchAcrossRelationships");
   }
 
   @Action(name = ACTION_LIST)
@@ -437,20 +442,20 @@ public class EntityResource extends CollectionResourceTaskTemplate<String, Entit
   @Nonnull
   @WithSpan
   public Task<DeleteEntityResponse> deleteEntity(@ActionParam(PARAM_URN) @Nonnull String urnStr,
-      @ActionParam(PARAM_ASPECT_NAME) @Optional String aspectName,
-      @ActionParam(PARAM_START_TIME_MILLIS) @Optional Long startTimeMills,
-      @ActionParam(PARAM_END_TIME_MILLIS) @Optional Long endTimeMillis) throws URISyntaxException {
+                                                 @ActionParam(PARAM_ASPECT_NAME) @Optional String aspectName,
+                                                 @ActionParam(PARAM_START_TIME_MILLIS) @Optional Long startTimeMills,
+                                                 @ActionParam(PARAM_END_TIME_MILLIS) @Optional Long endTimeMillis) throws URISyntaxException {
     Urn urn = Urn.createFromString(urnStr);
     return RestliUtil.toTask(() -> {
       // Find the timeseries aspects to delete. If aspectName is null, delete all.
       List<String> timeseriesAspectNames =
-          EntitySpecUtils.getEntityTimeseriesAspectNames(_entityService.getEntityRegistry(), urn.getEntityType());
+              EntitySpecUtils.getEntityTimeseriesAspectNames(_entityService.getEntityRegistry(), urn.getEntityType());
       if (aspectName != null && !timeseriesAspectNames.contains(aspectName)) {
         throw new UnsupportedOperationException(
-            String.format("Not supported for non-timeseries aspect '{}'.", aspectName));
+                String.format("Not supported for non-timeseries aspect '{}'.", aspectName));
       }
       List<String> timeseriesAspectsToDelete =
-          (aspectName == null) ? timeseriesAspectNames : ImmutableList.of(aspectName);
+              (aspectName == null) ? timeseriesAspectNames : ImmutableList.of(aspectName);
 
       DeleteEntityResponse response = new DeleteEntityResponse();
       if (aspectName == null) {
@@ -458,7 +463,7 @@ public class EntityResource extends CollectionResourceTaskTemplate<String, Entit
         response.setRows(result.getRowsDeletedFromEntityDeletion());
       }
       Long numTimeseriesDocsDeleted =
-          deleteTimeseriesAspects(urn, startTimeMills, endTimeMillis, timeseriesAspectsToDelete);
+              deleteTimeseriesAspects(urn, startTimeMills, endTimeMillis, timeseriesAspectsToDelete);
       log.info("Total number of timeseries aspect docs deleted: {}", numTimeseriesDocsDeleted);
 
       response.setUrn(urnStr);

@@ -68,7 +68,7 @@ export const NameStep = ({ state, updateState, prev, submit }: StepProps) => {
                     <Typography.Paragraph>
                         An optional description to help keep track of your test.
                     </Typography.Paragraph>
-                    <Input
+                    <Input.TextArea
                         placeholder="The description for your test"
                         value={state.description || undefined}
                         onChange={(event) => setDescription(event.target.value)}

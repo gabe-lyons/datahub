@@ -242,6 +242,8 @@ springdoc:
 metadataTests:
   # Enable metadata tests feature
   enabled: ${METADATA_TESTS_ENABLED:false}
+  hook:
+    enabled: ${METADATA_TESTS_HOOK_ENABLED:true}
   cacheRefreshIntervalSecs: ${METADATA_TESTS_CACHE_REFRESH_INTERVAL_SECONDS:120}
   # Flags to enable bootstrap ingestion of default policies
   bootstrap:
@@ -315,3 +317,11 @@ entityClient:
 usageClient:
   retryInterval: ${USAGE_CLIENT_RETRY_INTERVAL:2}
   numRetries: ${USAGE_CLIENT_NUM_RETRIES:3}
+
+cache:
+  primary:
+    ttlSeconds: ${CACHE_TTL_SECONDS:600}
+    maxSize: ${CACHE_MAX_SIZE:10000}
+  homepage:
+    entityCounts:
+      ttlSeconds: ${CACHE_ENTITY_COUNTS_TTL_SECONDS:600}

@@ -19,7 +19,7 @@ const Container = styled.div`
     border-radius: 4px;
     padding: 16px;
     border: 0.5px solid ${ANTD_GRAY[5]};
-    overflow: scroll;
+    overflow: auto;
 `;
 
 const ActionWrapper = styled.div`

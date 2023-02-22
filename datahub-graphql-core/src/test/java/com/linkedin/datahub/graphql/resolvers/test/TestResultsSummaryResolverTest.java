@@ -122,7 +122,7 @@ public class TestResultsSummaryResolverTest {
 
   private static Filter buildFilter(@Nonnull final String fieldName) {
     final Filter result = new Filter();
-    final String fieldNameWithSuffix = fieldName + ESUtils.KEYWORD_SUFFIX;
+    final String fieldNameWithSuffix = ESUtils.toKeywordField(fieldName, false);
     result.setOr(new ConjunctiveCriterionArray(ImmutableList.of(
         new ConjunctiveCriterion()
             .setAnd(new CriterionArray(ImmutableList.of(
