@@ -30,6 +30,7 @@ public class NotificationSinkHook implements PlatformEventHook {
 
   @Override
   public void init() {
+    log.info("Created notification sink hook");
   }
 
   @Override
