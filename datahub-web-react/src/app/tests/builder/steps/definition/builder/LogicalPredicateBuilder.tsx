@@ -24,7 +24,7 @@ const Container = styled.div`
     display: flex;
     align-items: center;
     justify-content: left;
-    overflow: scroll;
+    overflow: auto;
 `;
 
 const ThinDivider = styled(Divider)`

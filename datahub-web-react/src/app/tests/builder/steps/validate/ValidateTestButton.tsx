@@ -12,12 +12,12 @@ import { TestBuilderState } from '../../types';
 const StatusContainer = styled.div<{ color?: string }>`
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: right;
     padding-left: 12px;
     padding-top: 8px;
     padding-bottom: 8px;
     padding-right: 12px;
-    max-width: 100px;
+    width: 140px;
 `;
 
 const StatusText = styled(Typography.Text)`

@@ -127,7 +127,7 @@ public class MetadataTestHook implements MetadataChangeLogHook {
     }
     // Do not trigger tests if the change comes from an ingestion
     if (event.hasSystemMetadata() && event.getSystemMetadata().hasRunId()
-        && event.getSystemMetadata().getRunId() != DEFAULT_RUN_ID) {
+        && !event.getSystemMetadata().getRunId().equals(DEFAULT_RUN_ID)) {
       return;
     }
 
