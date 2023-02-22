@@ -11,7 +11,6 @@ import com.linkedin.entity.client.EntityClient;
 import com.linkedin.gms.factory.auth.SystemAuthenticationFactory;
 import com.linkedin.gms.factory.config.ConfigurationProvider;
 import com.linkedin.gms.factory.entity.RestliEntityClientFactory;
-import com.linkedin.gms.factory.secret.SecretServiceFactory;
 import com.linkedin.gms.factory.spring.YamlPropertySourceFactory;
 import com.linkedin.metadata.config.notification.NotificationSinkConfiguration;
 import java.util.ArrayList;
