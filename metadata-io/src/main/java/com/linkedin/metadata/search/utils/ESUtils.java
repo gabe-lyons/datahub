@@ -146,6 +146,7 @@ public class ESUtils {
         criterionToQuery.setCondition(criterion.getCondition());
         criterionToQuery.setNegated(criterion.isNegated());
         criterionToQuery.setValue(criterion.getValue());
+        criterionToQuery.setValues(criterion.getValues());
         criterionToQuery.setField(toKeywordField(field, isTimeseries));
         orQueryBuilder.should(getQueryBuilderFromCriterionForSingleField(criterionToQuery, isTimeseries));
       }

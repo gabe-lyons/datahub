@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static auth.AuthUtils.*;
-import static auth.ConfigUtil.*;
 
 
 /**
@@ -31,19 +30,13 @@ public class SsoConfigs {
   private final String _authBaseUrl;
   private final String _authBaseCallbackPath;
   private final String _authSuccessRedirectPath;
-  private final Integer _sessionTtlInHours;
   private final Boolean _oidcEnabled;
-  private final String _authCookieSameSite;
-  private final Boolean _authCookieSecure;
 
   public SsoConfigs(Builder<?> builder) {
     _authBaseUrl = builder._authBaseUrl;
     _authBaseCallbackPath = builder._authBaseCallbackPath;
     _authSuccessRedirectPath = builder._authSuccessRedirectPath;
-    _sessionTtlInHours = builder._sessionTtlInHours;
     _oidcEnabled = builder._oidcEnabled;
-    _authCookieSameSite = builder._authCookieSameSite;
-    _authCookieSecure = builder._authCookieSecure;
   }
 
   public String getAuthBaseUrl() {
@@ -58,18 +51,6 @@ public class SsoConfigs {
     return _authSuccessRedirectPath;
   }
 
-  public Integer getSessionTtlInHours() {
-    return _sessionTtlInHours;
-  }
-
-  public String getAuthCookieSameSite() {
-    return _authCookieSameSite;
-  }
-
-  public boolean getAuthCookieSecure() {
-    return _authCookieSecure;
-  }
-
   public Boolean isOidcEnabled() {
     return _oidcEnabled;
   }
@@ -78,10 +59,7 @@ public class SsoConfigs {
     protected String _authBaseUrl = null;
     private String _authBaseCallbackPath = DEFAULT_BASE_CALLBACK_PATH;
     private String _authSuccessRedirectPath = DEFAULT_SUCCESS_REDIRECT_PATH;
-    private Integer _sessionTtlInHours = DEFAULT_SESSION_TTL_HOURS;
     protected Boolean _oidcEnabled = false;
-    private String _authCookieSameSite = DEFAULT_AUTH_COOKIE_SAME_SITE;
-    private Boolean _authCookieSecure = DEFAULT_AUTH_COOKIE_SECURE;
     private final ObjectMapper _objectMapper = new ObjectMapper();
     protected JsonNode jsonNode = null;
 
@@ -99,17 +77,6 @@ public class SsoConfigs {
       if (configs.hasPath(AUTH_SUCCESS_REDIRECT_PATH_CONFIG_PATH)) {
         _authSuccessRedirectPath = configs.getString(AUTH_SUCCESS_REDIRECT_PATH_CONFIG_PATH);
       }
-      if (configs.hasPath(SESSION_TTL_CONFIG_PATH)) {
-        _sessionTtlInHours = Integer.parseInt(configs.getString(SESSION_TTL_CONFIG_PATH));
-      }
-      _authCookieSameSite = getOptional(
-          configs,
-          AUTH_COOKIE_SAME_SITE,
-          DEFAULT_AUTH_COOKIE_SAME_SITE);
-      _authCookieSecure = Boolean.parseBoolean(getOptional(
-          configs,
-          AUTH_COOKIE_SECURE,
-          String.valueOf(DEFAULT_AUTH_COOKIE_SECURE)));
       return this;
     }
 

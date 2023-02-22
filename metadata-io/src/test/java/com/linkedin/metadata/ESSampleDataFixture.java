@@ -6,6 +6,7 @@ import com.linkedin.metadata.config.ElasticSearchConfiguration;
 import com.linkedin.metadata.entity.AspectDao;
 import com.linkedin.metadata.entity.EntityAspect;
 import com.linkedin.metadata.entity.EntityAspectIdentifier;
+import com.linkedin.metadata.config.EntityDocCountCacheConfiguration;
 import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.search.SearchService;
@@ -109,9 +110,11 @@ public class ESSampleDataFixture {
         int batchSize = 100;
         SearchRanker<Double> ranker = new SimpleRanker();
         CacheManager cacheManager = new ConcurrentMapCacheManager();
+        EntityDocCountCacheConfiguration entityDocCountCacheConfiguration = new EntityDocCountCacheConfiguration();
+        entityDocCountCacheConfiguration.setTtlSeconds(600L);
 
         SearchService service = new SearchService(
-                new EntityDocCountCache(entityRegistry, entitySearchService),
+                new EntityDocCountCache(entityRegistry, entitySearchService, entityDocCountCacheConfiguration),
                 new CachingEntitySearchService(
                         cacheManager,
                         entitySearchService,
@@ -129,7 +132,8 @@ public class ESSampleDataFixture {
                                         batchSize,
                                         false
                                 ),
-                                ranker
+                                ranker,
+                                entityDocCountCacheConfiguration
                         ),
                         batchSize,
                         false

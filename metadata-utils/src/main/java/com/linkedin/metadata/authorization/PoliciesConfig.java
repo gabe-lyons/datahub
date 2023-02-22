@@ -311,6 +311,11 @@ public class PoliciesConfig {
       "View Dataset Profile",
       "The ability to access dataset profile (snapshot statistics)");
 
+  public static final Privilege EDIT_QUERIES_PRIVILEGE = Privilege.of(
+      "EDIT_ENTITY_QUERIES",
+      "Edit Dataset Queries",
+      "The ability to edit the Queries for a Dataset.");
+
   // Tag Privileges
   public static final Privilege EDIT_TAG_COLOR_PRIVILEGE = Privilege.of(
       "EDIT_TAG_COLOR",
@@ -363,7 +368,9 @@ public class PoliciesConfig {
               MANAGE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE,
               MANAGE_DATASET_COL_TAGS_PRIVILEGE,
               EDIT_ENTITY_ASSERTIONS_PRIVILEGE,
-              EDIT_LINEAGE_PRIVILEGE, EDIT_ENTITY_EMBED_PRIVILEGE))
+              EDIT_LINEAGE_PRIVILEGE,
+              EDIT_ENTITY_EMBED_PRIVILEGE,
+              EDIT_QUERIES_PRIVILEGE))
           .flatMap(Collection::stream)
           .collect(Collectors.toList())
   );

@@ -41,13 +41,13 @@ const SUBTYPES = {
 export class DatasetEntity implements Entity<Dataset> {
     type: EntityType = EntityType.Dataset;
 
-    icon = (fontSize: number, styleType: IconStyleType) => {
+    icon = (fontSize: number, styleType: IconStyleType, color?: string) => {
         if (styleType === IconStyleType.TAB_VIEW) {
-            return <DatabaseOutlined style={{ fontSize }} />;
+            return <DatabaseOutlined style={{ fontSize, color }} />;
         }
 
         if (styleType === IconStyleType.HIGHLIGHT) {
-            return <DatabaseFilled style={{ fontSize, color: '#B37FEB' }} />;
+            return <DatabaseFilled style={{ fontSize, color: color || '#B37FEB' }} />;
         }
 
         if (styleType === IconStyleType.SVG) {
@@ -60,7 +60,7 @@ export class DatasetEntity implements Entity<Dataset> {
             <DatabaseOutlined
                 style={{
                     fontSize,
-                    color: '#BFBFBF',
+                    color: color || '#BFBFBF',
                 }}
             />
         );
@@ -135,8 +135,7 @@ export class DatasetEntity implements Entity<Dataset> {
                     component: QueriesTab,
                     display: {
                         visible: (_, _1) => true,
-                        enabled: (_, dataset: GetDatasetQuery) =>
-                            (dataset?.dataset?.usageStats?.buckets?.length || 0) > 0,
+                        enabled: (_, _2) => true,
                     },
                 },
                 {
