@@ -475,7 +475,7 @@ jobs:
         run: |
           ./gradlew :metadata-ingestion:install
       - name: Login to AWS ECR
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         if: ${{ needs.setup.outputs.publish == 'true' }}
         with:
             registry: 795586375822.dkr.ecr.us-west-2.amazonaws.com
