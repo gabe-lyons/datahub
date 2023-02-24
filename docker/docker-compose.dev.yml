@@ -67,6 +67,7 @@ services:
       # copy DSN from here https://sentry.io/settings/acryl-data/projects/frontend/keys/ in case you wish to try this locally
       - SENTRY_DSN=
       - JAVA_TOOL_OPTIONS=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5002
+      - DATAHUB_ANALYTICS_ENABLED=${DATAHUB_ANALYTICS_ENABLED:-true}
     volumes:
       - ../datahub-frontend/build/stage/playBinary:/datahub-frontend
 
