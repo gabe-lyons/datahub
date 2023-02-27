@@ -982,7 +982,7 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
     @Test
     public void testPrefixVsExactCaseSensitivity() {
         List<String> insensitiveExactMatches = List.of("testExactMatchCase", "testexactmatchcase", "TESTEXACTMATCHCASE");
-        for(String query : insensitiveExactMatches) {
+        for (String query : insensitiveExactMatches) {
             SearchResult result = search(searchService, query);
 
             assertTrue(result.hasEntities() && !result.getEntities().isEmpty(),
