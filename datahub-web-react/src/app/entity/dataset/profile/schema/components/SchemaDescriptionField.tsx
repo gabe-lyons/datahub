@@ -83,12 +83,13 @@ type Props = {
     onUpdate: (
         description: string,
     ) => Promise<FetchResult<UpdateDatasetMutation, Record<string, any>, Record<string, any>> | void>;
+    onPropose?: (description: string) => void;
     isEdited?: boolean;
 };
 
 const ABBREVIATED_LIMIT = 80;
 
-export default function DescriptionField({ description, onUpdate, isEdited = false, original }: Props) {
+export default function DescriptionField({ description, onUpdate, onPropose, isEdited = false, original }: Props) {
     const [showAddModal, setShowAddModal] = useState(false);
     const overLimit = removeMarkdown(description).length > 80;
     const [expanded, setExpanded] = useState(!overLimit);
@@ -115,6 +116,19 @@ export default function DescriptionField({ description, onUpdate, isEdited = fal
         } catch (e: unknown) {
             message.destroy();
             if (e instanceof Error) message.error({ content: `Update Failed! \n ${e.message || ''}`, duration: 2 });
+        }
+        onCloseModal();
+    };
+
+    const onProposeModal = async (desc: string | null) => {
+        try {
+            await onPropose?.(desc || '');
+            message.destroy();
+            message.success({ content: 'Proposed!', duration: 2 });
+            sendAnalytics();
+        } catch (e: unknown) {
+            message.destroy();
+            if (e instanceof Error) message.error({ content: `Proposal Failed! \n ${e.message || ''}`, duration: 2 });
         }
         onCloseModal();
     };
@@ -178,7 +192,9 @@ export default function DescriptionField({ description, onUpdate, isEdited = fal
                         original={original || ''}
                         onClose={onCloseModal}
                         onSubmit={onUpdateModal}
+                        onPropose={onProposeModal}
                         isAddDesc={!description}
+                        showPropose
                     />
                 </div>
             )}
