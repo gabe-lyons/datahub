@@ -83,6 +83,8 @@ public class SettingsBuilder {
   public static final String WORD_DELIMITER = "word_delimiter";
   public static final String WORD_DELIMITER_GRAPH = "word_delimiter_graph";
 
+  public static final String TRIM = "trim";
+
   // MultiFilters
   public static final String MULTIFILTER_GRAPH_1 = String.join(",", LOWERCASE, STICKY_DELIMITER_GRAPH);
   public static final String MULTIFILTER_GRAPH_2 = String.join(",", LOWERCASE, ALPHANUM_SPACE_ONLY,
@@ -116,6 +118,7 @@ public class SettingsBuilder {
   public static final List<String> INDEX_TOKEN_FILTERS =  ImmutableList.of(
           ASCII_FOLDING,
           MULTIFILTER,
+          TRIM,
           LOWERCASE,
           DATAHUB_STOP_WORDS,
           STOP,
@@ -128,6 +131,7 @@ public class SettingsBuilder {
   public static final List<String> SEARCH_TOKEN_FILTERS =  ImmutableList.of(
           ASCII_FOLDING,
           MULTIFILTER_GRAPH,
+          TRIM,
           LOWERCASE,
           DATAHUB_STOP_WORDS,
           STOP,
