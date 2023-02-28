@@ -29,6 +29,8 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.indices.AnalyzeRequest;
 import org.elasticsearch.client.indices.AnalyzeResponse;
+import org.elasticsearch.client.indices.GetMappingsRequest;
+import org.elasticsearch.client.indices.GetMappingsResponse;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -73,6 +75,17 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
     protected EntityClient entityClient;
 
     @Test
+    public void testDatasetHasTags() throws IOException {
+        GetMappingsRequest req = new GetMappingsRequest()
+                .indices("smpldat_datasetindex_v2");
+        GetMappingsResponse resp = _searchClient.indices().getMapping(req, RequestOptions.DEFAULT);
+        Map<String, Map<String, String>> mappings = (Map<String, Map<String, String>>) resp.mappings()
+                .get("smpldat_datasetindex_v2").sourceAsMap().get("properties");
+        assertTrue(mappings.containsKey("hasTags"));
+        assertEquals(mappings.get("hasTags"), Map.of("type", "boolean"));
+    }
+
+    @Test
     public void testFixtureInitialization() {
         assertNotNull(searchService);
         SearchResult noResult = search(searchService, "no results");
@@ -81,7 +94,7 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
         final SearchResult result = search(searchService, "test");
 
         Map<String, Integer> expectedTypes = Map.of(
-                "dataset", 7,
+                "dataset", 10,
                 "chart", 0,
                 "container", 1,
                 "dashboard", 0,
@@ -964,6 +977,24 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
         assertEquals(result.getEntities().get(0).getEntity().toString(),
                 "urn:li:dataset:(urn:li:dataPlatform:dbt,cypress_project.jaffle_shop.customers,PROD)",
                 "Expected exact match and 1st position");
+    }
+
+    @Test
+    public void testPrefixVsExactCaseSensitivity() {
+        List<String> insensitiveExactMatches = List.of("testExactMatchCase", "testexactmatchcase", "TESTEXACTMATCHCASE");
+        for (String query : insensitiveExactMatches) {
+            SearchResult result = search(searchService, query);
+
+            assertTrue(result.hasEntities() && !result.getEntities().isEmpty(),
+                    String.format("%s - Expected search results", query));
+            assertTrue(result.getEntities().stream().noneMatch(e -> e.getMatchedFields().isEmpty()),
+                    String.format("%s - Expected search results to include matched fields", query));
+
+            assertEquals(result.getEntities().size(), insensitiveExactMatches.size());
+            assertEquals(result.getEntities().get(0).getEntity().toString(),
+                    "urn:li:dataset:(urn:li:dataPlatform:testOnly," + query + ",PROD)",
+                    "Expected exact match as first match with matching case");
+        }
     }
 
     private Stream<AnalyzeResponse.AnalyzeToken> getTokens(AnalyzeRequest request) throws IOException {

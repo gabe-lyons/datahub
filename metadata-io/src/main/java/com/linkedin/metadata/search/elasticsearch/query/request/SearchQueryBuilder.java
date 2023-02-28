@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
+import com.linkedin.metadata.search.utils.ESUtils;
 import org.elasticsearch.common.lucene.search.function.CombineFunction;
 import org.elasticsearch.common.lucene.search.function.FieldValueFactorFunction;
 import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery;
@@ -36,6 +37,7 @@ public class SearchQueryBuilder {
 
   public static final String STRUCTURED_QUERY_PREFIX = "\\\\/q ";
   public static final float EXACT_MATCH_BOOST_FACTOR = 10.0f;
+  public static final float EXACT_MATCH_CASE_INSENSITIVE_FACTOR = 7.0f;
   private static final Set<FieldType> TYPES_WITH_DELIMITED_SUBFIELD =
       new HashSet<>(Arrays.asList(FieldType.TEXT, FieldType.TEXT_PARTIAL));
 
@@ -124,9 +126,17 @@ public class SearchQueryBuilder {
   }
 
   private static Optional<QueryBuilder> getPrefixQuery(@Nonnull EntitySpec entitySpec, String query) {
+    final String unquotedQuery = query.replaceAll("\"", "");
     BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
-    finalQuery.should(QueryBuilders.termQuery("urn", query.replaceAll("\"", ""))
+
+    // Exact match case-sensitive
+    finalQuery.should(QueryBuilders.termQuery("urn", unquotedQuery)
             .boost(Float.parseFloat((String) PRIMARY_URN_SEARCH_PROPERTIES.get("boostScore")) * EXACT_MATCH_BOOST_FACTOR)
+            .queryName("urn"));
+    // Exact match case-insensitive
+    finalQuery.should(QueryBuilders.termQuery("urn", unquotedQuery)
+            .caseInsensitive(true)
+            .boost(Float.parseFloat((String) PRIMARY_URN_SEARCH_PROPERTIES.get("boostScore")) * EXACT_MATCH_CASE_INSENSITIVE_FACTOR)
             .queryName("urn"));
 
     entitySpec.getSearchableFieldSpecs().stream()
@@ -138,9 +148,18 @@ public class SearchQueryBuilder {
               finalQuery.should(QueryBuilders.matchPhrasePrefixQuery(fieldSpec.getFieldName() + ".delimited", query)
                       .boost((float) fieldSpec.getBoostScore())
                       .queryName(fieldSpec.getFieldName())); // less than exact
-              finalQuery.should(QueryBuilders.termQuery(fieldSpec.getFieldName() + ".keyword", query.replaceAll("\"", ""))
+
+              // Exact match case-sensitive
+              finalQuery.should(QueryBuilders
+                      .termQuery(ESUtils.toKeywordField(fieldSpec.getFieldName(), false), unquotedQuery)
                       .boost((float) fieldSpec.getBoostScore() * EXACT_MATCH_BOOST_FACTOR)
-                      .queryName(fieldSpec.getFieldName() + ".keyword"));
+                      .queryName(ESUtils.toKeywordField(fieldSpec.getFieldName(), false)));
+              // Exact match case-insensitive
+              finalQuery.should(QueryBuilders
+                      .termQuery(ESUtils.toKeywordField(fieldSpec.getFieldName(), false), unquotedQuery)
+                      .caseInsensitive(true)
+                      .boost((float) fieldSpec.getBoostScore() * EXACT_MATCH_CASE_INSENSITIVE_FACTOR)
+                      .queryName(ESUtils.toKeywordField(fieldSpec.getFieldName(), false)));
             });
     return finalQuery.should().size() > 0 ? Optional.of(finalQuery) : Optional.empty();
   }
