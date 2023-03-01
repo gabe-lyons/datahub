@@ -38,6 +38,10 @@ def get_admin_credentials():
     )
 
 
+def get_root_urn():
+    return "urn:li:corpuser:admin"
+
+
 def get_gms_url():
     return os.getenv("DATAHUB_GMS_URL") or "http://localhost:8080"
 
