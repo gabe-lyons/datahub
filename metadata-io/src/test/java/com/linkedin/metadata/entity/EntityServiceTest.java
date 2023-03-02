@@ -1012,6 +1012,16 @@ abstract public class EntityServiceTest<T_AD extends AspectDao, T_RS extends Ret
         assertEquals(_entityService.listLatestAspects(entityUrn.getEntityType(), aspectName2, 0, 10).getTotalCount(), 1);
     }
 
+    /**
+     * Equivalence for mocks fails when directly using the object as when converting from RecordTemplate from JSON it
+     * reorders the fields. This simulates pulling the historical SystemMetadata from the previous call.
+     */
+    protected <T extends RecordTemplate> T simulatePullFromDB(T aspect, Class<T> clazz) throws Exception {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        return RecordUtils.toRecordTemplate(clazz, objectMapper.writeValueAsString(aspect));
+    }
+
     @Nonnull
     protected com.linkedin.entity.Entity createCorpUserEntity(Urn entityUrn, String email) throws Exception {
         CorpuserUrn corpuserUrn = CorpuserUrn.createFromUrn(entityUrn);

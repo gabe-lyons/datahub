@@ -176,6 +176,26 @@ public class ElasticSearchService implements EntitySearchService, ElasticSearchI
     return esBrowseDAO.getBrowsePaths(entityName, urn);
   }
 
+  @Nonnull
+  @Override
+  public ScrollResult fullTextScroll(@Nonnull List<String> entities, @Nonnull String input, @Nullable Filter postFilters,
+      @Nullable SortCriterion sortCriterion, @Nullable String scrollId, @Nonnull String keepAlive, int size) {
+    log.debug(String.format(
+        "Scrolling Structured Search documents entities: %s, input: %s, postFilters: %s, sortCriterion: %s, scrollId: %s, size: %s",
+        entities, input, postFilters, sortCriterion, scrollId, size));
+    return esSearchDAO.scroll(entities, input, postFilters, sortCriterion, scrollId, keepAlive, size, true);
+  }
+
+  @Nonnull
+  @Override
+  public ScrollResult structuredScroll(@Nonnull List<String> entities, @Nonnull String input, @Nullable Filter postFilters,
+      @Nullable SortCriterion sortCriterion, @Nullable String scrollId, @Nonnull String keepAlive, int size) {
+    log.debug(String.format(
+        "Scrolling FullText Search documents entities: %s, input: %s, postFilters: %s, sortCriterion: %s, scrollId: %s, size: %s",
+        entities, input, postFilters, sortCriterion, scrollId, size));
+    return esSearchDAO.scroll(entities, input, postFilters, sortCriterion, scrollId, keepAlive, size, false);
+  }
+
   @Override
   public int maxResultSize() {
     return ESUtils.MAX_RESULT_SIZE;

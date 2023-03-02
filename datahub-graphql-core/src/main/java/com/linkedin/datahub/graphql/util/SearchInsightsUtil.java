@@ -5,6 +5,7 @@ import com.linkedin.datahub.graphql.generated.SearchInsight;
 // import com.linkedin.metadata.search.features.Features;
 import java.util.ArrayList;
 import java.util.List;
+<<<<<<< HEAD
 // import java.util.Optional;
 import javax.annotation.Nonnull;
 
@@ -18,6 +19,20 @@ public class SearchInsightsUtil {
     // final Optional<SearchInsight> queryCountInsight = extractQueryCountInsight(features);
     // queryCountInsight.ifPresent(insights::add);
     return insights;
+=======
+import javax.annotation.Nullable;
+
+
+public class SearchInsightsUtil {
+
+  public static List<SearchInsight> getInsightsFromFeatures(@Nullable final DoubleMap features) {
+    // Currently no features are extracted.
+    if (features == null) {
+      return Collections.emptyList();
+    }
+
+    return Collections.emptyList();
+>>>>>>> oss_master
   }
 
   /*@Nonnull
