@@ -319,12 +319,6 @@ public class PoliciesConfig {
       "The ability to propose new descriptions associated with a dataset schema."
   );
 
-  public static final Privilege MANAGE_DATASET_COL_DESCRIPTIONS_PRIVILEGE = Privilege.of(
-      "MANAGE_DATASET_COL_DESCRIPTIONS_PRIVILEGE",
-      "Manage Dataset Column Descriptions",
-      "The ability to manage column (field) description proposals associated with a dataset schema."
-  );
-
   public static final Privilege VIEW_DATASET_USAGE_PRIVILEGE = Privilege.of(
       "VIEW_DATASET_USAGE",
       "View Dataset Usage",
@@ -386,7 +380,6 @@ public class PoliciesConfig {
               PROPOSE_DATASET_COL_TAGS_PRIVILEGE,
               MANAGE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE,
               PROPOSE_DATASET_COL_DESCRIPTION_PRIVILEGE,
-              MANAGE_DATASET_COL_DESCRIPTIONS_PRIVILEGE,
               MANAGE_DATASET_COL_TAGS_PRIVILEGE,
               EDIT_ENTITY_ASSERTIONS_PRIVILEGE,
               EDIT_LINEAGE_PRIVILEGE, EDIT_ENTITY_EMBED_PRIVILEGE))

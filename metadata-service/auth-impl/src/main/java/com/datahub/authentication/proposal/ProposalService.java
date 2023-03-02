@@ -116,8 +116,7 @@ public class ProposalService {
     return true;
   }
 
-  public boolean proposeUpdateResourceDescription(@Nonnull final Urn actorUrn, @Nonnull final Urn resourceUrn,
-      String subResource, String subResourceType, @Nonnull final String description, final Authorizer dataHubAuthorizer) {
+  public boolean proposeUpdateResourceDescription(@Nonnull final Urn actorUrn, @Nonnull final Urn resourceUrn, @Nonnull final String description, final Authorizer dataHubAuthorizer) {
     Objects.requireNonNull(actorUrn, "actorUrn cannot be null");
     Objects.requireNonNull(resourceUrn, "resourceUrn cannot be null");
     Objects.requireNonNull(description, "description cannot be null");
@@ -136,11 +135,6 @@ public class ProposalService {
               dataHubAuthorizer);
       assignedUsers = assignedUsersAndGroups.getFirst();
       assignedGroups = assignedUsersAndGroups.getSecond();
-    } else if (subResource != null && subResource.length() > 0) {
-      AuthorizedActors actors = dataHubAuthorizer.authorizedActors(PoliciesConfig.MANAGE_DATASET_COL_DESCRIPTIONS_PRIVILEGE.getType(),
-          Optional.of(spec));
-      assignedUsers = actors.getUsers();
-      assignedGroups = actors.getGroups();
     } else {
       AuthorizedActors actors = dataHubAuthorizer.authorizedActors(PoliciesConfig.MANAGE_ENTITY_DOCS_PROPOSALS_PRIVILEGE.getType(),
           Optional.of(spec));
@@ -149,7 +143,7 @@ public class ProposalService {
     }
 
     ActionRequestSnapshot snapshot =
-        createUpdateDescriptionProposalActionRequest(actorUrn, resourceUrn, subResource, subResourceType, assignedUsers, assignedGroups, description);
+        createUpdateDescriptionProposalActionRequest(actorUrn, resourceUrn, assignedUsers, assignedGroups, description);
 
     final AuditStamp auditStamp = new AuditStamp();
     auditStamp.setActor(actorUrn, SetMode.IGNORE_NULL);
@@ -457,7 +451,7 @@ public class ProposalService {
   }
 
   static ActionRequestSnapshot createUpdateDescriptionProposalActionRequest(@Nonnull final Urn actorUrn,
-      @Nonnull final Urn resourceUrn, @Nullable final String subresource, @Nullable final String subResourceType, @Nonnull final List<Urn> assignedUsers, @Nonnull final List<Urn> assignedGroups,
+      @Nonnull final Urn resourceUrn, @Nonnull final List<Urn> assignedUsers, @Nonnull final List<Urn> assignedGroups,
       @Nonnull final String description) {
     final ActionRequestSnapshot result = new ActionRequestSnapshot();
 
@@ -468,7 +462,7 @@ public class ProposalService {
     final ActionRequestAspectArray aspects = new ActionRequestAspectArray();
     aspects.add(ActionRequestAspect.create(createActionRequestStatus(actorUrn)));
     aspects.add(ActionRequestAspect.create(
-        createUpdateDescriptionActionRequestInfo(actorUrn, resourceUrn, subresource, subResourceType, assignedUsers, assignedGroups, description)));
+        createUpdateDescriptionActionRequestInfo(actorUrn, resourceUrn, assignedUsers, assignedGroups, description)));
 
     result.setAspects(aspects);
 
@@ -507,17 +501,11 @@ public class ProposalService {
   }
 
   static ActionRequestInfo createUpdateDescriptionActionRequestInfo(@Nonnull final Urn actorUrn,
-      @Nonnull final Urn resourceUrn, @Nullable final String subresource, @Nullable final String subresourceType, @Nonnull final List<Urn> assignedUsers, @Nonnull final List<Urn> assignedGroups,
+      @Nonnull final Urn resourceUrn, @Nonnull final List<Urn> assignedUsers, @Nonnull final List<Urn> assignedGroups,
       @Nonnull final String description) {
     final ActionRequestInfo info = new ActionRequestInfo();
     info.setType(UPDATE_DESCRIPTION_ACTION_REQUEST_TYPE);
     info.setResource(resourceUrn.toString());
-    if (subresource != null) {
-      info.setSubResource(subresource);
-    }
-    if (subresourceType != null) {
-      info.setSubResourceType(subresourceType);
-    }
     info.setAssignedUsers(new UrnArray(assignedUsers));
     info.setAssignedGroups(new UrnArray(assignedGroups));
     info.setResourceType(resourceUrn.getEntityType());

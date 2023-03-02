@@ -194,7 +194,6 @@ export default function DescriptionField({ description, onUpdate, onPropose, isE
                         onSubmit={onUpdateModal}
                         onPropose={onProposeModal}
                         isAddDesc={!description}
-                        showPropose
                     />
                 </div>
             )}

@@ -45,12 +45,9 @@ public class ProposeUpdateDescriptionResolver implements DataFetcher<Completable
           case Constants.GLOSSARY_TERM_ENTITY_NAME:
           case Constants.GLOSSARY_NODE_ENTITY_NAME:
           case Constants.DATASET_ENTITY_NAME:
-          case Constants.SCHEMA_FIELD_ENTITY_NAME:
-            return _proposalService.proposeUpdateResourceDescription(actor, resourceUrn, subresource, subresourceType != null ? subresourceType.toString() : null, description,
-                context.getAuthorizer());
+            return _proposalService.proposeUpdateResourceDescription(actor, resourceUrn, description, context.getAuthorizer());
           default:
-            return _proposalService.proposeUpdateResourceDescription(actor, resourceUrn, subresource, subresourceType != null ? subresourceType.toString() : null, description,
-                context.getAuthorizer());
+            return _proposalService.proposeUpdateResourceDescription(actor, resourceUrn, description, context.getAuthorizer());
         }
       } catch (Exception e) {
         throw new RuntimeException("Failed to update description", e);

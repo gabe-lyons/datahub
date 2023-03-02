@@ -200,14 +200,11 @@ public class ProposalUtils {
   public static boolean isAuthorizedToAcceptDescriptionProposals(@Nonnull QueryContext context, Urn targetUrn, String subResource) {
 
     boolean isGlossaryEntity = targetUrn.getEntityType().equals(GLOSSARY_TERM_ENTITY_NAME) || targetUrn.getEntityType().equals(GLOSSARY_NODE_ENTITY_NAME);
-    Boolean isTargetingSchema = subResource != null && subResource.length() > 0;
     // Decide whether the current principal should be allowed to update the Dataset.
     // If you either have all entity privileges, or have the specific privileges required, you are authorized.
     final DisjunctivePrivilegeGroup orPrivilegeGroups = new DisjunctivePrivilegeGroup(ImmutableList.of(
         ALL_PRIVILEGES_GROUP,
-        new ConjunctivePrivilegeGroup(ImmutableList.of(isTargetingSchema
-            ? PoliciesConfig.MANAGE_DATASET_COL_DESCRIPTIONS_PRIVILEGE.getType()
-            : PoliciesConfig.MANAGE_ENTITY_DOCS_PROPOSALS_PRIVILEGE.getType()))
+        new ConjunctivePrivilegeGroup(ImmutableList.of(PoliciesConfig.MANAGE_ENTITY_DOCS_PROPOSALS_PRIVILEGE.getType()))
     ));
 
     if (isGlossaryEntity) {
