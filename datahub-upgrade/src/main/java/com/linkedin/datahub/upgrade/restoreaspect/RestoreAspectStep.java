@@ -78,7 +78,7 @@ public class RestoreAspectStep implements UpgradeStep {
 
       Optional<String> s3Region = context.parsedArgs().get(S3BackupReader.S3_REGION);
       EbeanAspectBackupIterator<ParquetReaderWrapper> iterator =
-          new S3BackupReader(Collections.singletonList(s3Region.orElse(null))).getBackupIterator(context);
+          new S3BackupReader(Collections.singletonList(s3Region)).getBackupIterator(context);
       ParquetReaderWrapper reader;
       List<Future<UpgradeStepResult>> futureList = new ArrayList<>();
       while ((reader = iterator.getNextReader()) != null) {
