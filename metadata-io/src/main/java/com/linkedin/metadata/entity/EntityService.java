@@ -790,20 +790,11 @@ public class EntityService {
         throw new RuntimeException(String.format("Unknown aspect %s for entity %s", aspectName, entityName));
       }
 
-<<<<<<< HEAD
-
       Timer.Context produceMCLTimer = MetricUtils.timer(this.getClass(), "produceMCL").time();
       produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, oldValue, updatedValue, oldSystemMetadata,
           updatedSystemMetadata, result.getAuditStamp(), isNoOp ? ChangeType.RESTATE : ChangeType.UPSERT);
       produceMCLTimer.stop();
 
-=======
-      Timer.Context produceMCLTimer = MetricUtils.timer(this.getClass(), "produceMCL").time();
-      produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, oldValue, updatedValue, oldSystemMetadata,
-          updatedSystemMetadata, result.getAuditStamp(), isNoOp ? ChangeType.RESTATE : ChangeType.UPSERT);
-      produceMCLTimer.stop();
-
->>>>>>> oss_master
       // For legacy reasons, keep producing to the MAE event stream without blocking ingest
       try {
         Timer.Context produceMAETimer = MetricUtils.timer(this.getClass(), "produceMAE").time();

@@ -24,15 +24,11 @@
         "MANAGE_GLOSSARIES",
         "MANAGE_USER_CREDENTIALS",
         "MANAGE_TAGS",
-<<<<<<< HEAD
         "MANAGE_GLOBAL_SETTINGS",
-        "MANAGE_GLOBAL_VIEWS"
-=======
         "MANAGE_GLOBAL_VIEWS",
         "RESTORE_INDICES_PRIVILEGE",
         "SET_WRITEABLE_PRIVILEGE",
         "APPLY_RETENTION_PRIVILEGE"
->>>>>>> oss_master
       ],
       "displayName":"Root User - All Platform Privileges",
       "description":"Grants full platform privileges to root datahub super user.",
@@ -227,18 +223,14 @@
         "MANAGE_GLOSSARIES",
         "MANAGE_USER_CREDENTIALS",
         "MANAGE_TAGS",
-<<<<<<< HEAD
         "VIEW_METADATA_PROPOSALS",
         "MANAGE_TESTS",
         "MANAGE_GLOBAL_SETTINGS",
         "CREATE_CONSTRAINTS",
-        "MANAGE_GLOBAL_VIEWS"
-=======
         "MANAGE_GLOBAL_VIEWS",
         "RESTORE_INDICES_PRIVILEGE",
         "SET_WRITEABLE_PRIVILEGE",
         "APPLY_RETENTION_PRIVILEGE"
->>>>>>> oss_master
       ],
       "displayName":"Admins - Platform Policy",
       "description":"Admins have all platform privileges.",
@@ -423,18 +415,15 @@
         "VIEW_ENTITY_PAGE",
         "VIEW_DATASET_USAGE",
         "VIEW_DATASET_PROFILE",
-<<<<<<< HEAD
         "PROPOSE_ENTITY_TAGS_PRIVILEGE",
         "PROPOSE_ENTITY_GLOSSARY_TERMS_PRIVILEGE",
         "PROPOSE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE",
-        "PROPOSE_DATASET_COL_TAGS_PRIVILEGE"
-=======
+        "PROPOSE_DATASET_COL_TAGS_PRIVILEGE",
         "SEARCH_PRIVILEGE",
         "GET_COUNTS_PRIVILEGE",
         "GET_TIMESERIES_ASPECT_PRIVILEGE",
         "GET_ENTITY_PRIVILEGE",
         "GET_TIMELINE_PRIVILEGE"
->>>>>>> oss_master
       ],
       "displayName":"Readers - Metadata Policy",
       "description":"Readers can view all assets.",

@@ -46,11 +46,7 @@ def get_admin_credentials():
 
 
 def get_root_urn():
-<<<<<<< HEAD
     return "urn:li:corpuser:admin"
-=======
-    return "urn:li:corpuser:datahub"
->>>>>>> oss_master
 
 
 def get_gms_url():
