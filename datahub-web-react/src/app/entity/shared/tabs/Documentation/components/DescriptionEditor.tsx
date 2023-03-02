@@ -174,7 +174,7 @@ export const DescriptionEditor = ({ onComplete }: DescriptionEditorProps) => {
                 onPropose={proposeUpdate}
                 onClose={handleConfirmClose}
                 disableSave={!isDescriptionUpdated}
-                showPropose={shouldShowProposeButton || true}
+                showPropose={shouldShowProposeButton}
             />
             <EditorContainer>
                 <Editor content={updatedDescription} onChange={handleEditorChange} />

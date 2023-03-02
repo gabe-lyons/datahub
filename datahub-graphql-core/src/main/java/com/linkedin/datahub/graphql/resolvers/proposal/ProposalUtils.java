@@ -205,7 +205,9 @@ public class ProposalUtils {
     ));
 
     if (isGlossaryEntity) {
-      orPrivilegeGroups.getAuthorizedPrivilegeGroups().add(new ConjunctivePrivilegeGroup(ImmutableList.of(PoliciesConfig.MANAGE_GLOSSARIES_PRIVILEGE.getType())));
+      orPrivilegeGroups.getAuthorizedPrivilegeGroups().add(
+          new ConjunctivePrivilegeGroup(ImmutableList.of(PoliciesConfig.MANAGE_GLOSSARIES_PRIVILEGE.getType()))
+      );
     }
 
     // TODO: Add these new privileges to default places like superuser as well as roles

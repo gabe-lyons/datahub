@@ -6,7 +6,6 @@ import com.linkedin.common.urn.Urn;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.exception.AuthorizationException;
 import com.linkedin.datahub.graphql.generated.DescriptionUpdateInput;
-import com.linkedin.datahub.graphql.generated.SubResourceType;
 import com.linkedin.metadata.Constants;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -28,6 +27,11 @@ public class ProposeUpdateDescriptionResolver implements DataFetcher<Completable
     final QueryContext context = environment.getContext();
     Urn resourceUrn = Urn.createFromString(input.getResourceUrn());
     String description = input.getDescription();
+    String subresource = input.getSubResource();
+
+    if (subresource != null) {
+      throw new IllegalArgumentException("Proposing an update to a column description is currently not supported");
+    }
 
     if (!ProposalUtils.isAuthorizedToProposeDescription(context, resourceUrn)) {
       throw new AuthorizationException("Unauthorized to perform this action. Please contact your DataHub administrator.");

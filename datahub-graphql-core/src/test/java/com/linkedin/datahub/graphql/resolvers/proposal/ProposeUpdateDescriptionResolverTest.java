@@ -47,7 +47,7 @@ public class ProposeUpdateDescriptionResolverTest {
   }
 
   @Test
-  public void testFailsEmptyName() throws Exception {
+  public void testFailsUnsupportedEntityType() throws Exception {
     QueryContext mockContext = getMockAllowContext();
     when(_dataFetchingEnvironment.getContext()).thenReturn(mockContext);
     when(mockContext.getActorUrn()).thenReturn(ACTOR_URN_STRING);
