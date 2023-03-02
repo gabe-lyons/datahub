@@ -28,10 +28,8 @@ public class ProposeUpdateDescriptionResolver implements DataFetcher<Completable
     final QueryContext context = environment.getContext();
     Urn resourceUrn = Urn.createFromString(input.getResourceUrn());
     String description = input.getDescription();
-    String subresource = input.getSubResource();
-    SubResourceType subresourceType = input.getSubResourceType();
 
-    if (!ProposalUtils.isAuthorizedToProposeDescription(environment.getContext(), resourceUrn, subresource)) {
+    if (!ProposalUtils.isAuthorizedToProposeDescription(context, resourceUrn)) {
       throw new AuthorizationException("Unauthorized to perform this action. Please contact your DataHub administrator.");
     }
 
@@ -45,9 +43,12 @@ public class ProposeUpdateDescriptionResolver implements DataFetcher<Completable
           case Constants.GLOSSARY_TERM_ENTITY_NAME:
           case Constants.GLOSSARY_NODE_ENTITY_NAME:
           case Constants.DATASET_ENTITY_NAME:
-            return _proposalService.proposeUpdateResourceDescription(actor, resourceUrn, description, context.getAuthorizer());
+            return _proposalService.proposeUpdateResourceDescription(actor, resourceUrn, description,
+                context.getAuthorizer());
           default:
-            return _proposalService.proposeUpdateResourceDescription(actor, resourceUrn, description, context.getAuthorizer());
+            log.warn(String.format("Proposing an update to a description is currently not supported for entity type %s",
+                entityType));
+            return false;
         }
       } catch (Exception e) {
         throw new RuntimeException("Failed to update description", e);

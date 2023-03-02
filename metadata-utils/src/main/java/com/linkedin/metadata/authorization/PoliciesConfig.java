@@ -182,7 +182,7 @@ public class PoliciesConfig {
       "The ability to add and remove owners of an entity.");
 
   public static final Privilege PROPOSE_ENTITY_DOCS_PRIVILEGE = Privilege.of(
-      "PROPOSE_ENTITY_DOCS_PRIVILEGE",
+      "PROPOSE_ENTITY_DOCS",
       "Propose Documentation",
       "The ability to propose updates to an asset's documentation.");
 

@@ -27,14 +27,12 @@ public class ProposeUpdateDescriptionResolverTest {
   private ProposeUpdateDescriptionResolver _resolver;
   private DataFetchingEnvironment _dataFetchingEnvironment;
   private Authentication _authentication;
-  private Authorizer _authorizer;
 
   @BeforeMethod
   public void setupTest() {
     _proposalService = mock(ProposalService.class);
     _dataFetchingEnvironment = mock(DataFetchingEnvironment.class);
     _authentication = mock(Authentication.class);
-    _authorizer = mock(Authorizer.class);
 
     _resolver = new ProposeUpdateDescriptionResolver(_proposalService);
   }
@@ -53,7 +51,6 @@ public class ProposeUpdateDescriptionResolverTest {
     QueryContext mockContext = getMockAllowContext();
     when(_dataFetchingEnvironment.getContext()).thenReturn(mockContext);
     when(mockContext.getActorUrn()).thenReturn(ACTOR_URN_STRING);
-    when(mockContext.getAuthorizer()).thenReturn(_authorizer);
 
     DescriptionUpdateInput input = new DescriptionUpdateInput();
     input.setResourceUrn(UNSUPPORTED_ENTITY_URN_STRING);
@@ -67,13 +64,12 @@ public class ProposeUpdateDescriptionResolverTest {
     QueryContext mockContext = getMockAllowContext();
     when(_dataFetchingEnvironment.getContext()).thenReturn(mockContext);
     when(mockContext.getActorUrn()).thenReturn(ACTOR_URN_STRING);
-    when(mockContext.getAuthorizer()).thenReturn(_authorizer);
 
     DescriptionUpdateInput input = new DescriptionUpdateInput();
     input.setDescription(DESCRIPTION);
     input.setResourceUrn(GLOSSARY_NODE_URN_STRING);
     when(_dataFetchingEnvironment.getArgument(eq("input"))).thenReturn(input);
-    when(_proposalService.proposeUpdateResourceDescription(any(), any(), any(), eq(_authorizer))).thenReturn(true);
+    when(_proposalService.proposeUpdateResourceDescription(any(), any(), any(), any(Authorizer.class))).thenReturn(true);
 
     assertTrue(_resolver.get(_dataFetchingEnvironment).join());
   }
@@ -83,13 +79,12 @@ public class ProposeUpdateDescriptionResolverTest {
     QueryContext mockContext = getMockAllowContext();
     when(_dataFetchingEnvironment.getContext()).thenReturn(mockContext);
     when(mockContext.getActorUrn()).thenReturn(ACTOR_URN_STRING);
-    when(mockContext.getAuthorizer()).thenReturn(_authorizer);
 
     DescriptionUpdateInput input = new DescriptionUpdateInput();
     input.setDescription(DESCRIPTION);
     input.setResourceUrn(GLOSSARY_TERM_URN_STRING);
     when(_dataFetchingEnvironment.getArgument(eq("input"))).thenReturn(input);
-    when(_proposalService.proposeUpdateResourceDescription(any(), any(), any(), eq(_authorizer))).thenReturn(true);
+    when(_proposalService.proposeUpdateResourceDescription(any(), any(), any(), any(Authorizer.class))).thenReturn(true);
 
     assertTrue(_resolver.get(_dataFetchingEnvironment).join());
   }
@@ -99,13 +94,12 @@ public class ProposeUpdateDescriptionResolverTest {
     QueryContext mockContext = getMockAllowContext();
     when(_dataFetchingEnvironment.getContext()).thenReturn(mockContext);
     when(mockContext.getActorUrn()).thenReturn(ACTOR_URN_STRING);
-    when(mockContext.getAuthorizer()).thenReturn(_authorizer);
 
     DescriptionUpdateInput input = new DescriptionUpdateInput();
     input.setDescription(DESCRIPTION);
     input.setResourceUrn(DATASET_URN_STRING);
     when(_dataFetchingEnvironment.getArgument(eq("input"))).thenReturn(input);
-    when(_proposalService.proposeUpdateResourceDescription(any(), any(), any(), eq(_authorizer))).thenReturn(true);
+    when(_proposalService.proposeUpdateResourceDescription(any(), any(), any(), any(Authorizer.class))).thenReturn(true);
 
     assertTrue(_resolver.get(_dataFetchingEnvironment).join());
   }

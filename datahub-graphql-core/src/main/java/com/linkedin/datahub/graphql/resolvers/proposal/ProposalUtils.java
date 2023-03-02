@@ -119,15 +119,12 @@ public class ProposalUtils {
         orPrivilegeGroups);
   }
 
-  public static boolean isAuthorizedToProposeDescription(@Nonnull QueryContext context, Urn targetUrn, String subResource) {
+  public static boolean isAuthorizedToProposeDescription(@Nonnull QueryContext context, Urn targetUrn) {
 
-    Boolean isTargetingSchema = subResource != null && subResource.length() > 0;
     // If you either have all entity privileges, or have the specific privileges required, you are authorized.
     final DisjunctivePrivilegeGroup orPrivilegeGroups = new DisjunctivePrivilegeGroup(ImmutableList.of(
         ALL_PRIVILEGES_GROUP,
-        new ConjunctivePrivilegeGroup(ImmutableList.of(isTargetingSchema
-            ? PoliciesConfig.PROPOSE_DATASET_COL_DESCRIPTION_PRIVILEGE.getType()
-            : PoliciesConfig.PROPOSE_ENTITY_DOCS_PRIVILEGE.getType()))
+        new ConjunctivePrivilegeGroup(ImmutableList.of(PoliciesConfig.PROPOSE_ENTITY_DOCS_PRIVILEGE.getType()))
     ));
 
     return AuthorizationUtils.isAuthorized(
