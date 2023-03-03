@@ -48,13 +48,13 @@ public class S3BackupReader implements BackupReader<ParquetReaderWrapper> {
   private static final String TEMP_DIR = "/tmp/";
   private final ExecutorService downloaderThreadPool;
 
-  public S3BackupReader(@Nonnull List<String> args) {
+  public S3BackupReader(@Nonnull List<Optional<String>> args) {
     if (args.size() != argNames().size()) {
       throw new IllegalArgumentException("Incorrect number of arguments for S3BackupReader.");
     }
     Region region;
     String s3Region;
-    String arg = args.get(0);
+    String arg = args.get(0).get();
     int downloadPoolSize = DEFAULT_DOWNLOAD_POOL_SIZE;
     String envDownloadPoolSize = System.getenv(DOWNLOAD_POOL_SIZE);
     if (envDownloadPoolSize != null) {

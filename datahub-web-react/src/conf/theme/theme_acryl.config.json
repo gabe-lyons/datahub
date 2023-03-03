@@ -1,6 +1,8 @@
 {
     "styles": {
         "primary-color": "#11ADA0",
+        "primary-color-dark": "#003A3B",
+        "primary-color-light":"#F0FFFB",
         "link-color": "#00615F",
         "layout-header-background": "white",
         "layout-header-color": "#434343",
