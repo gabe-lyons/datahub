@@ -16,7 +16,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
+<<<<<<< HEAD
 import com.linkedin.metadata.search.utils.ESUtils;
+=======
+>>>>>>> oss_master
 import org.elasticsearch.common.lucene.search.function.CombineFunction;
 import org.elasticsearch.common.lucene.search.function.FieldValueFactorFunction;
 import org.elasticsearch.common.lucene.search.function.FunctionScoreQuery;
@@ -63,12 +66,21 @@ public class SearchQueryBuilder {
 
     if (fulltext && !query.startsWith(STRUCTURED_QUERY_PREFIX)) {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> oss_master
       final String sanitizedQuery = query.replaceFirst("^:+", "");
       BoolQueryBuilder simplePerField = QueryBuilders.boolQuery();
 
       // Simple query string does not use per field analyzers
       // Group the fields by analyzer
+<<<<<<< HEAD
       Map<String, List<SearchFieldConfig>> analyzerGroup = getStandardFields(entitySpec).stream()
+=======
+      Map<String, List<SearchFieldConfig>> analyzerGroup = entitySpecs.stream()
+              .map(SearchQueryBuilder::getStandardFields)
+              .flatMap(Set::stream)
+>>>>>>> oss_master
               .collect(Collectors.groupingBy(SearchFieldConfig::getAnalyzer));
 
       analyzerGroup.keySet().stream().sorted().forEach(analyzer -> {
@@ -81,6 +93,7 @@ public class SearchQueryBuilder {
       });
 
       finalQuery.should(simplePerField);
+<<<<<<< HEAD
 =======
       SimpleQueryStringBuilder simpleBuilder = QueryBuilders.simpleQueryStringQuery(query.replaceFirst("^:+", ""));
       simpleBuilder.defaultOperator(Operator.AND);
@@ -90,6 +103,8 @@ public class SearchQueryBuilder {
           .distinct()
           .forEach(fieldBoost -> simpleBuilder.field(fieldBoost.getFirst(), fieldBoost.getSecond()));
       finalQuery.should(simpleBuilder);
+>>>>>>> oss_master
+=======
 >>>>>>> oss_master
     } else {
       final String withoutQueryPrefix = query.startsWith(STRUCTURED_QUERY_PREFIX) ? query.substring(STRUCTURED_QUERY_PREFIX.length()) : query;
@@ -103,7 +118,11 @@ public class SearchQueryBuilder {
           .map(SearchQueryBuilder::getStandardFields)
           .flatMap(Set::stream)
           .distinct()
+<<<<<<< HEAD
           .forEach(fieldBoost -> queryBuilder.field(fieldBoost.getFirst(), fieldBoost.getSecond()));
+>>>>>>> oss_master
+=======
+          .forEach(cfg -> queryBuilder.field(cfg.getFieldName(), cfg.getBoost()));
 >>>>>>> oss_master
       finalQuery.should(queryBuilder);
     }

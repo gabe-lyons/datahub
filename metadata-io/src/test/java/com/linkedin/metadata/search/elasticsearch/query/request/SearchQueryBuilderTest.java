@@ -46,7 +46,11 @@ public class SearchQueryBuilderTest {
     assertEquals(fulltextQuery.value(), "testQuery");
     assertEquals(fulltextQuery.analyzer(), TEXT_SEARCH_ANALYZER);
     Map<String, Float> fulltextFields = fulltextQuery.fields();
+<<<<<<< HEAD
     assertEquals(fulltextFields.size(), 20);
+=======
+    assertEquals(fulltextFields.size(), 19);
+>>>>>>> oss_master
     assertEquals(fulltextFields.get("keyPart1").floatValue(), 10.0f);
     assertFalse(fulltextFields.containsKey("keyPart3"));
     assertEquals(fulltextFields.get("textFieldOverride").floatValue(), 1.0f);
@@ -55,7 +59,10 @@ public class SearchQueryBuilderTest {
     assertEquals(fulltextFields.get("keyPart1.delimited").floatValue(), 4.0f);
     assertFalse(fulltextFields.containsKey("keyPart3"));
     assertEquals(fulltextFields.get("textFieldOverride.delimited").floatValue(), 0.4f);
+<<<<<<< HEAD
     assertEquals(fulltextFields.get("customProperties.delimited").floatValue(), 0.4f);
+=======
+>>>>>>> oss_master
 
     BoolQueryBuilder boolPrefixQuery = (BoolQueryBuilder) shouldQueries.get(1);
     assertTrue(boolPrefixQuery.should().size() > 0);

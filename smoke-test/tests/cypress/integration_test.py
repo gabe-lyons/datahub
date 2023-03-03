@@ -10,8 +10,9 @@ from tests.utils import (
     get_admin_username,
     ingest_file_via_rest,
     delete_urns_from_file,
+    delete_urns,
 )
-
+from tests.setup.lineage.ingest_time_lineage import ingest_time_lineage, get_time_lineage_urns
 CYPRESS_TEST_DATA_DIR = "tests/cypress"
 
 TEST_DATA_FILENAME = "data.json"
@@ -127,6 +128,7 @@ def ingest_data():
     ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{TEST_DBT_DATA_FILENAME}")
     ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{TEST_PATCH_DATA_FILENAME}")
     ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{TEST_ONBOARDING_DATA_FILENAME}")
+    ingest_time_lineage()
     # acryl-main-data is for data specific to tests in the acryl-main-branch to avoid merge conflicts with OSS
     ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{ACRYL_MAIN_TEST_DATA_FILENAME}")
     ingest_file_via_rest(f"{CYPRESS_TEST_DATA_DIR}/{ACRYL_MAIN_INCIDENT_DATA_FILENAME}")
@@ -144,10 +146,10 @@ def ingest_cleanup_data():
     delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{TEST_DBT_DATA_FILENAME}")
     delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{TEST_PATCH_DATA_FILENAME}")
     delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{TEST_ONBOARDING_DATA_FILENAME}")
+    delete_urns(get_time_lineage_urns())
     # acryl-main-data is for data specific to tests in the acryl-main-branch to avoid merge conflicts with OSS
     delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{ACRYL_MAIN_TEST_DATA_FILENAME}")
     delete_urns_from_file(f"{CYPRESS_TEST_DATA_DIR}/{ACRYL_MAIN_INCIDENT_DATA_FILENAME}")
-
     print_now()
     print("deleting onboarding data file")
     if os.path.exists(f"{CYPRESS_TEST_DATA_DIR}/{TEST_ONBOARDING_DATA_FILENAME}"):

@@ -977,6 +977,7 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
         assertEquals(result.getEntities().get(0).getEntity().toString(),
                 "urn:li:dataset:(urn:li:dataPlatform:dbt,cypress_project.jaffle_shop.customers,PROD)",
                 "Expected exact match and 1st position");
+<<<<<<< HEAD
     }
 
     @Test
@@ -995,6 +996,8 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
                     "urn:li:dataset:(urn:li:dataPlatform:testOnly," + query + ",PROD)",
                     "Expected exact match as first match with matching case");
         }
+=======
+>>>>>>> oss_master
     }
 
     private Stream<AnalyzeResponse.AnalyzeToken> getTokens(AnalyzeRequest request) throws IOException {
