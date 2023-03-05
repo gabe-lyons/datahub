@@ -4,6 +4,53 @@ describe('proposals', () => {
     return false;
   });
 
+  function proposeDatasetDescription() {
+    cy.login();
+
+    cy.visit('/dataset/urn:li:dataset:(urn:li:dataPlatform:hive,DatasetToProposeOn,PROD)/Documentation');
+
+    cy.get('[data-testid="empty-tab-description"]').should('exist');
+    cy.get('[data-testid="add-documentation"]').click({force: true});
+    
+    cy.focused().type('Description to propose');
+    cy.get('[data-testid="propose-description"]').click({force: true});
+
+    cy.wait(2000);
+  }
+
+  it('can propose description to dataset and then reject description proposal from the my requests tab', () => {
+    proposeDatasetDescription();
+
+    // Accepting the proposal
+    cy.contains('Inbox').click({force: true});
+
+    cy.get('.action-request-test-id').should('have.length', 1)
+    cy.contains('Decline').first().click({force: true});
+    cy.contains('Yes').click({force: true});
+    cy.get('.action-request-test-id').should('have.length', 0)
+
+    cy.visit('/dataset/urn:li:dataset:(urn:li:dataPlatform:hive,DatasetToProposeOn,PROD)/Documentation');
+    cy.get('[data-testid="empty-tab-description"]').should('exist');
+    cy.wait(1000)
+  });
+
+  it('can propose description to dataset and then accept description proposal from the my requests tab', () => {
+    proposeDatasetDescription();
+    
+    // rejecting the proposal
+    cy.contains('Inbox').click({force: true});
+
+    cy.get('.action-request-test-id').should('have.length', 1)
+    cy.contains('Approve').first().click({force: true});
+    cy.contains('Yes').click({force: true});
+    cy.get('.action-request-test-id').should('have.length', 0)
+
+    cy.visit('/dataset/urn:li:dataset:(urn:li:dataPlatform:hive,DatasetToProposeOn,PROD)/Documentation');
+    cy.contains('Description to propose');
+
+    cy.wait(1000)
+  });
+
   function proposeTagAndDeclineOnProfile(entityRoute) {
     cy.login();
 

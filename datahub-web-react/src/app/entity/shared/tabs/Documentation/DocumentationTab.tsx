@@ -49,6 +49,8 @@ export const DocumentationTab = ({ properties }: { properties?: Props }) => {
         }
     }, [urn, routeToTab, showModal, localStorageDictionary]);
 
+    console.log('description', description);
+
     return isEditing && !showModal ? (
         <>
             <DescriptionEditor onComplete={() => routeToTab({ tabName: 'Documentation' })} />
@@ -60,6 +62,7 @@ export const DocumentationTab = ({ properties }: { properties?: Props }) => {
                     <TabToolbar>
                         <div>
                             <Button
+                                data-testid="edit-description"
                                 type="text"
                                 onClick={() => routeToTab({ tabName: 'Documentation', tabParams: { editing: true } })}
                             >
@@ -97,7 +100,10 @@ export const DocumentationTab = ({ properties }: { properties?: Props }) => {
                 </>
             ) : (
                 <EmptyTab tab="documentation">
-                    <Button onClick={() => routeToTab({ tabName: 'Documentation', tabParams: { editing: true } })}>
+                    <Button
+                        data-testid="add-documentation"
+                        onClick={() => routeToTab({ tabName: 'Documentation', tabParams: { editing: true } })}
+                    >
                         <EditOutlined /> Add Documentation
                     </Button>
                     {!hideLinksButton && <AddLinkModal refetch={refetch} />}

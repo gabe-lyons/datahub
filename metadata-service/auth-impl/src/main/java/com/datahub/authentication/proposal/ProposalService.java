@@ -621,6 +621,9 @@ public class ProposalService {
       final Authentication authentication) throws Exception {
     EditableDatasetProperties editableDatasetProperties =
         (EditableDatasetProperties) _entityService.getLatestAspect(resourceUrn, EDITABLE_DATASET_PROPERTIES_ASPECT_NAME);
+    if (editableDatasetProperties == null) {
+      editableDatasetProperties = new EditableDatasetProperties();
+    }
 
     final MetadataChangeProposal proposal = DescriptionUtils.createDatasetDescriptionChangeProposal(editableDatasetProperties, resourceUrn, description, authentication.getActor());
     _entityClient.ingestProposal(proposal, authentication);
