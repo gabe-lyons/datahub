@@ -1,7 +1,6 @@
 package com.datahub.authentication.proposal;
 
 import com.datahub.authentication.Actor;
-import com.datahub.authentication.Authentication;
 import com.linkedin.common.AuditStamp;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.common.urn.UrnUtils;
@@ -10,17 +9,15 @@ import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.glossary.GlossaryNodeInfo;
 import com.linkedin.glossary.GlossaryTermInfo;
 import com.linkedin.metadata.Constants;
-import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.utils.GenericRecordUtils;
 import com.linkedin.mxe.MetadataChangeProposal;
 
 import javax.annotation.Nonnull;
 import java.util.Objects;
 
-import static com.linkedin.metadata.Constants.GLOSSARY_NODE_INFO_ASPECT_NAME;
-import static com.linkedin.metadata.Constants.GLOSSARY_TERM_INFO_ASPECT_NAME;
-
 public class DescriptionUtils {
+
+  private DescriptionUtils() { }
 
   public static MetadataChangeProposal createGlossaryNodeDescriptionChangeProposal(
       @Nonnull final GlossaryNodeInfo glossaryNodeInfo,

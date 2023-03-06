@@ -46,7 +46,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -116,7 +115,12 @@ public class ProposalService {
     return true;
   }
 
-  public boolean proposeUpdateResourceDescription(@Nonnull final Urn actorUrn, @Nonnull final Urn resourceUrn, @Nonnull final String description, final Authorizer dataHubAuthorizer) {
+  public boolean proposeUpdateResourceDescription(
+      @Nonnull final Urn actorUrn,
+      @Nonnull final Urn resourceUrn,
+      @Nonnull final String description,
+      final Authorizer dataHubAuthorizer
+  ) {
     Objects.requireNonNull(actorUrn, "actorUrn cannot be null");
     Objects.requireNonNull(resourceUrn, "resourceUrn cannot be null");
     Objects.requireNonNull(description, "description cannot be null");
@@ -625,7 +629,8 @@ public class ProposalService {
       editableDatasetProperties = new EditableDatasetProperties();
     }
 
-    final MetadataChangeProposal proposal = DescriptionUtils.createDatasetDescriptionChangeProposal(editableDatasetProperties, resourceUrn, description, authentication.getActor());
+    final MetadataChangeProposal proposal =
+        DescriptionUtils.createDatasetDescriptionChangeProposal(editableDatasetProperties, resourceUrn, description, authentication.getActor());
     _entityClient.ingestProposal(proposal, authentication);
   }
 
