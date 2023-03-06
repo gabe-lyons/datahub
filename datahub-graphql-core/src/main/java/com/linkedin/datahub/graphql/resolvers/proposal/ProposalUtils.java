@@ -119,6 +119,22 @@ public class ProposalUtils {
         orPrivilegeGroups);
   }
 
+  public static boolean isAuthorizedToProposeDescription(@Nonnull QueryContext context, Urn targetUrn) {
+
+    // If you either have all entity privileges, or have the specific privileges required, you are authorized.
+    final DisjunctivePrivilegeGroup orPrivilegeGroups = new DisjunctivePrivilegeGroup(ImmutableList.of(
+        ALL_PRIVILEGES_GROUP,
+        new ConjunctivePrivilegeGroup(ImmutableList.of(PoliciesConfig.PROPOSE_ENTITY_DOCS_PRIVILEGE.getType()))
+    ));
+
+    return AuthorizationUtils.isAuthorized(
+        context.getAuthorizer(),
+        context.getActorUrn(),
+        targetUrn.getEntityType(),
+        targetUrn.toString(),
+        orPrivilegeGroups);
+  }
+
   public static boolean isAuthorizedToAcceptProposal(
       @Nonnull QueryContext context,
       ActionRequestType type,
@@ -130,6 +146,9 @@ public class ProposalUtils {
     }
     if (type.equals(ActionRequestType.TERM_ASSOCIATION)) {
       return isAuthorizedToAcceptTerms(context, targetUrn, subResource);
+    }
+    if (type.equals(ActionRequestType.UPDATE_DESCRIPTION)) {
+      return isAuthorizedToAcceptDescriptionProposals(context, targetUrn, subResource);
     }
 
     return false;
@@ -166,6 +185,32 @@ public class ProposalUtils {
             ? PoliciesConfig.MANAGE_DATASET_COL_TAGS_PRIVILEGE.getType()
             : PoliciesConfig.MANAGE_ENTITY_TAGS_PRIVILEGE.getType()))
     ));
+
+    return AuthorizationUtils.isAuthorized(
+        context.getAuthorizer(),
+        context.getActorUrn(),
+        targetUrn.getEntityType(),
+        targetUrn.toString(),
+        orPrivilegeGroups);
+  }
+
+  public static boolean isAuthorizedToAcceptDescriptionProposals(@Nonnull QueryContext context, Urn targetUrn, String subResource) {
+
+    boolean isGlossaryEntity = targetUrn.getEntityType().equals(GLOSSARY_TERM_ENTITY_NAME) || targetUrn.getEntityType().equals(GLOSSARY_NODE_ENTITY_NAME);
+    // Decide whether the current principal should be allowed to update the Dataset.
+    // If you either have all entity privileges, or have the specific privileges required, you are authorized.
+    final DisjunctivePrivilegeGroup orPrivilegeGroups = new DisjunctivePrivilegeGroup(ImmutableList.of(
+        ALL_PRIVILEGES_GROUP,
+        new ConjunctivePrivilegeGroup(ImmutableList.of(PoliciesConfig.MANAGE_ENTITY_DOCS_PROPOSALS_PRIVILEGE.getType()))
+    ));
+
+    if (isGlossaryEntity) {
+      orPrivilegeGroups.getAuthorizedPrivilegeGroups().add(
+          new ConjunctivePrivilegeGroup(ImmutableList.of(PoliciesConfig.MANAGE_GLOSSARIES_PRIVILEGE.getType()))
+      );
+    }
+
+    // TODO: Add these new privileges to default places like superuser as well as roles
 
     return AuthorizationUtils.isAuthorized(
         context.getAuthorizer(),

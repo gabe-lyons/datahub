@@ -181,6 +181,16 @@ public class PoliciesConfig {
       "Edit Owners",
       "The ability to add and remove owners of an entity.");
 
+  public static final Privilege PROPOSE_ENTITY_DOCS_PRIVILEGE = Privilege.of(
+      "PROPOSE_ENTITY_DOCS",
+      "Propose Documentation",
+      "The ability to propose updates to an asset's documentation.");
+
+  public static final Privilege MANAGE_ENTITY_DOCS_PROPOSALS_PRIVILEGE = Privilege.of(
+      "MANAGE_ENTITY_DOCS_PROPOSALS_PRIVILEGE",
+      "Manage Documentation Proposals",
+      "The ability to manage a proposal update an asset's documentation");
+
   public static final Privilege EDIT_ENTITY_DOCS_PRIVILEGE = Privilege.of(
       "EDIT_ENTITY_DOCS",
       "Edit Description",
@@ -255,7 +265,9 @@ public class PoliciesConfig {
       EDIT_ENTITY_DEPRECATION_PRIVILEGE,
       EDIT_ENTITY_INCIDENTS_PRIVILEGE,
       EDIT_ENTITY_PRIVILEGE,
-      DELETE_ENTITY_PRIVILEGE
+      DELETE_ENTITY_PRIVILEGE,
+      PROPOSE_ENTITY_DOCS_PRIVILEGE,
+      MANAGE_ENTITY_DOCS_PROPOSALS_PRIVILEGE
   );
 
   // Dataset Privileges
@@ -299,6 +311,12 @@ public class PoliciesConfig {
       "EDIT_DATASET_COL_DESCRIPTION",
       "Edit Dataset Column Descriptions",
       "The ability to edit the column (field) descriptions associated with a dataset schema."
+  );
+
+  public static final Privilege PROPOSE_DATASET_COL_DESCRIPTION_PRIVILEGE = Privilege.of(
+      "PROPOSE_DATASET_COL_DESCRIPTION_PRIVILEGE",
+      "Propose Dataset Column Descriptions",
+      "The ability to propose new descriptions associated with a dataset schema."
   );
 
   public static final Privilege VIEW_DATASET_USAGE_PRIVILEGE = Privilege.of(
@@ -366,6 +384,7 @@ public class PoliciesConfig {
               PROPOSE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE,
               PROPOSE_DATASET_COL_TAGS_PRIVILEGE,
               MANAGE_DATASET_COL_GLOSSARY_TERMS_PRIVILEGE,
+              PROPOSE_DATASET_COL_DESCRIPTION_PRIVILEGE,
               MANAGE_DATASET_COL_TAGS_PRIVILEGE,
               EDIT_ENTITY_ASSERTIONS_PRIVILEGE,
               EDIT_LINEAGE_PRIVILEGE,

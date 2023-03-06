@@ -30,11 +30,11 @@ export const DescriptionEditorToolbar = ({
             </Button>
             <div>
                 {showPropose && (
-                    <ProposeButton onClick={onPropose} disabled={disableSave}>
+                    <ProposeButton data-testid="propose-description" onClick={onPropose} disabled={disableSave}>
                         <MailOutlined /> Propose
                     </ProposeButton>
                 )}
-                <Button onClick={onSave} disabled={disableSave}>
+                <Button data-testid="save-description" onClick={onSave} disabled={disableSave}>
                     <CheckOutlined /> Save
                 </Button>
             </div>

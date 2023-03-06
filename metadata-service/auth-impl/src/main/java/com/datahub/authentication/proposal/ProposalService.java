@@ -2,6 +2,7 @@ package com.datahub.authentication.proposal;
 
 import com.datahub.authentication.Authentication;
 import com.datahub.authorization.AuthorizedActors;
+import com.datahub.authorization.ResourceSpec;
 import com.datahub.plugins.auth.authorization.Authorizer;
 import com.linkedin.actionrequest.ActionRequestInfo;
 import com.linkedin.actionrequest.ActionRequestParams;
@@ -16,6 +17,7 @@ import com.linkedin.common.UrnArray;
 import com.linkedin.common.urn.GlossaryNodeUrn;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.data.template.SetMode;
+import com.linkedin.dataset.EditableDatasetProperties;
 import com.linkedin.entity.Entity;
 import com.linkedin.entity.client.EntityClient;
 import com.linkedin.events.metadata.ChangeType;
@@ -44,6 +46,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -112,8 +115,12 @@ public class ProposalService {
     return true;
   }
 
-  public boolean proposeUpdateResourceDescription(@Nonnull final Urn actorUrn, @Nonnull final Urn resourceUrn,
-      @Nonnull final String description, final Authorizer dataHubAuthorizer) {
+  public boolean proposeUpdateResourceDescription(
+      @Nonnull final Urn actorUrn,
+      @Nonnull final Urn resourceUrn,
+      @Nonnull final String description,
+      final Authorizer dataHubAuthorizer
+  ) {
     Objects.requireNonNull(actorUrn, "actorUrn cannot be null");
     Objects.requireNonNull(resourceUrn, "resourceUrn cannot be null");
     Objects.requireNonNull(description, "description cannot be null");
@@ -122,11 +129,22 @@ public class ProposalService {
       throw new RuntimeException(String.format("Entity %s does not exist", resourceUrn));
     }
 
-    Pair<List<Urn>, List<Urn>> assignedUsersAndGroups =
-        getAssignedUsersAndGroups(PoliciesConfig.MANAGE_GLOSSARIES_PRIVILEGE.getType(), Optional.of(resourceUrn),
-            dataHubAuthorizer);
-    List<Urn> assignedUsers = assignedUsersAndGroups.getFirst();
-    List<Urn> assignedGroups = assignedUsersAndGroups.getSecond();
+    List<Urn> assignedUsers;
+    List<Urn> assignedGroups;
+    ResourceSpec spec = new ResourceSpec(resourceUrn.getEntityType(), resourceUrn.toString());
+
+    if (resourceUrn.getEntityType().equals(GLOSSARY_TERM_ENTITY_NAME) || resourceUrn.getEntityType().equals(GLOSSARY_NODE_ENTITY_NAME)) {
+      Pair<List<Urn>, List<Urn>> assignedUsersAndGroups =
+          getAssignedUsersAndGroups(PoliciesConfig.MANAGE_GLOSSARIES_PRIVILEGE.getType(), Optional.of(resourceUrn),
+              dataHubAuthorizer);
+      assignedUsers = assignedUsersAndGroups.getFirst();
+      assignedGroups = assignedUsersAndGroups.getSecond();
+    } else {
+      AuthorizedActors actors = dataHubAuthorizer.authorizedActors(PoliciesConfig.MANAGE_ENTITY_DOCS_PROPOSALS_PRIVILEGE.getType(),
+          Optional.of(spec));
+      assignedUsers = actors.getUsers();
+      assignedGroups = actors.getGroups();
+    }
 
     ActionRequestSnapshot snapshot =
         createUpdateDescriptionProposalActionRequest(actorUrn, resourceUrn, assignedUsers, assignedGroups, description);
@@ -272,6 +290,9 @@ public class ProposalService {
         break;
       case GLOSSARY_TERM_ENTITY_NAME:
         updateGlossaryTermDescription(resourceUrn, description, authentication);
+        break;
+      case DATASET_ENTITY_NAME:
+        updateDatasetDescription(resourceUrn, description, authentication);
         break;
       default:
         log.warn(String.format("Proposing an update to a description is currently not supported for entity type %s",
@@ -587,15 +608,7 @@ public class ProposalService {
         (GlossaryNodeInfo) _entityService.getLatestAspect(resourceUrn, GLOSSARY_NODE_INFO_ASPECT_NAME);
     Objects.requireNonNull(glossaryNodeInfo, "glossaryNodeInfo cannot be null");
 
-    glossaryNodeInfo.setDefinition(description);
-
-    final MetadataChangeProposal proposal = new MetadataChangeProposal();
-    proposal.setEntityUrn(resourceUrn);
-    proposal.setEntityType(Constants.GLOSSARY_NODE_ENTITY_NAME);
-    proposal.setAspectName(Constants.GLOSSARY_NODE_INFO_ASPECT_NAME);
-    proposal.setAspect(GenericRecordUtils.serializeAspect(glossaryNodeInfo));
-    proposal.setChangeType(ChangeType.UPSERT);
-
+    final MetadataChangeProposal proposal = DescriptionUtils.createGlossaryNodeDescriptionChangeProposal(glossaryNodeInfo, resourceUrn, description);
     _entityClient.ingestProposal(proposal, authentication);
   }
 
@@ -603,17 +616,21 @@ public class ProposalService {
       final Authentication authentication) throws Exception {
     GlossaryTermInfo glossaryTermInfo =
         (GlossaryTermInfo) _entityService.getLatestAspect(resourceUrn, GLOSSARY_TERM_INFO_ASPECT_NAME);
-    Objects.requireNonNull(glossaryTermInfo, "glossaryTermInfo cannot be null");
 
-    glossaryTermInfo.setDefinition(description);
+    final MetadataChangeProposal proposal = DescriptionUtils.createGlossaryTermDescriptionChangeProposal(glossaryTermInfo, resourceUrn, description);
+    _entityClient.ingestProposal(proposal, authentication);
+  }
 
-    final MetadataChangeProposal proposal = new MetadataChangeProposal();
-    proposal.setEntityUrn(resourceUrn);
-    proposal.setEntityType(Constants.GLOSSARY_TERM_ENTITY_NAME);
-    proposal.setAspectName(Constants.GLOSSARY_TERM_INFO_ASPECT_NAME);
-    proposal.setAspect(GenericRecordUtils.serializeAspect(glossaryTermInfo));
-    proposal.setChangeType(ChangeType.UPSERT);
+  void updateDatasetDescription(@Nonnull final Urn resourceUrn, @Nonnull final String description,
+      final Authentication authentication) throws Exception {
+    EditableDatasetProperties editableDatasetProperties =
+        (EditableDatasetProperties) _entityService.getLatestAspect(resourceUrn, EDITABLE_DATASET_PROPERTIES_ASPECT_NAME);
+    if (editableDatasetProperties == null) {
+      editableDatasetProperties = new EditableDatasetProperties();
+    }
 
+    final MetadataChangeProposal proposal =
+        DescriptionUtils.createDatasetDescriptionChangeProposal(editableDatasetProperties, resourceUrn, description, authentication.getActor());
     _entityClient.ingestProposal(proposal, authentication);
   }
 
