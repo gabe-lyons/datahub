@@ -622,18 +622,7 @@
                 }
               }
             },
-            "doc" : "Urn of the applied tag",
-            "Relationship" : {
-              "entityTypes" : [ "tag" ],
-              "name" : "TaggedWith"
-            },
-            "Searchable" : {
-              "addToFilters" : true,
-              "fieldName" : "tags",
-              "fieldType" : "URN",
-              "filterNameOverride" : "Tag",
-              "hasValuesFieldName" : "hasTags"
-            }
+            "doc" : "Urn of the applied tag"
           }, {
             "name" : "context",
             "type" : "string",
@@ -643,12 +632,20 @@
         }
       },
       "doc" : "Tags associated with a given entity",
+      "Relationship" : {
+        "/*/tag" : {
+          "entityTypes" : [ "tag" ],
+          "name" : "TaggedWith"
+        }
+      },
       "Searchable" : {
         "/*/tag" : {
           "addToFilters" : true,
           "boostScore" : 0.5,
           "fieldName" : "tags",
           "fieldType" : "URN",
+          "filterNameOverride" : "Tag",
+          "hasValuesFieldName" : "hasTags",
           "queryByDefault" : true
         }
       }
@@ -1891,6 +1888,7 @@
       "optional" : true,
       "Searchable" : {
         "boostScore" : 10.0,
+        "enableAutocomplete" : true,
         "fieldType" : "TEXT_PARTIAL",
         "queryByDefault" : true
       }
@@ -2069,6 +2067,7 @@
       "optional" : true,
       "Searchable" : {
         "boostScore" : 10.0,
+        "enableAutocomplete" : true,
         "fieldType" : "TEXT_PARTIAL",
         "queryByDefault" : true
       }
@@ -2131,6 +2130,7 @@
       "optional" : true,
       "Searchable" : {
         "boostScore" : 10.0,
+        "enableAutocomplete" : true,
         "fieldType" : "TEXT_PARTIAL",
         "queryByDefault" : true
       }
@@ -2222,7 +2222,10 @@
         "type" : "string",
         "doc" : "The URL-encoded name of the AD/LDAP group. Serves as a globally unique identifier within DataHub.",
         "Searchable" : {
-          "fieldType" : "TEXT_PARTIAL"
+          "boostScore" : 10.0,
+          "enableAutocomplete" : true,
+          "fieldType" : "TEXT_PARTIAL",
+          "queryByDefault" : true
         }
       } ],
       "Aspect" : {

@@ -782,7 +782,7 @@ public class EntityService {
 
     // Produce MCL after a successful update
     boolean isNoOp = oldValue == updatedValue;
-    if (!isNoOp || _alwaysEmitChangeLog || shouldAspectEmitChangeLog(urn, aspectName)) {
+    if (!isNoOp || _alwaysEmitChangeLog) { // || shouldAspectEmitChangeLog(urn, aspectName)
       log.debug(String.format("Producing MetadataChangeLog for ingested aspect %s, urn %s", aspectName, urn));
       String entityName = urnToEntityName(urn);
       EntitySpec entitySpec = getEntityRegistry().getEntitySpec(entityName);
@@ -1030,7 +1030,7 @@ public class EntityService {
       MetadataChangeProposal mcp, Urn entityUrn,
       AuditStamp auditStamp, AspectSpec aspectSpec) {
     boolean isNoOp = oldAspect == newAspect;
-    if (!isNoOp || _alwaysEmitChangeLog || shouldAspectEmitChangeLog(aspectSpec)) {
+    if (!isNoOp || _alwaysEmitChangeLog) { // || shouldAspectEmitChangeLog(aspectSpec)
       log.debug("Producing MetadataChangeLog for ingested aspect {}, urn {}", mcp.getAspectName(), entityUrn);
 
       final MetadataChangeLog metadataChangeLog = new MetadataChangeLog(mcp.data());

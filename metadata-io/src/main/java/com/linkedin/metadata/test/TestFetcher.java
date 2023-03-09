@@ -5,6 +5,7 @@ import com.linkedin.common.urn.Urn;
 import com.linkedin.entity.EntityResponse;
 import com.linkedin.entity.EnvelopedAspectMap;
 import com.linkedin.metadata.entity.EntityService;
+import com.linkedin.metadata.query.SearchFlags;
 import com.linkedin.metadata.query.filter.SortCriterion;
 import com.linkedin.metadata.query.filter.SortOrder;
 import com.linkedin.metadata.search.EntitySearchService;
@@ -48,7 +49,8 @@ public class TestFetcher {
       throws RemoteInvocationException, URISyntaxException {
     log.debug("Batch fetching tests. start: {}, count: {}", start, count);
     // First fetch all test urns from start - start + count
-    SearchResult result = _entitySearchService.structuredSearch(TEST_ENTITY_NAME, query, null, SORT_CRITERION, start, count);
+    SearchResult result = _entitySearchService.search(TEST_ENTITY_NAME, query, null, SORT_CRITERION, start, count,
+            new SearchFlags().setFulltext(false));
     List<Urn> testUrns = result.getEntities().stream().map(SearchEntity::getEntity).collect(Collectors.toList());
 
     if (testUrns.isEmpty()) {

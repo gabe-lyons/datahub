@@ -332,7 +332,7 @@ public class RestliEntityClient extends BaseClient implements EntityClient {
   @Override
   public SearchResult search(@Nonnull String entity, @Nonnull String input,
       @Nullable Map<String, String> requestFilters, int start, int count, @Nonnull final Authentication authentication,
-      @Nullable Boolean fulltext, @Nullable SearchFlags searchFlags)
+      @Nullable SearchFlags searchFlags)
       throws RemoteInvocationException {
 
     final EntitiesDoSearchRequestBuilder requestBuilder = ENTITIES_REQUEST_BUILDERS.actionSearch()
@@ -340,8 +340,8 @@ public class RestliEntityClient extends BaseClient implements EntityClient {
         .inputParam(input)
         .filterParam(newFilter(requestFilters))
         .startParam(start)
-        .countParam(count)
-        .fulltextParam(fulltext);
+        .fulltextParam(searchFlags != null ? searchFlags.isFulltext() : null)
+        .countParam(count);
     if (searchFlags != null) {
       requestBuilder.searchFlagsParam(searchFlags);
     }
@@ -385,15 +385,14 @@ public class RestliEntityClient extends BaseClient implements EntityClient {
   @Override
   public SearchResult search(@Nonnull String entity, @Nonnull String input, @Nullable Filter filter,
       SortCriterion sortCriterion, int start, int count, @Nonnull final Authentication authentication,
-      @Nullable Boolean fulltext, @Nullable SearchFlags searchFlags)
+      @Nullable SearchFlags searchFlags)
       throws RemoteInvocationException {
 
     final EntitiesDoSearchRequestBuilder requestBuilder = ENTITIES_REQUEST_BUILDERS.actionSearch()
         .entityParam(entity)
         .inputParam(input)
         .startParam(start)
-        .countParam(count)
-        .fulltextParam(fulltext);
+        .countParam(count);
 
     if (filter != null) {
       requestBuilder.filterParam(filter);
@@ -405,6 +404,7 @@ public class RestliEntityClient extends BaseClient implements EntityClient {
 
     if (searchFlags != null) {
       requestBuilder.searchFlagsParam(searchFlags);
+      requestBuilder.fulltextParam(searchFlags.isFulltext());
     }
 
     return sendClientRequest(requestBuilder, authentication).getEntity();
