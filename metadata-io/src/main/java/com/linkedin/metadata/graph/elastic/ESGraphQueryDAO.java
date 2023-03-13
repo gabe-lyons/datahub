@@ -375,7 +375,6 @@ public class ESGraphQueryDAO {
           result.add(relationship);
         }
       }
-      count++;
     }
     return result;
   }
