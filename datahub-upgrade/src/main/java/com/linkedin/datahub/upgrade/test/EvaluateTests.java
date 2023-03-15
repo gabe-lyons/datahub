@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.linkedin.datahub.upgrade.Upgrade;
 import com.linkedin.datahub.upgrade.UpgradeCleanupStep;
 import com.linkedin.datahub.upgrade.UpgradeStep;
-import com.linkedin.datahub.upgrade.restoreindices.RestoreIndices;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.test.TestEngine;
 import java.util.ArrayList;
