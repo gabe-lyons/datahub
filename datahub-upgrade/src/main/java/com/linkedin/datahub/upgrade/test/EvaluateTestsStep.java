@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 public class EvaluateTestsStep implements UpgradeStep {
 
   final String ELASTIC_TIMEOUT = System.getenv()
-      .getOrDefault(EvaluateTests.ELASTIC_TIMEOUT_ARG_NAME,
+      .getOrDefault(EvaluateTests.ELASTIC_TIMEOUT_ENV_NAME,
           "1m");
 
   private final EntitySearchService _entitySearchService;

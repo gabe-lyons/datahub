@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class EvaluateTests implements Upgrade {
 
-  public static final String ELASTIC_TIMEOUT_ARG_NAME = "ELASTIC_TIMEOUT";
+  public static final String ELASTIC_TIMEOUT_ENV_NAME = "METADATA_TEST_ELASTIC_TIMEOUT";
 
   private final List<UpgradeStep> _steps;
 
