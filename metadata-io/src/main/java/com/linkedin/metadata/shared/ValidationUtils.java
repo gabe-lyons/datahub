@@ -15,7 +15,6 @@ import com.linkedin.metadata.search.ScrollResult;
 import lombok.extern.slf4j.Slf4j;
 import com.linkedin.metadata.search.SearchEntityArray;
 import com.linkedin.metadata.search.SearchResult;
-import lombok.extern.slf4j.Slf4j;
 import com.linkedin.metadata.utils.metrics.MetricUtils;
 import java.util.Objects;
 import java.util.stream.Collectors;

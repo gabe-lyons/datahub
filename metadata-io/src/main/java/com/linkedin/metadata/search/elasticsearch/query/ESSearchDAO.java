@@ -4,7 +4,6 @@ import com.codahale.metrics.Timer;
 import com.datahub.util.exception.ESQueryException;
 import com.linkedin.metadata.config.search.SearchConfiguration;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.linkedin.metadata.config.search.SearchConfiguration;
 import com.linkedin.metadata.models.EntitySpec;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.query.AutoCompleteResult;
