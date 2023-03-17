@@ -5,11 +5,20 @@ import DescriptionField from '../../../../../dataset/profile/schema/components/S
 import { pathMatchesNewPath } from '../../../../../dataset/profile/schema/utils/utils';
 import { useUpdateDescriptionMutation } from '../../../../../../../graphql/mutations.generated';
 import { useMutationUrn, useRefetch } from '../../../../EntityContext';
+import { useProposeUpdateDescriptionMutation } from '../../../../../../../graphql/proposals.generated';
+import { useSchemaRefetch } from '../SchemaContext';
 
 export default function useDescriptionRenderer(editableSchemaMetadata: EditableSchemaMetadata | null | undefined) {
     const urn = useMutationUrn();
     const refetch = useRefetch();
+    const schemaRefetch = useSchemaRefetch();
     const [updateDescription] = useUpdateDescriptionMutation();
+    const [proposeUpdateDescription] = useProposeUpdateDescriptionMutation();
+
+    const refresh: any = () => {
+        refetch?.();
+        schemaRefetch?.();
+    };
 
     return (description: string, record: SchemaField): JSX.Element => {
         const relevantEditableFieldInfo = editableSchemaMetadata?.editableSchemaFieldInfo.find(
@@ -34,7 +43,19 @@ export default function useDescriptionRenderer(editableSchemaMetadata: EditableS
                                 subResourceType: SubResourceType.DatasetField,
                             },
                         },
-                    }).then(refetch)
+                    }).then(refresh)
+                }
+                onPropose={(updatedDescription) =>
+                    proposeUpdateDescription({
+                        variables: {
+                            input: {
+                                description: DOMPurify.sanitize(updatedDescription),
+                                resourceUrn: urn,
+                                subResource: record.fieldPath,
+                                subResourceType: SubResourceType.DatasetField,
+                            },
+                        },
+                    }).then(refresh)
                 }
             />
         );

@@ -1,4 +1,4 @@
-import { GetDatasetDocument, UpdateDatasetDocument } from './graphql/dataset.generated';
+import { GetDatasetDocument, UpdateDatasetDocument, GetDatasetSchemaDocument } from './graphql/dataset.generated';
 import { GetDataFlowDocument } from './graphql/dataFlow.generated';
 import { GetDataJobDocument } from './graphql/dataJob.generated';
 import { GetBrowsePathsDocument, GetBrowseResultsDocument } from './graphql/browse.generated';
@@ -479,59 +479,6 @@ export const dataset3 = {
             },
         ],
     },
-    schemaMetadata: {
-        __typename: 'SchemaMetadata',
-        aspectVersion: 0,
-        createdAt: 0,
-        fields: [
-            {
-                __typename: 'SchemaField',
-                nullable: false,
-                recursive: false,
-                fieldPath: 'user_id',
-                description: 'Id of the user created',
-                type: SchemaFieldDataType.String,
-                nativeDataType: 'varchar(100)',
-                isPartOfKey: false,
-                jsonPath: null,
-                globalTags: null,
-                glossaryTerms: null,
-                label: 'hi',
-            },
-            {
-                __typename: 'SchemaField',
-                nullable: false,
-                recursive: false,
-                fieldPath: 'user_name',
-                description: 'Name of the user who signed up',
-                type: SchemaFieldDataType.String,
-                nativeDataType: 'boolean',
-                isPartOfKey: false,
-                jsonPath: null,
-                globalTags: null,
-                glossaryTerms: null,
-                label: 'hi',
-            },
-        ],
-        hash: '',
-        platformSchema: null,
-        platformUrn: 'urn:li:dataPlatform:hive',
-        created: {
-            actor: 'urn:li:corpuser:jdoe',
-            time: 1581407189000,
-        },
-        cluster: '',
-        name: 'SampleHiveSchema',
-        version: 0,
-        lastModified: {
-            actor: 'urn:li:corpuser:jdoe',
-            time: 1581407189000,
-        },
-        datasetUrn: 'urn:li:dataset:3',
-        primaryKeys: [],
-        foreignKeys: [],
-    },
-    editableSchemaMetadata: null,
     deprecation: null,
     usageStats: null,
     tagProposals: null,
@@ -593,6 +540,66 @@ export const dataset3 = {
     totalIncidents: null,
     embed: null,
 } as Dataset;
+
+export const dataset3WithSchema = {
+    dataset: {
+        __typename: 'Dataset',
+        schemaMetadata: {
+            __typename: 'SchemaMetadata',
+            aspectVersion: 0,
+            createdAt: 0,
+            fields: [
+                {
+                    __typename: 'SchemaField',
+                    nullable: false,
+                    recursive: false,
+                    fieldPath: 'user_id',
+                    description: 'Id of the user created',
+                    type: SchemaFieldDataType.String,
+                    nativeDataType: 'varchar(100)',
+                    isPartOfKey: false,
+                    jsonPath: null,
+                    globalTags: null,
+                    glossaryTerms: null,
+                    label: 'hi',
+                },
+                {
+                    __typename: 'SchemaField',
+                    nullable: false,
+                    recursive: false,
+                    fieldPath: 'user_name',
+                    description: 'Name of the user who signed up',
+                    type: SchemaFieldDataType.String,
+                    nativeDataType: 'boolean',
+                    isPartOfKey: false,
+                    jsonPath: null,
+                    globalTags: null,
+                    glossaryTerms: null,
+                    label: 'hi',
+                },
+            ],
+            hash: '',
+            platformSchema: null,
+            platformUrn: 'urn:li:dataPlatform:hive',
+            created: {
+                actor: 'urn:li:corpuser:jdoe',
+                time: 1581407189000,
+            },
+            cluster: '',
+            name: 'SampleHiveSchema',
+            version: 0,
+            lastModified: {
+                actor: 'urn:li:corpuser:jdoe',
+                time: 1581407189000,
+            },
+            datasetUrn: 'urn:li:dataset:3',
+            primaryKeys: [],
+            foreignKeys: [],
+        },
+        editableSchemaMetadata: null,
+        siblings: null,
+    },
+};
 
 export const dataset4 = {
     ...dataset3,
@@ -1701,6 +1708,26 @@ export const mocks = [
                 dataset: {
                     ...dataset3,
                 },
+            },
+        },
+        newData: () => ({
+            data: {
+                dataset: {
+                    ...dataset3,
+                },
+            },
+        }),
+    },
+    {
+        request: {
+            query: GetDatasetSchemaDocument,
+            variables: {
+                urn: 'urn:li:dataset:3',
+            },
+        },
+        result: {
+            data: {
+                ...dataset3WithSchema,
             },
         },
     },

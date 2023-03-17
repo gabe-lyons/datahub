@@ -4,6 +4,7 @@ import com.datahub.authentication.proposal.ProposalService;
 import com.linkedin.common.urn.CorpuserUrn;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.datahub.graphql.QueryContext;
+import com.linkedin.datahub.graphql.exception.AuthorizationException;
 import com.linkedin.datahub.graphql.generated.DescriptionUpdateInput;
 import com.linkedin.metadata.Constants;
 import graphql.schema.DataFetcher;
@@ -32,6 +33,10 @@ public class ProposeUpdateDescriptionResolver implements DataFetcher<Completable
       throw new IllegalArgumentException("Proposing an update to a column description is currently not supported");
     }
 
+    if (!ProposalUtils.isAuthorizedToProposeDescription(context, resourceUrn)) {
+      throw new AuthorizationException("Unauthorized to perform this action. Please contact your DataHub administrator.");
+    }
+
     Urn actor = CorpuserUrn.createFromString(context.getActorUrn());
     String entityType = resourceUrn.getEntityType();
 
@@ -41,6 +46,7 @@ public class ProposeUpdateDescriptionResolver implements DataFetcher<Completable
         switch (entityType) {
           case Constants.GLOSSARY_TERM_ENTITY_NAME:
           case Constants.GLOSSARY_NODE_ENTITY_NAME:
+          case Constants.DATASET_ENTITY_NAME:
             return _proposalService.proposeUpdateResourceDescription(actor, resourceUrn, description,
                 context.getAuthorizer());
           default:

@@ -85,14 +85,18 @@ public class SearchRequestHandler {
   private static final String REMOVED = "removed";
 
   private static final String URN_FILTER = "urn";
+
+  private static final String[] FIELDS_TO_FETCH = new String[]{"urn", "usageCountLast30Days"};
+  private static final String[] URN_FIELD = new String[]{"urn"};
+
   private final List<EntitySpec> _entitySpecs;
   private final Set<String> _facetFields;
   private final Set<String> _defaultQueryFieldNames;
   private final HighlightBuilder _highlights;
   private final Map<String, String> _filtersToDisplayName;
+
   private final SearchConfiguration _configs;
   private final SearchQueryBuilder _searchQueryBuilder;
-
 
   private SearchRequestHandler(@Nonnull EntitySpec entitySpec, @Nonnull SearchConfiguration configs) {
     this(ImmutableList.of(entitySpec), configs);
@@ -194,7 +198,7 @@ public class SearchRequestHandler {
 
     searchSourceBuilder.from(from);
     searchSourceBuilder.size(size);
-    searchSourceBuilder.fetchSource("urn", null);
+    searchSourceBuilder.fetchSource(FIELDS_TO_FETCH, null);
 
     BoolQueryBuilder filterQuery = getFilterQuery(filter);
     searchSourceBuilder.query(QueryBuilders.boolQuery()
@@ -269,6 +273,7 @@ public class SearchRequestHandler {
     final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
     searchSourceBuilder.query(filterQuery);
     searchSourceBuilder.from(from).size(size);
+    searchSourceBuilder.fetchSource(URN_FIELD, null);
     ESUtils.buildSortOrder(searchSourceBuilder, sortCriterion);
     searchRequest.source(searchSourceBuilder);
 
@@ -325,7 +330,7 @@ public class SearchRequestHandler {
     final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
     searchSourceBuilder.query(filterQuery);
     searchSourceBuilder.size(size);
-    searchSourceBuilder.fetchSource("urn", null);
+    searchSourceBuilder.fetchSource(URN_FIELD, null);
     ESUtils.buildSortOrder(searchSourceBuilder, sortCriterion);
     searchRequest.source(searchSourceBuilder);
     searchRequest.scroll(keepAliveDuration);

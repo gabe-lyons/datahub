@@ -2,6 +2,7 @@ package com.linkedin.metadata.search.elasticsearch.query;
 
 import com.codahale.metrics.Timer;
 import com.datahub.util.exception.ESQueryException;
+import com.linkedin.metadata.config.search.SearchConfiguration;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.linkedin.metadata.config.search.SearchConfiguration;
 import com.linkedin.metadata.models.EntitySpec;
@@ -181,7 +182,7 @@ public class ESSearchDAO {
    * @param from index to start the search from
    * @param size the number of search hits to return
    * @param searchFlags Structured or full text search modes, plus other misc options
-   * @return a {@link SearchResult} that contains a list of matched documents and related search result metadata
+   * @return a {@link com.linkedin.metadata.dao.SearchResult} that contains a list of matched documents and related search result metadata
    */
   @Nonnull
   public SearchResult search(@Nonnull String entityName, @Nonnull String input, @Nullable Filter postFilters,

@@ -4,6 +4,7 @@ import TagTermGroup from '../../../../../../shared/tags/TagTermGroup';
 import { findFieldPathProposal } from '../../../../../../shared/tags/utils/proposalUtils';
 import { pathMatchesNewPath } from '../../../../../dataset/profile/schema/utils/utils';
 import { useBaseEntity, useMutationUrn, useRefetch } from '../../../../EntityContext';
+import { useSchemaRefetch } from '../SchemaContext';
 
 export default function useTagsAndTermsRenderer(
     editableSchemaMetadata: EditableSchemaMetadata | null | undefined,
@@ -15,6 +16,12 @@ export default function useTagsAndTermsRenderer(
     const urn = useMutationUrn();
     const baseEntity = useBaseEntity();
     const refetch = useRefetch();
+    const schemaRefetch = useSchemaRefetch();
+
+    const refresh: any = () => {
+        refetch?.();
+        schemaRefetch?.();
+    };
 
     const tagAndTermRender = (tags: GlobalTags, record: SchemaField, rowIndex: number | undefined) => {
         const relevantEditableFieldInfo = editableSchemaMetadata?.editableSchemaFieldInfo.find(
@@ -37,7 +44,7 @@ export default function useTagsAndTermsRenderer(
                     entityType={EntityType.Dataset}
                     entitySubresource={record.fieldPath}
                     highlightText={filterText}
-                    refetch={refetch}
+                    refetch={refresh}
                     proposedGlossaryTerms={
                         options.showTerms
                             ? findFieldPathProposal(

@@ -46,6 +46,8 @@ public class IngestMetadataTestsStep implements BootstrapStep {
 
   private static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
   private static final ObjectMapper JSON_MAPPER = new ObjectMapper();
+  private static final String UPGRADE_ID = "ingest-default-metadata-policies";
+  private static final Urn UPGRADE_ID_URN = BootstrapStep.getUpgradeUrn(UPGRADE_ID);
 
   @Nonnull
   @Override
@@ -60,6 +62,10 @@ public class IngestMetadataTestsStep implements BootstrapStep {
 
   @Override
   public void execute() throws IOException, URISyntaxException {
+    if (_entityService.exists(UPGRADE_ID_URN)) {
+      log.info("Default metadata tests were already ingested. Skipping ingesting again.");
+      return;
+    }
     log.info("Ingesting default metadata tests...");
 
     // If test bootstrap is disabled, skip

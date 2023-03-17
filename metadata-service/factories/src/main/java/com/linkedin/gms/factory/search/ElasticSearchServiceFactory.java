@@ -43,7 +43,7 @@ public class ElasticSearchServiceFactory {
 
   @Bean(name = "elasticSearchService")
   @Nonnull
-  protected ElasticSearchService getInstance(ConfigurationProvider configurationProvider) {
+  protected ElasticSearchService getInstance() {
     log.info("Search configuration: {}", configurationProvider.getElasticSearch().getSearch());
 
     ESSearchDAO esSearchDAO =
