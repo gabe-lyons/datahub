@@ -12,6 +12,7 @@ import com.linkedin.entity.client.EntityClient;
 import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.query.filter.SortCriterion;
 import com.linkedin.metadata.query.filter.SortOrder;
+import com.linkedin.metadata.query.SearchFlags;
 import com.linkedin.metadata.search.SearchEntity;
 import com.linkedin.metadata.search.SearchEntityArray;
 import com.linkedin.metadata.search.SearchResult;
@@ -63,8 +64,7 @@ public class ListTestsResolver implements DataFetcher<CompletableFuture<ListTest
               start,
               count,
               context.getAuthentication(),
-                  true,
-              null);
+              new SearchFlags().setFulltext(true));
 
           // Now that we have entities we can bind this to a result.
           final ListTestsResult result = new ListTestsResult();

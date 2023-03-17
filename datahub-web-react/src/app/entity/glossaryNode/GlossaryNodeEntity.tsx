@@ -2,7 +2,6 @@ import { FolderFilled, FolderOutlined } from '@ant-design/icons';
 import React from 'react';
 import { useGetGlossaryNodeQuery } from '../../../graphql/glossaryNode.generated';
 import { EntityType, GlossaryNode, SearchResult } from '../../../types.generated';
-import GlossaryEntitiesPath from '../../glossary/GlossaryEntitiesPath';
 import { FetchedEntity } from '../../lineage/types';
 import { Entity, EntityCapabilityType, IconStyleType, PreviewType } from '../Entity';
 import { EntityProfile } from '../shared/containers/profile/EntityProfile';
@@ -59,8 +58,8 @@ class GlossaryNodeEntity implements Entity<GlossaryNode> {
                 entityType={EntityType.GlossaryNode}
                 useEntityQuery={useGetGlossaryNodeQuery}
                 getOverrideProperties={this.getOverridePropertiesFromEntity}
-                displayGlossaryBrowser
                 isNameEditable
+                hideBrowseBar
                 tabs={[
                     {
                         name: 'Contents',
@@ -85,7 +84,6 @@ class GlossaryNodeEntity implements Entity<GlossaryNode> {
                         component: SidebarOwnerSection,
                     },
                 ]}
-                customNavBar={<GlossaryEntitiesPath />}
                 headerDropdownItems={
                     new Set([
                         EntityMenuItems.ADD_TERM_GROUP,

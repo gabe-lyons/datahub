@@ -246,8 +246,6 @@ export const dataset1 = {
     },
     domain: null,
     container: null,
-    upstream: null,
-    downstream: null,
     health: [],
     assertions: null,
     deprecation: null,
@@ -346,8 +344,6 @@ export const dataset2 = {
     },
     domain: null,
     container: null,
-    upstream: null,
-    downstream: null,
     health: [],
     assertions: null,
     status: null,
@@ -469,8 +465,6 @@ export const dataset3 = {
     },
     incoming: null,
     outgoing: null,
-    upstream: null,
-    downstream: null,
     institutionalMemory: {
         elements: [
             {

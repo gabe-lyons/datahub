@@ -2,6 +2,8 @@ package com.linkedin.datahub.graphql.resolvers.proposal;
 
 import com.datahub.authentication.Authentication;
 import com.datahub.authorization.AuthorizedActors;
+import com.datahub.authorization.ConjunctivePrivilegeGroup;
+import com.datahub.authorization.DisjunctivePrivilegeGroup;
 import com.datahub.plugins.auth.authorization.Authorizer;
 import com.datahub.authorization.ResourceSpec;
 import com.google.common.collect.ImmutableList;
@@ -23,8 +25,6 @@ import com.linkedin.container.Container;
 import com.linkedin.data.template.SetMode;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.authorization.AuthorizationUtils;
-import com.linkedin.datahub.graphql.authorization.ConjunctivePrivilegeGroup;
-import com.linkedin.datahub.graphql.authorization.DisjunctivePrivilegeGroup;
 import com.linkedin.datahub.graphql.generated.ActionRequestResult;
 import com.linkedin.datahub.graphql.generated.ActionRequestType;
 import com.linkedin.datahub.graphql.generated.SubResourceType;

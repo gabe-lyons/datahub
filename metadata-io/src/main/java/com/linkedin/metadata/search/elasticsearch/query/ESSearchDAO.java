@@ -3,9 +3,11 @@ package com.linkedin.metadata.search.elasticsearch.query;
 import com.codahale.metrics.Timer;
 import com.datahub.util.exception.ESQueryException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.linkedin.metadata.config.search.SearchConfiguration;
 import com.linkedin.metadata.models.EntitySpec;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.query.AutoCompleteResult;
+import com.linkedin.metadata.query.SearchFlags;
 import com.linkedin.metadata.query.filter.Filter;
 import com.linkedin.metadata.query.filter.SortCriterion;
 import com.linkedin.metadata.search.ScrollResult;
@@ -27,24 +29,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.ElasticsearchStatusException;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
-<<<<<<< HEAD
 import org.elasticsearch.action.search.SearchScrollRequest;
-=======
 import org.elasticsearch.client.Request;
->>>>>>> oss_master
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.Response;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.client.core.CountRequest;
 
-<<<<<<< HEAD
 import static com.linkedin.metadata.search.utils.SearchUtils.EMPTY_SCROLL_RESULT;
 
-=======
 import static com.linkedin.metadata.Constants.*;
 import static com.linkedin.metadata.models.registry.template.util.TemplateUtil.*;
 import static com.linkedin.metadata.search.utils.SearchUtils.*;
->>>>>>> oss_master
 
 /**
  * A search DAO for Elasticsearch backend.
@@ -58,6 +54,8 @@ public class ESSearchDAO {
   private final IndexConvention indexConvention;
   private final boolean pointInTimeCreationEnabled;
   private final String elasticSearchImplementation;
+  @Nonnull
+  private final SearchConfiguration searchConfiguration;
 
   public long docCount(@Nonnull String entityName) {
     EntitySpec entitySpec = entityRegistry.getEntitySpec(entityName);
@@ -75,17 +73,20 @@ public class ESSearchDAO {
   @WithSpan
   private SearchResult executeAndExtract(@Nonnull EntitySpec entitySpec, @Nonnull SearchRequest searchRequest,
                                          @Nullable Filter filter, int from, int size) {
+    long id = System.currentTimeMillis();
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "executeAndExtract_search").time()) {
+      log.debug("Executing request {}: {}", id, searchRequest);
       final SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
       // extract results, validated against document model as well
-      return SearchRequestHandler.getBuilder(entitySpec).extractResult(searchResponse, filter, from, size);
+      return SearchRequestHandler.getBuilder(entitySpec, searchConfiguration).extractResult(searchResponse, filter, from, size);
     } catch (Exception e) {
       log.error("Search query failed", e);
       throw new ESQueryException("Search query failed:", e);
+    } finally {
+      log.debug("Returning from request {}.", id);
     }
   }
 
-<<<<<<< HEAD
   private ScrollResult buildScrollResult(@Nonnull SearchResult searchResult, @Nullable String scrollId) {
     ScrollResult result = new ScrollResult().setEntities(searchResult.getEntities())
             .setMetadata(searchResult.getMetadata())
@@ -105,7 +106,8 @@ public class ESSearchDAO {
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "esSearch").time()) {
       final SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
       // extract results, validated against document model as well
-      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpec).extractResult(searchResponse, filters, 0, size);
+      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpec, searchConfiguration)
+              .extractResult(searchResponse, filters, 0, size);
       return buildScrollResult(searchResult, searchResponse.getScrollId());
     } catch (Exception e) {
       if (e instanceof ElasticsearchStatusException) {
@@ -129,18 +131,32 @@ public class ESSearchDAO {
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "esSearch").time()) {
       final SearchResponse searchResponse = client.scroll(searchScrollRequest, RequestOptions.DEFAULT);
       // extract results, validated against document model as well
-      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpec).extractResult(searchResponse, filters, 0, size);
+      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpec, searchConfiguration)
+              .extractResult(searchResponse, filters, 0, size);
       return buildScrollResult(searchResult, searchResponse.getScrollId());
-=======
+    } catch (Exception e) {
+      if (e instanceof ElasticsearchStatusException) {
+        final ElasticsearchStatusException statusException = (ElasticsearchStatusException) e;
+        if (statusException.status().getStatus() == 400) {
+          // Malformed query -- Could indicate bad search syntax. Return empty response.
+          log.warn("Received 400 from Elasticsearch. Returning empty search response", e);
+          return EMPTY_SCROLL_RESULT;
+        }
+      }
+      log.error("Search query failed", e);
+      throw new ESQueryException("Search query failed:", e);
+    }
+  }
+
   @Nonnull
   @WithSpan
   private ScrollResult executeAndExtract(@Nonnull List<EntitySpec> entitySpecs, @Nonnull SearchRequest searchRequest, @Nullable Filter filter,
-      @Nullable String scrollId, @Nonnull String keepAlive, int size) {
+          @Nullable String scrollId, @Nonnull String keepAlive, int size) {
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "executeAndExtract_scroll").time()) {
       final SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
       // extract results, validated against document model as well
-      return SearchRequestHandler.getBuilder(entitySpecs).extractScrollResult(searchResponse, filter, scrollId, keepAlive, size, supportsPointInTime());
->>>>>>> oss_master
+      return SearchRequestHandler.getBuilder(entitySpecs, searchConfiguration).extractScrollResult(searchResponse,
+              filter, scrollId, keepAlive, size, supportsPointInTime());
     } catch (Exception e) {
       if (e instanceof ElasticsearchStatusException) {
         final ElasticsearchStatusException statusException = (ElasticsearchStatusException) e;
@@ -164,18 +180,18 @@ public class ESSearchDAO {
    * @param sortCriterion {@link SortCriterion} to be applied to search results
    * @param from index to start the search from
    * @param size the number of search hits to return
-   * @param fulltext Structured or full text search modes
+   * @param searchFlags Structured or full text search modes, plus other misc options
    * @return a {@link SearchResult} that contains a list of matched documents and related search result metadata
    */
   @Nonnull
   public SearchResult search(@Nonnull String entityName, @Nonnull String input, @Nullable Filter postFilters,
-      @Nullable SortCriterion sortCriterion, int from, int size, boolean fulltext) {
+      @Nullable SortCriterion sortCriterion, int from, int size, @Nullable SearchFlags searchFlags) {
     final String finalInput = input.isEmpty() ? "*" : input;
     Timer.Context searchRequestTimer = MetricUtils.timer(this.getClass(), "searchRequest").time();
     EntitySpec entitySpec = entityRegistry.getEntitySpec(entityName);
     // Step 1: construct the query
-    final SearchRequest searchRequest = SearchRequestHandler.getBuilder(entitySpec)
-        .getSearchRequest(finalInput, postFilters, sortCriterion, from, size, fulltext);
+    final SearchRequest searchRequest = SearchRequestHandler.getBuilder(entitySpec, searchConfiguration)
+        .getSearchRequest(finalInput, postFilters, sortCriterion, from, size, searchFlags);
     searchRequest.indices(indexConvention.getIndexName(entitySpec));
     searchRequestTimer.stop();
     // Step 2: execute the query and extract results, validated against document model as well
@@ -196,7 +212,7 @@ public class ESSearchDAO {
       @Nullable SortCriterion sortCriterion, int from, int size) {
     EntitySpec entitySpec = entityRegistry.getEntitySpec(entityName);
     final SearchRequest searchRequest =
-        SearchRequestHandler.getBuilder(entitySpec).getFilterRequest(filters, sortCriterion, from, size);
+        SearchRequestHandler.getBuilder(entitySpec, searchConfiguration).getFilterRequest(filters, sortCriterion, from, size);
     searchRequest.indices(indexConvention.getIndexName(entitySpec));
     return executeAndExtract(entitySpec, searchRequest, filters, from, size);
   }
@@ -222,7 +238,7 @@ public class ESSearchDAO {
     // If scrollID is null, it is the initial scroll request -> execute search request with the scroll setting
     if (scrollId == null) {
       final SearchRequest searchRequest =
-          SearchRequestHandler.getBuilder(entitySpec).getScrollRequest(filters, sortCriterion, size, keepAliveDuration);
+          SearchRequestHandler.getBuilder(entitySpec, searchConfiguration).getScrollRequest(filters, sortCriterion, size, keepAliveDuration);
       searchRequest.indices(indexConvention.getIndexName(entitySpec));
       return executeSearchScrollRequestAndExtract(entitySpec, filters, searchRequest, size);
     }
@@ -304,7 +320,7 @@ public class ESSearchDAO {
    */
   @Nonnull
   public ScrollResult scroll(@Nonnull List<String> entities, @Nonnull String input, @Nullable Filter postFilters,
-      @Nullable SortCriterion sortCriterion, @Nullable String scrollId, @Nonnull String keepAlive, int size, boolean fulltext) {
+      @Nullable SortCriterion sortCriterion, @Nullable String scrollId, @Nonnull String keepAlive, int size, SearchFlags searchFlags) {
     final String finalInput = input.isEmpty() ? "*" : input;
     String[] indexArray = entities.stream()
         .map(indexConvention::getEntityIndexName)
@@ -330,8 +346,8 @@ public class ESSearchDAO {
     }
 
     // Step 1: construct the query
-    final SearchRequest searchRequest = SearchRequestHandler.getBuilder(entitySpecs)
-        .getSearchRequest(finalInput, postFilters, sortCriterion, sort, pitId, keepAlive, size, fulltext);
+    final SearchRequest searchRequest = SearchRequestHandler.getBuilder(entitySpecs, searchConfiguration)
+        .getSearchRequest(finalInput, postFilters, sortCriterion, sort, pitId, keepAlive, size, searchFlags);
 
     // PIT specifies indices in creation so it doesn't support specifying indices on the request, so we only specify if not using PIT
     if (!supportsPointInTime()) {

@@ -264,16 +264,7 @@ public class ESUtils {
   @Nonnull
   public static String toKeywordField(@Nonnull final String filterField, final boolean skipKeywordSuffix) {
     return skipKeywordSuffix
-<<<<<<< HEAD
-<<<<<<< HEAD
             || KEYWORD_FIELDS.contains(filterField)
-=======
-            || "urn".equals(filterField)
-            || "runId".equals(filterField)
->>>>>>> oss_master
-=======
-            || KEYWORD_FIELDS.contains(filterField)
->>>>>>> oss_master
             || filterField.contains(".") ? filterField : filterField + ESUtils.KEYWORD_SUFFIX;
   }
 

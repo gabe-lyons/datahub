@@ -12,6 +12,7 @@ import com.linkedin.metadata.search.SearchResult;
 import com.linkedin.metadata.search.cache.CacheableSearcher;
 import com.linkedin.metadata.utils.metrics.MetricUtils;
 import java.util.List;
+import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +20,6 @@ import org.javatuples.Quintet;
 import org.javatuples.Sextet;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
-
-import java.util.Optional;
 
 import static com.datahub.util.RecordUtils.toJsonString;
 import static com.datahub.util.RecordUtils.toRecordTemplate;
@@ -154,12 +153,11 @@ public class CachingEntitySearchService {
       int from,
       int size,
       @Nullable SearchFlags flags) {
-    SearchFlags searchFlags = Optional.ofNullable(flags).orElse(new SearchFlags());
     return new CacheableSearcher<>(
         cacheManager.getCache(ENTITY_SEARCH_SERVICE_SEARCH_CACHE_NAME),
         batchSize,
         querySize -> getRawSearchResults(entityName, query, filters, sortCriterion, querySize.getFrom(),
-                querySize.getSize(), Boolean.TRUE.equals(searchFlags.isFulltext())),
+                querySize.getSize(), flags),
         querySize -> Quintet.with(entityName, query, filters != null ? toJsonString(filters) : null,
             sortCriterion != null ? toJsonString(sortCriterion) : null, querySize), flags, enableCache).getSearchResults(from, size);
   }
@@ -280,25 +278,9 @@ public class CachingEntitySearchService {
       final SortCriterion sortCriterion,
       final int start,
       final int count,
-      final boolean fulltext) {
+      @Nullable final SearchFlags searchFlags) {
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "getRawSearchResults").time()) {
-      if (fulltext) {
-        return entitySearchService.fullTextSearch(
-                entityName,
-                input,
-                filters,
-                sortCriterion,
-                start,
-                count);
-      } else {
-        return entitySearchService.structuredSearch(
-                entityName,
-                input,
-                filters,
-                sortCriterion,
-                start,
-                count);
-      }
+      return entitySearchService.search(entityName, input, filters, sortCriterion, start, count, searchFlags);
     }
   }
 
