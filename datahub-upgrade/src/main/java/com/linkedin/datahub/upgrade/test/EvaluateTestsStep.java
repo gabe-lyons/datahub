@@ -25,6 +25,10 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class EvaluateTestsStep implements UpgradeStep {
 
+  private static final String ELASTIC_TIMEOUT = System.getenv()
+      .getOrDefault(EvaluateTests.ELASTIC_TIMEOUT_ENV_NAME,
+          "1m");
+
   private final EntitySearchService _entitySearchService;
   private final TestEngine _testEngine;
 
@@ -53,7 +57,7 @@ public class EvaluateTestsStep implements UpgradeStep {
       for (String entityType : entityTypesToEvaluate) {
         int batch = 1;
         context.report().addLine(String.format("Fetching batch %d of %s entities", batch, entityType));
-        ScrollResult scrollResult = _entitySearchService.scroll(entityType, null, null, batchSize, null, "1m");
+        ScrollResult scrollResult = _entitySearchService.scroll(entityType, null, null, batchSize, null, ELASTIC_TIMEOUT);
         while (scrollResult.getEntities().size() > 0) {
           context.report().addLine(String.format("Processing batch %d of %s entities", batch, entityType));
           List<Urn> entitiesInBatch =
@@ -71,7 +75,7 @@ public class EvaluateTestsStep implements UpgradeStep {
           batch++;
           context.report().addLine(String.format("Fetching batch %d of %s entities", batch, entityType));
           scrollResult =
-              _entitySearchService.scroll(entityType, null, null, batchSize, scrollResult.getScrollId(), "1m");
+              _entitySearchService.scroll(entityType, null, null, batchSize, scrollResult.getScrollId(), ELASTIC_TIMEOUT);
         }
         context.report().addLine(String.format("Finished evaluating tests for %s entities", entityType));
       }
