@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { message, Modal, Button, Form, Input, Typography, Select } from 'antd';
 import analytics, { EventType, EntityActionType } from '../../../../../analytics';
-import { useEntityData } from '../../../EntityContext';
+import { useEntityData, useRefetch } from '../../../EntityContext';
 import { IncidentType } from '../../../../../../types.generated';
 import { INCIDENT_DISPLAY_TYPES } from '../incidentUtils';
 import { useRaiseIncidentMutation } from '../../../../../../graphql/mutations.generated';
@@ -14,6 +14,7 @@ type AddIncidentProps = {
 
 export const AddIncidentModal = ({ visible, onClose, refetch }: AddIncidentProps) => {
     const { urn, entityType } = useEntityData();
+    const refetchEntity = useRefetch();
     const incidentTypes = INCIDENT_DISPLAY_TYPES;
     const [selectedIncidentType, setSelectedIncidentType] = useState<IncidentType>(IncidentType.Operational);
     const [isOtherTypeSelected, setIsOtherTypeSelected] = useState<boolean>(false);
@@ -66,6 +67,7 @@ export const AddIncidentModal = ({ visible, onClose, refetch }: AddIncidentProps
         handleClose();
         setTimeout(function () {
             refetch?.();
+            refetchEntity?.();
         }, 2000);
     };
 

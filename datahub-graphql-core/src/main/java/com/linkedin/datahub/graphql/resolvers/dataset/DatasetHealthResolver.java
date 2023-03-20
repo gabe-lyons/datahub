@@ -90,8 +90,10 @@ public class DatasetHealthResolver implements DataFetcher<CompletableFuture<List
     _entityClient = entityClient;
     _graphClient = graphClient;
     _timeseriesAspectService = timeseriesAspectService;
+    // TODO: Decide what to do with this cache.
+    // Disabling cache so that dataset health updates instantly after changes. (e.g. incidents raised).
     _statusCache = CacheBuilder.newBuilder()
-        .maximumSize(10000)
+        .maximumSize(0)
         .expireAfterWrite(1, TimeUnit.MINUTES)
         .build();
     _config = config;
