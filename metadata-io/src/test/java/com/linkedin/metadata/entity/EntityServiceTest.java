@@ -1141,16 +1141,6 @@ abstract public class EntityServiceTest<T_AD extends AspectDao, T_RS extends Ret
         assertEquals(_entityService.listLatestAspects(entityUrn.getEntityType(), aspectName2, 0, 10).getTotalCount(), 1);
     }
 
-    /**
-     * Equivalence for mocks fails when directly using the object as when converting from RecordTemplate from JSON it
-     * reorders the fields. This simulates pulling the historical SystemMetadata from the previous call.
-     */
-    protected <T extends RecordTemplate> T simulatePullFromDB(T aspect, Class<T> clazz) throws Exception {
-        final ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        return RecordUtils.toRecordTemplate(clazz, objectMapper.writeValueAsString(aspect));
-    }
-
     @Test
     public void testRestoreIndices() throws Exception {
         String urnStr = "urn:li:dataset:(urn:li:dataPlatform:looker,sample_dataset_unique,PROD)";
@@ -1178,7 +1168,7 @@ abstract public class EntityServiceTest<T_AD extends AspectDao, T_RS extends Ret
 
         ArgumentCaptor<MetadataChangeLog> mclCaptor = ArgumentCaptor.forClass(MetadataChangeLog.class);
         verify(_mockProducer, times(1)).produceMetadataChangeLog(
-            Mockito.eq(entityUrn), Mockito.any(), mclCaptor.capture());
+                Mockito.eq(entityUrn), Mockito.any(), mclCaptor.capture());
         MetadataChangeLog mcl = mclCaptor.getValue();
         assertEquals(mcl.getEntityType(), "dataset");
         assertNull(mcl.getPreviousAspectValue());
