@@ -11,7 +11,7 @@ import { FAILURE_COLOR_HEX, getNameFromType, SUCCESS_COLOR_HEX } from '../incide
 import { useGetUserQuery } from '../../../../../../graphql/user.generated';
 import { useEntityRegistry } from '../../../../../useEntityRegistry';
 import { getLocaleTimezone } from '../../../../../shared/time/timeUtils';
-import { useEntityData } from '../../../EntityContext';
+import { useEntityData, useRefetch } from '../../../EntityContext';
 import analytics, { EntityActionType, EventType } from '../../../../../analytics';
 import { useUpdateIncidentStatusMutation } from '../../../../../../graphql/mutations.generated';
 import { ResolveIncidentModal } from './ResolveIncidentModal';
@@ -142,6 +142,7 @@ const MenuItem = styled.div`
 
 export default function IncidentListItem({ incident, refetch }: Props) {
     const { entityType } = useEntityData();
+    const refetchEntity = useRefetch();
     const entityRegistry = useEntityRegistry();
     const [updateIncidentStatusMutation] = useUpdateIncidentStatusMutation();
     const [isResolvedModalVisible, setIsResolvedModalVisible] = useState(false);
@@ -176,6 +177,9 @@ export default function IncidentListItem({ incident, refetch }: Props) {
                 actionType: EntityActionType.ResolvedIncident,
             });
             message.success({ content: 'Incident updated successfully! .', duration: 2 });
+            setTimeout(() => {
+                refetchEntity?.();
+            }, 2000);
         } catch (e: unknown) {
             message.destroy();
             if (e instanceof Error) {
