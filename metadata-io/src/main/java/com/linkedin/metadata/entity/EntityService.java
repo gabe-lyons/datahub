@@ -27,6 +27,7 @@ import com.linkedin.data.schema.validator.Validator;
 import com.linkedin.data.template.DataTemplateUtil;
 import com.linkedin.data.template.RecordTemplate;
 import com.linkedin.data.template.StringArray;
+import com.linkedin.data.template.StringMap;
 import com.linkedin.data.template.UnionTemplate;
 import com.linkedin.dataplatform.DataPlatformInfo;
 import com.linkedin.entity.AspectType;
@@ -436,7 +437,7 @@ public class EntityService {
       String entityName,
       @Nonnull Urn urn,
       @Nonnull String aspectName,
-      long version) {
+      long version) throws Exception {
     log.debug(String.format("Invoked getEnvelopedAspect with entityName: %s, urn: %s, aspectName: %s, version: %s",
         urn.getEntityType(),
         urn,
@@ -783,7 +784,7 @@ public class EntityService {
 
     // Produce MCL after a successful update
     boolean isNoOp = oldValue == updatedValue;
-    if (!isNoOp || _alwaysEmitChangeLog) { // || shouldAspectEmitChangeLog(urn, aspectName)
+    if (!isNoOp || _alwaysEmitChangeLog || shouldAspectEmitChangeLog(urn, aspectName)) {
       log.debug(String.format("Producing MetadataChangeLog for ingested aspect %s, urn %s", aspectName, urn));
       String entityName = urnToEntityName(urn);
       EntitySpec entitySpec = getEntityRegistry().getEntitySpec(entityName);
@@ -1031,14 +1032,13 @@ public class EntityService {
       MetadataChangeProposal mcp, Urn entityUrn,
       AuditStamp auditStamp, AspectSpec aspectSpec) {
     boolean isNoOp = oldAspect == newAspect;
-    if (!isNoOp || _alwaysEmitChangeLog) { // || shouldAspectEmitChangeLog(aspectSpec)
+    if (!isNoOp || _alwaysEmitChangeLog || shouldAspectEmitChangeLog(aspectSpec)) {
       log.debug("Producing MetadataChangeLog for ingested aspect {}, urn {}", mcp.getAspectName(), entityUrn);
 
       final MetadataChangeLog metadataChangeLog = new MetadataChangeLog(mcp.data());
       metadataChangeLog.setEntityUrn(entityUrn);
       metadataChangeLog.setCreated(auditStamp);
-      // The change log produced by this method is always an upsert as it contains the entire RecordTemplate update
-      metadataChangeLog.setChangeType(ChangeType.UPSERT);
+      metadataChangeLog.setChangeType(isNoOp ? ChangeType.RESTATE : ChangeType.UPSERT);
 
       if (oldAspect != null) {
         metadataChangeLog.setPreviousAspectValue(GenericRecordUtils.serializeAspect(oldAspect));
@@ -1140,7 +1140,12 @@ public class EntityService {
       result.createRecordMs += System.currentTimeMillis() - startTime;
       startTime = System.currentTimeMillis();
 
+      // Force indexing to skip diff mode and fix error states
       SystemMetadata latestSystemMetadata = EntityUtils.parseSystemMetadata(aspect.getSystemMetadata());
+      StringMap properties = latestSystemMetadata.getProperties() != null ? latestSystemMetadata.getProperties()
+          : new StringMap();
+      properties.put(FORCE_INDEXING_KEY, Boolean.TRUE.toString());
+      latestSystemMetadata.setProperties(properties);
 
       // 5. Produce MAE events for the aspect record
       produceMetadataChangeLog(urn, entityName, aspectName, aspectSpec, null, aspectRecord, null,
