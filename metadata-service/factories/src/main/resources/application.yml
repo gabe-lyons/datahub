@@ -317,6 +317,7 @@ featureFlags:
   lineageSearchCacheEnabled: ${LINEAGE_SEARCH_CACHE_ENABLED:true} # Enables in-memory cache for searchAcrossLineage query
   graphServiceDiffModeEnabled: ${GRAPH_SERVICE_DIFF_MODE_ENABLED:true} # Enables diff mode for graph writes, uses a different code path that produces a diff from previous to next to write relationships instead of wholesale deleting edges and reading
   alwaysEmitChangeLog: ${ALWAYS_EMIT_CHANGE_LOG:false} # Enables always emitting a MCL even when no changes are detected. Used for Time Based Lineage when no changes occur.
+  searchServiceDiffModeEnabled: ${SEARCH_SERVICE_DIFF_MODE_ENABLED:true} # Enables diff mode for search document writes, reduces amount of writes to ElasticSearch documents for no-ops
 
 entityChangeEvents:
   enabled: ${ENABLE_ENTITY_CHANGE_EVENTS_HOOK:true}
