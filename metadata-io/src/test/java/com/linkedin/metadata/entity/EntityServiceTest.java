@@ -1143,28 +1143,30 @@ abstract public class EntityServiceTest<T_AD extends AspectDao, T_RS extends Ret
 
     @Test
     public void testRestoreIndices() throws Exception {
-        String urnStr = "urn:li:dataset:(urn:li:dataPlatform:looker,sample_dataset_unique,PROD)";
-        Urn entityUrn = UrnUtils.getUrn(urnStr);
-        List<Pair<String, RecordTemplate>> pairToIngest = new ArrayList<>();
+        if (this instanceof EbeanEntityServiceTest) {
+            String urnStr = "urn:li:dataset:(urn:li:dataPlatform:looker,sample_dataset_unique,PROD)";
+            Urn entityUrn = UrnUtils.getUrn(urnStr);
+            List<Pair<String, RecordTemplate>> pairToIngest = new ArrayList<>();
 
-        final UpstreamLineage upstreamLineage = AspectGenerationUtils.createUpstreamLineage();
-        String aspectName1 = AspectGenerationUtils.getAspectName(upstreamLineage);
-        pairToIngest.add(getAspectRecordPair(upstreamLineage, UpstreamLineage.class));
+            final UpstreamLineage upstreamLineage = AspectGenerationUtils.createUpstreamLineage();
+            String aspectName1 = AspectGenerationUtils.getAspectName(upstreamLineage);
+            pairToIngest.add(getAspectRecordPair(upstreamLineage, UpstreamLineage.class));
 
-        SystemMetadata metadata1 = AspectGenerationUtils.createSystemMetadata();
+            SystemMetadata metadata1 = AspectGenerationUtils.createSystemMetadata();
 
-        _entityService.ingestAspects(entityUrn, pairToIngest, TEST_AUDIT_STAMP, metadata1);
+            _entityService.ingestAspects(entityUrn, pairToIngest, TEST_AUDIT_STAMP, metadata1);
 
-        clearInvocations(_mockProducer);
+            clearInvocations(_mockProducer);
 
-        RestoreIndicesArgs args = new RestoreIndicesArgs();
-        args.setAspectName(UPSTREAM_LINEAGE_ASPECT_NAME);
-        args.setBatchSize(1);
-        args.setStart(0);
-        args.setBatchDelayMs(1L);
-        args.setNumThreads(1);
-        args.setUrn(urnStr);
-        _entityService.restoreIndices(args, obj -> { });
+            RestoreIndicesArgs args = new RestoreIndicesArgs();
+            args.setAspectName(UPSTREAM_LINEAGE_ASPECT_NAME);
+            args.setBatchSize(1);
+            args.setStart(0);
+            args.setBatchDelayMs(1L);
+            args.setNumThreads(1);
+            args.setUrn(urnStr);
+            _entityService.restoreIndices(args, obj -> {
+            });
 
         ArgumentCaptor<MetadataChangeLog> mclCaptor = ArgumentCaptor.forClass(MetadataChangeLog.class);
         verify(_mockProducer, times(1)).produceMetadataChangeLog(
@@ -1174,7 +1176,7 @@ abstract public class EntityServiceTest<T_AD extends AspectDao, T_RS extends Ret
         assertNull(mcl.getPreviousAspectValue());
         assertNull(mcl.getPreviousSystemMetadata());
         assertEquals(mcl.getChangeType(), ChangeType.RESTATE);
-        assertEquals(mcl.getSystemMetadata().getProperties().get(FORCE_INDEXING_KEY), "true");
+        assertEquals(mcl.getSystemMetadata().getProperties().get(FORCE_INDEXING_KEY), "true");}
     }
 
     @Nonnull

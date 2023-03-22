@@ -1,4 +1,4 @@
-import { dataset3WithLineage, dataset4WithLineage } from '../../../../Mocks';
+import { dataset3WithLineage, dataset3WithSchema, dataset4WithLineage } from '../../../../Mocks';
 import { EntityType, SchemaFieldDataType } from '../../../../types.generated';
 import {
     combineEntityDataWithSiblings,
@@ -50,59 +50,7 @@ const usageStats = {
 
 const datasetPrimary = {
     ...dataset3WithLineage,
-    schemaMetadata: {
-        __typename: 'SchemaMetadata',
-        aspectVersion: 0,
-        createdAt: 0,
-        fields: [
-            {
-                __typename: 'SchemaField',
-                nullable: false,
-                recursive: false,
-                fieldPath: 'user_id',
-                description: 'Id of the user created',
-                type: SchemaFieldDataType.String,
-                nativeDataType: 'varchar(100)',
-                isPartOfKey: false,
-                jsonPath: null,
-                globalTags: null,
-                glossaryTerms: null,
-                label: 'hi',
-            },
-            {
-                __typename: 'SchemaField',
-                nullable: false,
-                recursive: false,
-                fieldPath: 'user_name',
-                description: 'Name of the user who signed up',
-                type: SchemaFieldDataType.String,
-                nativeDataType: 'boolean',
-                isPartOfKey: false,
-                jsonPath: null,
-                globalTags: null,
-                glossaryTerms: null,
-                label: 'hi',
-            },
-        ],
-        hash: '',
-        platformSchema: null,
-        platformUrn: 'urn:li:dataPlatform:hive',
-        created: {
-            actor: 'urn:li:corpuser:jdoe',
-            time: 1581407189000,
-        },
-        cluster: '',
-        name: 'SampleHiveSchema',
-        version: 0,
-        lastModified: {
-            actor: 'urn:li:corpuser:jdoe',
-            time: 1581407189000,
-        },
-        datasetUrn: 'urn:li:dataset:3',
-        primaryKeys: [],
-        foreignKeys: [],
-    },
-    editableSchemaMetadata: null,
+    ...dataset3WithSchema.dataset,
     properties: {
         ...dataset3WithLineage.properties,
         description: 'primary description',
