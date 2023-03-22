@@ -1168,15 +1168,16 @@ abstract public class EntityServiceTest<T_AD extends AspectDao, T_RS extends Ret
             _entityService.restoreIndices(args, obj -> {
             });
 
-        ArgumentCaptor<MetadataChangeLog> mclCaptor = ArgumentCaptor.forClass(MetadataChangeLog.class);
-        verify(_mockProducer, times(1)).produceMetadataChangeLog(
-                Mockito.eq(entityUrn), Mockito.any(), mclCaptor.capture());
-        MetadataChangeLog mcl = mclCaptor.getValue();
-        assertEquals(mcl.getEntityType(), "dataset");
-        assertNull(mcl.getPreviousAspectValue());
-        assertNull(mcl.getPreviousSystemMetadata());
-        assertEquals(mcl.getChangeType(), ChangeType.RESTATE);
-        assertEquals(mcl.getSystemMetadata().getProperties().get(FORCE_INDEXING_KEY), "true");}
+            ArgumentCaptor<MetadataChangeLog> mclCaptor = ArgumentCaptor.forClass(MetadataChangeLog.class);
+            verify(_mockProducer, times(1)).produceMetadataChangeLog(
+                    Mockito.eq(entityUrn), Mockito.any(), mclCaptor.capture());
+            MetadataChangeLog mcl = mclCaptor.getValue();
+            assertEquals(mcl.getEntityType(), "dataset");
+            assertNull(mcl.getPreviousAspectValue());
+            assertNull(mcl.getPreviousSystemMetadata());
+            assertEquals(mcl.getChangeType(), ChangeType.RESTATE);
+            assertEquals(mcl.getSystemMetadata().getProperties().get(FORCE_INDEXING_KEY), "true");
+        }
     }
 
     @Nonnull
