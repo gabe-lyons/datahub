@@ -33,8 +33,20 @@ class GraphQLQuery:
         query["variables"]["input"] = new_dict
         return query
 
+    def get_query_with_variables(self, variables, drop_keys=['test_name']):
+        query = dict(self.get_query())
+        new_dict = dict(self._get_default_variables())
+        new_dict.update(variables)
+        for drop_key in drop_keys:
+            del new_dict[drop_key]
+        query["variables"] = new_dict
+        return query
+
     def _get_default_input(self):
-        return self._query["variables"]["input"]
+        return self._get_default_variables()["input"]
+
+    def _get_default_variables(self):
+        return self._query["variables"]
 
 
 if __name__ == "__main__":
