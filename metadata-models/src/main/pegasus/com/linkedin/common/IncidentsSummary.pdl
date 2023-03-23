@@ -1,0 +1,43 @@
+namespace com.linkedin.common
+
+/**
+ * Summary related incidents on an entity.
+ */
+@Aspect = {
+    "name": "incidentsSummary"
+}
+record IncidentsSummary {
+    /**
+    * Resolved incidents for an asset
+    */
+    @Searchable = {
+        "/*" : {
+            "fieldType": "URN",
+            "hasValuesFieldName": "hasResolvedIncidents"
+        }
+    }
+    @Relationship = {
+      "/*" : {
+        "name": "ResolvedIncidents",
+        "entityTypes": [ "incident" ]
+      }
+    }
+    resolvedIncidents: array[Urn] = []
+
+    /**
+    * Active incidents for an asset
+    */
+    @Searchable = {
+        "/*" : {
+            "fieldType": "URN",
+            "hasValuesFieldName": "hasActiveIncidents"
+        }
+    }
+    @Relationship = {
+      "/*" : {
+        "name": "ActiveIncidents",
+        "entityTypes": [ "incident" ]
+      }
+    }
+    activeIncidents: array[Urn] = []
+}

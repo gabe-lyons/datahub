@@ -45,7 +45,21 @@ public class ESUtils {
   };
 
   public static final Set<String> BOOLEAN_FIELDS = ImmutableSet.of(
-      "removed"
+      "removed",
+      "hasOwners",
+      "hasActiveIncidents",
+      "hasResolvedIncidents",
+      "hasFailingAssertions",
+      "hasPassingAssertions",
+      "hasDescription",
+      "hasDomain",
+      "hasParentNode",
+      "hasRole",
+      "hasContainer",
+      "hasPassingTests",
+      "hasFailingTests",
+      "hasTags",
+      "hasGlossaryTerms"
   );
 
   /*

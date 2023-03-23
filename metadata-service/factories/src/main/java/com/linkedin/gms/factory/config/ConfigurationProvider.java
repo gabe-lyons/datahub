@@ -3,6 +3,7 @@ package com.linkedin.gms.factory.config;
 import com.datahub.authentication.AuthenticationConfiguration;
 import com.datahub.authorization.AuthorizationConfiguration;
 import com.linkedin.datahub.graphql.featureflags.FeatureFlags;
+import com.linkedin.metadata.config.ChromeExtensionConfiguration;
 import com.linkedin.metadata.config.cache.CacheConfiguration;
 import com.linkedin.metadata.config.DataHubConfiguration;
 import com.linkedin.metadata.config.search.ElasticSearchConfiguration;
@@ -90,4 +91,6 @@ public class ConfigurationProvider {
    * Configuration for caching
    */
   private CacheConfiguration cache;
+
+  private ChromeExtensionConfiguration chromeExtension;
 }

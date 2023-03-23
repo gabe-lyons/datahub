@@ -22,5 +22,16 @@ entities:
     keyAspect: chartKey
     aspects:
       - domains
+  - name: assertion
+    keyAspect: assertionKey
+    aspects:
+      - assertionInfo
+      - assertionRunEvent
+      - status
+  - name: incident
+    keyAspect: incidentKey
+    aspects:
+      - incidentInfo
+      - status
 events:
   - name: entityChangeEvent

@@ -1,0 +1,31 @@
+namespace com.linkedin.common
+
+/**
+ * Summary related to entity assertions
+ */
+@Aspect = {
+    "name": "assertionsSummary"
+}
+record AssertionsSummary {
+    /**
+    * Failing assertions for an asset
+    */
+    @Searchable = {
+        "/*" : {
+            "fieldType": "URN",
+            "hasValuesFieldName": "hasFailingAssertions"
+        }
+    }
+    failingAssertions: array[Urn] = []
+
+    /**
+    * Passing assertions for an asset
+    */
+    @Searchable = {
+        "/*" : {
+            "fieldType": "URN",
+            "hasValuesFieldName": "hasPassingAssertions"
+        }
+    }
+    passingAssertions: array[Urn] = []
+}

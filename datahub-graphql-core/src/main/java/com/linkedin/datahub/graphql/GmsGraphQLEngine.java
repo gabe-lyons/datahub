@@ -305,6 +305,7 @@ import com.linkedin.datahub.graphql.types.tag.TagType;
 import com.linkedin.datahub.graphql.types.test.TestType;
 import com.linkedin.datahub.graphql.types.view.DataHubViewType;
 import com.linkedin.entity.client.EntityClient;
+import com.linkedin.metadata.config.ChromeExtensionConfiguration;
 import com.linkedin.metadata.config.DataHubConfiguration;
 import com.linkedin.metadata.config.IngestionConfiguration;
 import com.linkedin.metadata.config.TestsConfiguration;
@@ -398,6 +399,7 @@ public class GmsGraphQLEngine {
     private final TestsConfiguration testsConfiguration;
     private final DataHubConfiguration datahubConfiguration;
     private final ViewsConfiguration viewsConfiguration;
+    private final ChromeExtensionConfiguration chromeExtensionConfiguration;
 
     private final DatasetType datasetType;
     private final CorpUserType corpUserType;
@@ -494,6 +496,7 @@ public class GmsGraphQLEngine {
         this.datahubConfiguration = args.datahubConfiguration;
         this.viewsConfiguration = args.viewsConfiguration;
         this.featureFlags = args.featureFlags;
+        this.chromeExtensionConfiguration = args.chromeExtensionConfiguration;
 
         this.datasetType = new DatasetType(entityClient);
         this.corpUserType = new CorpUserType(entityClient, featureFlags);
@@ -771,7 +774,8 @@ public class GmsGraphQLEngine {
                     this.telemetryConfiguration,
                     this.testsConfiguration,
                     this.datahubConfiguration,
-                    this.viewsConfiguration
+                    this.viewsConfiguration,
+                    this.chromeExtensionConfiguration
                 ))
             .dataFetcher("me", new MeResolver(this.entityClient, featureFlags))
             .dataFetcher("search", new SearchResolver(this.entityClient))

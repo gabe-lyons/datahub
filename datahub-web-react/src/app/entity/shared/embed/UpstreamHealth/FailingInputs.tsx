@@ -2,10 +2,10 @@ import { orange } from '@ant-design/colors';
 import { DownOutlined, WarningFilled } from '@ant-design/icons';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { Dataset } from '../../../../../types.generated';
 import { ANTD_GRAY } from '../../constants';
 import ActiveIncidents from './ActiveIncidents';
 import FailingAssertions from './FailingAssertions';
-import { UpstreamSummary } from './utils';
 
 const TextWrapper = styled.span`
     font-size: 16px;
@@ -40,10 +40,26 @@ const StyledArrow = styled(DownOutlined)<{ isOpen: boolean }>`
 `;
 
 interface Props {
-    upstreamSummary: UpstreamSummary;
+    datasetsWithActiveIncidents: Dataset[];
+    totalDatasetsWithActiveIncidents: number;
+    fetchMoreIncidentsData: () => void;
+    isLoadingIncidents: boolean;
+    datasetsWithFailingAssertions: Dataset[];
+    totalDatasetsWithFailingAssertions: number;
+    fetchMoreAssertionsData: () => void;
+    isLoadingAssertions: boolean;
 }
 
-export default function FailingInputs({ upstreamSummary }: Props) {
+export default function FailingInputs({
+    datasetsWithActiveIncidents,
+    totalDatasetsWithActiveIncidents,
+    fetchMoreIncidentsData,
+    isLoadingIncidents,
+    datasetsWithFailingAssertions,
+    totalDatasetsWithFailingAssertions,
+    fetchMoreAssertionsData,
+    isLoadingAssertions,
+}: Props) {
     const [areFailingDetailsVisible, setAreFailingDetailsVisible] = useState(false);
 
     return (
@@ -55,11 +71,21 @@ export default function FailingInputs({ upstreamSummary }: Props) {
             </FailingDetailsWrapper>
             {areFailingDetailsVisible && (
                 <>
-                    {upstreamSummary.datasetsWithActiveIncidents.length > 0 && (
-                        <ActiveIncidents upstreamSummary={upstreamSummary} />
+                    {datasetsWithActiveIncidents.length > 0 && (
+                        <ActiveIncidents
+                            datasetsWithActiveIncidents={datasetsWithActiveIncidents}
+                            totalDatasetsWithActiveIncidents={totalDatasetsWithActiveIncidents}
+                            fetchMoreIncidentsData={fetchMoreIncidentsData}
+                            isLoadingIncidents={isLoadingIncidents}
+                        />
                     )}
-                    {upstreamSummary.datasetsWithFailingAssertions.length > 0 && (
-                        <FailingAssertions upstreamSummary={upstreamSummary} />
+                    {datasetsWithFailingAssertions.length > 0 && (
+                        <FailingAssertions
+                            datasetsWithFailingAssertions={datasetsWithFailingAssertions}
+                            totalDatasetsWithFailingAssertions={totalDatasetsWithFailingAssertions}
+                            fetchMoreAssertionsData={fetchMoreAssertionsData}
+                            isLoadingAssertions={isLoadingAssertions}
+                        />
                     )}
                 </>
             )}
