@@ -292,6 +292,7 @@ public class Constants {
 
   // Search
   public static final String USAGE_FEATURES_ASPECT_NAME = "usageFeatures";
+  public static final String STORAGE_FEATURES_ASPECT_NAME = "storageFeatures";
 
   // Constraints
   public static final String CONSTRAINT_INFO_ASPECT_NAME = "constraintInfo";

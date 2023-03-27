@@ -12,6 +12,7 @@ import com.linkedin.datahub.graphql.generated.Entity;
 import com.linkedin.entity.EntityResponse;
 import com.linkedin.entity.client.EntityClient;
 import com.linkedin.metadata.Constants;
+import com.linkedin.metadata.search.features.StorageFeatures;
 import com.linkedin.metadata.search.features.UsageFeatures;
 import com.linkedin.usage.UsageClient;
 import com.linkedin.usage.UsageTimeRange;
@@ -64,35 +65,64 @@ public class DatasetStatsSummaryResolver implements DataFetcher<CompletableFutur
 
       try {
 
-        // acryl-main only - first see if we can populate stats based on the UsageFeatures aspect
-        UsageFeatures maybeUsageFeatures = getUsageFeatures(resourceUrn, context);
-        if (maybeUsageFeatures != null) {
-          // Do not cache to ensure we're up to date. 
-          return getSummaryFromUsageFeatures(maybeUsageFeatures);
-        }
+        final EntityResponse response = getOfflineFeatures(resourceUrn, context);
 
-        // else compute usage features normally
-        com.linkedin.usage.UsageQueryResult
-            usageQueryResult = usageClient.getUsageStats(resourceUrn.toString(), UsageTimeRange.MONTH, context.getAuthentication());
+        final UsageFeatures maybeUsageFeatures = response != null && response.getAspects().containsKey(Constants.USAGE_FEATURES_ASPECT_NAME)
+            ? new UsageFeatures(response.getAspects().get(Constants.USAGE_FEATURES_ASPECT_NAME).getValue().data())
+            : null;
+        final StorageFeatures maybeStorageFeatures = response != null && response.getAspects().containsKey(Constants.STORAGE_FEATURES_ASPECT_NAME)
+            ? new StorageFeatures(response.getAspects().get(Constants.STORAGE_FEATURES_ASPECT_NAME).getValue().data())
+            : null;
 
         final DatasetStatsSummary result = new DatasetStatsSummary();
-        result.setQueryCountLast30Days(usageQueryResult.getAggregations().getTotalSqlQueries());
-        result.setUniqueUserCountLast30Days(usageQueryResult.getAggregations().getUniqueUserCount());
-        if (usageQueryResult.getAggregations().hasUsers()) {
-          result.setTopUsersLast30Days(trimUsers(usageQueryResult.getAggregations().getUsers()
-              .stream()
-              .filter(UserUsageCounts::hasUser)
-              .sorted((a, b) -> (b.getCount() - a.getCount()))
-              .map(userCounts -> createPartialUser(Objects.requireNonNull(userCounts.getUser())))
-              .collect(Collectors.toList())));
-        }
+        addUsageFeatures(result, maybeUsageFeatures, resourceUrn, context);
+        addStorageFeatures(result, maybeStorageFeatures);
+
+        // acryl-main only - first see if we can populate stats based on the UsageFeatures aspect
         this.summaryCache.put(resourceUrn, result);
         return result;
       } catch (Exception e) {
-          log.error(String.format("Failed to load Usage Stats summary for resource %s", resourceUrn.toString()), e);
+          log.error(String.format("Failed to load Stats summary for resource %s", resourceUrn.toString()), e);
           return null; // Do not throw when loading usage summary fails.
       }
     });
+  }
+
+  private void addUsageFeatures(
+      @Nonnull final DatasetStatsSummary result,
+      @Nullable final UsageFeatures maybeUsageFeatures,
+      @Nonnull final Urn resourceUrn,
+      @Nonnull final QueryContext context) throws Exception {
+    // If we have offline-computed usage features, use those to avoid the expensive query.
+    if (maybeUsageFeatures != null) {
+      // Do not cache to ensure we're up to date.
+      addSummaryFromOfflineUsageFeatures(maybeUsageFeatures, result);
+      return;
+    }
+
+    // else compute usage features normally
+    com.linkedin.usage.UsageQueryResult
+        usageQueryResult = usageClient.getUsageStats(resourceUrn.toString(), UsageTimeRange.MONTH, context.getAuthentication());
+    result.setQueryCountLast30Days(usageQueryResult.getAggregations().getTotalSqlQueries());
+    result.setUniqueUserCountLast30Days(usageQueryResult.getAggregations().getUniqueUserCount());
+    if (usageQueryResult.getAggregations().hasUsers()) {
+      result.setTopUsersLast30Days(trimUsers(usageQueryResult.getAggregations().getUsers()
+          .stream()
+          .filter(UserUsageCounts::hasUser)
+          .sorted((a, b) -> (b.getCount() - a.getCount()))
+          .map(userCounts -> createPartialUser(Objects.requireNonNull(userCounts.getUser())))
+          .collect(Collectors.toList())));
+    }
+  }
+
+  private void addStorageFeatures(
+      @Nonnull final DatasetStatsSummary result,
+      @Nullable final StorageFeatures maybeStorageFeatures) throws Exception {
+    // We only add storage features if we have them.
+    if (maybeStorageFeatures != null) {
+      // Do not cache to ensure we're up to date.
+      addSummaryFromOfflineStorageFeatures(maybeStorageFeatures, result);
+    }
   }
 
   private List<CorpUser> trimUsers(final List<CorpUser> originalUsers) {
@@ -109,21 +139,13 @@ public class DatasetStatsSummaryResolver implements DataFetcher<CompletableFutur
   }
 
   @Nullable
-  private UsageFeatures getUsageFeatures(final Urn datasetUrn, final QueryContext context) {
+  private EntityResponse getOfflineFeatures(final Urn datasetUrn, final QueryContext context) {
     try {
-      EntityResponse response = this.entityClient.getV2(
+      return this.entityClient.getV2(
           Constants.DATASET_ENTITY_NAME,
           datasetUrn,
-          ImmutableSet.of(Constants.USAGE_FEATURES_ASPECT_NAME),
+          ImmutableSet.of(Constants.USAGE_FEATURES_ASPECT_NAME, Constants.STORAGE_FEATURES_ASPECT_NAME),
           context.getAuthentication());
-
-      if (response != null && response.getAspects().containsKey(Constants.USAGE_FEATURES_ASPECT_NAME)) {
-        return new UsageFeatures(response.getAspects().get(Constants.USAGE_FEATURES_ASPECT_NAME).getValue().data());
-      } else {
-        // No usage features found for urn.
-        return null;
-      }
-
     } catch (Exception e) {
       log.error(String.format("Failed to retrieve usage features aspect for dataset urn %s. Returning null...", datasetUrn));
       return null;
@@ -131,11 +153,11 @@ public class DatasetStatsSummaryResolver implements DataFetcher<CompletableFutur
   }
 
   /**
-   * Saas-Only: Generates a Dataset Stats Summary using the UsageFeatures aspect which computed
+   * Saas-Only: Adds to Dataset Stats Summary using the UsageFeatures aspect which computed
    * asynchronously and stored in GMS. This helps to reduce computation latency on the read side.
    */
-  private DatasetStatsSummary getSummaryFromUsageFeatures(@Nonnull final UsageFeatures usageFeatures) {
-    final DatasetStatsSummary result = new DatasetStatsSummary();
+  private void addSummaryFromOfflineUsageFeatures(@Nonnull final UsageFeatures usageFeatures, @Nullable final DatasetStatsSummary result) {
+
     // Query stats
     if (usageFeatures.hasUsageCountLast30Days()) {
       result.setQueryCountLast30Days(usageFeatures.getUsageCountLast30Days().intValue());
@@ -145,6 +167,12 @@ public class DatasetStatsSummaryResolver implements DataFetcher<CompletableFutur
     }
     if (usageFeatures.hasQueryCountRankLast30Days()) {
       result.setQueryCountRankLast30Days(usageFeatures.getQueryCountRankLast30Days().intValue());
+    }
+    if (usageFeatures.hasWriteCountLast30Days()) {
+      result.setUpdateCountLast30Days(usageFeatures.getWriteCountLast30Days().intValue());
+    }
+    if (usageFeatures.hasWriteCountPercentileLast30Days()) {
+      result.setUpdateCountPercentileLast30Days(usageFeatures.getWriteCountPercentileLast30Days());
     }
 
     // User stats
@@ -165,6 +193,25 @@ public class DatasetStatsSummaryResolver implements DataFetcher<CompletableFutur
           .map(userUrn -> createPartialUser(Objects.requireNonNull(userUrn)))
           .collect(Collectors.toList())));
     }
-    return result;
+  }
+
+  /**
+   * Saas-Only: Adds to Dataset Stats Summary using the StorageFeatures aspect which computed
+   * asynchronously and stored in GMS. This helps to reduce computation latency on the read side.
+   */
+  private void addSummaryFromOfflineStorageFeatures(@Nonnull final StorageFeatures storageFeatures, @Nullable final DatasetStatsSummary result) {
+    // Query stats
+    if (storageFeatures.hasRowCount()) {
+      result.setRowCount(storageFeatures.getRowCount());
+    }
+    if (storageFeatures.hasRowCountPercentile()) {
+      result.setRowCountPercentile(storageFeatures.getRowCountPercentile());
+    }
+    if (storageFeatures.hasSizeInBytes()) {
+      result.setSizeInBytes(storageFeatures.getSizeInBytes());
+    }
+    if (storageFeatures.hasSizeInBytesPercentile()) {
+      result.setSizeInBytesPercentile(storageFeatures.getSizeInBytesPercentile().intValue());
+    }
   }
 }
