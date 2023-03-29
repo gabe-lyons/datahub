@@ -2,7 +2,7 @@ import { EntityType } from '../../../../../../../types.generated';
 import { PropertyPredicate } from '../types';
 import { isUnaryOperator, Operator, OPERATOR_ID_TO_DETAILS } from './types/operators';
 import { entityProperties, Property } from './types/properties';
-import { ValueInputType, ValueOptions, VALUE_TYPE_ID_TO_DETAILS } from './types/values';
+import { ValueInputType, ValueOptions, ValueTypeId, VALUE_TYPE_ID_TO_DETAILS } from './types/values';
 
 /**
  * Returns true if a well-supported Property supports searchable
@@ -18,6 +18,13 @@ const isSearchableProperty = (property: Property): boolean => {
  */
 const isSelectableProperty = (property: Property): boolean => {
     return property.valueOptions?.options && property.valueOptions?.mode;
+};
+
+/**
+ * Returns true if we are dealing with a Time-Select property.
+ */
+const isTimeProperty = (property: Property): boolean => {
+    return property.valueType === ValueTypeId.TIMESTAMP;
 };
 
 /**
@@ -122,6 +129,13 @@ export const getValueOptions = (predicate: PropertyPredicate, properties: Proper
     if (isSelectableProperty(property)) {
         return {
             inputType: ValueInputType.SELECT,
+            options: property.valueOptions,
+        };
+    }
+    // Display a fixed select values input.
+    if (isTimeProperty(property)) {
+        return {
+            inputType: ValueInputType.TIME_SELECT,
             options: property.valueOptions,
         };
     }
