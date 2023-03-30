@@ -1031,7 +1031,7 @@ public class EntityService {
       MetadataChangeProposal mcp, Urn entityUrn,
       AuditStamp auditStamp, AspectSpec aspectSpec) {
     boolean isNoOp = oldAspect == newAspect;
-    if (!isNoOp || _alwaysEmitChangeLog) { // || shouldAspectEmitChangeLog(aspectSpec)
+    if (!isNoOp || _alwaysEmitChangeLog  || shouldAspectEmitChangeLog(aspectSpec)) {
       log.debug("Producing MetadataChangeLog for ingested aspect {}, urn {}", mcp.getAspectName(), entityUrn);
 
       final MetadataChangeLog metadataChangeLog = new MetadataChangeLog(mcp.data());
