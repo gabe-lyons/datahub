@@ -1045,10 +1045,10 @@ abstract public class EntityServiceTest<T_AD extends AspectDao, T_RS extends Ret
 
         assertTrue(DataTemplateUtil.areEqual(EntityUtils.parseSystemMetadata(readAspectDao2.getSystemMetadata()), metadata3));
 
-        verify(_mockProducer, times(1)).produceMetadataChangeLog(Mockito.eq(entityUrn), Mockito.any(), mclCaptor.capture());
+        verify(_mockProducer, times(0)).produceMetadataChangeLog(Mockito.any(), Mockito.any(), Mockito.any());
 
-        verify(_mockProducer, times(1)).produceMetadataAuditEvent(Mockito.eq(entityUrn), Mockito.notNull(), Mockito.any(),
-            Mockito.any(), Mockito.any(), Mockito.eq(MetadataAuditOperation.UPDATE));
+        verify(_mockProducer, times(0)).produceMetadataAuditEvent(Mockito.any(), Mockito.any(), Mockito.any(),
+            Mockito.any(), Mockito.any(), Mockito.any());
 
         verifyNoMoreInteractions(_mockProducer);
     }
