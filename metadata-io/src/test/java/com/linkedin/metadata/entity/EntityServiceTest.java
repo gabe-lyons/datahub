@@ -480,9 +480,9 @@ abstract public class EntityServiceTest<T_AD extends AspectDao, T_RS extends Ret
 
         _entityService.ingestAspects(entityUrn, pairToIngest, TEST_AUDIT_STAMP, metadata1);
 
-        verify(_mockProducer, times(1)).produceMetadataChangeLog(Mockito.eq(entityUrn),
-            Mockito.any(), Mockito.eq(restateChangeLog));
-        verify(_mockProducer, times(1)).produceMetadataAuditEvent(Mockito.eq(entityUrn),
+        verify(_mockProducer, times(0)).produceMetadataChangeLog(Mockito.any(),
+            Mockito.any(), Mockito.any());
+        verify(_mockProducer, times(0)).produceMetadataAuditEvent(Mockito.any(),
             Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
 
 
