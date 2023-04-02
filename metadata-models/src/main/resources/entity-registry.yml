@@ -285,6 +285,7 @@ entities:
     keyAspect: testKey
     aspects:
       - testInfo
+      - status
   - name: dataHubUpgrade
     category: internal
     keyAspect: dataHubUpgradeKey

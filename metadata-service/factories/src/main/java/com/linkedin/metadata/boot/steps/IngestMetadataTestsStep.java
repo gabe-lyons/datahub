@@ -36,6 +36,8 @@ import org.springframework.core.io.ClassPathResource;
  *
  * For each metadata test defined in the yaml file, it checks whether the urn exists.
  * If not, it ingests the metadata test into DataHub.
+ *
+ * Note that if a Metadata Tests is soft-deleted by a user, this will NOT re-create the test.
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -74,7 +76,7 @@ public class IngestMetadataTestsStep implements BootstrapStep {
       return;
     }
 
-    // 1. Read default retention config
+    // 1. Read default metadata tests
     final Map<Urn, TestInfo> metadataTestsMap =
         parseYamlMetadataTestConfig(new ClassPathResource("./boot/metadata_tests.yaml").getFile());
 
@@ -91,7 +93,7 @@ public class IngestMetadataTestsStep implements BootstrapStep {
   }
 
   private boolean hasTest(Urn testUrn) {
-    // Check if policy exists
+    // Check if test exists
     try {
       RecordTemplate aspect =
           _entityService.getLatestEnvelopedAspect(Constants.TEST_ENTITY_NAME, testUrn, Constants.TEST_INFO_ASPECT_NAME);
