@@ -9,8 +9,8 @@ import { StatsSummary } from '../../shared/components/styled/StatsSummary';
 import { FormattedBytesStat } from './FormattedBytesStat';
 import { PercentileLabel } from '../../shared/stats/PercentileLabel';
 
-const StatText = styled.span`
-    color: ${ANTD_GRAY[8]};
+const StatText = styled.span<{ color: string }>`
+    color: ${(props) => props.color};
 `;
 
 const PopoverContent = styled.div`
@@ -26,6 +26,7 @@ type Props = {
     uniqueUserCountLast30Days?: number | null;
     uniqueUserPercentileLast30Days?: number | null;
     lastUpdatedMs?: number | null;
+    color?: string;
 };
 
 export const DatasetStatsSummary = ({
@@ -37,11 +38,14 @@ export const DatasetStatsSummary = ({
     uniqueUserCountLast30Days,
     uniqueUserPercentileLast30Days,
     lastUpdatedMs,
+    color,
 }: Props) => {
+    const displayedColor = color !== undefined ? color : ANTD_GRAY[7];
+
     const statsViews = [
         !!rowCount && (
-            <StatText>
-                <TableOutlined style={{ marginRight: 8, color: ANTD_GRAY[7] }} />
+            <StatText color={displayedColor}>
+                <TableOutlined style={{ marginRight: 8, color: displayedColor }} />
                 <b>{formatNumberWithoutAbbreviation(rowCount)}</b> rows
                 {!!columnCount && (
                     <>
@@ -51,14 +55,14 @@ export const DatasetStatsSummary = ({
             </StatText>
         ),
         !!sizeInBytes && (
-            <StatText>
-                <HddOutlined style={{ marginRight: 8, color: ANTD_GRAY[7] }} />
+            <StatText color={displayedColor}>
+                <HddOutlined style={{ marginRight: 8, color: displayedColor }} />
                 <FormattedBytesStat bytes={sizeInBytes} />
             </StatText>
         ),
         !!queryCountLast30Days && (
-            <StatText>
-                <ConsoleSqlOutlined style={{ marginRight: 8, color: ANTD_GRAY[7] }} />
+            <StatText color={displayedColor}>
+                <ConsoleSqlOutlined style={{ marginRight: 8, color: displayedColor }} />
                 <b>{formatNumberWithoutAbbreviation(queryCountLast30Days)}</b> queries last month
                 {!!queryCountPercentileLast30Days && (
                     <Typography.Text type="secondary">
@@ -72,8 +76,8 @@ export const DatasetStatsSummary = ({
             </StatText>
         ),
         !!uniqueUserCountLast30Days && (
-            <StatText>
-                <TeamOutlined style={{ marginRight: 8, color: ANTD_GRAY[7] }} />
+            <StatText color={displayedColor}>
+                <TeamOutlined style={{ marginRight: 8, color: displayedColor }} />
                 <b>{formatNumberWithoutAbbreviation(uniqueUserCountLast30Days)}</b> unique users
                 {!!uniqueUserPercentileLast30Days && (
                     <Typography.Text type="secondary">
@@ -95,7 +99,7 @@ export const DatasetStatsSummary = ({
                     </PopoverContent>
                 }
             >
-                <StatText>
+                <StatText color={displayedColor}>
                     <ClockCircleOutlined style={{ marginRight: 8, color: ANTD_GRAY[7] }} />
                     Updated {toRelativeTimeString(lastUpdatedMs)}
                 </StatText>

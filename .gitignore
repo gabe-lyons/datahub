@@ -78,6 +78,8 @@ datahub-frontend/public/**
 metadata-service/plugin/src/test/resources/sample-plugins/**
 
 smoke-test/rollback-reports
+coverage*.xml
+.vercel
 
 # A bunch of binaries we never ever want to add
 datahub-frontend/bin/main/
