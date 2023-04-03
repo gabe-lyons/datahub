@@ -16,9 +16,16 @@ cd "$DIR"
 
 if [ "${RUN_QUICKSTART:-true}" == "true" ]; then
     source ./run-quickstart.sh
-fi
+else
+  mkdir -p ~/.datahub/plugins/frontend/auth/
+  echo "test_user:test_pass" >> ~/.datahub/plugins/frontend/auth/user.props
+  echo "admin:mypass" > ~/.datahub/plugins/frontend/auth/user.props
 
-source venv/bin/activate
+  python3 -m venv venv
+  source venv/bin/activate
+  pip install --upgrade pip wheel setuptools
+  pip install -r requirements.txt
+fi
 
 (cd ..; ./gradlew :smoke-test:yarnInstall)
 
