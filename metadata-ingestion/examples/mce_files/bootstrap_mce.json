@@ -3595,5 +3595,41 @@
       "contentType": "application/json"
     },
     "systemMetadata": null
+  },
+  {
+    "auditHeader": null,
+    "entityType": "dataset",
+    "entityUrn": "urn:li:dataset:(urn:li:dataPlatform:hive,SampleHiveDataset,PROD)",
+    "changeType": "UPSERT",
+    "aspectName": "storageFeatures",
+    "aspect": {
+      "value": "{\"rowCount\":50, \"rowCountPercentile\": 80, \"sizeInBytes\": 1000, \"sizeInBytesPercentile\": 50}",
+      "contentType": "application/json"
+    },
+    "systemMetadata": null
+  },
+  {
+    "auditHeader": null,
+    "entityType": "dataset",
+    "entityUrn": "urn:li:dataset:(urn:li:dataPlatform:hive,SampleHiveDataset,PROD)",
+    "changeType": "UPSERT",
+    "aspectName": "assertionsSummary",
+    "aspect": {
+      "value": "{\"failingAssertions\":[], \"passingAssertions\": [\"urn:li:assertion:test\"]}",
+      "contentType": "application/json"
+    },
+    "systemMetadata": null
+  },
+  {
+    "auditHeader": null,
+    "entityType": "dataset",
+    "entityUrn": "urn:li:dataset:(urn:li:dataPlatform:hive,SampleHiveDataset,PROD)",
+    "changeType": "UPSERT",
+    "aspectName": "incidentsSummary",
+    "aspect": {
+      "value": "{\"activeIncidents\":[], \"resolvedIncidents\": [\"urn:li:incident:test\"]}",
+      "contentType": "application/json"
+    },
+    "systemMetadata": null
   }
 ]

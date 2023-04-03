@@ -1,6 +1,5 @@
 import { LoadingOutlined } from '@ant-design/icons';
 import { QueryHookOptions, QueryResult } from '@apollo/client';
-import { Divider } from 'antd';
 import React from 'react';
 import styled from 'styled-components';
 import { EntityType, Exact } from '../../../../types.generated';
@@ -12,7 +11,7 @@ import { SidebarAboutSection } from '../containers/profile/sidebar/AboutSection/
 import { SidebarOwnerSection } from '../containers/profile/sidebar/Ownership/SidebarOwnerSection';
 import { SidebarTagsSection } from '../containers/profile/sidebar/SidebarTagsSection';
 import { SidebarDomainSection } from '../containers/profile/sidebar/Domain/SidebarDomainSection';
-import UpstreamHealth from './UpstreamHealth/UpstreamHealth';
+import UpstreamHealth, { StyledDivider } from './UpstreamHealth/UpstreamHealth';
 import NonExistentEntityPage from '../entity/NonExistentEntityPage';
 
 const LoadingWrapper = styled.div`
@@ -21,10 +20,6 @@ const LoadingWrapper = styled.div`
     justify-content: center;
     height: 85vh;
     font-size: 50px;
-`;
-
-const StyledDivider = styled(Divider)`
-    margin: 16px 0;
 `;
 
 interface Props<T> {
@@ -78,7 +73,6 @@ export default function EmbeddedProfile<T>({ urn, entityType, getOverridePropert
                     <EmbeddedHeader />
                     <StyledDivider />
                     <UpstreamHealth />
-                    <StyledDivider />
                     <SidebarAboutSection readOnly />
                     <StyledDivider />
                     <SidebarOwnerSection readOnly />

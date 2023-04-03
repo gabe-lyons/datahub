@@ -1,6 +1,7 @@
 package com.linkedin.metadata.boot.factories;
 
 import com.google.common.collect.ImmutableList;
+import com.linkedin.gms.factory.assertions.AssertionServiceFactory;
 import com.linkedin.gms.factory.config.ConfigurationProvider;
 import com.linkedin.gms.factory.entity.EntityServiceFactory;
 import com.linkedin.gms.factory.entityregistry.EntityRegistryFactory;
@@ -9,6 +10,7 @@ import com.linkedin.gms.factory.search.SearchDocumentTransformerFactory;
 import com.linkedin.metadata.boot.BootstrapManager;
 import com.linkedin.metadata.boot.BootstrapStep;
 import com.linkedin.metadata.boot.dependencies.BootstrapDependency;
+import com.linkedin.metadata.boot.steps.AssertionsSummaryStep;
 import com.linkedin.metadata.boot.steps.IndexDataPlatformsStep;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformInstancesStep;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformsStep;
@@ -32,6 +34,9 @@ import com.linkedin.metadata.search.transformer.SearchDocumentTransformer;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
+
+import com.linkedin.metadata.service.AssertionService;
+import com.linkedin.metadata.timeseries.TimeseriesAspectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,7 +48,7 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 @Import({EntityServiceFactory.class, EntityRegistryFactory.class, EntitySearchServiceFactory.class,
-    SearchDocumentTransformerFactory.class})
+    SearchDocumentTransformerFactory.class, AssertionServiceFactory.class})
 public class BootstrapManagerFactory {
 
   @Autowired
@@ -61,6 +66,14 @@ public class BootstrapManagerFactory {
   @Autowired
   @Qualifier("searchDocumentTransformer")
   private SearchDocumentTransformer _searchDocumentTransformer;
+
+  @Autowired
+  @Qualifier("assertionService")
+  private AssertionService _assertionService;
+
+  @Autowired
+  @Qualifier("timeseriesAspectService")
+  private TimeseriesAspectService _timeseriesAspectService;
 
   @Autowired
   @Qualifier("entityAspectMigrationsDao")
@@ -107,6 +120,8 @@ public class BootstrapManagerFactory {
     final IngestDefaultGlobalSettingsStep ingestSettingsStep = new IngestDefaultGlobalSettingsStep(_entityService);
     final WaitForSystemUpdateStep waitForSystemUpdateStep = new WaitForSystemUpdateStep(_dataHubUpgradeKafkaListener,
         _configurationProvider);
+    final AssertionsSummaryStep assertionsSummaryStep =
+        new AssertionsSummaryStep(_entityService, _entitySearchService, _assertionService, _timeseriesAspectService);
 
     final List<BootstrapStep> finalSteps = new ArrayList<>(ImmutableList.of(
             waitForSystemUpdateStep,
@@ -122,6 +137,7 @@ public class BootstrapManagerFactory {
             restoreDbtSiblingsIndices,
             indexDataPlatformsStep,
             restoreColumnLineageIndices,
+            assertionsSummaryStep,
             // Saas-only
             _ingestMetadataTestsStep));
 

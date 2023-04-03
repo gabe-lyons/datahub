@@ -19,11 +19,11 @@ extend type Query {
   globalSettings: GlobalSettings
 
 
-    """
-    Fetch the Global Settings related to the Views feature.
-    Requires the 'Manage Global Views' Platform Privilege.
-    """
-    globalViewsSettings: GlobalViewsSettings
+  """
+  Fetch the Global Settings related to the Views feature.
+  Requires the 'Manage Global Views' Platform Privilege.
+  """
+  globalViewsSettings: GlobalViewsSettings
 }
 
 extend type Mutation {
@@ -206,6 +206,11 @@ type AppConfig {
   Configurations related to DataHub Views
   """
   viewsConfig: ViewsConfig!
+
+  """
+  Configuration related to the DataHub Chrome Extension
+  """
+  chromeExtensionConfig: ChromeExtensionConfig!
 }
 
 """
@@ -835,4 +840,19 @@ type GlobalViewsSettings {
   this will be the default view.
   """
   defaultView: String
+}
+
+"""
+Configurations related to DataHub Chrome extension
+"""
+type ChromeExtensionConfig {
+  """
+  Whether the Chrome Extension is enabled
+  """
+  enabled: Boolean!
+
+  """
+  Whether lineage is enabled
+  """
+  lineageEnabled: Boolean!
 }

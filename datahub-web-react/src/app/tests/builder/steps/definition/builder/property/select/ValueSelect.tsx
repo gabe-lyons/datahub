@@ -4,6 +4,7 @@ import { Select } from 'antd';
 import { SelectParams, ValueInputType, ValueOptions } from '../types/values';
 import { SelectInput } from '../input/SelectInput';
 import { EntitySearchInput } from '../../../../../../../entity/shared/EntitySearchInput/EntitySearchInput';
+import { TimeSelectInput } from '../input/TimeSelectInput';
 
 const StyledSelect = styled(Select)`
     & {
@@ -58,6 +59,14 @@ export const ValueSelect = ({ selectedValues, options, onChangeValues }: Props) 
                     placeholder="Select a value..."
                     options={(options.options as SelectParams)?.options}
                     mode={(options.options as any)?.mode || 'single'}
+                    style={SelectInputStyle}
+                />
+            )}
+            {options.inputType === ValueInputType.TIME_SELECT && (
+                <TimeSelectInput
+                    selected={selectedValues}
+                    onChangeSelected={(selected) => onChangeValues(selected as string[])}
+                    placeholder="Select a time (local)..."
                     style={SelectInputStyle}
                 />
             )}

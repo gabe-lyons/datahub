@@ -84,6 +84,8 @@ public class Constants {
   public static final String ORIGIN_ASPECT_NAME = "origin";
   public static final String INPUT_FIELDS_ASPECT_NAME = "inputFields";
   public static final String EMBED_ASPECT_NAME = "embed";
+  public static final String INCIDENTS_SUMMARY_ASPECT_NAME = "incidentsSummary";
+  public static final String ASSERTIONS_SUMMARY_ASPECT_NAME = "assertionsSummary";
 
   // User
   public static final String CORP_USER_KEY_ASPECT_NAME = "corpUserKey";
@@ -290,6 +292,7 @@ public class Constants {
 
   // Search
   public static final String USAGE_FEATURES_ASPECT_NAME = "usageFeatures";
+  public static final String STORAGE_FEATURES_ASPECT_NAME = "storageFeatures";
 
   // Constraints
   public static final String CONSTRAINT_INFO_ASPECT_NAME = "constraintInfo";

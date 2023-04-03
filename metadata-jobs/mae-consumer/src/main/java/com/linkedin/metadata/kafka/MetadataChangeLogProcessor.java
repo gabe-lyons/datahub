@@ -9,7 +9,9 @@ import com.linkedin.metadata.EventUtils;
 import com.linkedin.metadata.kafka.config.MetadataChangeLogProcessorCondition;
 import com.linkedin.metadata.kafka.hook.MetadataChangeLogHook;
 import com.linkedin.metadata.kafka.hook.UpdateIndicesHook;
+import com.linkedin.metadata.kafka.hook.assertion.AssertionsSummaryHook;
 import com.linkedin.metadata.kafka.hook.event.EntityChangeEventGeneratorHook;
+import com.linkedin.metadata.kafka.hook.incident.IncidentsSummaryHook;
 import com.linkedin.metadata.kafka.hook.ingestion.IngestionSchedulerHook;
 import com.linkedin.metadata.kafka.hook.notification.NotificationGeneratorHook;
 import com.linkedin.metadata.kafka.hook.siblings.SiblingAssociationHook;
@@ -40,7 +42,9 @@ import org.springframework.stereotype.Component;
     KafkaEventConsumerFactory.class,
     SiblingAssociationHook.class,
     MetadataTestHook.class,
-    NotificationGeneratorHook.class
+    NotificationGeneratorHook.class,
+    AssertionsSummaryHook.class,
+    IncidentsSummaryHook.class
 })
 @EnableKafka
 public class MetadataChangeLogProcessor {
@@ -53,10 +57,13 @@ public class MetadataChangeLogProcessor {
       @Nonnull final IngestionSchedulerHook ingestionSchedulerHook,
       @Nonnull final NotificationGeneratorHook notificationGeneratorHook,
       @Nonnull final EntityChangeEventGeneratorHook entityChangeEventHook,
-      @Nonnull final SiblingAssociationHook siblingAssociationHook, @Nonnull final MetadataTestHook metadataTestHook) {
+      @Nonnull final SiblingAssociationHook siblingAssociationHook,
+      @Nonnull final AssertionsSummaryHook assertionsSummaryHook,
+      @Nonnull final MetadataTestHook metadataTestHook,
+      @Nonnull final IncidentsSummaryHook incidentsSummaryHook) {
     this.hooks =
         ImmutableList.of(updateIndicesHook, ingestionSchedulerHook, notificationGeneratorHook, entityChangeEventHook,
-            siblingAssociationHook, metadataTestHook);
+            siblingAssociationHook, assertionsSummaryHook, metadataTestHook, incidentsSummaryHook);
     this.hooks.forEach(MetadataChangeLogHook::init);
   }
 

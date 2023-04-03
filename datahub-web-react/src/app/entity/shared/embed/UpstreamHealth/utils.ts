@@ -1,65 +1,4 @@
-import { Dataset, Entity, EntityType } from '../../../../../types.generated';
-
-function getAssertionsSummary(dataset: Dataset) {
-    let numAssertionsFailing = 0;
-    let numAssertionsPassing = 0;
-
-    dataset.assertions?.assertions?.forEach((assertion) => {
-        const totalRunEvents = assertion.runEvents?.total;
-        if (totalRunEvents) {
-            const failingForDataset = assertion.runEvents?.failed;
-            if (failingForDataset) {
-                numAssertionsFailing += 1;
-            } else {
-                numAssertionsPassing += 1;
-            }
-        }
-    });
-
-    return { numAssertionsPassing, numAssertionsFailing };
-}
-
-export interface UpstreamSummary {
-    passingUpstreams: number;
-    failingUpstreams: number;
-    datasetsWithFailingAssertions: Dataset[];
-    datasetsWithActiveIncidents: Dataset[];
-}
-
-export function extractUpstreamSummary(upstreams: Entity[]): UpstreamSummary {
-    let passingUpstreams = 0;
-    let failingUpstreams = 0;
-    const datasetsWithFailingAssertions = new Set<Dataset>();
-    const datasetsWithActiveIncidents = new Set<Dataset>();
-
-    upstreams.forEach((entity) => {
-        if (entity.type === EntityType.Dataset) {
-            const { numAssertionsPassing, numAssertionsFailing } = getAssertionsSummary(entity as Dataset);
-            const { activeIncidents } = entity as any;
-
-            if (numAssertionsFailing || activeIncidents.total) {
-                failingUpstreams += 1;
-            }
-
-            if (numAssertionsFailing) {
-                datasetsWithFailingAssertions.add(entity as Dataset);
-            } else if (numAssertionsPassing) {
-                passingUpstreams += 1;
-            }
-
-            if (activeIncidents.total) {
-                datasetsWithActiveIncidents.add(entity as Dataset);
-            }
-        }
-    });
-
-    return {
-        failingUpstreams,
-        passingUpstreams,
-        datasetsWithFailingAssertions: Array.from(datasetsWithFailingAssertions),
-        datasetsWithActiveIncidents: Array.from(datasetsWithActiveIncidents),
-    };
-}
+import { Dataset, EntityType, FilterOperator, LineageDirection } from '../../../../../types.generated';
 
 export function getNumAssertionsFailing(dataset: Dataset) {
     let numFailing = 0;
@@ -71,4 +10,39 @@ export function getNumAssertionsFailing(dataset: Dataset) {
     });
 
     return numFailing;
+}
+
+export const DATASET_COUNT = 5;
+
+export function generateQueryVariables(
+    urn: string,
+    filterField: string,
+    start: number,
+    includeAssertions: boolean,
+    includeIncidents: boolean,
+    skip?: boolean,
+) {
+    return {
+        skip,
+        variables: {
+            input: {
+                urn,
+                query: '*',
+                types: [EntityType.Dataset],
+                start,
+                count: DATASET_COUNT,
+                direction: LineageDirection.Upstream,
+                orFilters: [
+                    {
+                        and: [
+                            { field: 'degree', condition: FilterOperator.Equal, values: ['1', '2', '3+'] },
+                            { field: filterField, condition: FilterOperator.Equal, values: ['true'] },
+                        ],
+                    },
+                ],
+            },
+            includeAssertions,
+            includeIncidents,
+        },
+    };
 }

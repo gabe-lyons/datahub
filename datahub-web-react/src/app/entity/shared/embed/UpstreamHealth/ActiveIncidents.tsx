@@ -1,21 +1,29 @@
+import { LoadingOutlined } from '@ant-design/icons';
 import React from 'react';
+import { Dataset } from '../../../../../types.generated';
 import { useEntityRegistry } from '../../../../useEntityRegistry';
-import { FailingDataWrapper, FailingSectionWrapper } from './FailingAssertions';
+import { FailingDataWrapper, FailingSectionWrapper, LoadingWrapper, LoadMoreButton } from './FailingAssertions';
 import FailingEntity from './FailingEntity';
-import { UpstreamSummary } from './utils';
 
 interface Props {
-    upstreamSummary: UpstreamSummary;
+    datasetsWithActiveIncidents: Dataset[];
+    totalDatasetsWithActiveIncidents: number;
+    fetchMoreIncidentsData: () => void;
+    isLoadingIncidents: boolean;
 }
 
-export default function ActiveIncidents({ upstreamSummary }: Props) {
-    const { datasetsWithActiveIncidents } = upstreamSummary;
+export default function ActiveIncidents({
+    datasetsWithActiveIncidents,
+    totalDatasetsWithActiveIncidents,
+    fetchMoreIncidentsData,
+    isLoadingIncidents,
+}: Props) {
     const entityRegistry = useEntityRegistry();
 
     return (
         <FailingSectionWrapper>
-            {datasetsWithActiveIncidents.length} active incident{datasetsWithActiveIncidents.length > 1 && 's'} on data
-            sources
+            {totalDatasetsWithActiveIncidents} data source{totalDatasetsWithActiveIncidents > 1 && 's'} with active
+            incidents
             <FailingDataWrapper>
                 {datasetsWithActiveIncidents.map((dataset) => {
                     const numActiveIncidents = (dataset as any).activeIncidents.total;
@@ -29,6 +37,18 @@ export default function ActiveIncidents({ upstreamSummary }: Props) {
                         />
                     );
                 })}
+                {totalDatasetsWithActiveIncidents > datasetsWithActiveIncidents.length && (
+                    <>
+                        {isLoadingIncidents && (
+                            <LoadingWrapper>
+                                <LoadingOutlined />
+                            </LoadingWrapper>
+                        )}
+                        {!isLoadingIncidents && (
+                            <LoadMoreButton onClick={fetchMoreIncidentsData}>+ Load more</LoadMoreButton>
+                        )}
+                    </>
+                )}
             </FailingDataWrapper>
         </FailingSectionWrapper>
     );

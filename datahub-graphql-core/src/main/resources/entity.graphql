@@ -6053,6 +6053,36 @@ type DatasetStatsSummary {
     uniqueUserRankLast30Days: Int
 
     """
+    The total write count in past 30 days - includes inserts, updates, deletes, alters.
+    """
+    updateCountLast30Days: Int
+
+    """
+    The write count percentile in the last 30 days
+    """
+    updateCountPercentileLast30Days: Int
+
+    """
+    Row count for the table
+    """
+    rowCount: Long
+
+    """
+    Row count percentile for the table
+    """
+    rowCountPercentile: Int
+
+    """
+    Storage size in bytes for the table
+    """
+    sizeInBytes: Long
+
+    """
+    Storage size in bytes percentile for the table
+    """
+    sizeInBytesPercentile: Int
+
+    """
     The top users in the past 30 days
     """
     topUsersLast30Days: [CorpUser!]

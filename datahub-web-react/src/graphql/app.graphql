@@ -54,6 +54,10 @@ query appConfig {
         viewsConfig {
             enabled
         }
+        chromeExtensionConfig {
+            enabled
+            lineageEnabled
+        }
     }
 }
 

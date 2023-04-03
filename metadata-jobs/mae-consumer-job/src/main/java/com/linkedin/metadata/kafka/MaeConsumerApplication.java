@@ -19,7 +19,9 @@ import org.springframework.context.annotation.FilterType;
         "com.linkedin.metadata.kafka",
         "com.linkedin.metadata.dao.producer",
         "com.datahub.event",
-        "com.linkedin.gms.factory.notifications"
+        "com.linkedin.gms.factory.notifications",
+        "com.linkedin.gms.factory.incident",
+        "com.linkedin.gms.factory.assertion"
 }, excludeFilters = {
     @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ScheduledAnalyticsFactory.class)})
 public class MaeConsumerApplication {

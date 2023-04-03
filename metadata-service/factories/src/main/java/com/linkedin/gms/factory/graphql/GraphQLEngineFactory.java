@@ -54,7 +54,8 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @Import({RestHighLevelClientFactory.class, IndexConventionFactory.class, RestliEntityClientFactory.class,
     RecommendationServiceFactory.class, EntityRegistryFactory.class, DataHubTokenServiceFactory.class,
-    GitVersionFactory.class, SiblingGraphServiceFactory.class, TestEngineFactory.class, EntitySearchServiceFactory.class})
+    GitVersionFactory.class, SiblingGraphServiceFactory.class, TestEngineFactory.class,
+    EntitySearchServiceFactory.class})
 public class GraphQLEngineFactory {
   @Autowired
   @Qualifier("elasticSearchRestHighLevelClient")
@@ -170,7 +171,6 @@ public class GraphQLEngineFactory {
   @Value("${platformAnalytics.enabled}") // TODO: Migrate to DATAHUB_ANALYTICS_ENABLED
   private Boolean isAnalyticsEnabled;
 
-
   @Bean(name = "graphQLEngine")
   @Nonnull
   protected GraphQLEngine getInstance() {
@@ -209,6 +209,7 @@ public class GraphQLEngineFactory {
     args.setLineageService(_lineageService);
     args.setQueryService(_queryService);
     args.setFeatureFlags(_configProvider.getFeatureFlags());
+    args.setChromeExtensionConfiguration(_configProvider.getChromeExtension());
 
     // Saas Only
     args.setEntitySearchService(_entitySearchService);
@@ -216,7 +217,7 @@ public class GraphQLEngineFactory {
     args.setProposalService(_proposalService);
 
     return new GmsGraphQLEngine(
-            args
+        args
     ).builder().build();
   }
 }

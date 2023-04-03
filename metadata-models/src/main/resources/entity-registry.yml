@@ -30,6 +30,8 @@ entities:
       - inferredMetadata
       - schemaFieldsInferredMetadata
       - schemaFieldsInferredNeighbors
+      - incidentsSummary
+      - assertionsSummary
   - name: dataHubPolicy
     doc: DataHub Policies represent access policies granted to users or groups on metadata operations like edit, view etc.
     category: internal
@@ -283,6 +285,7 @@ entities:
     keyAspect: testKey
     aspects:
       - testInfo
+      - status
   - name: dataHubUpgrade
     category: internal
     keyAspect: dataHubUpgradeKey

@@ -124,18 +124,16 @@ const commonProps: Property[] = [
             entityTypes: [EntityType.GlossaryTerm],
             mode: SelectInputMode.MULTIPLE,
         },
-        children: [
-            {
-                id: 'glossaryTerms.terms.urn.glossaryTermInfo.parentNode',
-                displayName: 'Term Groups',
-                description: 'The parent term groups in which the terms reside.',
-                valueType: ValueTypeId.URN_LIST,
-                valueOptions: {
-                    entityTypes: [EntityType.GlossaryNode],
-                    mode: SelectInputMode.MULTIPLE,
-                },
-            },
-        ],
+    },
+    {
+        id: 'glossaryTerms.terms.urn.glossaryTermInfo.parentNode',
+        displayName: 'Glossary Term Groups',
+        description: 'The set of parent Term Groups for Glossary Terms attached to the asset.',
+        valueType: ValueTypeId.URN_LIST,
+        valueOptions: {
+            entityTypes: [EntityType.GlossaryNode],
+            mode: SelectInputMode.MULTIPLE,
+        },
     },
     {
         id: 'domains.domains',
@@ -172,6 +170,18 @@ const commonProps: Property[] = [
         displayName: 'Deprecated',
         description: 'Whether the asset is deprecated or not.',
         valueType: ValueTypeId.BOOLEAN,
+    },
+    {
+        id: '__firstSynchronized',
+        displayName: 'First Synchronized',
+        description: 'The time at which the asset was first seen by DataHub (ms).',
+        valueType: ValueTypeId.TIMESTAMP,
+    },
+    {
+        id: '__lastSynchronized',
+        displayName: 'Last Synchronized',
+        description: 'The time at which the asset was last seen by DataHub (ms).',
+        valueType: ValueTypeId.TIMESTAMP,
     },
 ];
 
@@ -252,6 +262,70 @@ const datasetProps: Property[] = [
                 description:
                     'The relative unique user count percentile for this dataset within the data platform instance. This requires usage data ingestion to be enabled.',
                 valueType: ValueTypeId.NUMBER,
+            },
+            {
+                id: 'storageFeatures.rowCount',
+                displayName: 'Row Count Total',
+                description:
+                    'The total number of rows in the dataset. This requires data profiling to be enabled for connected data sources.',
+                valueType: ValueTypeId.NUMBER,
+            },
+            {
+                id: 'storageFeatures.rowCountPercentile',
+                displayName: 'Row Count Percentile (0-100)',
+                description:
+                    'The relative row count percentile for this dataset within the data platform instance. This requires data profiling to be enabled.',
+                valueType: ValueTypeId.NUMBER,
+            },
+            {
+                id: 'storageFeatures.sizeInBytes',
+                displayName: 'Size In Bytes',
+                description:
+                    'The total size of the dataset in bytes. This requires data profiling to be enabled for supported data sources.',
+                valueType: ValueTypeId.NUMBER,
+            },
+            {
+                id: 'storageFeatures.sizeInBytesPercentile',
+                displayName: 'Size In Bytes Percentile (0-100)',
+                description:
+                    'The relative storage size percentile for this dataset within the data platform instance. This requires data profiling to be enabled for supported sources.',
+                valueType: ValueTypeId.NUMBER,
+            },
+        ],
+    },
+    {
+        id: 'assertions',
+        displayName: 'Assertions',
+        children: [
+            {
+                id: 'assertionsSummary.passingAssertions',
+                displayName: 'Passing Assertions',
+                description: 'Passing assertions for the asset',
+                valueType: ValueTypeId.EXISTS_LIST,
+            },
+            {
+                id: 'assertionsSummary.failingAssertions',
+                displayName: 'Failing Assertions',
+                description: 'Failing Assertions for the asset',
+                valueType: ValueTypeId.EXISTS_LIST,
+            },
+        ],
+    },
+    {
+        id: 'incidents',
+        displayName: 'Incidents',
+        children: [
+            {
+                id: 'incidentsSummary.activeIncidents',
+                displayName: 'Active Incidents',
+                description: 'Active incidents for the asset',
+                valueType: ValueTypeId.EXISTS_LIST,
+            },
+            {
+                id: 'incidentsSummary.resolvedIncidents',
+                displayName: 'Resolved Incidents',
+                description: 'Resolved incidents for the asset',
+                valueType: ValueTypeId.EXISTS_LIST,
             },
         ],
     },

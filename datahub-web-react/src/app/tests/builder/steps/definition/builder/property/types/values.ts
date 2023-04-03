@@ -49,6 +49,10 @@ export enum ValueTypeId {
      * A list of urns
      */
     URN_LIST = 'URN_LIST',
+    /**
+     * An exists value type
+     */
+    EXISTS_LIST = 'EXISTS_LIST',
 }
 
 /**
@@ -126,6 +130,11 @@ export const valueTypes = [
         displayName: 'List',
         operators: [OperatorId.CONTAINS_ANY, OperatorId.EXISTS],
     },
+    {
+        id: ValueTypeId.EXISTS_LIST,
+        displayName: 'List',
+        operators: [OperatorId.EXISTS],
+    },
 ];
 
 /**
@@ -153,6 +162,10 @@ export enum ValueInputType {
      * Entity search input
      */
     ENTITY_SEARCH,
+    /**
+     * A time select input
+     */
+    TIME_SELECT,
     /**
      * No input type
      */

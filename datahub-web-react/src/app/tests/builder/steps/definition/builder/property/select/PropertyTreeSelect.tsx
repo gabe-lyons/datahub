@@ -35,7 +35,7 @@ export const PropertyTreeSelect = ({ selectedProperty, properties, onChangePrope
 
         return (
             <TreeNode
-                disabled={!selectable}
+                selectable={selectable}
                 label={<PropertyTreeNodeLabel property={property} parents={parents} valueType={valueTypeDisplayName} />}
                 value={property.id}
                 title={
@@ -59,6 +59,8 @@ export const PropertyTreeSelect = ({ selectedProperty, properties, onChangePrope
             placeholder="Select a property..."
             onSelect={(newVal) => onChangeProperty(newVal as string)}
             value={selectedProperty}
+            treeDefaultExpandAll
+            treeExpandAction="click"
         >
             {properties.map((property) => {
                 return renderNode(property, []);
