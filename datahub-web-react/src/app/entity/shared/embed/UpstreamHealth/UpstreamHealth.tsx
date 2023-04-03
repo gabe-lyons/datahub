@@ -3,6 +3,10 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useSearchAcrossLineageQuery } from '../../../../../graphql/search.generated';
 import { Dataset } from '../../../../../types.generated';
+import {
+    HAS_ACTIVE_INCIDENTS_FILTER_NAME,
+    HAS_FAILING_ASSERTIONS_FILTER_NAME,
+} from '../../../../search/utils/constants';
 import { useAppConfig } from '../../../../useAppConfig';
 import { useEntityData } from '../../EntityContext';
 import FailingInputs from './FailingInputs';
@@ -28,7 +32,7 @@ export default function UpstreamHealth() {
         loading: isLoadingIncidents,
         fetchMore: fetchMoreIncidents,
     } = useSearchAcrossLineageQuery(
-        generateQueryVariables(urn, 'hasActiveIncidents', incidentsDataStart, false, true, !lineageEnabled),
+        generateQueryVariables(urn, HAS_ACTIVE_INCIDENTS_FILTER_NAME, incidentsDataStart, false, true, !lineageEnabled),
     );
 
     const {
@@ -36,7 +40,14 @@ export default function UpstreamHealth() {
         loading: isLoadingAssertions,
         fetchMore: fetchMoreAssertions,
     } = useSearchAcrossLineageQuery(
-        generateQueryVariables(urn, 'hasFailingAssertions', assertionsDataStart, true, false, !lineageEnabled),
+        generateQueryVariables(
+            urn,
+            HAS_FAILING_ASSERTIONS_FILTER_NAME,
+            assertionsDataStart,
+            true,
+            false,
+            !lineageEnabled,
+        ),
     );
 
     useEffect(() => {
