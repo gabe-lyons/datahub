@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - acryl-main
     paths:
       - "**/*.gradle"
       - "li-utils/**"
@@ -11,6 +12,7 @@ on:
   pull_request:
     branches:
       - master
+      - acryl-main
     paths:
       - "**/*.gradle"
       - "li-utils/**"
