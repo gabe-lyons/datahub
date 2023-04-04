@@ -184,7 +184,7 @@ project.ext.externalDependency = [
     'servletApi': 'javax.servlet:javax.servlet-api:3.1.0',
     'sentry': "io.sentry:sentry:$sentry",
     'sentryLogback': "io.sentry:sentry-logback:$sentry",
-    'shiroCore': 'org.apache.shiro:shiro-core:1.10.0',
+    'shiroCore': 'org.apache.shiro:shiro-core:1.11.0',
     'snakeYaml': 'org.yaml:snakeyaml:1.33',
     'sparkSql' : 'org.apache.spark:spark-sql_2.11:2.4.8',
     'sparkHive' : 'org.apache.spark:spark-hive_2.11:2.4.8',

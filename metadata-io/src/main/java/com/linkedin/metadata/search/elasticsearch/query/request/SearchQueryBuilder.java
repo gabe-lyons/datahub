@@ -1,6 +1,7 @@
 package com.linkedin.metadata.search.elasticsearch.query.request;
 
 import com.linkedin.metadata.config.search.ExactMatchConfiguration;
+import com.linkedin.metadata.config.search.PartialConfiguration;
 import com.linkedin.metadata.config.search.SearchConfiguration;
 import com.linkedin.metadata.models.EntitySpec;
 import com.linkedin.metadata.models.SearchableFieldSpec;
@@ -38,56 +39,63 @@ public class SearchQueryBuilder {
 
   public static final String STRUCTURED_QUERY_PREFIX = "\\\\/q ";
   private final ExactMatchConfiguration exactMatchConfiguration;
+  private final PartialConfiguration partialConfiguration;
 
   public SearchQueryBuilder(@Nonnull SearchConfiguration searchConfiguration) {
     this.exactMatchConfiguration = searchConfiguration.getExactMatch();
+    this.partialConfiguration = searchConfiguration.getPartial();
   }
 
-  public QueryBuilder buildQuery(@Nonnull EntitySpec entitySpec, @Nonnull String query, boolean fulltext) {
-    final QueryBuilder queryBuilder = buildInternalQuery(entitySpec, query, fulltext);
-
-    return QueryBuilders.functionScoreQuery(queryBuilder, buildScoreFunctions(entitySpec))
+  public QueryBuilder buildQuery(@Nonnull List<EntitySpec> entitySpecs, @Nonnull String query, boolean fulltext) {
+      final QueryBuilder queryBuilder = buildInternalQuery(entitySpecs, query, fulltext);
+      return QueryBuilders.functionScoreQuery(queryBuilder, buildScoreFunctions(entitySpecs))
         .scoreMode(FunctionScoreQuery.ScoreMode.AVG) // Average score functions
         .boostMode(CombineFunction.MULTIPLY); // Multiply score function with the score from query
   }
 
   /**
    * Constructs the search query.
-   * @param entitySpec entity being searched
+   * @param entitySpecs entities being searched
    * @param query search string
    * @param fulltext use fulltext queries
    * @return query builder
    */
-  private QueryBuilder buildInternalQuery(@Nonnull EntitySpec entitySpec, @Nonnull String query, boolean fulltext) {
+  private QueryBuilder buildInternalQuery(@Nonnull List<EntitySpec> entitySpecs, @Nonnull String query, boolean fulltext) {
     BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
 
     if (fulltext && !query.startsWith(STRUCTURED_QUERY_PREFIX)) {
       final String sanitizedQuery = query.replaceFirst("^:+", "");
-      getSimpleQuery(entitySpec, sanitizedQuery).ifPresent(finalQuery::should);
-      getPrefixAndExactMatchQuery(entitySpec, sanitizedQuery).ifPresent(finalQuery::should);
+
+      getSimpleQuery(entitySpecs, sanitizedQuery).ifPresent(finalQuery::should);
+      getPrefixAndExactMatchQuery(entitySpecs, sanitizedQuery).ifPresent(finalQuery::should);
     } else {
       final String withoutQueryPrefix = query.startsWith(STRUCTURED_QUERY_PREFIX) ? query.substring(STRUCTURED_QUERY_PREFIX.length()) : query;
 
       QueryStringQueryBuilder queryBuilder = QueryBuilders.queryStringQuery(withoutQueryPrefix);
       queryBuilder.defaultOperator(Operator.AND);
-      getStandardFields(entitySpec).forEach(cfg -> queryBuilder.field(cfg.getFieldName(), cfg.getBoost()));
+      entitySpecs.stream()
+          .map(this::getStandardFields)
+          .flatMap(Set::stream)
+          .distinct()
+          .forEach(cfg -> queryBuilder.field(cfg.getFieldName(), cfg.getBoost()));
       finalQuery.should(queryBuilder);
-
       if (exactMatchConfiguration.isEnableStructured()) {
-        getPrefixAndExactMatchQuery(entitySpec, withoutQueryPrefix).ifPresent(finalQuery::should);
+        getPrefixAndExactMatchQuery(entitySpecs, withoutQueryPrefix).ifPresent(finalQuery::should);
       }
     }
 
     return finalQuery;
   }
 
-  private static Set<SearchFieldConfig> getStandardFields(@Nonnull EntitySpec entitySpec) {
+  private Set<SearchFieldConfig> getStandardFields(@Nonnull EntitySpec entitySpec) {
     Set<SearchFieldConfig> fields = new HashSet<>();
 
     // Always present
     final float urnBoost = Float.parseFloat((String) PRIMARY_URN_SEARCH_PROPERTIES.get("boostScore"));
-    List.of("urn", "urn.delimited").forEach(urnField -> fields.add(SearchFieldConfig.detectSubFieldType(
-            urnField, urnBoost, SearchableAnnotation.FieldType.URN)));
+
+    fields.add(SearchFieldConfig.detectSubFieldType("urn", urnBoost, SearchableAnnotation.FieldType.URN));
+    fields.add(SearchFieldConfig.detectSubFieldType("urn.delimited", urnBoost * partialConfiguration.getUrnFactor(),
+            SearchableAnnotation.FieldType.URN));
 
     List<SearchableFieldSpec> searchableFieldSpecs = entitySpec.getSearchableFieldSpecs();
     for (SearchableFieldSpec fieldSpec : searchableFieldSpecs) {
@@ -100,7 +108,8 @@ public class SearchQueryBuilder {
 
       if (SearchFieldConfig.detectSubFieldType(fieldSpec).hasDelimitedSubfield()) {
         fields.add(SearchFieldConfig.detectSubFieldType(searchFieldConfig.getFieldName() + ".delimited",
-                searchFieldConfig.getBoost() * 0.4f, fieldSpec.getSearchableAnnotation().getFieldType()));
+                searchFieldConfig.getBoost() * partialConfiguration.getFactor(),
+                fieldSpec.getSearchableAnnotation().getFieldType()));
       }
     }
 
@@ -115,18 +124,20 @@ public class SearchQueryBuilder {
     return Stream.of("\"", "'").anyMatch(query::contains);
   }
 
-  private Optional<QueryBuilder> getSimpleQuery(@Nonnull EntitySpec entitySpec, String sanitizedQuery) {
+  private Optional<QueryBuilder> getSimpleQuery(List<EntitySpec> entitySpecs, String sanitizedQuery) {
     Optional<QueryBuilder> result = Optional.empty();
 
     if (!isQuoted(sanitizedQuery) || !exactMatchConfiguration.isExclusive()) {
       BoolQueryBuilder simplePerField = QueryBuilders.boolQuery();
       // Simple query string does not use per field analyzers
       // Group the fields by analyzer
-      Map<String, Set<SearchFieldConfig>> analyzerGroup = getStandardFields(entitySpec).stream()
-              .collect(Collectors.groupingBy(SearchFieldConfig::getAnalyzer, Collectors.toSet()));
+      Map<String, List<SearchFieldConfig>> analyzerGroup = entitySpecs.stream()
+              .map(this::getStandardFields)
+              .flatMap(Set::stream)
+              .collect(Collectors.groupingBy(SearchFieldConfig::getAnalyzer));
 
       analyzerGroup.keySet().stream().sorted().forEach(analyzer -> {
-        Set<SearchFieldConfig> fieldConfigs = analyzerGroup.get(analyzer);
+        List<SearchFieldConfig> fieldConfigs = analyzerGroup.get(analyzer);
         SimpleQueryStringBuilder simpleBuilder = QueryBuilders.simpleQueryStringQuery(sanitizedQuery);
         simpleBuilder.analyzer(analyzer);
         simpleBuilder.defaultOperator(Operator.AND);
@@ -140,8 +151,8 @@ public class SearchQueryBuilder {
     return result;
   }
 
-  private Optional<QueryBuilder> getPrefixAndExactMatchQuery(@Nonnull EntitySpec entitySpec, String query) {
-    BoolQueryBuilder finalQuery = QueryBuilders.boolQuery();
+  private Optional<QueryBuilder> getPrefixAndExactMatchQuery(@Nonnull List<EntitySpec> entitySpecs, String query) {
+    BoolQueryBuilder finalQuery =  QueryBuilders.boolQuery();
     String unquotedQuery = unquote(query);
 
     // Exact match case-sensitive
@@ -157,7 +168,9 @@ public class SearchQueryBuilder {
                     * exactMatchConfiguration.getCaseSensitivityFactor())
             .queryName("urn"));
 
-    entitySpec.getSearchableFieldSpecs().stream()
+    entitySpecs.stream()
+            .map(EntitySpec::getSearchableFieldSpecs)
+            .flatMap(List::stream)
             .map(SearchableFieldSpec::getSearchableAnnotation)
             .filter(SearchableAnnotation::isQueryByDefault)
             .filter(SearchableAnnotation::isEnableAutocomplete) // Proxy for identifying likely exact match fields
@@ -185,26 +198,30 @@ public class SearchQueryBuilder {
                               * exactMatchConfiguration.getCaseSensitivityFactor())
                       .queryName(ESUtils.toKeywordField(srchAnnotation.getFieldName(), false)));
             });
+
     return finalQuery.should().size() > 0 ? Optional.of(finalQuery) : Optional.empty();
   }
 
-  private static FunctionScoreQueryBuilder.FilterFunctionBuilder[] buildScoreFunctions(@Nonnull EntitySpec entitySpec) {
+  private static FunctionScoreQueryBuilder.FilterFunctionBuilder[] buildScoreFunctions(@Nonnull List<EntitySpec> entitySpecs) {
     List<FunctionScoreQueryBuilder.FilterFunctionBuilder> finalScoreFunctions = new ArrayList<>();
     // Add a default weight of 1.0 to make sure the score function is larger than 1
     finalScoreFunctions.add(
         new FunctionScoreQueryBuilder.FilterFunctionBuilder(ScoreFunctionBuilders.weightFactorFunction(1.0f)));
-    entitySpec.getSearchableFieldSpecs()
-        .stream()
-        .flatMap(fieldSpec -> fieldSpec.getSearchableAnnotation()
+    entitySpecs.stream()
+        .map(EntitySpec::getSearchableFieldSpecs)
+        .flatMap(List::stream)
+        .map(SearchableFieldSpec::getSearchableAnnotation)
+        .flatMap(annotation -> annotation
             .getWeightsPerFieldValue()
             .entrySet()
             .stream()
-            .map(entry -> buildWeightFactorFunction(fieldSpec.getSearchableAnnotation().getFieldName(), entry.getKey(),
+            .map(entry -> buildWeightFactorFunction(annotation.getFieldName(), entry.getKey(),
                 entry.getValue())))
         .forEach(finalScoreFunctions::add);
 
-    entitySpec.getSearchScoreFieldSpecs()
-        .stream()
+    entitySpecs.stream()
+        .map(EntitySpec::getSearchScoreFieldSpecs)
+        .flatMap(List::stream)
         .map(fieldSpec -> buildScoreFunctionFromSearchScoreAnnotation(fieldSpec.getSearchScoreAnnotation()))
         .forEach(finalScoreFunctions::add);
 

@@ -3,8 +3,8 @@ import { EditableSchemaMetadata, EntityType, GlobalTags, SchemaField } from '../
 import TagTermGroup from '../../../../../../shared/tags/TagTermGroup';
 import { findFieldPathProposal } from '../../../../../../shared/tags/utils/proposalUtils';
 import { pathMatchesNewPath } from '../../../../../dataset/profile/schema/utils/utils';
-import { useBaseEntity, useMutationUrn, useRefetch } from '../../../../EntityContext';
 import { useSchemaRefetch } from '../SchemaContext';
+import { useBaseEntity, useMutationUrn, useRefetch } from '../../../../EntityContext';
 
 export default function useTagsAndTermsRenderer(
     editableSchemaMetadata: EditableSchemaMetadata | null | undefined,

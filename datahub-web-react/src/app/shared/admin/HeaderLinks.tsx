@@ -14,10 +14,10 @@ import {
 import { Link } from 'react-router-dom';
 import { Button, Dropdown, Menu, Tooltip } from 'antd';
 import { useAppConfig } from '../../useAppConfig';
-import { useGetAuthenticatedUser } from '../../useGetAuthenticatedUser';
 import { ANTD_GRAY } from '../../entity/shared/constants';
 import { HOME_PAGE_INGESTION_ID } from '../../onboarding/config/HomePageOnboardingConfig';
 import { useUpdateEducationStepIdsAllowlist } from '../../onboarding/useUpdateEducationStepIdsAllowlist';
+import { useUserContext } from '../../context/useUserContext';
 
 const LinkWrapper = styled.span`
     margin-right: 0px;
@@ -65,7 +65,7 @@ interface Props {
 
 export function HeaderLinks(props: Props) {
     const { areLinksHidden } = props;
-    const me = useGetAuthenticatedUser();
+    const me = useUserContext();
     const { config } = useAppConfig();
 
     const isAnalyticsEnabled = config?.analyticsConfig.enabled;
@@ -76,14 +76,14 @@ export function HeaderLinks(props: Props) {
     const isActionRequestsEnabled = config?.actionRequestsConfig.enabled;
     const isTestsEnabled = config?.testsConfig.enabled;
 
-    const showAnalytics = (isAnalyticsEnabled && me && me.platformPrivileges.viewAnalytics) || false;
+    const showAnalytics = (isAnalyticsEnabled && me && me?.platformPrivileges?.viewAnalytics) || false;
     const showSettings = true;
     const showIngestion =
-        isIngestionEnabled && me && me.platformPrivileges.manageIngestion && me.platformPrivileges.manageSecrets;
-    const showDomains = me?.platformPrivileges.createDomains || me?.platformPrivileges.manageDomains;
+        isIngestionEnabled && me && me.platformPrivileges?.manageIngestion && me.platformPrivileges?.manageSecrets;
+    const showDomains = me?.platformPrivileges?.createDomains || me?.platformPrivileges?.manageDomains;
 
     // SaaS only
-    const showActionRequests = (isActionRequestsEnabled && me && me.platformPrivileges.viewMetadataProposals) || false;
+    const showActionRequests = (isActionRequestsEnabled && me?.platformPrivileges?.viewMetadataProposals) || false;
     const showTests = (isTestsEnabled && me?.platformPrivileges?.manageTests) || false;
     useUpdateEducationStepIdsAllowlist(!!showIngestion, HOME_PAGE_INGESTION_ID);
 

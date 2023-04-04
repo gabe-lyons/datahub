@@ -1,4 +1,4 @@
-import { dataset3WithLineage, dataset4WithLineage } from '../../../../Mocks';
+import { dataset3WithLineage, dataset3WithSchema, dataset4WithLineage } from '../../../../Mocks';
 import { EntityType, SchemaFieldDataType } from '../../../../types.generated';
 import {
     combineEntityDataWithSiblings,
@@ -50,59 +50,7 @@ const usageStats = {
 
 const datasetPrimary = {
     ...dataset3WithLineage,
-    schemaMetadata: {
-        __typename: 'SchemaMetadata',
-        aspectVersion: 0,
-        createdAt: 0,
-        fields: [
-            {
-                __typename: 'SchemaField',
-                nullable: false,
-                recursive: false,
-                fieldPath: 'user_id',
-                description: 'Id of the user created',
-                type: SchemaFieldDataType.String,
-                nativeDataType: 'varchar(100)',
-                isPartOfKey: false,
-                jsonPath: null,
-                globalTags: null,
-                glossaryTerms: null,
-                label: 'hi',
-            },
-            {
-                __typename: 'SchemaField',
-                nullable: false,
-                recursive: false,
-                fieldPath: 'user_name',
-                description: 'Name of the user who signed up',
-                type: SchemaFieldDataType.String,
-                nativeDataType: 'boolean',
-                isPartOfKey: false,
-                jsonPath: null,
-                globalTags: null,
-                glossaryTerms: null,
-                label: 'hi',
-            },
-        ],
-        hash: '',
-        platformSchema: null,
-        platformUrn: 'urn:li:dataPlatform:hive',
-        created: {
-            actor: 'urn:li:corpuser:jdoe',
-            time: 1581407189000,
-        },
-        cluster: '',
-        name: 'SampleHiveSchema',
-        version: 0,
-        lastModified: {
-            actor: 'urn:li:corpuser:jdoe',
-            time: 1581407189000,
-        },
-        datasetUrn: 'urn:li:dataset:3',
-        primaryKeys: [],
-        foreignKeys: [],
-    },
-    editableSchemaMetadata: null,
+    ...dataset3WithSchema.dataset,
     properties: {
         ...dataset3WithLineage.properties,
         description: 'primary description',
@@ -177,6 +125,20 @@ const datasetUnprimary = {
                 label: 'hi',
             },
             ...(dataset4WithLineage.schemaMetadata?.fields || []),
+            {
+                __typename: 'SchemaField',
+                nullable: false,
+                recursive: false,
+                fieldPath: 'duplicate_field',
+                description: 'Test to make sure fields merge works case insensitive',
+                type: SchemaFieldDataType.String,
+                nativeDataType: 'varchar(100)',
+                isPartOfKey: false,
+                jsonPath: null,
+                globalTags: null,
+                glossaryTerms: null,
+                label: 'hi',
+            },
         ],
     },
     siblings: {
@@ -186,6 +148,27 @@ const datasetUnprimary = {
 
 const datasetPrimaryWithSiblings = {
     ...datasetPrimary,
+    schemaMetadata: {
+        ...datasetPrimary.schemaMetadata,
+        fields: [
+            ...(datasetPrimary.schemaMetadata?.fields || []),
+            {
+                __typename: 'SchemaField',
+                nullable: false,
+                recursive: false,
+                fieldPath: 'DUPLICATE_FIELD',
+                description: 'Test to make sure fields merge works case insensitive',
+                type: SchemaFieldDataType.String,
+                nativeDataType: 'varchar(100)',
+                isPartOfKey: false,
+                jsonPath: null,
+                globalTags: null,
+                glossaryTerms: null,
+                label: 'hi',
+            },
+        ],
+    },
+
     siblings: {
         isPrimary: true,
         siblings: [datasetUnprimary],
@@ -545,10 +528,11 @@ describe('siblingUtils', () => {
             expect(combinedData.dataset.globalTags.tags[1].tag.urn).toEqual('urn:li:tag:primary-tag');
 
             // merges schema metadata properly  by fieldPath
-            expect(combinedData.dataset.schemaMetadata?.fields).toHaveLength(3);
+            expect(combinedData.dataset.schemaMetadata?.fields).toHaveLength(4);
             expect(combinedData.dataset.schemaMetadata?.fields[0].fieldPath).toEqual('new_one');
-            expect(combinedData.dataset.schemaMetadata?.fields[1].fieldPath).toEqual('user_id');
-            expect(combinedData.dataset.schemaMetadata?.fields[2].fieldPath).toEqual('user_name');
+            expect(combinedData.dataset.schemaMetadata?.fields[1].fieldPath).toEqual('DUPLICATE_FIELD');
+            expect(combinedData.dataset.schemaMetadata?.fields[2].fieldPath).toEqual('user_id');
+            expect(combinedData.dataset.schemaMetadata?.fields[3].fieldPath).toEqual('user_name');
 
             // will overwrite string properties w/ primary
             expect(combinedData.dataset.editableProperties.description).toEqual('secondary description');

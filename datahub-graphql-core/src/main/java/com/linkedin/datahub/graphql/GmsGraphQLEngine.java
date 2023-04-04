@@ -85,6 +85,7 @@ import com.linkedin.datahub.graphql.generated.Owner;
 import com.linkedin.datahub.graphql.generated.PolicyMatchCriterionValue;
 import com.linkedin.datahub.graphql.generated.QueryEntity;
 import com.linkedin.datahub.graphql.generated.QuerySubject;
+import com.linkedin.datahub.graphql.generated.QuickFilter;
 import com.linkedin.datahub.graphql.generated.RecommendationContent;
 import com.linkedin.datahub.graphql.generated.ResolvedAuditStamp;
 import com.linkedin.datahub.graphql.generated.SchemaFieldEntity;
@@ -227,6 +228,9 @@ import com.linkedin.datahub.graphql.resolvers.role.GetInviteTokenResolver;
 import com.linkedin.datahub.graphql.resolvers.role.ListRolesResolver;
 import com.linkedin.datahub.graphql.resolvers.search.AutoCompleteForMultipleResolver;
 import com.linkedin.datahub.graphql.resolvers.search.AutoCompleteResolver;
+import com.linkedin.datahub.graphql.resolvers.search.GetQuickFiltersResolver;
+import com.linkedin.datahub.graphql.resolvers.search.ScrollAcrossEntitiesResolver;
+import com.linkedin.datahub.graphql.resolvers.search.ScrollAcrossLineageResolver;
 import com.linkedin.datahub.graphql.resolvers.search.SearchAcrossEntitiesResolver;
 import com.linkedin.datahub.graphql.resolvers.search.SearchAcrossLineageResolver;
 import com.linkedin.datahub.graphql.resolvers.search.SearchResolver;
@@ -780,7 +784,9 @@ public class GmsGraphQLEngine {
             .dataFetcher("me", new MeResolver(this.entityClient, featureFlags))
             .dataFetcher("search", new SearchResolver(this.entityClient))
             .dataFetcher("searchAcrossEntities", new SearchAcrossEntitiesResolver(this.entityClient, this.viewService))
+            .dataFetcher("scrollAcrossEntities", new ScrollAcrossEntitiesResolver(this.entityClient, this.viewService))
             .dataFetcher("searchAcrossLineage", new SearchAcrossLineageResolver(this.entityClient))
+            .dataFetcher("scrollAcrossLineage", new ScrollAcrossLineageResolver(this.entityClient))
             .dataFetcher("autoComplete", new AutoCompleteResolver(searchableTypes))
             .dataFetcher("autoCompleteForMultiple", new AutoCompleteForMultipleResolver(searchableTypes))
             .dataFetcher("browse", new BrowseResolver(browsableTypes))
@@ -845,6 +851,7 @@ public class GmsGraphQLEngine {
             .dataFetcher("listGlobalViews", new ListGlobalViewsResolver(this.entityClient))
             .dataFetcher("globalViewsSettings", new GlobalViewsSettingsResolver(this.settingsService))
             .dataFetcher("listQueries", new ListQueriesResolver(this.entityClient))
+            .dataFetcher("getQuickFilters", new GetQuickFiltersResolver(this.entityClient, this.viewService))
         );
     }
 
@@ -1089,6 +1096,10 @@ public class GmsGraphQLEngine {
                     (env) -> ((ListTestsResult) env.getSource()).getTests().stream()
                         .map(Test::getUrn)
                         .collect(Collectors.toList())))
+            )
+            .type("QuickFilter", typeWiring -> typeWiring
+                .dataFetcher("entity", new EntityTypeResolver(entityTypes,
+                    (env) -> ((QuickFilter) env.getSource()).getEntity()))
             )
             // Proposals not in OSS
             .type("ActionRequest", typeWiring -> typeWiring.dataFetcher("entity",

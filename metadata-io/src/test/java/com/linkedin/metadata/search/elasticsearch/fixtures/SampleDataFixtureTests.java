@@ -931,6 +931,25 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
     }
 
     @Test
+    public void testCustomPropertiesQuoted() {
+        Map<String, Integer> expectedResults = Map.of(
+                "\"materialization=view\"", 3,
+                STRUCTURED_QUERY_PREFIX + "customProperties:\"materialization=view\"", 3
+        );
+
+        Map<String, SearchResult> results = expectedResults.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> search(searchService, entry.getKey())));
+
+        results.forEach((key, value) -> {
+            Integer actualCount = value.getEntities().size();
+            Integer expectedCount = expectedResults.get(key);
+            assertSame(actualCount, expectedCount,
+                    String.format("Search term `%s` has %s fulltext results, expected %s results.", key, actualCount,
+                            expectedCount));
+        });
+    }
+
+    @Test
     public void testStructQueryFieldPaths() {
         String query = STRUCTURED_QUERY_PREFIX + "fieldPaths: customer_id";
         SearchResult result = search(searchService, query);
@@ -1129,25 +1148,6 @@ public class SampleDataFixtureTests extends AbstractTestNGSpringContextTests {
                     "urn:li:dataset:(urn:li:dataPlatform:testOnly," + query + ",PROD)",
                     "Expected exact match as first match with matching case");
         }
-    }
-
-    @Test
-    public void testCustomPropertiesQuoted() {
-        Map<String, Integer> expectedResults = Map.of(
-                "\"materialization=view\"", 3,
-                STRUCTURED_QUERY_PREFIX + "customProperties:\"materialization=view\"", 3
-        );
-
-        Map<String, SearchResult> results = expectedResults.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> search(searchService, entry.getKey())));
-
-        results.forEach((key, value) -> {
-            Integer actualCount = value.getEntities().size();
-            Integer expectedCount = expectedResults.get(key);
-            assertSame(actualCount, expectedCount,
-                    String.format("Search term `%s` has %s fulltext results, expected %s results.", key, actualCount,
-                            expectedCount));
-        });
     }
 
     private Stream<AnalyzeResponse.AnalyzeToken> getTokens(AnalyzeRequest request) throws IOException {

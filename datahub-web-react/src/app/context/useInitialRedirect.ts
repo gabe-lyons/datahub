@@ -7,9 +7,7 @@ export function useInitialRedirect(state, localState, setState, setLocalState) {
     const history = useHistory();
 
     /**
-     * Route to the most recently visited path once on first load of home page, if present in local storage
-     * and if it is not an embedded page.
-     *
+     * Route to the most recently visited path once on first load of home page, if present in local storage.
      */
     useEffect(() => {
         if (
@@ -22,7 +20,7 @@ export function useInitialRedirect(state, localState, setState, setLocalState) {
                 loadedInitialPath: true,
             });
             if (localState.selectedPath && !localState.selectedPath.includes(PageRoutes.EMBED)) {
-                history.push({
+                history.replace({
                     pathname: localState.selectedPath,
                     search: localState.selectedSearch || '',
                 });
@@ -39,12 +37,12 @@ export function useInitialRedirect(state, localState, setState, setLocalState) {
     ]);
 
     /**
-     * When the location of the browse changes, save the latest to local state if it's not an embedded page.
+     * When the location of the browse changes, save the latest to local state.
      */
     useEffect(() => {
         if (
-            !location.pathname.includes(PageRoutes.EMBED) &&
-            (localState.selectedPath !== location.pathname || localState.selectedSearch !== location.search)
+            (localState.selectedPath !== location.pathname || localState.selectedSearch !== location.search) &&
+            !location.pathname.includes(PageRoutes.EMBED)
         ) {
             setLocalState({
                 ...localState,
