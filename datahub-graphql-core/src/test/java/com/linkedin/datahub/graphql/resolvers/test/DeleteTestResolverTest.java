@@ -1,10 +1,14 @@
 package com.linkedin.datahub.graphql.resolvers.test;
 
 import com.datahub.authentication.Authentication;
+import com.linkedin.common.Status;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.entity.client.EntityClient;
+import com.linkedin.metadata.Constants;
+import com.linkedin.metadata.entity.AspectUtils;
 import com.linkedin.metadata.test.TestEngine;
+import com.linkedin.mxe.MetadataChangeProposal;
 import graphql.schema.DataFetchingEnvironment;
 import java.util.concurrent.CompletionException;
 import org.mockito.Mockito;
@@ -23,19 +27,57 @@ public class DeleteTestResolverTest {
     EntityClient mockClient = Mockito.mock(EntityClient.class);
     TestEngine mockEngine = Mockito.mock(TestEngine.class);
     DeleteTestResolver resolver = new DeleteTestResolver(mockClient, mockEngine);
+    Urn urn = Urn.createFromString(TEST_URN);
 
     // Execute resolver
     QueryContext mockContext = getMockAllowContext();
     DataFetchingEnvironment mockEnv = Mockito.mock(DataFetchingEnvironment.class);
     Mockito.when(mockEnv.getArgument(Mockito.eq("urn"))).thenReturn(TEST_URN);
     Mockito.when(mockEnv.getContext()).thenReturn(mockContext);
+    Mockito.when(mockClient.exists(Mockito.eq(urn), Mockito.any(Authentication.class))).thenReturn(true);
 
-    assertTrue(resolver.get(mockEnv).get());
+    assertTrue(resolver.get(mockEnv).join());
 
-    Mockito.verify(mockClient, Mockito.times(1)).deleteEntity(
-        Mockito.eq(Urn.createFromString(TEST_URN)),
+    MetadataChangeProposal expectedChangeProposal = AspectUtils.buildMetadataChangeProposal(
+        urn,
+        Constants.STATUS_ASPECT_NAME,
+        new Status().setRemoved(true)
+    );
+
+    Mockito.verify(mockClient, Mockito.times(1)).exists(
+        Mockito.eq(urn),
         Mockito.any(Authentication.class)
     );
+
+    Mockito.verify(mockClient, Mockito.times(1)).ingestProposal(
+        Mockito.eq(expectedChangeProposal),
+        Mockito.any(Authentication.class),
+        Mockito.eq(true)
+    );
+  }
+
+  @Test
+  public void testGetEntityDoesNotExist() throws Exception {
+    EntityClient mockClient = Mockito.mock(EntityClient.class);
+    TestEngine mockEngine = Mockito.mock(TestEngine.class);
+    DeleteTestResolver resolver = new DeleteTestResolver(mockClient, mockEngine);
+    Urn urn = Urn.createFromString(TEST_URN);
+
+    // Execute resolver
+    QueryContext mockContext = getMockAllowContext();
+    DataFetchingEnvironment mockEnv = Mockito.mock(DataFetchingEnvironment.class);
+    Mockito.when(mockEnv.getArgument(Mockito.eq("urn"))).thenReturn(TEST_URN);
+    Mockito.when(mockEnv.getContext()).thenReturn(mockContext);
+    Mockito.when(mockClient.exists(Mockito.eq(urn), Mockito.any(Authentication.class))).thenReturn(false);
+
+    assertThrows(CompletionException.class, () -> resolver.get(mockEnv).join());
+
+    Mockito.verify(mockClient, Mockito.times(1)).exists(
+        Mockito.eq(urn),
+        Mockito.any(Authentication.class)
+    );
+
+    Mockito.verifyNoMoreInteractions(mockClient);
   }
 
   @Test
