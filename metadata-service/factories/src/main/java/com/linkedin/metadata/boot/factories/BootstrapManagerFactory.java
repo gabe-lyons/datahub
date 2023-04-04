@@ -15,6 +15,7 @@ import com.linkedin.metadata.boot.steps.IndexDataPlatformsStep;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformInstancesStep;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformsStep;
 import com.linkedin.metadata.boot.steps.IngestDefaultGlobalSettingsStep;
+import com.linkedin.metadata.boot.steps.IngestDefaultTagsStep;
 import com.linkedin.metadata.boot.steps.IngestMetadataTestsStep;
 import com.linkedin.metadata.boot.steps.IngestPoliciesStep;
 import com.linkedin.metadata.boot.steps.IngestRetentionPoliciesStep;
@@ -118,6 +119,7 @@ public class BootstrapManagerFactory {
     final RemoveClientIdAspectStep removeClientIdAspectStep = new RemoveClientIdAspectStep(_entityService);
     final RestoreColumnLineageIndices restoreColumnLineageIndices = new RestoreColumnLineageIndices(_entityService, _entityRegistry);
     final IngestDefaultGlobalSettingsStep ingestSettingsStep = new IngestDefaultGlobalSettingsStep(_entityService);
+    final IngestDefaultTagsStep ingestDefaultTagsStep = new IngestDefaultTagsStep(_entityService);
     final WaitForSystemUpdateStep waitForSystemUpdateStep = new WaitForSystemUpdateStep(_dataHubUpgradeKafkaListener,
         _configurationProvider);
     final AssertionsSummaryStep assertionsSummaryStep =
@@ -139,7 +141,9 @@ public class BootstrapManagerFactory {
             restoreColumnLineageIndices,
             assertionsSummaryStep,
             // Saas-only
-            _ingestMetadataTestsStep));
+            _ingestMetadataTestsStep,
+            ingestDefaultTagsStep
+        ));
 
     if (_upgradeDefaultBrowsePathsEnabled) {
       finalSteps.add(new UpgradeDefaultBrowsePathsStep(_entityService));
