@@ -30,6 +30,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;
 
+import static com.linkedin.metadata.Constants.*;
+
 
 /**
  * This bootstrap step is responsible for ingesting default metadata tests
@@ -116,7 +118,7 @@ public class IngestMetadataTestsStep implements BootstrapStep {
     keyAspectProposal.setEntityUrn(testUrn);
 
     _entityService.ingestProposal(keyAspectProposal,
-        new AuditStamp().setActor(UrnUtils.getUrn(Constants.SYSTEM_ACTOR)).setTime(System.currentTimeMillis()), false);
+        new AuditStamp().setActor(UrnUtils.getUrn(SYSTEM_ACTOR)).setTime(System.currentTimeMillis()), false);
 
     final MetadataChangeProposal proposal = new MetadataChangeProposal();
     proposal.setEntityUrn(testUrn);
@@ -126,7 +128,7 @@ public class IngestMetadataTestsStep implements BootstrapStep {
     proposal.setChangeType(ChangeType.UPSERT);
 
     _entityService.ingestProposal(proposal,
-        new AuditStamp().setActor(UrnUtils.getUrn(Constants.SYSTEM_ACTOR)).setTime(System.currentTimeMillis()), false);
+        new AuditStamp().setActor(UrnUtils.getUrn(SYSTEM_ACTOR)).setTime(System.currentTimeMillis()), false);
   }
 
   /**
@@ -152,6 +154,9 @@ public class IngestMetadataTestsStep implements BootstrapStep {
     }
 
     Map<Urn, TestInfo> metadataTestsMap = new HashMap<>();
+
+    final long currentTime = System.currentTimeMillis();
+    int i = 0;
 
     for (JsonNode metadataTest : metadataTests) {
       if (!metadataTest.has("urn")) {
@@ -183,6 +188,8 @@ public class IngestMetadataTestsStep implements BootstrapStep {
             "Each element in the retention config must contain field definition with the test definition.");
       }
 
+      testInfo.setLastUpdated(
+          new AuditStamp().setActor(UrnUtils.getUrn(SYSTEM_ACTOR)).setTime(currentTime + i--));
       metadataTestsMap.put(testUrn, testInfo);
     }
     return metadataTestsMap;
