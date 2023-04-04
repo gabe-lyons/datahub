@@ -6,8 +6,14 @@ import { SUCCESS_COLOR_HEX } from '../entity/shared/tabs/Incident/incidentUtils'
 import { navigateToSearchUrl } from '../search/utils/navigateToSearchUrl';
 import { useGetTestResultsSummaryQuery } from '../../graphql/test.generated';
 import { formatNumberWithoutAbbreviation } from '../shared/formatNumber';
-import { PLACEHOLDER_TEST_URN } from './utils';
 import { NoResultsSummary } from './NoResultsSummary';
+import { ANTD_GRAY } from '../entity/shared/constants';
+import { PLACEHOLDER_TEST_URN } from './constants';
+
+const Container = styled.div`
+    padding: 4px;
+    height: 80px;
+`;
 
 const StyledButton = styled(Button)`
     margin: 0px;
@@ -16,6 +22,13 @@ const StyledButton = styled(Button)`
 
 const StyledTag = styled(Tag)`
     font-size: 12px;
+`;
+
+const Title = styled.div`
+    color: ${ANTD_GRAY[6]};
+    font-size: 10px;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
 `;
 
 type Props = {
@@ -43,7 +56,8 @@ export const TestResultsSummary = ({ urn }: Props) => {
             : '-';
 
     return (
-        <>
+        <Container>
+            <Title>RESULTS</Title>
             {(hasResults && (
                 <>
                     <StyledButton
@@ -90,6 +104,6 @@ export const TestResultsSummary = ({ urn }: Props) => {
                     </StyledButton>
                 </>
             )) || <NoResultsSummary />}
-        </>
+        </Container>
     );
 };

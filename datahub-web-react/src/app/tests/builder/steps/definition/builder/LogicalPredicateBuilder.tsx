@@ -1,6 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Divider } from 'antd';
 /* eslint-disable import/no-cycle */
 import { LogicalOperatorOperands } from './LogicalOperatorOperands';
 import { ANTD_GRAY } from '../../../../../entity/shared/constants';
@@ -17,22 +16,19 @@ import { isLogicalPredicate } from './utils';
 const MAX_PREDICATES = 10;
 
 const Container = styled.div`
-    background-color: ${ANTD_GRAY[3]};
+    background-color: ${ANTD_GRAY[1]};
     border-radius: 4px;
     padding: 16px;
-    border: 0.5px solid ${ANTD_GRAY[5]};
+    border: 0.5px solid ${ANTD_GRAY[4]};
     display: flex;
     align-items: center;
     justify-content: left;
     overflow: auto;
+    box-shadow: 0px 0px 6px 0px #e8e8e8;
 `;
 
-const ThinDivider = styled(Divider)`
-    min-height: 40px;
-    padding: 0px;
-    margin: 0px;
-    padding-right: 8px;
-    padding-left: 8px;
+const OperandContainer = styled.div`
+    margin-left: 8px;
 `;
 
 const EMPTY_PROPERTY_PREDICATE = {
@@ -110,9 +106,12 @@ export const LogicalPredicateBuilder = ({
 
     return (
         <Container>
-            <LogicalOperatorDropdown operator={operator} onSelectOperator={onChangeOperator} />
-            <ThinDivider type="vertical" />
-            <div>
+            <LogicalOperatorDropdown
+                operator={operator}
+                onSelectOperator={onChangeOperator}
+                predicateDisplayName={options.predicateDisplayName}
+            />
+            <OperandContainer>
                 <LogicalOperatorOperands
                     operands={operands}
                     onChangeOperands={onChangeOperands}
@@ -127,7 +126,7 @@ export const LogicalPredicateBuilder = ({
                         options={options}
                     />
                 )}
-            </div>
+            </OperandContainer>
         </Container>
     );
 };

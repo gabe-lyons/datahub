@@ -11,7 +11,7 @@ const CUSTOM_ID = 'custom';
 
 const StyledTreeSelect = styled(TreeSelect)`
     max-width: 400px;
-    min-width: 300px;
+    min-width: 240px;
     margin-right: 8px;
 `;
 

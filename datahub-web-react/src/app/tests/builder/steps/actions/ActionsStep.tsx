@@ -2,14 +2,12 @@ import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { Typography } from 'antd';
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { ANTD_GRAY } from '../../../../entity/shared/constants';
 import { FAILURE_COLOR_HEX, SUCCESS_COLOR_HEX } from '../../../../entity/shared/tabs/Incident/incidentUtils';
-import { StepProps, TestBuilderStep } from '../../types';
 import { ACTION_TYPES } from '../definition/builder/property/types/action';
 import { deserializeTestDefinition, serializeTestDefinition } from '../definition/utils';
-import { YamlStep } from '../definition/yaml/YamlStep';
 import { ActionsBuilder } from '../definition/builder/action/ActionsBuilder';
 import { Action } from './types';
+import { TestBuilderState } from '../../types';
 
 const ActionSection = styled.div`
     margin-bottom: 20px;
@@ -18,19 +16,14 @@ const ActionSection = styled.div`
 const ActionSectionTitle = styled.div`
     margin-top: 8px;
     margin-bottom: 12px;
+    padding-left: 4px;
     display: flex;
     align-items: center;
     justify-content: left;
 `;
 
 const ActionsContainer = styled.div`
-    background-color: ${ANTD_GRAY[3]};
-    border-radius: 4px;
-    padding: 20px;
-    padding-top: 8px;
-    border: 0.5px solid ${ANTD_GRAY[6]};
-    margin-top: 16px;
-    margin-bottom: 20px;
+    padding: 8px;
 `;
 
 const FailureIcon = styled(CloseCircleFilled)`
@@ -40,7 +33,7 @@ const FailureIcon = styled(CloseCircleFilled)`
 
 const SuccessIcon = styled(CheckCircleFilled)`
     color: ${SUCCESS_COLOR_HEX};
-    font-size: 18px;
+    font-size: 20px;
 `;
 
 const StatusTitle = styled(Typography.Title)`
@@ -48,6 +41,7 @@ const StatusTitle = styled(Typography.Title)`
         margin: 0px;
         padding: 0px;
         margin-left: 8px;
+        font-size: 12px;
     }
 `;
 
@@ -57,7 +51,16 @@ const ActionSelect = styled.div`
     margin-right: 12px;
 `;
 
-export const ActionsStep = ({ state, updateState, prev, goTo }: StepProps) => {
+const SubTitle = styled(Typography.Paragraph)`
+    font-size: 14px;
+`;
+
+type Props = {
+    state: TestBuilderState;
+    updateState: (newState: TestBuilderState) => void;
+};
+
+export const ActionsStep = ({ state, updateState }: Props) => {
     const testDefinition = useMemo(() => deserializeTestDefinition(state?.definition?.json || '{}'), [state]);
 
     const selectedPassingActions = testDefinition.actions?.passing || [];
@@ -97,44 +100,38 @@ export const ActionsStep = ({ state, updateState, prev, goTo }: StepProps) => {
         updateState(newState);
     };
 
-    const onClickNext = () => {
-        goTo(TestBuilderStep.NAME);
-    };
-
     return (
         <>
-            <YamlStep state={state} updateState={updateState} onNext={onClickNext} onPrev={prev}>
-                <Typography.Title level={4}>Actions</Typography.Title>
-                <Typography.Paragraph type="secondary">
-                    Define a set of actions to run against the entities that fail or succeed the test.
-                </Typography.Paragraph>
-                <ActionsContainer>
-                    <ActionSection>
-                        <ActionSectionTitle>
-                            <SuccessIcon />
-                            <StatusTitle level={5}>On Passing</StatusTitle>
-                        </ActionSectionTitle>
+            <Typography.Title level={5}>Add custom actions</Typography.Title>
+            <SubTitle type="secondary">
+                What actions would you like to apply to the data assets that pass or fail the conditions?
+            </SubTitle>
+            <ActionsContainer>
+                <ActionSection>
+                    <ActionSectionTitle>
+                        <SuccessIcon />
+                        <StatusTitle>Passing Assets</StatusTitle>
+                    </ActionSectionTitle>
+                    <ActionsBuilder
+                        actionTypes={ACTION_TYPES}
+                        selectedActions={selectedPassingActions}
+                        onChangeActions={onSetPassingActions}
+                    />
+                </ActionSection>
+                <ActionSection>
+                    <ActionSectionTitle>
+                        <FailureIcon />
+                        <StatusTitle>Failing Assets</StatusTitle>
+                    </ActionSectionTitle>
+                    <ActionSelect>
                         <ActionsBuilder
                             actionTypes={ACTION_TYPES}
-                            selectedActions={selectedPassingActions}
-                            onChangeActions={onSetPassingActions}
+                            selectedActions={selectedFailingActions}
+                            onChangeActions={onSetFailingActions}
                         />
-                    </ActionSection>
-                    <ActionSection>
-                        <ActionSectionTitle>
-                            <FailureIcon />
-                            <StatusTitle level={5}>On Failing</StatusTitle>
-                        </ActionSectionTitle>
-                        <ActionSelect>
-                            <ActionsBuilder
-                                actionTypes={ACTION_TYPES}
-                                selectedActions={selectedFailingActions}
-                                onChangeActions={onSetFailingActions}
-                            />
-                        </ActionSelect>
-                    </ActionSection>
-                </ActionsContainer>
-            </YamlStep>
+                    </ActionSelect>
+                </ActionSection>
+            </ActionsContainer>
         </>
     );
 };

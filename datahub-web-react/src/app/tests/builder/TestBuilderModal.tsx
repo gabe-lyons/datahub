@@ -5,9 +5,10 @@ import { ExpandAltOutlined, ShrinkOutlined } from '@ant-design/icons';
 import ClickOutside from '../../shared/ClickOutside';
 import { TestBuilderStepComponent, TestBuilderStepTitles } from './conf';
 import { DEFAULT_BUILDER_STATE, StepProps, TestBuilderState, TestBuilderStep } from './types';
+import { Instructions } from './tutorial/Instructions';
 
-const modalStyle = { top: 40 };
-const modalBodyStyle = { paddingRight: 60, paddingLeft: 60, paddingBottom: 40 };
+const modalStyle = {};
+const modalBodyStyle = { paddingRight: 48, paddingLeft: 48, paddingBottom: 20 };
 
 const ExpandButton = styled(Button)`
     && {
@@ -18,6 +19,24 @@ const ExpandButton = styled(Button)`
 const TitleContainer = styled.div`
     display: flex;
     justify-content: space-between;
+`;
+
+const Container = styled.div`
+    display: flex;
+    align-items: top;
+    justify-content: space-between;
+    width: 100%;
+`;
+
+const LeftColumn = styled.div`
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+`;
+
+const RightColumn = styled.div`
+    width: 30%;
+    margin-left: 40px;
 `;
 
 const StepsContainer = styled.div`
@@ -62,8 +81,8 @@ export const TestBuilderModal = ({ initialState, onSubmit, onCancel }: Props) =>
 
     const modalClosePopup = () => {
         Modal.confirm({
-            title: 'Exit Test Editor',
-            content: `Are you sure you want to exit test editor? All changes will be lost`,
+            title: 'Exit Editor',
+            content: `Are you sure you want to exit the editor? All changes will be lost`,
             onOk() {
                 onCancel?.();
             },
@@ -91,7 +110,7 @@ export const TestBuilderModal = ({ initialState, onSubmit, onCancel }: Props) =>
         <ClickOutside onClickOutside={modalClosePopup} wrapperClassName="test-builder-modal">
             <Modal
                 wrapClassName="test-builder-modal"
-                width={modalExpanded ? 1400 : 1000}
+                width={modalExpanded ? 1600 : 1200}
                 footer={null}
                 title={
                     <TitleContainer>
@@ -106,21 +125,28 @@ export const TestBuilderModal = ({ initialState, onSubmit, onCancel }: Props) =>
                 visible
                 onCancel={onCancel}
             >
-                <StepsContainer>
-                    <Steps current={currentStepIndex}>
-                        {stepIds.map((id) => (
-                            <Steps.Step key={id} title={TestBuilderStepTitles[id]} />
-                        ))}
-                    </Steps>
-                </StepsContainer>
-                <StepComponent
-                    state={builderState}
-                    updateState={setBuilderState}
-                    goTo={goTo}
-                    prev={stepStack.length > 1 ? prev : undefined}
-                    submit={submit}
-                    cancel={cancel}
-                />
+                <Container>
+                    <LeftColumn>
+                        <StepsContainer>
+                            <Steps current={currentStepIndex}>
+                                {stepIds.map((id) => (
+                                    <Steps.Step key={id} title={TestBuilderStepTitles[id]} />
+                                ))}
+                            </Steps>
+                        </StepsContainer>
+                        <StepComponent
+                            state={builderState}
+                            updateState={setBuilderState}
+                            goTo={goTo}
+                            prev={stepStack.length > 1 ? prev : undefined}
+                            submit={submit}
+                            cancel={cancel}
+                        />
+                    </LeftColumn>
+                    <RightColumn>
+                        <Instructions />
+                    </RightColumn>
+                </Container>
             </Modal>
         </ClickOutside>
     );
