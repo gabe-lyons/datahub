@@ -104,19 +104,19 @@ export const LineageTab = ({
     const directionOptions = [
         {
             label: (
-                <>
+                <span data-testid="lineage-tab-direction-select-option-downstream">
                     <ArrowDownOutlined style={{ marginRight: 4 }} />
                     <b>Downstream</b>
-                </>
+                </span>
             ),
             value: LineageDirection.Downstream,
         },
         {
             label: (
-                <>
+                <span data-testid="lineage-tab-direction-select-option-upstream">
                     <ArrowUpOutlined style={{ marginRight: 4 }} />
                     <b>Upstream</b>
-                </>
+                </span>
             ),
             value: LineageDirection.Upstream,
         },
@@ -159,6 +159,7 @@ export const LineageTab = ({
                         options={directionOptions}
                         onChange={(value) => setLineageDirection(value as LineageDirection)}
                         suffixIcon={<CaretDownOutlined style={{ color: 'black' }} />}
+                        data-testid="lineage-tab-direction-select"
                     />
                     <ColumnsLineageSelect
                         selectedColumn={selectedColumn}

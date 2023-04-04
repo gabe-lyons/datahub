@@ -28,13 +28,13 @@ export const EntityTypeSelect = ({ entityTypes, selectedTypes, onChangeTypes }: 
             style={selectStyle}
             value={selectedTypes}
             mode="multiple"
-            placeholder="Select asset types"
+            placeholder="Datasets, Dashboards, Charts..."
             onSelect={onSelectEntityType}
             onDeselect={onDeselectEntityType}
         >
             {Array.from(entityTypes).map((entityType) => (
                 <Select.Option value={entityType} key={entityType}>
-                    {entityRegistry.getEntityName(entityType)}
+                    {entityRegistry.getCollectionName(entityType)}
                 </Select.Option>
             ))}
         </Select>

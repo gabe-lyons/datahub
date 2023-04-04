@@ -77,7 +77,6 @@ interface Props {
     refetchForEntity?: () => void;
     refetchForTerms?: () => void;
     refetchForNodes?: () => void;
-    refreshBrowser?: () => void;
     onDeleteEntity?: () => void;
 }
 
@@ -92,7 +91,6 @@ function EntityDropdown(props: Props) {
         refetchForEntity,
         refetchForTerms,
         refetchForNodes,
-        refreshBrowser,
         onDeleteEntity: onDelete,
         size,
         options,
@@ -271,9 +269,7 @@ function EntityDropdown(props: Props) {
                     refetch={refetchForEntity}
                 />
             )}
-            {isMoveModalVisible && (
-                <MoveGlossaryEntityModal onClose={() => setIsMoveModalVisible(false)} refetchData={refreshBrowser} />
-            )}
+            {isMoveModalVisible && <MoveGlossaryEntityModal onClose={() => setIsMoveModalVisible(false)} />}
             {hasBeenDeleted && !onDelete && deleteRedirectPath && <Redirect to={deleteRedirectPath} />}
             {/* acryl-main only */}
             {isRaiseIncidentModalVisible && (

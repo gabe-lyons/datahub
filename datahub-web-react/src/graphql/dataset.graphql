@@ -406,20 +406,16 @@ query getDatasetRuns($urn: String!, $start: Int!, $count: Int!, $direction: Rela
     }
 }
 
-query getIncidents($urn: String!, $start: Int!, $count: Int!, $state: IncidentState) {
+query getDatasetSchema($urn: String!) {
     dataset(urn: $urn) {
-        incidents(start: $start, count: $count, state: $state) {
-            ...incidentsFields
-        }
+        ...datasetSchema
         siblings {
             isPrimary
             siblings {
                 urn
                 type
                 ... on Dataset {
-                    incidents(start: $start, count: $count, state: $state) {
-                        ...incidentsFields
-                    }
+                    ...datasetSchema
                 }
             }
         }
@@ -444,16 +440,20 @@ fragment datasetSchema on Dataset {
     }
 }
 
-query getDatasetSchema($urn: String!) {
+query getIncidents($urn: String!, $start: Int!, $count: Int!, $state: IncidentState) {
     dataset(urn: $urn) {
-        ...datasetSchema
+        incidents(start: $start, count: $count, state: $state) {
+            ...incidentsFields
+        }
         siblings {
             isPrimary
             siblings {
                 urn
                 type
                 ... on Dataset {
-                    ...datasetSchema
+                    incidents(start: $start, count: $count, state: $state) {
+                        ...incidentsFields
+                    }
                 }
             }
         }

@@ -15,11 +15,12 @@ import { ActionBuilder } from './ActionBuilder';
 const MAX_ACTIONS = 10;
 
 const Container = styled.div`
-    background-color: ${ANTD_GRAY[3]};
+    background-color: ${ANTD_GRAY[1]};
     border-radius: 4px;
     padding: 16px;
-    border: 0.5px solid ${ANTD_GRAY[5]};
+    border: 0.5px solid ${ANTD_GRAY[3]};
     overflow: auto;
+    box-shadow: 0px 0px 6px 0px #e8e8e8;
 `;
 
 const ActionWrapper = styled.div`
@@ -38,10 +39,12 @@ const DeleteButton = styled(Button)`
 `;
 
 const DeleteIcon = styled(DeleteOutlined)`
-    font-size: 16px;
-    margin: 0px;
-    padding: 0px;
-    color: ${ANTD_GRAY[6]};
+    && {
+        font-size: 14px;
+        margin: 0px;
+        padding: 0px;
+        color: ${ANTD_GRAY[7]};
+    }
 `;
 
 const EMPTY_ACTION = {

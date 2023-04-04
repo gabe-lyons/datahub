@@ -26,8 +26,10 @@ const DeleteButton = styled(Button)`
 `;
 
 const DeleteIcon = styled(DeleteOutlined)`
-    font-size: 16px;
-    color: ${ANTD_GRAY[6]};
+    && {
+        font-size: 14px;
+        color: ${ANTD_GRAY[7]};
+    }
 `;
 
 type Props = {

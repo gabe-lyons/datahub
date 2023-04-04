@@ -3,7 +3,7 @@ namespace com.linkedin.metadata.search
 import com.linkedin.common.Urn
 
 /**
- * The model for the result of a scrolled search query, where unlimited number of results are fetched
+ * The model for the result of a search query
  */
 record ScrollResult {
 
@@ -18,9 +18,9 @@ record ScrollResult {
   metadata: SearchResultMetadata
 
   /**
-   * Unique ID corresponding to the search context, which can be used to query more results with the same context
+   * Scroll Identifier for subsequent requests, if not present then no further results to fetch
    */
-  scrollId: string
+  scrollId: optional string
 
   /**
    * Size of each page in the result

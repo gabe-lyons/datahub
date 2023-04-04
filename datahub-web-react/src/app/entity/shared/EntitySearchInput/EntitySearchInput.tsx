@@ -120,6 +120,22 @@ export const EntitySearchInput = ({
         });
     };
 
+    /**
+     * Issue a star search on component mount to provide a default set of results.
+     */
+    useEffect(() => {
+        searchResources({
+            variables: {
+                input: {
+                    types: entityTypes,
+                    query: '*',
+                    start: 0,
+                    count: 10,
+                },
+            },
+        });
+    }, [entityTypes, searchResources]);
+
     return (
         <Select
             value={selectedUrns}

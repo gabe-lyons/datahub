@@ -1,0 +1,10 @@
+[
+  {
+    "urn": "urn:li:tag:Gold",
+    "properties": {
+      "name": "⭐ Gold",
+      "description": "Assigned to critical data assets within your organization.",
+      "colorHex": "#FFDA75"
+    }
+  }
+]

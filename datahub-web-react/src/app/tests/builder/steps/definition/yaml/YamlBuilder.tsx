@@ -32,9 +32,9 @@ export const YamlBuilder = ({ initialValue, onChange }: Props) => {
     return (
         <>
             <Section>
-                <SelectTemplateHeader level={5}>Define your Test</SelectTemplateHeader>
-                <Typography.Text>
-                    For more information about how to configure a Test, check out the{' '}
+                <SelectTemplateHeader level={5}>Define your test</SelectTemplateHeader>
+                <Typography.Text type="secondary">
+                    For more information about how to configure a test, check out the{' '}
                     <a
                         href="https://docs.acryl.io/-Mhxve3SFaX4GN0xKMZB/administering-datahub/metadata-tests"
                         target="_blank"
