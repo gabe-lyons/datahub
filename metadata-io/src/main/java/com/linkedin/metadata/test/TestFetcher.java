@@ -24,9 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
-import static com.linkedin.metadata.Constants.POLICY_ENTITY_NAME;
-import static com.linkedin.metadata.Constants.TEST_ENTITY_NAME;
-import static com.linkedin.metadata.Constants.TEST_INFO_ASPECT_NAME;
+import static com.linkedin.metadata.Constants.*;
 
 
 @Slf4j
@@ -49,18 +47,25 @@ public class TestFetcher {
       throws RemoteInvocationException, URISyntaxException {
     log.debug("Batch fetching tests. start: {}, count: {}", start, count);
     // First fetch all test urns from start - start + count
-    SearchResult result = _entitySearchService.search(TEST_ENTITY_NAME, query, null, SORT_CRITERION, start, count,
-            new SearchFlags().setFulltext(false));
+    SearchResult result = _entitySearchService.search(
+        TEST_ENTITY_NAME,
+        query,
+        null,
+        SORT_CRITERION,
+        start,
+        count,
+        new SearchFlags().setFulltext(false));
     List<Urn> testUrns = result.getEntities().stream().map(SearchEntity::getEntity).collect(Collectors.toList());
 
     if (testUrns.isEmpty()) {
       return new TestFetchResult(Collections.emptyList(), 0);
     }
 
-    // Fetch TestInfo aspects for each urn
+    // Fetch aspects for each urn
     final Map<Urn, EntityResponse> testEntities =
-        _entityService.getEntitiesV2(POLICY_ENTITY_NAME, new HashSet<>(testUrns),
-            ImmutableSet.of(TEST_INFO_ASPECT_NAME));
+        _entityService.getEntitiesV2(POLICY_ENTITY_NAME,
+            new HashSet<>(testUrns), ImmutableSet.of(
+                TEST_INFO_ASPECT_NAME));
     return new TestFetchResult(testUrns.stream()
         .map(testEntities::get)
         .filter(Objects::nonNull)

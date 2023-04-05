@@ -24,7 +24,6 @@ def test_healthchecks(wait_for_healthchecks):
     pass
 
 
-test_id = "test id"
 test_name = "test name"
 test_category = "test category"
 test_description = "test description"
@@ -33,7 +32,7 @@ test_definition_json = "{\"on\":{\"types\":[\"dataset\"]},\"rules\":{\"or\":[{" 
                        "{\"query\":\"datasetProperties.description\",\"operation\":\"exists\"}]}} "
 
 
-def create_test(frontend_session):
+def create_test(frontend_session, test_id):
 
     # Create new Test
     create_test_json = {
@@ -84,7 +83,7 @@ def delete_test(frontend_session, test_urn):
 @pytest.mark.dependency(depends=["test_healthchecks"])
 def test_create_test(frontend_session, wait_for_healthchecks):
 
-    test_urn = create_test(frontend_session)
+    test_urn = create_test(frontend_session, "test-create-id")
 
     # Get the test
     get_test_json = {
@@ -131,20 +130,20 @@ def test_create_test(frontend_session, wait_for_healthchecks):
     # Delete test
     delete_test(frontend_session, test_urn)
 
-    # Ensure the test no longer exists
+    # Ensure that soft-deleted tests
     response = frontend_session.post(
         f"{get_frontend_url()}/api/v2/graphql", json=get_test_json
     )
     response.raise_for_status()
     res_data = response.json()
 
-    assert res_data["data"]["test"] is None
+    assert res_data["data"]["test"] is not None
     assert "errors" not in res_data
 
 
 @pytest.mark.dependency(depends=["test_healthchecks", "test_create_test"])
 def test_update_test(frontend_session, wait_for_healthchecks):
-    test_urn = create_test(frontend_session)
+    test_urn = create_test(frontend_session,  "test-update-id")
     test_name = "new name"
     test_category = "new category"
     test_description = "new description"

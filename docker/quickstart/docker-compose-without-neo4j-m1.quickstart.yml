@@ -106,6 +106,8 @@ services:
     volumes:
     - ${HOME}/.datahub/plugins:/etc/datahub/plugins
   datahub-upgrade:
+    labels:
+      datahub_setup_job: true
     command:
     - -u
     - SystemUpdate
@@ -129,6 +131,8 @@ services:
     - ENTITY_REGISTRY_CONFIG_PATH=/datahub/datahub-gms/resources/entity-registry.yml
     hostname: datahub-upgrade
     image: ${DATAHUB_UPGRADE_IMAGE:-795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-upgrade}:${DATAHUB_VERSION:-head}
+    labels:
+      datahub_setup_job: true
   elasticsearch:
     container_name: elasticsearch
     environment:
@@ -150,6 +154,8 @@ services:
     volumes:
     - esdata:/usr/share/elasticsearch/data
   elasticsearch-setup:
+    labels:
+      datahub_setup_job: true
     container_name: elasticsearch-setup
     depends_on:
     - elasticsearch
@@ -159,7 +165,11 @@ services:
     - ELASTICSEARCH_PROTOCOL=http
     hostname: elasticsearch-setup
     image: ${DATAHUB_ELASTIC_SETUP_IMAGE:-795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-elasticsearch-setup}:${DATAHUB_VERSION:-head}
+    labels:
+      datahub_setup_job: true
   kafka-setup:
+    labels:
+      datahub_setup_job: true
     container_name: kafka-setup
     depends_on:
     - broker
@@ -170,6 +180,8 @@ services:
     - KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181
     hostname: kafka-setup
     image: ${DATAHUB_KAFKA_SETUP_IMAGE:-795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-kafka-setup}:${DATAHUB_VERSION:-head}
+    labels:
+      datahub_setup_job: true
   mysql:
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_bin --default-authentication-plugin=mysql_native_password
     container_name: mysql
@@ -186,6 +198,8 @@ services:
     - ../mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
     - mysqldata:/var/lib/mysql
   mysql-setup:
+    labels:
+      datahub_setup_job: true
     container_name: mysql-setup
     depends_on:
     - mysql
@@ -197,6 +211,8 @@ services:
     - DATAHUB_DB_NAME=datahub
     hostname: mysql-setup
     image: ${DATAHUB_MYSQL_SETUP_IMAGE:-795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-mysql-setup}:${DATAHUB_VERSION:-head}
+    labels:
+      datahub_setup_job: true
   schema-registry:
     container_name: schema-registry
     depends_on:

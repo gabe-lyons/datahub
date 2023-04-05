@@ -48,7 +48,8 @@ public class ElasticSearchServiceFactory {
 
     ESSearchDAO esSearchDAO =
         new ESSearchDAO(entityRegistry, components.getSearchClient(), components.getIndexConvention(),
-                configurationProvider.getElasticSearch().getSearch());
+            configurationProvider.getFeatureFlags().isPointInTimeCreationEnabled(),
+            configurationProvider.getElasticSearch().getImplementation(), configurationProvider.getElasticSearch().getSearch());
     return new ElasticSearchService(
         new EntityIndexBuilders(components.getIndexBuilder(), entityRegistry, components.getIndexConvention(),
             settingsBuilder), esSearchDAO,

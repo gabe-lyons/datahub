@@ -33,8 +33,10 @@ import com.linkedin.metadata.query.SearchFlags;
 import com.linkedin.metadata.query.filter.Filter;
 import com.linkedin.metadata.query.filter.SortCriterion;
 import com.linkedin.metadata.search.EntitySearchService;
+import com.linkedin.metadata.search.LineageScrollResult;
 import com.linkedin.metadata.search.LineageSearchResult;
 import com.linkedin.metadata.search.LineageSearchService;
+import com.linkedin.metadata.search.ScrollResult;
 import com.linkedin.metadata.search.SearchResult;
 import com.linkedin.metadata.search.SearchService;
 import com.linkedin.metadata.search.client.CachingEntitySearchService;
@@ -140,11 +142,11 @@ public class JavaEntityClient implements EntityClient {
     public AutoCompleteResult autoComplete(
         @Nonnull String entityType,
         @Nonnull String query,
-        @Nonnull Map<String, String> requestFilters,
+        @Nullable Filter requestFilters,
         @Nonnull int limit,
         @Nullable String field,
         @Nonnull final Authentication authentication) throws RemoteInvocationException {
-      return _cachingEntitySearchService.autoComplete(entityType, query, field, newFilter(requestFilters), limit, null);
+      return _cachingEntitySearchService.autoComplete(entityType, query, field, filterOrDefaultEmptyFilter(requestFilters), limit, null);
     }
 
     /**
@@ -160,10 +162,10 @@ public class JavaEntityClient implements EntityClient {
     public AutoCompleteResult autoComplete(
         @Nonnull String entityType,
         @Nonnull String query,
-        @Nonnull Map<String, String> requestFilters,
+        @Nullable Filter requestFilters,
         @Nonnull int limit,
         @Nonnull final Authentication authentication) throws RemoteInvocationException {
-        return _cachingEntitySearchService.autoComplete(entityType, query, "", newFilter(requestFilters), limit, null);
+        return _cachingEntitySearchService.autoComplete(entityType, query, "", filterOrDefaultEmptyFilter(requestFilters), limit, null);
     }
 
     /**
@@ -330,6 +332,18 @@ public class JavaEntityClient implements EntityClient {
 
     @Nonnull
     @Override
+    public ScrollResult scrollAcrossEntities(@Nonnull List<String> entities, @Nonnull String input,
+        @Nullable Filter filter, @Nullable String scrollId, @Nonnull String keepAlive, int count,
+        @Nullable SearchFlags searchFlags, @Nonnull Authentication authentication)
+        throws RemoteInvocationException {
+        final SearchFlags finalFlags = searchFlags != null ? searchFlags : new SearchFlags().setFulltext(true);
+        return ValidationUtils.validateScrollResult(
+            _searchService.scrollAcrossEntities(entities, input, filter, null, scrollId, keepAlive, count,
+                finalFlags), _entityService);
+    }
+
+    @Nonnull
+    @Override
     public LineageSearchResult searchAcrossLineage(@Nonnull Urn sourceUrn, @Nonnull LineageDirection direction,
         @Nonnull List<String> entities, @Nullable String input, @Nullable Integer maxHops, @Nullable Filter filter,
         @Nullable SortCriterion sortCriterion, int start, int count, @Nullable SearchFlags searchFlags,
@@ -352,6 +366,20 @@ public class JavaEntityClient implements EntityClient {
             _lineageSearchService.searchAcrossLineage(sourceUrn, direction, entities, input, maxHops, filter,
                         sortCriterion, start, count, startTimeMillis, endTimeMillis, searchFlags),
                 _entityService);
+    }
+
+    @Nonnull
+    @Override
+    public LineageScrollResult scrollAcrossLineage(@Nonnull Urn sourceUrn, @Nonnull LineageDirection direction,
+        @Nonnull List<String> entities, @Nullable String input, @Nullable Integer maxHops, @Nullable Filter filter,
+        @Nullable SortCriterion sortCriterion, @Nullable String scrollId, @Nonnull String keepAlive, int count,
+        @Nullable Long startTimeMillis, @Nullable Long endTimeMillis, @Nullable SearchFlags searchFlags,
+        @Nonnull final Authentication authentication)
+        throws RemoteInvocationException {
+        final SearchFlags finalFlags = searchFlags != null ? searchFlags : new SearchFlags().setSkipCache(true);
+        return ValidationUtils.validateLineageScrollResult(
+            _lineageSearchService.scrollAcrossLineage(sourceUrn, direction, entities, input, maxHops, filter,
+                sortCriterion, scrollId, keepAlive, count, startTimeMillis, endTimeMillis, finalFlags), _entityService);
     }
 
     /**
@@ -431,7 +459,7 @@ public class JavaEntityClient implements EntityClient {
     @Override
     public List<EnvelopedAspect> getTimeseriesAspectValues(@Nonnull String urn, @Nonnull String entity,
         @Nonnull String aspect, @Nullable Long startTimeMillis, @Nullable Long endTimeMillis, @Nullable Integer limit,
-        @Nonnull Boolean getLatestValue, @Nullable Filter filter, @Nonnull final Authentication authentication)
+        @Nullable Boolean getLatestValue, @Nullable Filter filter, @Nonnull final Authentication authentication)
         throws RemoteInvocationException {
       GetTimeseriesAspectValuesResponse response = new GetTimeseriesAspectValuesResponse();
       response.setEntityName(entity);

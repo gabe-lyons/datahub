@@ -9,5 +9,6 @@ import org.springframework.context.annotation.Configuration;
 public class ElasticSearchConfiguration {
 
   private BuildIndicesConfiguration buildIndices;
+  public String implementation;
   private SearchConfiguration search;
 }

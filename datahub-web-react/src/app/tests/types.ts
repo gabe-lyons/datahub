@@ -1,3 +1,5 @@
+import { Test } from '../../types.generated';
+
 /**
  * A single property predicate as it appears in a deserialized
  * Test Definition.
@@ -84,3 +86,6 @@ export interface TestDefinition {
      */
     actions?: TestActions;
 }
+
+export type TestCategoryType = { name: string; description?: string };
+export type TestCategoryGroupType = { name: string; description?: string; tests: Test[] };

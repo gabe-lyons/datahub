@@ -205,6 +205,11 @@ type Query {
     listQueries(
       "Input required for listing queries"
       input: ListQueriesInput!): ListQueriesResult
+
+    """
+    Get quick filters to display in auto-complete
+    """
+    getQuickFilters(input: GetQuickFiltersInput!): GetQuickFiltersResult
 }
 
 """
@@ -1408,7 +1413,7 @@ type SiblingProperties {
 }
 
 """
-All of the parent containers for a given entity
+All of the parent containers for a given entity. Returns parents with direct parent first followed by the parent's parent etc.
 """
 type ParentContainersResult {
     """
@@ -1652,6 +1657,26 @@ type DatasetProperties {
     External URL associated with the Dataset
     """
     externalUrl: String
+
+    """
+    Created timestamp millis associated with the Dataset
+    """
+    created: Long
+
+    """
+    Actor associated with the Dataset's created timestamp
+    """
+    createdActor: String
+
+    """
+    Last Modified timestamp millis associated with the Dataset
+    """
+    lastModified: Long
+
+    """
+    Actor associated with the Dataset's lastModified timestamp
+    """
+    lastModifiedActor: String
 }
 
 

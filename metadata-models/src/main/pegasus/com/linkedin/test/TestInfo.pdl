@@ -18,10 +18,11 @@ record TestInfo {
     name: string
 
     /**
-    * Category of the test
+    * Category of the test - Operational, Governance, etc.
     */
     @Searchable = {
-      "fieldType": "KEYWORD"
+      "fieldType": "KEYWORD",
+      "addToFilters": true
     }
     category: string
 

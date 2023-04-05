@@ -1,3 +1,5 @@
+import { DEFAULT_TEST_CATEGORY } from '../constants';
+
 export const DEFAULT_TEST_DEFINITION = {
     on: {
         types: [],
@@ -6,6 +8,7 @@ export const DEFAULT_TEST_DEFINITION = {
 };
 
 export const DEFAULT_BUILDER_STATE = {
+    category: DEFAULT_TEST_CATEGORY,
     definition: {
         json: JSON.stringify(DEFAULT_TEST_DEFINITION),
     },
@@ -47,7 +50,6 @@ export interface TestBuilderState {
 export enum TestBuilderStep {
     SELECT = 'SELECT',
     RULES = 'RULES',
-    ACTIONS = 'ACTIONS',
     NAME = 'NAME',
 }
 

@@ -47,6 +47,8 @@ import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Map;
 
+import static com.linkedin.metadata.Constants.*;
+
 
 @TestConfiguration
 @Import(ESTestConfiguration.class)
@@ -103,7 +105,8 @@ public class ESSearchLineageFixture {
             @Qualifier("searchLineageEntityIndexBuilders") EntityIndexBuilders indexBuilders,
             @Qualifier("searchLineageIndexConvention") IndexConvention indexConvention
     ) {
-        ESSearchDAO searchDAO = new ESSearchDAO(entityRegistry, _searchClient, indexConvention, _searchConfiguration);
+        ESSearchDAO searchDAO = new ESSearchDAO(entityRegistry, _searchClient, indexConvention, false,
+            ELASTICSEARCH_IMPLEMENTATION_ELASTICSEARCH, _searchConfiguration);
         ESBrowseDAO browseDAO = new ESBrowseDAO(entityRegistry, _searchClient, indexConvention);
         ESWriteDAO writeDAO = new ESWriteDAO(entityRegistry, _searchClient, indexConvention, _bulkProcessor, 1);
         return new ElasticSearchService(indexBuilders, searchDAO, browseDAO, writeDAO);

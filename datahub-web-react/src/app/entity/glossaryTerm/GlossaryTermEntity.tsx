@@ -14,7 +14,6 @@ import { SidebarOwnerSection } from '../shared/containers/profile/sidebar/Owners
 import { PropertiesTab } from '../shared/tabs/Properties/PropertiesTab';
 import { DocumentationTab } from '../shared/tabs/Documentation/DocumentationTab';
 import { SidebarAboutSection } from '../shared/containers/profile/sidebar/AboutSection/SidebarAboutSection';
-import GlossaryEntitiesPath from '../../glossary/GlossaryEntitiesPath';
 import { EntityMenuItems } from '../shared/EntityDropdown/EntityDropdown';
 import { EntityActionItem } from '../shared/entity/EntityActions';
 import { FetchedEntity } from '../../lineage/types';
@@ -71,8 +70,8 @@ export class GlossaryTermEntity implements Entity<GlossaryTerm> {
                 headerDropdownItems={
                     new Set([EntityMenuItems.UPDATE_DEPRECATION, EntityMenuItems.MOVE, EntityMenuItems.DELETE])
                 }
-                displayGlossaryBrowser
                 isNameEditable
+                hideBrowseBar
                 tabs={[
                     {
                         name: 'Documentation',
@@ -119,7 +118,6 @@ export class GlossaryTermEntity implements Entity<GlossaryTerm> {
                     },
                 ]}
                 getOverrideProperties={this.getOverridePropertiesFromEntity}
-                customNavBar={<GlossaryEntitiesPath />}
             />
         );
     };
