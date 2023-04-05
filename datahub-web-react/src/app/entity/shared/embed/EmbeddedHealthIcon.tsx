@@ -14,7 +14,7 @@ const ICON_ID = 'embedded-datahub-health-icon';
 
 const StyledWarning = styled(WarningFilled)`
     color: ${orange[5]};
-    font-size: 12px;
+    font-size: 16px;
 `;
 
 interface RouteParams {
