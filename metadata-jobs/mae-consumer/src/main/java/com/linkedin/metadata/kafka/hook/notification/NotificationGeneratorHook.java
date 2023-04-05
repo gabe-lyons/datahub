@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 
 @Slf4j
@@ -18,15 +19,23 @@ import org.springframework.context.annotation.Import;
 public class NotificationGeneratorHook implements MetadataChangeLogHook {
 
   private final List<MclNotificationGenerator> _notificationGenerators;
+  private final boolean _isEnabled;
 
   @Autowired
-  public NotificationGeneratorHook(@Nonnull final List<MclNotificationGenerator> notificationGenerators) {
+  public NotificationGeneratorHook(@Nonnull final List<MclNotificationGenerator> notificationGenerators,
+      @Nonnull @Value("${incidentNotification.enabled:true}") Boolean isEnabled) {
     _notificationGenerators = Objects.requireNonNull(notificationGenerators);
+    _isEnabled = isEnabled;
   }
 
   @Override
   public void init() {
     // pass.
+  }
+
+  @Override
+  public boolean isEnabled() {
+    return _isEnabled;
   }
 
   @Override

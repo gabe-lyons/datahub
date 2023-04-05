@@ -58,22 +58,17 @@ public class AssertionsSummaryHook implements MetadataChangeLogHook {
 
   private final EntityRegistry _entityRegistry;
   private final AssertionService _assertionService;
+  private final boolean _isEnabled;
 
   @Autowired
   public AssertionsSummaryHook(
       @Nonnull final EntityRegistry entityRegistry,
-      @Nonnull final AssertionService assertionService
+      @Nonnull final AssertionService assertionService,
+      @Nonnull @Value("${assertions.hook.enabled:true}") Boolean isEnabled
   ) {
     _entityRegistry = Objects.requireNonNull(entityRegistry, "entityRegistry is required");
     _assertionService = Objects.requireNonNull(assertionService, "assertionService is required");
-  }
-
-  @Value("${assertions.hook.enabled:true}")
-  private boolean enabled = true;
-
-  @VisibleForTesting
-  void setEnabled(boolean newValue) {
-    enabled = newValue;
+    _isEnabled = isEnabled;
   }
 
   @Override
@@ -81,8 +76,13 @@ public class AssertionsSummaryHook implements MetadataChangeLogHook {
   }
 
   @Override
+  public boolean isEnabled() {
+    return _isEnabled;
+  }
+
+  @Override
   public void invoke(@Nonnull final MetadataChangeLog event) {
-    if (enabled && isEligibleForProcessing(event)) {
+    if (_isEnabled && isEligibleForProcessing(event)) {
       log.debug("Urn {} received by Assertion Summary Hook.", event.getEntityUrn());
       final Urn urn = HookUtils.getUrnFromEvent(event, _entityRegistry);
       // Handle the deletion case.
