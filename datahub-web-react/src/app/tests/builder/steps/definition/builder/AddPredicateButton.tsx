@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Dropdown, Menu } from 'antd';
+import { Dropdown, Menu, Typography } from 'antd';
 import { LogicalOperatorType } from './types';
 import { ANTD_GRAY } from '../../../../../entity/shared/constants';
 
@@ -8,10 +8,20 @@ const DropdownWrapper = styled.div<{
     disabled: boolean;
 }>`
     cursor: ${(props) => (props.disabled ? 'normal' : 'pointer')};
-    color: ${(props) => (props.disabled ? ANTD_GRAY[7] : 'none')};
+    color: ${(props) => (props.disabled ? ANTD_GRAY[6] : ANTD_GRAY[8])};
     display: flex;
     margin-left: 4px;
     margin-right: 12px;
+    :hover {
+        text-decoration: underline;
+    }
+`;
+
+const OptionDescription = styled(Typography.Paragraph)`
+    && {
+        margin: 0px;
+        padding: 0px;
+    }
 `;
 
 type Props = {
@@ -36,22 +46,29 @@ export const AddPredicateButton = ({
             overlay={
                 <Menu>
                     <Menu.Item onClick={onAddPropertyPredicate}>
-                        Property {options?.predicateDisplayName}
-                        ...
+                        <Typography.Text strong>Property</Typography.Text> {options?.predicateDisplayName}
+                        <OptionDescription type="secondary">
+                            Match a particular property or attribute of a data asset
+                        </OptionDescription>
                     </Menu.Item>
                     <Menu.Item onClick={() => onAddLogicalPredicate(LogicalOperatorType.AND)}>
-                        And {options?.predicateDisplayName}...
+                        <Typography.Text strong>AND</Typography.Text> {options?.predicateDisplayName}
+                        <OptionDescription type="secondary">Add a nested AND block</OptionDescription>
                     </Menu.Item>
                     <Menu.Item onClick={() => onAddLogicalPredicate(LogicalOperatorType.OR)}>
-                        Or {options?.predicateDisplayName}...
+                        <Typography.Text strong>OR</Typography.Text> {options?.predicateDisplayName}
+                        <OptionDescription type="secondary">Add a nested OR block</OptionDescription>
                     </Menu.Item>
                     <Menu.Item onClick={() => onAddLogicalPredicate(LogicalOperatorType.NOT)}>
-                        Not {options?.predicateDisplayName}...
+                        <Typography.Text strong>NOT</Typography.Text> {options?.predicateDisplayName}
+                        <OptionDescription type="secondary">Add a nested NOT block</OptionDescription>
                     </Menu.Item>
                 </Menu>
             }
         >
-            <DropdownWrapper disabled={disabled}>+ Add {options?.predicateDisplayName}</DropdownWrapper>
+            <DropdownWrapper disabled={disabled}>
+                <b>+ Add {options?.predicateDisplayName}</b>
+            </DropdownWrapper>
         </Dropdown>
     );
 };

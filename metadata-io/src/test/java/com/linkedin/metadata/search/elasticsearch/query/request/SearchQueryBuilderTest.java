@@ -1,11 +1,13 @@
 package com.linkedin.metadata.search.elasticsearch.query.request;
 
+import com.google.common.collect.ImmutableList;
 import com.linkedin.metadata.TestEntitySpecBuilder;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.linkedin.metadata.config.search.ExactMatchConfiguration;
+import com.linkedin.metadata.config.search.PartialConfiguration;
 import com.linkedin.metadata.config.search.SearchConfiguration;
 import com.linkedin.util.Pair;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -38,14 +40,19 @@ public class SearchQueryBuilderTest {
     exactMatchConfiguration.setCaseSensitivityFactor(0.7f);
     exactMatchConfiguration.setEnableStructured(true);
 
+    PartialConfiguration partialConfiguration = new PartialConfiguration();
+    partialConfiguration.setFactor(0.4f);
+    partialConfiguration.setUrnFactor(0.7f);
+
     testQueryConfig.setExactMatch(exactMatchConfiguration);
+    testQueryConfig.setPartial(partialConfiguration);
   }
   public static final SearchQueryBuilder TEST_BUILDER = new SearchQueryBuilder(testQueryConfig);
 
   @Test
   public void testQueryBuilderFulltext() {
     FunctionScoreQueryBuilder result =
-        (FunctionScoreQueryBuilder) TEST_BUILDER.buildQuery(TestEntitySpecBuilder.getSpec(), "testQuery",
+        (FunctionScoreQueryBuilder) TEST_BUILDER.buildQuery(ImmutableList.of(TestEntitySpecBuilder.getSpec()), "testQuery",
                 true);
     BoolQueryBuilder mainQuery = (BoolQueryBuilder) result.query();
     List<QueryBuilder> shouldQueries = mainQuery.should();
@@ -84,7 +91,7 @@ public class SearchQueryBuilderTest {
             "textFieldOverride.delimited", 0.4f,
             "keyPart1.delimited", 4.0f,
             "nestedArrayArrayField.delimited", 0.4f,
-            "urn.delimited", 10.0f,
+            "urn.delimited", 7.0f,
             "textArrayField.delimited", 0.4f,
             "nestedArrayStringField.delimited", 0.4f,
             "customProperties.delimited", 0.4f
@@ -120,8 +127,8 @@ public class SearchQueryBuilderTest {
   @Test
   public void testQueryBuilderStructured() {
     FunctionScoreQueryBuilder result =
-            (FunctionScoreQueryBuilder) TEST_BUILDER.buildQuery(TestEntitySpecBuilder.getSpec(), "testQuery",
-                    false);
+        (FunctionScoreQueryBuilder) TEST_BUILDER.buildQuery(ImmutableList.of(TestEntitySpecBuilder.getSpec()),
+            "testQuery", false);
     BoolQueryBuilder mainQuery = (BoolQueryBuilder) result.query();
     List<QueryBuilder> shouldQueries = mainQuery.should();
     assertEquals(shouldQueries.size(), 2);

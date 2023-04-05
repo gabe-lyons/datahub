@@ -19,7 +19,6 @@ import graphql.schema.DataFetchingEnvironment;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
@@ -126,22 +125,5 @@ public class SearchAcrossLineageResolver
         log.debug("Returning from search across lineage resolver");
       }
     });
-  }
-
-//  Assumption is that filter values for degree are either null, 3+, 2, or 1.
-  private Integer getMaxHops(List<FacetFilterInput> filters) {
-    Set<String> degreeFilterValues = filters.stream()
-        .filter(filter -> filter.getField().equals("degree"))
-        .flatMap(filter -> filter.getValues().stream())
-        .collect(Collectors.toSet());
-    Integer maxHops = null;
-    if (!degreeFilterValues.contains("3+")) {
-      if (degreeFilterValues.contains("2")) {
-        maxHops = 2;
-      } else if (degreeFilterValues.contains("1")) {
-        maxHops = 1;
-      }
-    }
-    return maxHops;
   }
 }

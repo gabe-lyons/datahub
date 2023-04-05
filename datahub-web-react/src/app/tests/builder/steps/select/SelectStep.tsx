@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import styled from 'styled-components';
-import { Typography } from 'antd';
+import { Tooltip, Typography } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
 import { EntityCapabilityType } from '../../../../entity/Entity';
 import { useEntityRegistry } from '../../../../useEntityRegistry';
 import { EntityTypeSelect } from '../definition/builder/property/input/EntityTypeSelect';
@@ -15,6 +16,7 @@ import {
 } from '../definition/builder/utils';
 import { StepProps, TestBuilderStep } from '../../types';
 import { getPropertiesForEntityTypes } from '../definition/builder/property/utils';
+import { ANTD_GRAY } from '../../../../entity/shared/constants';
 
 const Section = styled.div`
     margin-top: 20px;
@@ -23,6 +25,30 @@ const Section = styled.div`
 
 const BuilderWrapper = styled.div`
     margin-bottom: 28px;
+    margin-top: 12px;
+`;
+
+const SubTitle = styled(Typography.Paragraph)`
+    font-size: 16px;
+`;
+
+const AdditionalFilters = styled.div`
+    font-size: 14px;
+    margin-bottom: 8px;
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: left;
+`;
+
+const AdditionalFiltersTitle = styled.div`
+    margin-right: 4px;
+`;
+
+const StyledInfoOutlined = styled(InfoCircleOutlined)`
+    margin-left: 4px;
+    font-size: 12px;
+    color: ${ANTD_GRAY[7]};
 `;
 
 export const SelectStep = ({ state, updateState, goTo }: StepProps) => {
@@ -72,44 +98,50 @@ export const SelectStep = ({ state, updateState, goTo }: StepProps) => {
 
     return (
         <>
-            <YamlStep state={state} updateState={updateState} onNext={onClickNext}>
-                <Typography.Title level={4}>Select Assets</Typography.Title>
-                <Typography.Paragraph type="secondary">
-                    Choose assets to run this test against. Tests are evaluated once every day, and when an asset
-                    changes.
-                </Typography.Paragraph>
-                <Section>
-                    <Typography.Title level={5}>Asset Types</Typography.Title>
-                    <Typography.Paragraph type="secondary">
-                        Select entity types that are eligible to be tested
-                    </Typography.Paragraph>
-                    <EntityTypeSelect
-                        selectedTypes={selectedEntityTypes}
-                        entityTypes={testEntities}
-                        onChangeTypes={onChangeTypes}
-                    />
-                </Section>
-                <Section>
-                    <Typography.Title level={5}>Conditions</Typography.Title>
-                    <Typography.Paragraph type="secondary">
-                        Run this test for all assets matching the following conditions
-                    </Typography.Paragraph>
-                    <BuilderWrapper>
-                        <LogicalPredicateBuilder
-                            selectedPredicate={
-                                convertTestPredicateToLogicalPredicate(
-                                    testDefinition.on.conditions || [],
-                                ) as LogicalPredicate
-                            }
-                            onChangePredicate={onChangePredicate}
-                            properties={getPropertiesForEntityTypes(selectedEntityTypes)}
-                            disabled={!testDefinition.on?.types || testDefinition.on?.types.length === 0}
-                            options={{
-                                predicateDisplayName: 'condition',
-                            }}
-                        />
-                    </BuilderWrapper>
-                </Section>
+            <YamlStep
+                state={state}
+                updateState={updateState}
+                onNext={onClickNext}
+                nextDisabled={!selectedEntityTypes?.length}
+            >
+                <Typography.Title level={4}>Select your data assets</Typography.Title>
+                <SubTitle type="secondary">Which data assets do you want to test?</SubTitle>
+                <EntityTypeSelect
+                    selectedTypes={selectedEntityTypes}
+                    entityTypes={testEntities}
+                    onChangeTypes={onChangeTypes}
+                />
+                {selectedEntityTypes.length > 0 && (
+                    <Section>
+                        <AdditionalFilters>
+                            <AdditionalFiltersTitle>
+                                <b>Additional Filters</b>
+                            </AdditionalFiltersTitle>
+                            <Typography.Text type="secondary">(Optional)</Typography.Text>
+                            <Tooltip
+                                placement="right"
+                                title="Continue to narrow your selection set based an asset's Data Platform, Domains, Glossary Terms, Owners, Usage statistics, & more."
+                            >
+                                <StyledInfoOutlined />
+                            </Tooltip>
+                        </AdditionalFilters>
+                        <BuilderWrapper>
+                            <LogicalPredicateBuilder
+                                selectedPredicate={
+                                    convertTestPredicateToLogicalPredicate(
+                                        testDefinition.on.conditions || [],
+                                    ) as LogicalPredicate
+                                }
+                                onChangePredicate={onChangePredicate}
+                                properties={getPropertiesForEntityTypes(selectedEntityTypes)}
+                                disabled={!testDefinition.on?.types || testDefinition.on?.types.length === 0}
+                                options={{
+                                    predicateDisplayName: 'filter',
+                                }}
+                            />
+                        </BuilderWrapper>
+                    </Section>
+                )}
             </YamlStep>
         </>
     );

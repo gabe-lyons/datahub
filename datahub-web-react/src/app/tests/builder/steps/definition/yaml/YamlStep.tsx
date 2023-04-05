@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { CodeOutlined, FormOutlined } from '@ant-design/icons';
-import { Button, message } from 'antd';
+import { Button, message, Tooltip } from 'antd';
 import { jsonToYaml, yamlToJson } from '../../../../../ingest/source/utils';
 import { ANTD_GRAY } from '../../../../../entity/shared/constants';
 import { YamlBuilder } from './YamlBuilder';
 import { validateJsonDefinition } from '../utils';
 import { TestBuilderState } from '../../../types';
+
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+`;
 
 const ControlsContainer = styled.div`
     display: flex;
@@ -44,10 +51,22 @@ type YamlStepProps = {
     onNext: () => void;
     onPrev?: () => void;
     actionTitle?: string;
+    actionTip?: string;
+    nextDisabled?: boolean;
     onAction?: () => void;
 };
 
-export const YamlStep = ({ children, state, updateState, onNext, onPrev, actionTitle, onAction }: YamlStepProps) => {
+export const YamlStep = ({
+    children,
+    state,
+    updateState,
+    onNext,
+    onPrev,
+    actionTitle,
+    actionTip,
+    onAction,
+    nextDisabled = false,
+}: YamlStepProps) => {
     const [showYamlEditor, setShowYamlEditor] = useState(false);
     const [stagedYaml, setStagedYaml] = useState(state?.definition?.json);
 
@@ -103,30 +122,35 @@ export const YamlStep = ({ children, state, updateState, onNext, onPrev, actionT
     };
 
     return (
-        <>
-            <ToggleViewButtonWrapper>
-                <StyledButton type="text" isSelected={!showYamlEditor} onClick={() => onChangeView(false)}>
-                    <FormOutlined /> Form
-                </StyledButton>
-                <StyledButton type="text" isSelected={showYamlEditor} onClick={() => onChangeView(true)}>
-                    <CodeOutlined /> YAML
-                </StyledButton>
-            </ToggleViewButtonWrapper>
+        <Container>
             {(showYamlEditor && (
                 <YamlBuilder initialValue={jsonToYaml(state?.definition?.json || '{}')} onChange={updateStagedYaml} />
-            )) ||
-                children}
+            )) || <div>{children}</div>}
             <ControlsContainer>
-                {(onPrev && <Button onClick={onPrev}>Previous</Button>) || <div> </div>}
+                {(onPrev && <Button onClick={onPrev}>Back</Button>) || <div> </div>}
+                <ToggleViewButtonWrapper>
+                    <Tooltip title="Use Form builder to author your test (recommended)">
+                        <StyledButton type="text" isSelected={!showYamlEditor} onClick={() => onChangeView(false)}>
+                            <FormOutlined /> Form
+                        </StyledButton>
+                    </Tooltip>
+                    <Tooltip title="Use YAML builder to author your test">
+                        <StyledButton type="text" isSelected={showYamlEditor} onClick={() => onChangeView(true)}>
+                            <CodeOutlined /> YAML
+                        </StyledButton>
+                    </Tooltip>
+                </ToggleViewButtonWrapper>
                 <div>
                     {onAction && (
-                        <ActionButton onClick={handleOnAction} type="primary">
-                            {actionTitle}
+                        <ActionButton onClick={handleOnAction}>
+                            <Tooltip title={actionTip}>{actionTitle}</Tooltip>
                         </ActionButton>
                     )}
-                    <Button onClick={handleOnNext}>Next</Button>
+                    <Button type="primary" onClick={handleOnNext} disabled={nextDisabled}>
+                        Next
+                    </Button>
                 </div>
             </ControlsContainer>
-        </>
+        </Container>
     );
 };

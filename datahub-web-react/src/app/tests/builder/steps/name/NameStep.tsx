@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Button, Form, Input, Typography } from 'antd';
 import { StepProps } from '../../types';
+import { CategorySelect } from './CategorySelect';
+import { isSupportedCategory, isCustomCategory } from '../../../utils';
+import { DEFAULT_TEST_CATEGORY, TestCategory } from '../../../constants';
 
 const StyledForm = styled(Form)`
     max-width: 400px;
@@ -18,6 +21,8 @@ const SaveButton = styled(Button)`
 `;
 
 export const NameStep = ({ state, updateState, prev, submit }: StepProps) => {
+    const [showCustomCategory, setShowCustomCategory] = useState(isCustomCategory(state?.category));
+
     const setName = (name: string) => {
         updateState({
             ...state,
@@ -26,6 +31,11 @@ export const NameStep = ({ state, updateState, prev, submit }: StepProps) => {
     };
 
     const setCategory = (category: string) => {
+        if (category === TestCategory.CUSTOM || !isSupportedCategory(category)) {
+            setShowCustomCategory(true);
+        } else {
+            setShowCustomCategory(false);
+        }
         updateState({
             ...state,
             category,
@@ -40,7 +50,7 @@ export const NameStep = ({ state, updateState, prev, submit }: StepProps) => {
     };
 
     const onClickCreate = () => {
-        if (state.name !== undefined && state.name.length > 0) {
+        if (state.category?.length && state.name?.length) {
             submit();
         }
     };
@@ -49,7 +59,6 @@ export const NameStep = ({ state, updateState, prev, submit }: StepProps) => {
         <>
             <StyledForm layout="vertical">
                 <Form.Item required label={<Typography.Text strong>Name</Typography.Text>}>
-                    <Typography.Paragraph>Give your test a name.</Typography.Paragraph>
                     <Input
                         placeholder="A name for your test"
                         value={state.name}
@@ -57,17 +66,21 @@ export const NameStep = ({ state, updateState, prev, submit }: StepProps) => {
                     />
                 </Form.Item>
                 <Form.Item required label={<Typography.Text strong>Category</Typography.Text>}>
-                    <Typography.Paragraph>The category of your test.</Typography.Paragraph>
-                    <Input
-                        placeholder="The category of your test"
-                        value={state.category}
-                        onChange={(event) => setCategory(event.target.value)}
+                    <CategorySelect
+                        categoryName={state.category || DEFAULT_TEST_CATEGORY}
+                        onSelect={(newValue) => setCategory(newValue)}
                     />
                 </Form.Item>
+                {showCustomCategory && (
+                    <Form.Item required label={<Typography.Text strong>Custom Category</Typography.Text>}>
+                        <Input
+                            placeholder="The category of your test"
+                            value={state.category}
+                            onChange={(event) => setCategory(event.target.value)}
+                        />
+                    </Form.Item>
+                )}
                 <Form.Item label={<Typography.Text strong>Description</Typography.Text>}>
-                    <Typography.Paragraph>
-                        An optional description to help keep track of your test.
-                    </Typography.Paragraph>
                     <Input.TextArea
                         placeholder="The description for your test"
                         value={state.description || undefined}
@@ -76,9 +89,10 @@ export const NameStep = ({ state, updateState, prev, submit }: StepProps) => {
                 </Form.Item>
             </StyledForm>
             <ControlsContainer>
-                <Button onClick={prev}>Previous</Button>
+                <Button onClick={prev}>Back</Button>
                 <SaveButton
                     disabled={!(state.name !== undefined && state.name.length > 0)}
+                    type="primary"
                     onClick={() => onClickCreate()}
                 >
                     Save

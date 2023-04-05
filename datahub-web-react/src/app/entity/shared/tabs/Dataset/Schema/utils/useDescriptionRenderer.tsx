@@ -5,8 +5,8 @@ import DescriptionField from '../../../../../dataset/profile/schema/components/S
 import { pathMatchesNewPath } from '../../../../../dataset/profile/schema/utils/utils';
 import { useUpdateDescriptionMutation } from '../../../../../../../graphql/mutations.generated';
 import { useMutationUrn, useRefetch } from '../../../../EntityContext';
-import { useProposeUpdateDescriptionMutation } from '../../../../../../../graphql/proposals.generated';
 import { useSchemaRefetch } from '../SchemaContext';
+import { useProposeUpdateDescriptionMutation } from '../../../../../../../graphql/proposals.generated';
 
 export default function useDescriptionRenderer(editableSchemaMetadata: EditableSchemaMetadata | null | undefined) {
     const urn = useMutationUrn();

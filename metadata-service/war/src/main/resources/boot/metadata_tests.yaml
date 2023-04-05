@@ -1,57 +1,328 @@
 -
-  urn: "urn:li:test:0"
-  name: Dataset has description
-  category: Metadata Completeness
-  description: All datasets should have a description
-  definition:
-    on:
-      types:
-        - dataset
-    rules:
-      or:
-        - query: editableDatasetProperties.description
-          operation: exists
-        - query: datasetProperties.description
-          operation: exists
--
-  urn: "urn:li:test:1"
-  name: Dataset has owners
-  category: Metadata Completeness
-  description: All datasets or their domains should have at least one owner
-  definition:
-    on:
-      types:
-        - dataset
-    rules:
-      or:
-        - query: ownership.owners.owner
-          operation: exists
-        - query: domains.domains.ownership.owners.owner
-          operation: exists
--
-  urn: "urn:li:test:2"
-  name: Dataset has domain
-  category: Metadata Completeness
-  description: All datasets should have a domain
-  definition:
-    on:
-      types:
-        - dataset
-    rules:
-      - query: domains.domains
-        operation: exists
--
-  urn: "urn:li:test:3"
-  name: Dataset has a Classification glossary term
+  urn: "urn:li:test:__default_governance_gold_tier"
+  name: Gold Tier Datasets
   category: Data Governance
-  description: All datasets should have a glossary term under Classification node
+  description: This test automatically adds the "Gold" Tag to the most important Datasets inside the organization. This test defines importance as a combination of query volume, change volume (inserts, updates, alters, deletes rows), number of unique users, and row count.
+  definition:
+    - on:
+        types:
+          - dataset
+      rules:
+        or:
+          - property: usageFeatures.queryCountPercentileLast30Days
+            operator: greater_than
+            values:
+              - '25'
+          - property: usageFeatures.uniqueUserPercentileLast30Days
+            operator: greater_than
+            values:
+              - '25'
+          - property: storageFeatures.rowCountPercentile
+            operator: greater_than
+            values:
+              - '25'
+      actions:
+        passing:
+          - type: add_tags
+            values:
+              - 'urn:li:tag:__default_gold'
+        failing:
+          - type: remove_tags
+            values:
+              - 'urn:li:tag:__default_gold'
+
+-
+  urn: "urn:li:test:__default_governance_ownership"
+  name: Data Warehouse Tables with Ownership
+  category: Data Governance
+  description: Tables on the Data Warehouse which have at least 1 owner defined
   definition:
     on:
       types:
         - dataset
+      conditions:
+        or:
+          -
+            property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:snowflake'
+          -
+            property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:redshift'
+          -
+            property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:bigquery'
     rules:
-      - query: glossaryTerms.terms.urn.glossaryTermInfo.parentNode
-        operation: equals
-        params:
+      and:
+        -
+          property: ownership.owners.owner
+          operator: exists
+
+-
+  urn: "urn:li:test:__default_governance_documentation"
+  name: Data Warehouse Tables with Documentation
+  category: Data Governance
+  description: Tables on the Data Warehouse which have documentation defined
+  definition:
+    on:
+      types:
+        - dataset
+      conditions:
+        or:
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:snowflake'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:redshift'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:bigquery'
+    rules:
+      or:
+        - property: datasetProperties.description
+          operator: exists
+        - property: editableDatasetProperties.description
+          operator: exists
+-
+  urn: "urn:li:test:__default_governance_domain"
+  name: Data Warehouse Tables in a Domain
+  category: Data Governance
+  description: Tables on the Data Warehouse which have been categorized into a Domain
+  definition:
+    on:
+      types:
+        - dataset
+      conditions:
+        or:
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:snowflake'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:redshift'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:bigquery'
+    rules:
+      and:
+        - property: domains.domains
+          operator: exists
+-
+  urn: "urn:li:test:__default_cost_query_percentile"
+  name: Top 10% Most Queried Data Warehouse Tables
+  category: Data Cost
+  description: Top 10% of Tables on the Data Warehouse with the highest query count in the past 30 days. This is a proxy to compute cost for an asset. This test requires that usage extraction is enabled for your Data Warehouse Ingestion Source.
+  definition:
+    on:
+      types:
+        - dataset
+      conditions:
+        or:
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:snowflake'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:redshift'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:bigquery'
+    rules:
+      or:
+        - property: usageFeatures.queryCountPercentileLast30Days
+          operator: greater_than
           values:
-            - 'urn:li:glossaryNode:Classification'
+            - '90'
+      actions:
+        passing:
+          - type: add_tags
+            values:
+              - 'urn:li:tag:__default_most_queried'
+        failing:
+          - type: remove_tags
+            values:
+              - 'urn:li:tag:__default_most_queried'
+-
+  urn: "urn:li:test:__default_cost_storage_size_percentile"
+  name: Top 10% Largest Data Warehouse Tables by Storage Size in Bytes
+  category: Data Cost
+  description: Top 10% of Tables on the Data Warehouse with the highest storage size in bytes. This is a proxy to a cost input due to disk storage size. This test requires that Table profiling is enabled for your Data Warehouse Ingestion Source.
+  definition:
+    on:
+      types:
+        - dataset
+      conditions:
+        or:
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:snowflake'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:redshift'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:bigquery'
+    rules:
+      or:
+        - property: storageFeatures.sizeInBytesPercentile
+          operator: greater_than
+          values:
+            - '90'
+      actions:
+        passing:
+          - type: add_tags
+            values:
+              - 'urn:li:tag:__default_largest_tables'
+        failing:
+          - type: remove_tags
+            values:
+              - 'urn:li:tag:__default_largest_tables'
+-
+  urn: "urn:li:test:__default_cost_0_queries"
+  name: Data Warehouse Tables with 0 Queries (Past 30 days)
+  category: Data Cost
+  description: Data Warehouse Tables that have had 0 total queries in the past 30 days, indicating that they are good candidates for removal. This test requires that usage extraction is enabled for your Data Warehouse Ingestion Source.
+  definition:
+    on:
+      types:
+        - dataset
+      conditions:
+        or:
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:snowflake'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:redshift'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:bigquery'
+    rules:
+      or:
+        - property: usageFeatures.usageCountLast30Days
+          operator: equals
+          values:
+            - '0'
+      actions:
+        passing:
+          - type: add_tags
+            values:
+              - 'urn:li:tag:__default_low_usage'
+        failing:
+          - type: remove_tags
+            values:
+              - 'urn:li:tag:__default_low_usage'
+-
+  urn: "urn:li:test:__default_cost_0_changes"
+  name: Data Warehouse Tables with 0 Changes (Past 30 days)
+  category: Data Cost
+  description: Data Warehouse Tables that have had 0 total changes (inserts, updates, deletes) in the past 30 days, indicating that they are good candidates for removal. This test requires that usage extraction is enabled for your Data Warehouse Ingestion Source.
+  definition:
+    on:
+      types:
+        - dataset
+      conditions:
+        or:
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:snowflake'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:redshift'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:bigquery'
+    rules:
+      or:
+        - property: usageFeatures.writeCountLast30Days
+          operator: equals
+          values:
+            - '0'
+      actions:
+        passing:
+          - type: add_tags
+            values:
+              - 'urn:li:tag:__default_infrequent_changes'
+        failing:
+          - type: remove_tags
+            values:
+              - 'urn:li:tag:__default_infrequent_changes'
+-
+  urn: "urn:li:test:__default_quality_failing_assertions"
+  name: Data Warehouse Tables with Failing Assertions
+  category: Data Quality
+  description: Data Warehouse Tables that have at least 1 actively failing Assertion (Test).
+  definition:
+    on:
+      types:
+        - dataset
+      conditions:
+        or:
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:snowflake'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:redshift'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:bigquery'
+    rules:
+      or:
+        - property: assertionsSummary.failingAssertions
+          operator: exists
+
+-
+  urn: "urn:li:test:__default_quality_active_incidents"
+  name: Data Warehouse Tables with Active Incidents
+  category: Data Quality
+  description: Data Warehouse Tables that have at least 1 active Incident.
+  definition:
+    on:
+      types:
+        - dataset
+      conditions:
+        or:
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:snowflake'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:redshift'
+          - property: dataPlatformInstance.platform
+            operator: equals
+            values:
+              - 'urn:li:dataPlatform:bigquery'
+    rules:
+      or:
+        - property: incidentsSummary.activeIncidents
+          operator: exists

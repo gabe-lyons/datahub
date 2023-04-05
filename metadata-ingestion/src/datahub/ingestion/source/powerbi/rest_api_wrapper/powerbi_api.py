@@ -277,6 +277,18 @@ class PowerBiAPI:
                 dataset_id=dataset_dict[Constant.ID],
             )
 
+            # fetch + set dataset parameters
+            try:
+                dataset_parameters = self._get_resolver().get_dataset_parameters(
+                    workspace_id=scan_result[Constant.ID],
+                    dataset_id=dataset_dict[Constant.ID],
+                )
+                dataset_instance.parameters = dataset_parameters
+            except Exception as e:
+                logger.info(
+                    f"Unable to fetch dataset parameters for {dataset_dict[Constant.ID]}: {e}"
+                )
+
             if self.__config.extract_endorsements_to_tags:
                 dataset_instance.tags = self._parse_endorsement(
                     dataset_dict.get(Constant.ENDORSEMENT_DETAIL, None)
@@ -305,6 +317,7 @@ class PowerBiAPI:
                             table[Constant.NAME].replace(" ", "_"),
                         ),
                         expression=expression,
+                        dataset=dataset_instance,
                     )
                 )
 
@@ -362,7 +375,6 @@ class PowerBiAPI:
     def fill_workspace(
         self, workspace: Workspace, reporter: PowerBiDashboardSourceReport
     ) -> None:
-
         self._fill_metadata_from_scan_result(
             workspace=workspace
         )  # First try to fill the admin detail as some regular metadata contains lineage to admin metadata

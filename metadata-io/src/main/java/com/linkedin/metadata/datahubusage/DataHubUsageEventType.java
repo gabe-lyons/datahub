@@ -61,6 +61,9 @@ public enum DataHubUsageEventType {
   CREATE_QUERY_EVENT("CreateQueryEvent"),
   DELETE_QUERY_EVENT("DeleteQueryEvent"),
   UPDATE_QUERY_EVENT("UpdateQueryEvent"),
+  SELECT_AUTO_COMPLETE_OPTION("SelectAutoCompleteOption"),
+  SELECT_QUICK_FILTER_EVENT("SelectQuickFilterEvent"),
+  DESELECT_QUICK_FILTER_EVENT("DeselectQuickFilterEvent"),
   // SaaS only events
   CREATE_TEST_EVENT("CreateTestEvent"),
   UPDATE_TEST_EVENT("UpdateTestEvent"),
