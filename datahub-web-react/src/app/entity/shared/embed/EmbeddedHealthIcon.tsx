@@ -9,6 +9,9 @@ import { useAppConfig } from '../../../useAppConfig';
 import { decodeUrn } from '../utils';
 import { generateQueryVariables } from './UpstreamHealth/utils';
 
+// Do not update unless you update the reference to this ID in our Chrome extension code
+const ICON_ID = 'embedded-datahub-health-icon';
+
 const StyledWarning = styled(WarningFilled)`
     color: ${orange[5]};
     font-size: 12px;
@@ -34,7 +37,7 @@ export default function EmbeddedHealthIcon() {
     );
 
     if (incidentsData?.searchAcrossLineage?.total || assertionsData?.searchAcrossLineage?.total) {
-        return <StyledWarning />;
+        return <StyledWarning id={ICON_ID} />;
     }
 
     return null;
