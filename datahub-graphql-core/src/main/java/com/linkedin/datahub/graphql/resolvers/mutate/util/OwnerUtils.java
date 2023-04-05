@@ -76,8 +76,8 @@ public class OwnerUtils {
         entityService,
         new Ownership());
     for (OwnerInput input : owners) {
-      final OwnershipType ownershipType = input.getType() != null ?
-          OwnershipType.valueOf(input.getType().toString()) : OwnershipType.NONE;
+      final OwnershipType ownershipType = input.getType() != null
+          ? OwnershipType.valueOf(input.getType().toString()) : OwnershipType.NONE;
       addOwner(ownershipAspect, UrnUtils.getUrn(input.getOwnerUrn()), ownershipType);
     }
     return buildMetadataChangeProposal(resourceUrn, Constants.OWNERSHIP_ASPECT_NAME, ownershipAspect, actor, entityService);
