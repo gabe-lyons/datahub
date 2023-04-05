@@ -34,6 +34,9 @@ public class GrafanaConfiguration {
     @Value("${grafana.namespace}")
     private String namespace;
 
+    @Value("${grafana.datasource}")
+    private String datasource;
+
     @Value("${grafana.logging}")
     private String logging;
 
@@ -97,7 +100,8 @@ public class GrafanaConfiguration {
         return List.of(
                 Map.entry("orgId", new String[]{orgId}),
                 Map.entry("var-namespace", new String[]{namespace}),
-                Map.entry("kiosk", new String[]{""})
+                Map.entry("kiosk", new String[]{""}),
+                Map.entry("var-datasource", new String[]{datasource})
         );
     }
 
