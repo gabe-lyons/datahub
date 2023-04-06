@@ -29,6 +29,7 @@ export enum PageRoutes {
     TESTS = '/tests',
     SETTINGS_VIEWS = '/settings/views',
     EMBED = '/embed',
+    EMBED_HEALTH = '/embed/health',
 }
 
 /**

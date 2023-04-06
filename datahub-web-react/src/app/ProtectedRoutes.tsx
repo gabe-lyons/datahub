@@ -6,6 +6,7 @@ import { SearchRoutes } from './SearchRoutes';
 import { PageRoutes } from '../conf/Global';
 import EmbeddedPage from './embed/EmbeddedPage';
 import { useEntityRegistry } from './useEntityRegistry';
+import EmbeddedHealthIcon from './entity/shared/embed/EmbeddedHealthIcon';
 import AppProviders from './AppProviders';
 
 /**
@@ -20,6 +21,7 @@ export const ProtectedRoutes = (): JSX.Element => {
                 <Layout>
                     <Switch>
                         <Route exact path="/" render={() => <HomePage />} />
+                        <Route path={`${PageRoutes.EMBED_HEALTH}/:urn`} render={() => <EmbeddedHealthIcon />} />
                         {entityRegistry.getEntities().map((entity) => (
                             <Route
                                 key={`${entity.getPathName()}/${PageRoutes.EMBED}`}

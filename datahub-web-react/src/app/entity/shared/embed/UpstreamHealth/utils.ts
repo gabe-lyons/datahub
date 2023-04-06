@@ -21,6 +21,7 @@ export function generateQueryVariables(
     includeAssertions: boolean,
     includeIncidents: boolean,
     skip?: boolean,
+    count?: number,
 ) {
     return {
         skip,
@@ -30,7 +31,7 @@ export function generateQueryVariables(
                 query: '*',
                 types: [EntityType.Dataset],
                 start,
-                count: DATASET_COUNT,
+                count: count !== undefined ? count : DATASET_COUNT,
                 direction: LineageDirection.Upstream,
                 orFilters: [
                     {
