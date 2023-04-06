@@ -20,7 +20,7 @@ type Props = {
 export const TestCard = ({ test, onEdited, onDeleted, index }: Props) => {
     return (
         <StyledCard title={<TestCardDetails test={test} index={index} onEdited={onEdited} onDeleted={onDeleted} />}>
-            <TestCardResults testUrn={test.urn} />
+            <TestCardResults testUrn={test.urn} name={test.name} />
         </StyledCard>
     );
 };

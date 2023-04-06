@@ -1,14 +1,14 @@
-import React from 'react';
-import { Button, Tag, Typography } from 'antd';
-import { useHistory } from 'react-router-dom';
+import React, { useState } from 'react';
 import styled from 'styled-components';
+import { Button, Tag, Typography } from 'antd';
 import { SUCCESS_COLOR_HEX } from '../entity/shared/tabs/Incident/incidentUtils';
-import { navigateToSearchUrl } from '../search/utils/navigateToSearchUrl';
 import { useGetTestResultsSummaryQuery } from '../../graphql/test.generated';
 import { formatNumberWithoutAbbreviation } from '../shared/formatNumber';
 import { NoResultsSummary } from './NoResultsSummary';
 import { ANTD_GRAY } from '../entity/shared/constants';
 import { PLACEHOLDER_TEST_URN } from './constants';
+import TestResultsModal from './TestResultsModal';
+import { TestResultType } from '../../types.generated';
 
 const Container = styled.div`
     padding: 4px;
@@ -31,12 +31,15 @@ const Title = styled.div`
     margin-bottom: 12px;
 `;
 
+const DEFAULT_MODAL_OPTIONS = { visible: false, defaultActive: TestResultType.Success };
+
 type Props = {
     urn: string;
+    name: string;
 };
 
-export const TestResultsSummary = ({ urn }: Props) => {
-    const history = useHistory();
+export const TestResultsSummary = ({ urn, name }: Props) => {
+    const [resultsModalOptions, setResultsModalOptions] = useState(DEFAULT_MODAL_OPTIONS);
 
     const { data: results } = useGetTestResultsSummaryQuery({
         skip: !urn || urn === PLACEHOLDER_TEST_URN,
@@ -62,17 +65,7 @@ export const TestResultsSummary = ({ urn }: Props) => {
                 <>
                     <StyledButton
                         type="link"
-                        onClick={() =>
-                            navigateToSearchUrl({
-                                filters: [
-                                    {
-                                        field: 'passingTests',
-                                        values: [urn],
-                                    },
-                                ],
-                                history,
-                            })
-                        }
+                        onClick={() => setResultsModalOptions({ visible: true, defaultActive: TestResultType.Success })}
                     >
                         <StyledTag>
                             <Typography.Text style={{ color: SUCCESS_COLOR_HEX }} strong>
@@ -83,17 +76,7 @@ export const TestResultsSummary = ({ urn }: Props) => {
                     </StyledButton>
                     <StyledButton
                         type="link"
-                        onClick={() =>
-                            navigateToSearchUrl({
-                                filters: [
-                                    {
-                                        field: 'failingTests',
-                                        values: [urn],
-                                    },
-                                ],
-                                history,
-                            })
-                        }
+                        onClick={() => setResultsModalOptions({ visible: true, defaultActive: TestResultType.Failure })}
                     >
                         <StyledTag>
                             <Typography.Text style={{ color: 'red' }} strong>
@@ -104,6 +87,16 @@ export const TestResultsSummary = ({ urn }: Props) => {
                     </StyledButton>
                 </>
             )) || <NoResultsSummary />}
+            {resultsModalOptions.visible && results && (
+                <TestResultsModal
+                    urn={urn}
+                    name={name}
+                    defaultActive={resultsModalOptions.defaultActive}
+                    passingCount={passingCount}
+                    failingCount={failingCount}
+                    onClose={() => setResultsModalOptions(DEFAULT_MODAL_OPTIONS)}
+                />
+            )}
         </Container>
     );
 };

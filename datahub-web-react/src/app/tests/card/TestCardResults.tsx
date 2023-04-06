@@ -3,8 +3,9 @@ import { TestResultsSummary } from '../TestResultsSummary';
 
 type Props = {
     testUrn: string;
+    name: string;
 };
 
-export const TestCardResults = ({ testUrn }: Props) => {
-    return <TestResultsSummary urn={testUrn} />;
+export const TestCardResults = ({ testUrn, name }: Props) => {
+    return <TestResultsSummary urn={testUrn} name={name} />;
 };
