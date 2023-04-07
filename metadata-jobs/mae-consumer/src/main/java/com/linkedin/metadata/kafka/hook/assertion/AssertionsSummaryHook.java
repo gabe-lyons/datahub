@@ -1,6 +1,5 @@
 package com.linkedin.metadata.kafka.hook.assertion;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.linkedin.assertion.AssertionResult;

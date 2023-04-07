@@ -1,6 +1,5 @@
 package com.linkedin.metadata.kafka.hook.incident;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.linkedin.common.IncidentsSummary;
 import com.linkedin.common.Status;
