@@ -9,6 +9,7 @@ import com.linkedin.metadata.kafka.hook.notification.ingestion.IngestionNotifica
 import com.linkedin.metadata.kafka.hook.notification.proposal.ProposalNotificationGenerator;
 import javax.annotation.Nonnull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -33,6 +34,9 @@ public class NotificationGeneratorHookFactory {
   @Autowired
   private EntityChangeNotificationGenerator _entityChangeNotificationGenerator;
 
+  @Value("${incidentNotification.enabled:true}")
+  private boolean isEnabled;
+
   @Bean(name = "notificationGeneratorHook")
   @Scope("singleton")
   @Nonnull
@@ -42,7 +46,8 @@ public class NotificationGeneratorHookFactory {
             _incidentNotificationGenerator,
             _proposalNotificationGenerator,
             _entityChangeNotificationGenerator,
-            _ingestionNotificationGenerator)
+            _ingestionNotificationGenerator),
+            isEnabled
     );
   }
 }

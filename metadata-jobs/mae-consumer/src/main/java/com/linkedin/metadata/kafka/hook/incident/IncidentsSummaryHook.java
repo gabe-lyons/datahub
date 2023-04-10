@@ -1,6 +1,5 @@
 package com.linkedin.metadata.kafka.hook.incident;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.linkedin.common.IncidentsSummary;
 import com.linkedin.common.Status;
@@ -52,22 +51,17 @@ public class IncidentsSummaryHook implements MetadataChangeLogHook {
 
   private final EntityRegistry _entityRegistry;
   private final IncidentService _incidentService;
+  private final boolean _isEnabled;
 
   @Autowired
   public IncidentsSummaryHook(
       @Nonnull final EntityRegistry entityRegistry,
-      @Nonnull final IncidentService incidentService
+      @Nonnull final IncidentService incidentService,
+      @Nonnull @Value("${incidents.hook.enabled:true}") Boolean isEnabled
   ) {
     _entityRegistry = Objects.requireNonNull(entityRegistry, "entityRegistry is required");
     _incidentService = Objects.requireNonNull(incidentService, "incidentService is required");
-  }
-
-  @Value("${incidents.hook.enabled:true}")
-  private boolean enabled = true;
-
-  @VisibleForTesting
-  void setEnabled(boolean newValue) {
-    enabled = newValue;
+    _isEnabled = isEnabled;
   }
 
   @Override
@@ -75,8 +69,13 @@ public class IncidentsSummaryHook implements MetadataChangeLogHook {
   }
 
   @Override
+  public boolean isEnabled() {
+    return _isEnabled;
+  }
+
+  @Override
   public void invoke(@Nonnull final MetadataChangeLog event) {
-    if (enabled && isEligibleForProcessing(event)) {
+    if (_isEnabled && isEligibleForProcessing(event)) {
       log.debug("Urn {} received by Incident Summary Hook.", event.getEntityUrn());
       final Urn urn = HookUtils.getUrnFromEvent(event, _entityRegistry);
       // Handle the deletion case.
