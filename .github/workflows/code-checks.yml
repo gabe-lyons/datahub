@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - master
+      - acryl-main
     paths:
       - "metadata-io/**"
       - "datahub-web-react/**"
@@ -11,6 +12,7 @@ on:
   pull_request:
     branches:
       - master
+      - acryl-main
     paths:
       - "metadata-io/**"
       - "datahub-web-react/**"

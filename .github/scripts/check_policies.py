@@ -15,11 +15,15 @@ metadata_privileges = set()
 platform_privileges = set()
 for policy in all_policies:
     urn = policy["urn"]
+    displayName = policy.get("info", {}).get("displayName")
     if urn == "urn:li:dataHubPolicy:0":
         root_user_platform_policy_privileges = policy["info"]["privileges"]
     elif urn == "urn:li:dataHubPolicy:editor-platform-policy":
         editor_platform_policy_privileges = policy["info"]["privileges"]
-    elif urn == "urn:li:dataHubPolicy:7":
+    elif (
+        displayName is not None
+        and displayName == "All Users - Base Platform Privileges"
+    ):
         all_user_platform_policy_privilges = policy["info"]["privileges"]
     try:
         doc_type = policy["info"]["type"]

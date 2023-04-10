@@ -28,7 +28,8 @@
         "MANAGE_GLOBAL_VIEWS",
         "RESTORE_INDICES_PRIVILEGE",
         "SET_WRITEABLE_PRIVILEGE",
-        "APPLY_RETENTION_PRIVILEGE"
+        "APPLY_RETENTION_PRIVILEGE",
+        "CREATE_CONSTRAINTS"
       ],
       "displayName":"Root User - All Platform Privileges",
       "description":"Grants full platform privileges to root datahub super user.",
@@ -111,7 +112,8 @@
         "MANAGE_TAGS",
         "VIEW_METADATA_PROPOSALS",
         "MANAGE_DOMAINS",
-        "MANAGE_GLOBAL_VIEWS"
+        "MANAGE_GLOBAL_VIEWS",
+        "CREATE_CONSTRAINTS"
       ],
       "displayName":"All Users - Base Platform Privileges",
       "description":"Grants base platform privileges to ALL users of DataHub. Change this policy to alter that behavior.",

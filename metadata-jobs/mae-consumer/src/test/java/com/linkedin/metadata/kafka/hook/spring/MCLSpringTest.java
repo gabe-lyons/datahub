@@ -3,9 +3,13 @@ package com.linkedin.metadata.kafka.hook.spring;
 import com.linkedin.gms.factory.config.ConfigurationProvider;
 import com.linkedin.metadata.kafka.MetadataChangeLogProcessor;
 import com.linkedin.metadata.kafka.hook.UpdateIndicesHook;
+import com.linkedin.metadata.kafka.hook.assertion.AssertionsSummaryHook;
 import com.linkedin.metadata.kafka.hook.event.EntityChangeEventGeneratorHook;
+import com.linkedin.metadata.kafka.hook.incident.IncidentsSummaryHook;
 import com.linkedin.metadata.kafka.hook.ingestion.IngestionSchedulerHook;
+import com.linkedin.metadata.kafka.hook.notification.NotificationGeneratorHook;
 import com.linkedin.metadata.kafka.hook.siblings.SiblingAssociationHook;
+import com.linkedin.metadata.kafka.hook.test.MetadataTestHook;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
@@ -35,5 +39,9 @@ public class MCLSpringTest extends AbstractTestNGSpringContextTests {
     assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof UpdateIndicesHook));
     assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof SiblingAssociationHook));
     assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof EntityChangeEventGeneratorHook));
+    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof NotificationGeneratorHook));
+    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof IncidentsSummaryHook));
+    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof MetadataTestHook));
+    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof AssertionsSummaryHook));
   }
 }
