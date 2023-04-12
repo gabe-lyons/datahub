@@ -9,6 +9,7 @@ export const DEFAULT_TEST_DEFINITION = {
 
 export const DEFAULT_BUILDER_STATE = {
     category: DEFAULT_TEST_CATEGORY,
+    description: null,
     definition: {
         json: JSON.stringify(DEFAULT_TEST_DEFINITION),
     },
