@@ -252,7 +252,7 @@ public class MappingUtil {
   }
 
   public static Pair<String, Boolean> ingestProposal(com.linkedin.mxe.MetadataChangeProposal serviceProposal, String actorUrn,
-      EntityService entityService) {
+      EntityService entityService, boolean async) {
     // TODO: Use the actor present in the IC.
     Timer.Context context = MetricUtils.timer("postEntity").time();
     final com.linkedin.common.AuditStamp auditStamp =
@@ -265,7 +265,7 @@ public class MappingUtil {
     log.info("Proposal: {}", serviceProposal);
     Throwable exceptionally = null;
     try {
-      EntityService.IngestProposalResult proposalResult = entityService.ingestProposal(serviceProposal, auditStamp, false);
+      EntityService.IngestProposalResult proposalResult = entityService.ingestProposal(serviceProposal, auditStamp, async);
       Urn urn = proposalResult.getUrn();
       additionalChanges.forEach(proposal -> entityService.ingestProposal(proposal, auditStamp, false));
       return new Pair<>(urn.toString(), proposalResult.isDidUpdate());

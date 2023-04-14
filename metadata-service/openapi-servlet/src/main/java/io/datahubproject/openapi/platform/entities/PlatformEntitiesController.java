@@ -17,6 +17,7 @@ import io.datahubproject.openapi.util.MappingUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +32,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 
@@ -56,7 +58,8 @@ public class PlatformEntitiesController {
 
   @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<List<String>> postEntities(
-      @RequestBody @Nonnull List<MetadataChangeProposal> metadataChangeProposals) {
+      @RequestBody @Nonnull List<MetadataChangeProposal> metadataChangeProposals,
+      @RequestParam(required = false, name = "async") Boolean async) {
     log.info("INGEST PROPOSAL proposal: {}", metadataChangeProposals);
 
     Authentication authentication = AuthenticationContext.getAuthentication();
@@ -74,8 +77,9 @@ public class PlatformEntitiesController {
       throw new UnauthorizedException(actorUrnStr + " is unauthorized to edit entities.");
     }
 
+    boolean asyncBool = Objects.requireNonNullElseGet(async, () -> Boolean.parseBoolean(System.getenv("ASYNC_INGEST_DEFAULT")));
     List<Pair<String, Boolean>> responses = proposals.stream()
-        .map(proposal -> MappingUtil.ingestProposal(proposal, actorUrnStr, _entityService))
+        .map(proposal -> MappingUtil.ingestProposal(proposal, actorUrnStr, _entityService, asyncBool))
         .collect(Collectors.toList());
     if (responses.stream().anyMatch(Pair::getSecond)) {
       return ResponseEntity.status(HttpStatus.CREATED)
