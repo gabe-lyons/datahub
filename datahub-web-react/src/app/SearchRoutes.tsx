@@ -45,7 +45,7 @@ export const SearchRoutes = (): JSX.Element => {
                 <Route path={PageRoutes.SETTINGS} render={() => <SettingsPage />} />
                 <Route path={PageRoutes.ACTION_REQUESTS} render={() => <ActionRequestsPage />} />
                 <Route path={PageRoutes.TESTS} render={() => <ManageTestsPage />} />
-                <GlossaryRoutes />
+                <Route path={`${PageRoutes.GLOSSARY}*`} render={() => <GlossaryRoutes />} />
                 <Route component={NoPageFound} />
             </Switch>
         </SearchablePage>

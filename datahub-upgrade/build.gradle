@@ -70,7 +70,7 @@ dependencies {
 }
 
 bootJar {
-  mainClassName = 'com.linkedin.datahub.upgrade.UpgradeCliApplication'
+  mainClass = 'com.linkedin.datahub.upgrade.UpgradeCliApplication'
   archiveFileName = "${project.name}.jar"
 }
 

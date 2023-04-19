@@ -63,3 +63,4 @@ try {
     print("Could not set git hook config")
 }
 include 'metadata-auth:auth-api'
+include 'metadata-integration:java:examples'
