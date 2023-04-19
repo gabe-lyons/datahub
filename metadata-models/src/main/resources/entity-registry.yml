@@ -26,14 +26,12 @@ entities:
       - testResults
       - siblings
       - embed
-<<<<<<< HEAD
       - inferredNeighbors
       - inferredMetadata
       - schemaFieldsInferredMetadata
       - schemaFieldsInferredNeighbors
       - incidentsSummary
       - assertionsSummary
-=======
       - datasetProperties
       - editableDatasetProperties
       - datasetDeprecation
@@ -46,7 +44,6 @@ entities:
       - glossaryTerms
       - browsePaths
       - dataPlatformInstance
->>>>>>> oss_master
   - name: dataHubPolicy
     doc: DataHub Policies represent access policies granted to users or groups on metadata operations like edit, view etc.
     category: internal
@@ -61,10 +58,8 @@ entities:
       - domains
       - deprecation
       - versionInfo
-<<<<<<< HEAD
       - testResults
       - proposals
-=======
       - dataJobInfo
       - dataJobInputOutput
       - editableDataJobProperties
@@ -75,7 +70,6 @@ entities:
       - glossaryTerms
       - institutionalMemory
       - dataPlatformInstance
->>>>>>> oss_master
   - name: dataFlow
     category: core
     keyAspect: dataFlowKey
@@ -83,10 +77,8 @@ entities:
       - domains
       - deprecation
       - versionInfo
-<<<<<<< HEAD
       - testResults
       - proposals
-=======
       - dataFlowInfo
       - editableDataFlowProperties
       - ownership
@@ -102,7 +94,6 @@ entities:
       - dataProcessInfo
       - ownership
       - status
->>>>>>> oss_master
   - name: dataProcessInstance
     doc: DataProcessInstance represents an instance of a datajob/jobflow run
     keyAspect: dataProcessInstanceKey
@@ -123,9 +114,7 @@ entities:
       - usageFeatures
       - chartUsageStatistics
       - embed
-<<<<<<< HEAD
       - proposals
-=======
       - browsePaths
       - domains
       - container
@@ -136,7 +125,6 @@ entities:
       - dataPlatformInstance
       - globalTags
       - glossaryTerms
->>>>>>> oss_master
   - name: dashboard
     keyAspect: dashboardKey
     aspects:
@@ -149,9 +137,7 @@ entities:
       - testResults
       - subTypes
       - embed
-<<<<<<< HEAD
       - proposals
-=======
       - dashboardInfo
       - editableDashboardProperties
       - ownership
@@ -161,7 +147,6 @@ entities:
       - glossaryTerms
       - institutionalMemory
       - dataPlatformInstance
->>>>>>> oss_master
   - name: notebook
     doc: Notebook represents a combination of query, text, chart and etc. This is in BETA version
     keyAspect: notebookKey
@@ -235,11 +220,8 @@ entities:
       - tagProperties
       - ownership
       - deprecation
-<<<<<<< HEAD
       - testResults
-=======
       - status
->>>>>>> oss_master
   - name: glossaryTerm
     keyAspect: glossaryTermKey
     aspects:
@@ -309,10 +291,8 @@ entities:
       - glossaryTerms
       - editableMlModelProperties
       - domains
-<<<<<<< HEAD
       - testResults
       - proposals
-=======
       - ownership
       - mlModelProperties
       - intendedUse
@@ -331,7 +311,6 @@ entities:
       - browsePaths
       - globalTags
       - dataPlatformInstance
->>>>>>> oss_master
   - name: mlModelGroup
     category: core
     keyAspect: mlModelGroupKey
@@ -339,10 +318,8 @@ entities:
       - glossaryTerms
       - editableMlModelGroupProperties
       - domains
-<<<<<<< HEAD
       - testResults
       - proposals
-=======
       - mlModelGroupProperties
       - ownership
       - status
@@ -360,7 +337,6 @@ entities:
       - deprecation
       - globalTags
       - dataPlatformInstance
->>>>>>> oss_master
   - name: mlFeatureTable
     category: core
     keyAspect: mlFeatureTableKey
@@ -368,10 +344,8 @@ entities:
       - glossaryTerms
       - editableMlFeatureTableProperties
       - domains
-<<<<<<< HEAD
       - testResults
       - proposals
-=======
       - mlFeatureTableProperties
       - ownership
       - institutionalMemory
@@ -380,7 +354,6 @@ entities:
       - browsePaths
       - globalTags
       - dataPlatformInstance
->>>>>>> oss_master
   - name: mlFeature
     category: core
     keyAspect: mlFeatureKey
@@ -388,10 +361,8 @@ entities:
       - glossaryTerms
       - editableMlFeatureProperties
       - domains
-<<<<<<< HEAD
       - testResults
       - proposals
-=======
       - mlFeatureProperties
       - ownership
       - institutionalMemory
@@ -400,7 +371,6 @@ entities:
       - browsePaths
       - globalTags
       - dataPlatformInstance
->>>>>>> oss_master
   - name: mlPrimaryKey
     category: core
     keyAspect: mlPrimaryKeyKey
@@ -408,10 +378,8 @@ entities:
       - glossaryTerms
       - editableMlPrimaryKeyProperties
       - domains
-<<<<<<< HEAD
       - testResults
       - proposals
-=======
       - mlPrimaryKeyProperties
       - ownership
       - institutionalMemory
@@ -419,7 +387,6 @@ entities:
       - deprecation
       - globalTags
       - dataPlatformInstance
->>>>>>> oss_master
   - name: telemetry
     category: internal
     keyAspect: telemetryKey
