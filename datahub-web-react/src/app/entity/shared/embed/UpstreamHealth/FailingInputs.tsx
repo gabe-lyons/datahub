@@ -3,7 +3,10 @@ import { DownOutlined, WarningFilled } from '@ant-design/icons';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Dataset } from '../../../../../types.generated';
+import { useEntityRegistry } from '../../../../useEntityRegistry';
 import { ANTD_GRAY } from '../../constants';
+import { getDisplayedEntityType } from '../../containers/profile/header/utils';
+import { useEntityData } from '../../EntityContext';
 import ActiveIncidents from './ActiveIncidents';
 import FailingAssertions from './FailingAssertions';
 
@@ -61,11 +64,14 @@ export default function FailingInputs({
     isLoadingAssertions,
 }: Props) {
     const [areFailingDetailsVisible, setAreFailingDetailsVisible] = useState(false);
+    const entityRegistry = useEntityRegistry();
+    const { entityData, entityType } = useEntityData();
+    const displayedEntityType = getDisplayedEntityType(entityData, entityRegistry, entityType);
 
     return (
         <div>
             <StyledWarning />
-            <TextWrapper>Some data inputs are not healthy</TextWrapper>
+            <TextWrapper>Data incidents impacting this {displayedEntityType}</TextWrapper>
             <FailingDetailsWrapper onClick={() => setAreFailingDetailsVisible(!areFailingDetailsVisible)}>
                 view details <StyledArrow isOpen={areFailingDetailsVisible} />
             </FailingDetailsWrapper>
