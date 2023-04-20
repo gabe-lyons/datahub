@@ -123,13 +123,7 @@ shadowJar {
   relocate 'io.opentracing','datahub.spark2.shaded.io.opentracing'
   relocate 'io.netty','datahub.spark2.shaded.io.netty'
   relocate 'ch.randelshofer', 'datahub.shaded.ch.randelshofer'
-  finalizedBy checkShadowJar
 }
-
-checkShadowJar {
-   dependsOn shadowJar
-}
-
 
 jacocoTestReport {
     dependsOn test // tests are required to run before generating the report

@@ -66,7 +66,7 @@ public class IngestDefaultTagsStepTest {
     final IngestDefaultTagsStep step = new IngestDefaultTagsStep(entityService, "/boot/test_tags_invalid_json.json");
     Assert.assertThrows(RuntimeException.class, step::execute);
     // Verify no interactions
-    verifyZeroInteractions(entityService);
+    verifyNoInteractions(entityService);
   }
 
   @Test

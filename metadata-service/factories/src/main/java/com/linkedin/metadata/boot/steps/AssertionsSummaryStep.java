@@ -110,7 +110,7 @@ public class AssertionsSummaryStep extends UpgradeStep {
         null,
         null,
         1,
-        true,
+        null,
         null);
 
     // we're only fetching 1 and only fetching the latest value, so findFirst

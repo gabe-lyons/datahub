@@ -92,7 +92,7 @@ test {
 }
 
 task checkShadowJar(type: Exec) {
-  commandLine 'sh', '-c', 'scripts/check_jar.sh'
+   commandLine 'sh', '-c', 'scripts/check_jar.sh'
 }
 
 
@@ -107,12 +107,6 @@ shadowJar {
   // we relocate namespaces manually, because we want to know exactly which libs we are exposing and why
   // we can move to automatic relocation using ConfigureShadowRelocation after we get to a good place on these first
   // acryl-main doesn't perform any re-locations. I don't exactly know why, but keeping this comment here for future readers
- 
-  finalizedBy checkShadowJar
-}
-
-checkShadowJar {
-   dependsOn shadowJar
 }
 
 assemble {

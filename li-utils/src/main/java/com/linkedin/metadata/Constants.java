@@ -81,7 +81,6 @@ public class Constants {
   public static final String DEPRECATION_ASPECT_NAME = "deprecation";
   public static final String OPERATION_EVENT_TIME_FIELD_NAME = "lastUpdatedTimestamp"; // :(
   public static final String SIBLINGS_ASPECT_NAME = "siblings";
-  public static final String OPERATION_ASPECT_NAME = "operation";
   public static final String ORIGIN_ASPECT_NAME = "origin";
   public static final String INPUT_FIELDS_ASPECT_NAME = "inputFields";
   public static final String EMBED_ASPECT_NAME = "embed";
