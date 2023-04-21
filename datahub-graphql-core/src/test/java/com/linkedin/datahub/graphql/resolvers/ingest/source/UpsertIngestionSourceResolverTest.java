@@ -1,20 +1,15 @@
 package com.linkedin.datahub.graphql.resolvers.ingest.source;
 
 import com.datahub.authentication.Authentication;
-import com.linkedin.common.urn.Urn;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.generated.UpdateIngestionSourceConfigInput;
 import com.linkedin.datahub.graphql.generated.UpdateIngestionSourceInput;
 import com.linkedin.datahub.graphql.generated.UpdateIngestionSourceScheduleInput;
 import com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils;
 import com.linkedin.entity.client.EntityClient;
-import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.ingestion.DataHubIngestionSourceConfig;
 import com.linkedin.ingestion.DataHubIngestionSourceInfo;
 import com.linkedin.ingestion.DataHubIngestionSourceSchedule;
-import com.linkedin.metadata.Constants;
-import com.linkedin.metadata.utils.GenericRecordUtils;
-import com.linkedin.mxe.MetadataChangeProposal;
 import com.linkedin.r2.RemoteInvocationException;
 import graphql.schema.DataFetchingEnvironment;
 import org.mockito.Mockito;
