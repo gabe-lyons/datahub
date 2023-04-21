@@ -63,7 +63,6 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import org.junit.Assert;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
