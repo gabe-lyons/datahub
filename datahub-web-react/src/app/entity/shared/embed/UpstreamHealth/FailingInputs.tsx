@@ -13,7 +13,7 @@ import FailingAssertions from './FailingAssertions';
 const TextWrapper = styled.span`
     font-size: 16px;
     line-height: 24px;
-    margin-left: 8px;
+    margin-left: 6px;
 `;
 
 const StyledWarning = styled(WarningFilled)`
@@ -24,10 +24,10 @@ const StyledWarning = styled(WarningFilled)`
 const FailingDetailsWrapper = styled.span`
     font-size: 14px;
     color: ${ANTD_GRAY[8]};
-    margin-left: 8px;
+    margin-left: 6px;
     &:hover {
         cursor: pointer;
-        color: $ ${(props) => props.theme.styles['primary-color']};
+        color: ${(props) => props.theme.styles['primary-color']};
     }
 `;
 
@@ -71,9 +71,9 @@ export default function FailingInputs({
     return (
         <div>
             <StyledWarning />
-            <TextWrapper>Data incidents impacting this {displayedEntityType}</TextWrapper>
+            <TextWrapper>Data quality issues impacting this {displayedEntityType}</TextWrapper>
             <FailingDetailsWrapper onClick={() => setAreFailingDetailsVisible(!areFailingDetailsVisible)}>
-                view details <StyledArrow isOpen={areFailingDetailsVisible} />
+                details <StyledArrow isOpen={areFailingDetailsVisible} />
             </FailingDetailsWrapper>
             {areFailingDetailsVisible && (
                 <>
