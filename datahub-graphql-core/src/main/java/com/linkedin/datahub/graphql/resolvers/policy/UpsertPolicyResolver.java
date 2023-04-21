@@ -48,7 +48,7 @@ public class UpsertPolicyResolver implements DataFetcher<CompletableFuture<Strin
 
       if (policyUrn.isPresent()) {
         // Update existing policy
-        proposal= buildMetadataChangeProposalWithUrn(Urn.createFromString(policyUrn.get()), POLICY_INFO_ASPECT_NAME, info);
+        proposal = buildMetadataChangeProposalWithUrn(Urn.createFromString(policyUrn.get()), POLICY_INFO_ASPECT_NAME, info);
       } else {
         // Create new policy
         // Since we are creating a new Policy, we need to generate a unique UUID.
