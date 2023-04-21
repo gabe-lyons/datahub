@@ -12,6 +12,7 @@ import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.generated.BatchAddTagsInput;
 import com.linkedin.datahub.graphql.generated.ResourceRefInput;
 import com.linkedin.datahub.graphql.resolvers.mutate.BatchAddTagsResolver;
+import com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils;
 import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.entity.EntityService;
@@ -23,6 +24,7 @@ import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
 import static com.linkedin.datahub.graphql.TestUtils.*;
+import static com.linkedin.metadata.Constants.*;
 import static org.testng.Assert.*;
 
 
@@ -76,21 +78,13 @@ public class BatchAddTagsResolverTest {
         new TagAssociation().setTag(TagUrn.createFromString(TEST_TAG_2_URN))
     )));
 
-    final MetadataChangeProposal proposal1 = new MetadataChangeProposal();
-    proposal1.setEntityUrn(Urn.createFromString(TEST_ENTITY_URN_1));
-    proposal1.setEntityType(Constants.DATASET_ENTITY_NAME);
-    proposal1.setAspectName(Constants.GLOBAL_TAGS_ASPECT_NAME);
-    proposal1.setAspect(GenericRecordUtils.serializeAspect(newTags));
-    proposal1.setChangeType(ChangeType.UPSERT);
+    final MetadataChangeProposal proposal1 = MutationUtils.buildMetadataChangeProposalWithUrn(Urn.createFromString(TEST_ENTITY_URN_1),
+        GLOBAL_TAGS_ASPECT_NAME, newTags);
 
     verifyIngestProposal(mockService, 1, proposal1);
 
-    final MetadataChangeProposal proposal2 = new MetadataChangeProposal();
-    proposal2.setEntityUrn(Urn.createFromString(TEST_ENTITY_URN_2));
-    proposal2.setEntityType(Constants.DATASET_ENTITY_NAME);
-    proposal2.setAspectName(Constants.GLOBAL_TAGS_ASPECT_NAME);
-    proposal2.setAspect(GenericRecordUtils.serializeAspect(newTags));
-    proposal2.setChangeType(ChangeType.UPSERT);
+    final MetadataChangeProposal proposal2 = MutationUtils.buildMetadataChangeProposalWithUrn(Urn.createFromString(TEST_ENTITY_URN_2),
+        GLOBAL_TAGS_ASPECT_NAME, newTags);
 
     verifyIngestProposal(mockService, 1, proposal2);
 
@@ -149,21 +143,13 @@ public class BatchAddTagsResolverTest {
         new TagAssociation().setTag(TagUrn.createFromString(TEST_TAG_2_URN))
     )));
 
-    final MetadataChangeProposal proposal1 = new MetadataChangeProposal();
-    proposal1.setEntityUrn(Urn.createFromString(TEST_ENTITY_URN_1));
-    proposal1.setEntityType(Constants.DATASET_ENTITY_NAME);
-    proposal1.setAspectName(Constants.GLOBAL_TAGS_ASPECT_NAME);
-    proposal1.setAspect(GenericRecordUtils.serializeAspect(newTags));
-    proposal1.setChangeType(ChangeType.UPSERT);
+    final MetadataChangeProposal proposal1 = MutationUtils.buildMetadataChangeProposalWithUrn(Urn.createFromString(TEST_ENTITY_URN_1),
+        GLOBAL_TAGS_ASPECT_NAME, newTags);
 
     verifyIngestProposal(mockService, 1, proposal1);
 
-    final MetadataChangeProposal proposal2 = new MetadataChangeProposal();
-    proposal2.setEntityUrn(Urn.createFromString(TEST_ENTITY_URN_2));
-    proposal2.setEntityType(Constants.DATASET_ENTITY_NAME);
-    proposal2.setAspectName(Constants.GLOBAL_TAGS_ASPECT_NAME);
-    proposal2.setAspect(GenericRecordUtils.serializeAspect(newTags));
-    proposal2.setChangeType(ChangeType.UPSERT);
+    final MetadataChangeProposal proposal2 = MutationUtils.buildMetadataChangeProposalWithUrn(Urn.createFromString(TEST_ENTITY_URN_2),
+        GLOBAL_TAGS_ASPECT_NAME, newTags);
 
     verifyIngestProposal(mockService, 1, proposal2);
 

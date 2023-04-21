@@ -4,6 +4,7 @@ import com.datahub.authentication.Authentication;
 import com.linkedin.common.urn.GlossaryNodeUrn;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.generated.CreateGlossaryEntityInput;
+import com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils;
 import com.linkedin.entity.client.EntityClient;
 import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.glossary.GlossaryTermInfo;
@@ -17,6 +18,8 @@ import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
 import static com.linkedin.datahub.graphql.TestUtils.getMockAllowContext;
+import static com.linkedin.metadata.Constants.*;
+
 
 public class CreateGlossaryTermResolverTest {
 
@@ -55,9 +58,6 @@ public class CreateGlossaryTermResolverTest {
 
     final GlossaryTermKey key = new GlossaryTermKey();
     key.setName("test-id");
-    final MetadataChangeProposal proposal = new MetadataChangeProposal();
-    proposal.setEntityKeyAspect(GenericRecordUtils.serializeAspect(key));
-    proposal.setEntityType(Constants.GLOSSARY_TERM_ENTITY_NAME);
     GlossaryTermInfo props = new GlossaryTermInfo();
     props.setDefinition(description);
     props.setName("test-name");
@@ -66,11 +66,8 @@ public class CreateGlossaryTermResolverTest {
       final GlossaryNodeUrn parent = GlossaryNodeUrn.createFromString(parentNode);
       props.setParentNode(parent);
     }
-    proposal.setAspectName(Constants.GLOSSARY_TERM_INFO_ASPECT_NAME);
-    proposal.setAspect(GenericRecordUtils.serializeAspect(props));
-    proposal.setChangeType(ChangeType.UPSERT);
-
-    return proposal;
+    return MutationUtils.buildMetadataChangeProposalWithKey(key, GLOSSARY_TERM_ENTITY_NAME,
+        GLOSSARY_TERM_INFO_ASPECT_NAME, props);
   }
 
   @Test
@@ -85,7 +82,8 @@ public class CreateGlossaryTermResolverTest {
 
     Mockito.verify(mockClient, Mockito.times(1)).ingestProposal(
         Mockito.eq(proposal),
-        Mockito.any(Authentication.class)
+        Mockito.any(Authentication.class),
+        Mockito.eq(false)
     );
   }
 
@@ -101,7 +99,8 @@ public class CreateGlossaryTermResolverTest {
 
     Mockito.verify(mockClient, Mockito.times(1)).ingestProposal(
         Mockito.eq(proposal),
-        Mockito.any(Authentication.class)
+        Mockito.any(Authentication.class),
+        Mockito.eq(false)
     );
   }
 
@@ -117,7 +116,8 @@ public class CreateGlossaryTermResolverTest {
 
     Mockito.verify(mockClient, Mockito.times(1)).ingestProposal(
         Mockito.eq(proposal),
-        Mockito.any(Authentication.class)
+        Mockito.any(Authentication.class),
+        Mockito.eq(false)
     );
   }
 }

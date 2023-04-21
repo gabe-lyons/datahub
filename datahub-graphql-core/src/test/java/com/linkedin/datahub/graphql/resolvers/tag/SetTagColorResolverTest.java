@@ -4,7 +4,9 @@ import com.datahub.authentication.Authentication;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.linkedin.common.urn.Urn;
+import com.linkedin.common.urn.UrnUtils;
 import com.linkedin.datahub.graphql.QueryContext;
+import com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils;
 import com.linkedin.entity.Aspect;
 import com.linkedin.entity.EntityResponse;
 import com.linkedin.entity.EnvelopedAspect;
@@ -24,6 +26,7 @@ import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
 import static com.linkedin.datahub.graphql.TestUtils.*;
+import static com.linkedin.metadata.Constants.*;
 import static org.testng.Assert.*;
 
 
@@ -59,16 +62,13 @@ public class SetTagColorResolverTest {
     resolver.get(mockEnv).get();
 
     final TagProperties newTagProperties = new TagProperties().setName("Test Tag").setColorHex(TEST_COLOR_HEX);
-    final MetadataChangeProposal proposal = new MetadataChangeProposal();
-    proposal.setEntityUrn(Urn.createFromString(TEST_ENTITY_URN));
-    proposal.setEntityType(Constants.TAG_ENTITY_NAME);
-    proposal.setAspectName(Constants.TAG_PROPERTIES_ASPECT_NAME);
-    proposal.setAspect(GenericRecordUtils.serializeAspect(newTagProperties));
-    proposal.setChangeType(ChangeType.UPSERT);
+    final MetadataChangeProposal proposal = MutationUtils.buildMetadataChangeProposalWithUrn(UrnUtils.getUrn(TEST_ENTITY_URN),
+        TAG_PROPERTIES_ASPECT_NAME, newTagProperties);
 
     Mockito.verify(mockClient, Mockito.times(1)).ingestProposal(
         Mockito.eq(proposal),
-        Mockito.any(Authentication.class)
+        Mockito.any(Authentication.class),
+        Mockito.eq(false)
     );
 
     Mockito.verify(mockService, Mockito.times(1)).exists(

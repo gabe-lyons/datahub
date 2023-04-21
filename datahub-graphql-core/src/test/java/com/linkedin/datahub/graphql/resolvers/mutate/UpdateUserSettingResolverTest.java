@@ -16,6 +16,7 @@ import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
 import static com.linkedin.datahub.graphql.TestUtils.*;
+import static com.linkedin.metadata.Constants.*;
 
 
 public class UpdateUserSettingResolverTest {
@@ -39,12 +40,8 @@ public class UpdateUserSettingResolverTest {
     resolver.get(mockEnv).get();
 
     CorpUserSettings newSettings = new CorpUserSettings().setAppearance(new CorpUserAppearanceSettings().setShowSimplifiedHomepage(true));
-    final MetadataChangeProposal proposal = new MetadataChangeProposal();
-    proposal.setEntityUrn(Urn.createFromString(TEST_USER_URN));
-    proposal.setEntityType(Constants.CORP_USER_ENTITY_NAME);
-    proposal.setAspectName(Constants.CORP_USER_SETTINGS_ASPECT_NAME);
-    proposal.setAspect(GenericRecordUtils.serializeAspect(newSettings));
-    proposal.setChangeType(ChangeType.UPSERT);
+    final MetadataChangeProposal proposal = MutationUtils.buildMetadataChangeProposalWithUrn(Urn.createFromString(TEST_USER_URN),
+        CORP_USER_SETTINGS_ASPECT_NAME, newSettings);
 
     verifyIngestProposal(mockService, 1, proposal);
   }

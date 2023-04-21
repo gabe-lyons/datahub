@@ -1,10 +1,12 @@
 package com.linkedin.datahub.graphql.resolvers.ingest.source;
 
 import com.datahub.authentication.Authentication;
+import com.linkedin.common.urn.Urn;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.generated.UpdateIngestionSourceConfigInput;
 import com.linkedin.datahub.graphql.generated.UpdateIngestionSourceInput;
 import com.linkedin.datahub.graphql.generated.UpdateIngestionSourceScheduleInput;
+import com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils;
 import com.linkedin.entity.client.EntityClient;
 import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.ingestion.DataHubIngestionSourceConfig;
@@ -19,6 +21,7 @@ import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
 import static com.linkedin.datahub.graphql.resolvers.ingest.IngestTestUtils.*;
+import static com.linkedin.metadata.Constants.*;
 import static org.testng.Assert.*;
 
 
@@ -62,15 +65,11 @@ public class UpsertIngestionSourceResolverTest {
     );
 
     Mockito.verify(mockClient, Mockito.times(1)).ingestProposal(
-        Mockito.eq(
-            new MetadataChangeProposal()
-              .setChangeType(ChangeType.UPSERT)
-              .setEntityType(Constants.INGESTION_SOURCE_ENTITY_NAME)
-              .setAspectName(Constants.INGESTION_INFO_ASPECT_NAME)
-              .setAspect(GenericRecordUtils.serializeAspect(info))
-              .setEntityUrn(TEST_INGESTION_SOURCE_URN)
+        Mockito.eq(MutationUtils.buildMetadataChangeProposalWithUrn(TEST_INGESTION_SOURCE_URN,
+            INGESTION_INFO_ASPECT_NAME, info)
         ),
-        Mockito.any(Authentication.class)
+        Mockito.any(Authentication.class),
+        Mockito.eq(false)
     );
   }
 
@@ -99,7 +98,8 @@ public class UpsertIngestionSourceResolverTest {
     EntityClient mockClient = Mockito.mock(EntityClient.class);
     Mockito.doThrow(RemoteInvocationException.class).when(mockClient).ingestProposal(
         Mockito.any(),
-        Mockito.any(Authentication.class));
+        Mockito.any(Authentication.class),
+        Mockito.eq(false));
     UpsertIngestionSourceResolver resolver = new UpsertIngestionSourceResolver(mockClient);
 
     // Execute resolver
