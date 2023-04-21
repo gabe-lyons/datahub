@@ -13,6 +13,7 @@ import com.linkedin.metadata.event.EventProducer;
 import com.linkedin.metadata.key.CorpUserKey;
 import com.linkedin.metadata.models.registry.EntityRegistryException;
 import com.linkedin.metadata.query.ListUrnsResult;
+import com.linkedin.metadata.service.UpdateIndicesService;
 import com.linkedin.metadata.utils.PegasusUtils;
 import com.linkedin.mxe.SystemMetadata;
 import io.ebean.EbeanServer;
@@ -46,7 +47,8 @@ public class EbeanEntityServiceTest extends EntityServiceTest<EbeanAspectDao, Eb
     _mockProducer = mock(EventProducer.class);
     _aspectDao = new EbeanAspectDao(server);
     _aspectDao.setConnectionValidated(true);
-    _entityService = new EntityService(_aspectDao, _mockProducer, _testEntityRegistry, false);
+    _mockUpdateIndicesService = mock(UpdateIndicesService.class);
+    _entityService = new EntityService(_aspectDao, _mockProducer, _testEntityRegistry, false, _mockUpdateIndicesService);
     _retentionService = new EbeanRetentionService(_entityService, server, 1000);
     _entityService.setRetentionService(_retentionService);
   }

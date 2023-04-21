@@ -13,16 +13,12 @@ import com.linkedin.datahub.graphql.exception.DataHubGraphQLErrorCode;
 import com.linkedin.datahub.graphql.exception.DataHubGraphQLException;
 import com.linkedin.datahub.graphql.generated.UpdateIncidentStatusInput;
 import com.linkedin.datahub.graphql.resolvers.AuthUtils;
-import com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils;
 import com.linkedin.entity.client.EntityClient;
-import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.incident.IncidentInfo;
 import com.linkedin.incident.IncidentState;
 import com.linkedin.incident.IncidentStatus;
-import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.authorization.PoliciesConfig;
 import com.linkedin.metadata.entity.EntityService;
-import com.linkedin.metadata.utils.GenericRecordUtils;
 import com.linkedin.mxe.MetadataChangeProposal;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -30,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 
 import static com.linkedin.datahub.graphql.resolvers.ResolverUtils.*;
+import static com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils.*;
 import static com.linkedin.metadata.Constants.*;
 
 
@@ -50,9 +47,9 @@ public class UpdateIncidentStatusResolver implements DataFetcher<CompletableFutu
     return CompletableFuture.supplyAsync(() -> {
 
       // Check whether the incident exists.
-      IncidentInfo info = (IncidentInfo) MutationUtils.getAspectFromEntity(
+      IncidentInfo info = (IncidentInfo) getAspectFromEntity(
         incidentUrn.toString(),
-        Constants.INCIDENT_INFO_ASPECT_NAME,
+        INCIDENT_INFO_ASPECT_NAME,
         _entityService,
         null);
 
@@ -72,13 +69,8 @@ public class UpdateIncidentStatusResolver implements DataFetcher<CompletableFutu
           }
           try {
             // Finally, create the MetadataChangeProposal.
-            final MetadataChangeProposal proposal = new MetadataChangeProposal();
-            proposal.setEntityUrn(incidentUrn);
-            proposal.setEntityType(INCIDENT_ENTITY_NAME);
-            proposal.setAspectName(INCIDENT_INFO_ASPECT_NAME);
-            proposal.setAspect(GenericRecordUtils.serializeAspect(info));
-            proposal.setChangeType(ChangeType.UPSERT);
-            _entityClient.ingestProposal(proposal, context.getAuthentication());
+            final MetadataChangeProposal proposal = buildMetadataChangeProposalWithUrn(incidentUrn, INCIDENT_INFO_ASPECT_NAME, info);
+            _entityClient.ingestProposal(proposal, context.getAuthentication(), false);
             return true;
           } catch (Exception e) {
             throw new RuntimeException("Failed to update incident status!", e);

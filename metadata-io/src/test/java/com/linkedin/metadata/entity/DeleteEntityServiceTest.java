@@ -18,6 +18,7 @@ import com.linkedin.metadata.models.registry.ConfigEntityRegistry;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.query.filter.RelationshipDirection;
 import com.linkedin.metadata.run.DeleteReferencesResponse;
+import com.linkedin.metadata.service.UpdateIndicesService;
 import com.linkedin.metadata.snapshot.Snapshot;
 import com.linkedin.metadata.utils.AuditStampUtils;
 import com.linkedin.metadata.utils.SystemMetadataUtils;
@@ -39,6 +40,7 @@ public class DeleteEntityServiceTest {
   protected GraphService _graphService = Mockito.mock(GraphService.class);
 
   protected DeleteEntityService _deleteEntityService;
+  protected UpdateIndicesService _mockUpdateIndicesService;
 
   protected EntityRegistry _entityRegistry;
 
@@ -46,7 +48,8 @@ public class DeleteEntityServiceTest {
     _entityRegistry = new ConfigEntityRegistry(Snapshot.class.getClassLoader()
         .getResourceAsStream("entity-registry.yml"));
     _aspectDao = mock(EbeanAspectDao.class);
-    _entityService = new EntityService(_aspectDao, mock(EventProducer.class), _entityRegistry, true);
+    _mockUpdateIndicesService = mock(UpdateIndicesService.class);
+    _entityService = new EntityService(_aspectDao, mock(EventProducer.class), _entityRegistry, true, _mockUpdateIndicesService);
     _deleteEntityService = new DeleteEntityService(_entityService, _graphService);
   }
 

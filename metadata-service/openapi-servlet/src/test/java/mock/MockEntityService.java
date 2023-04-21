@@ -28,6 +28,7 @@ import com.linkedin.metadata.models.AspectSpec;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.query.ListUrnsResult;
 import com.linkedin.metadata.run.AspectRowSummary;
+import com.linkedin.metadata.service.UpdateIndicesService;
 import com.linkedin.mxe.SystemMetadata;
 import com.linkedin.schema.ForeignKeyConstraint;
 import com.linkedin.schema.ForeignKeyConstraintArray;
@@ -55,8 +56,9 @@ import static entities.EntitiesControllerTest.*;
 
 
 public class MockEntityService extends EntityService {
-  public MockEntityService(@Nonnull AspectDao aspectDao, @Nonnull EventProducer producer, @Nonnull EntityRegistry entityRegistry) {
-    super(aspectDao, producer, entityRegistry, true);
+  public MockEntityService(@Nonnull AspectDao aspectDao, @Nonnull EventProducer producer, @Nonnull EntityRegistry entityRegistry, @Nonnull
+      UpdateIndicesService updateIndicesService) {
+    super(aspectDao, producer, entityRegistry, true, updateIndicesService);
   }
 
   @Override

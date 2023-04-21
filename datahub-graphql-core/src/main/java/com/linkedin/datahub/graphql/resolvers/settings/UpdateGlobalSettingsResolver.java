@@ -12,10 +12,7 @@ import com.linkedin.datahub.graphql.generated.UpdateOidcSettingsInput;
 import com.linkedin.datahub.graphql.generated.UpdateSlackIntegrationSettingsInput;
 import com.linkedin.datahub.graphql.generated.UpdateSsoSettingsInput;
 import com.linkedin.entity.client.EntityClient;
-import com.linkedin.events.metadata.ChangeType;
-import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.secret.SecretService;
-import com.linkedin.metadata.utils.GenericRecordUtils;
 import com.linkedin.mxe.MetadataChangeProposal;
 import com.linkedin.settings.NotificationSetting;
 import com.linkedin.settings.NotificationSettingMap;
@@ -32,6 +29,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static com.linkedin.datahub.graphql.resolvers.ResolverUtils.*;
+import static com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils.*;
+import static com.linkedin.metadata.Constants.*;
+
 
 public class UpdateGlobalSettingsResolver implements DataFetcher<CompletableFuture<Boolean>> {
 
@@ -60,14 +60,9 @@ public class UpdateGlobalSettingsResolver implements DataFetcher<CompletableFutu
         updateSettings(globalSettings, input);
 
         // Finally, write it back in a new aspect.
-        final MetadataChangeProposal proposal = new MetadataChangeProposal();
-        proposal.setEntityUrn(Constants.GLOBAL_SETTINGS_URN);
-        proposal.setEntityType(Constants.GLOBAL_SETTINGS_ENTITY_NAME);
-        proposal.setAspectName(Constants.GLOBAL_SETTINGS_INFO_ASPECT_NAME);
-        proposal.setAspect(GenericRecordUtils.serializeAspect(globalSettings));
-        proposal.setChangeType(ChangeType.UPSERT);
+        final MetadataChangeProposal proposal = buildMetadataChangeProposalWithUrn(GLOBAL_SETTINGS_URN, GLOBAL_SETTINGS_INFO_ASPECT_NAME, globalSettings);
           try {
-            _entityClient.ingestProposal(proposal, context.getAuthentication());
+            _entityClient.ingestProposal(proposal, context.getAuthentication(), false);
             return true;
           } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to update global settings! %s", input), e);

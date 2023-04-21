@@ -12,17 +12,14 @@ import com.linkedin.datahub.graphql.authorization.AuthorizationUtils;
 import com.linkedin.datahub.graphql.exception.AuthorizationException;
 import com.linkedin.datahub.graphql.generated.RaiseIncidentInput;
 import com.linkedin.entity.client.EntityClient;
-import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.incident.IncidentInfo;
 import com.linkedin.incident.IncidentSource;
 import com.linkedin.incident.IncidentSourceType;
 import com.linkedin.incident.IncidentState;
 import com.linkedin.incident.IncidentStatus;
 import com.linkedin.incident.IncidentType;
-import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.authorization.PoliciesConfig;
 import com.linkedin.metadata.key.IncidentKey;
-import com.linkedin.metadata.utils.GenericRecordUtils;
 import com.linkedin.mxe.MetadataChangeProposal;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -34,6 +31,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import static com.linkedin.datahub.graphql.resolvers.AuthUtils.*;
 import static com.linkedin.datahub.graphql.resolvers.ResolverUtils.*;
+import static com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils.*;
+import static com.linkedin.metadata.Constants.*;
+
 
 /**
  * Resolver used for creating (raising) a new asset incident.
@@ -66,13 +66,9 @@ public class RaiseIncidentResolver implements DataFetcher<CompletableFuture<Stri
         key.setId(id);
 
         // Create the MCP
-        final MetadataChangeProposal proposal = new MetadataChangeProposal();
-        proposal.setEntityKeyAspect(GenericRecordUtils.serializeAspect(key));
-        proposal.setEntityType(Constants.INCIDENT_ENTITY_NAME);
-        proposal.setAspectName(Constants.INCIDENT_INFO_ASPECT_NAME);
-        proposal.setAspect(GenericRecordUtils.serializeAspect(mapIncidentInfo(input, context)));
-        proposal.setChangeType(ChangeType.UPSERT);
-        return _entityClient.ingestProposal(proposal, context.getAuthentication());
+        final MetadataChangeProposal proposal = buildMetadataChangeProposalWithKey(key, INCIDENT_ENTITY_NAME,
+            INCIDENT_INFO_ASPECT_NAME, mapIncidentInfo(input, context));
+        return _entityClient.ingestProposal(proposal, context.getAuthentication(), false);
       } catch (Exception e) {
         log.error("Failed to create incident. {}", e.getMessage());
         throw new RuntimeException("Failed to incident", e);

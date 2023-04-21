@@ -14,6 +14,7 @@ import com.linkedin.metadata.key.CorpUserKey;
 import com.linkedin.metadata.models.registry.EntityRegistryException;
 import com.linkedin.metadata.query.ExtraInfo;
 import com.linkedin.metadata.query.ListUrnsResult;
+import com.linkedin.metadata.service.UpdateIndicesService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,8 @@ public class CassandraEntityServiceTest extends EntityServiceTest<CassandraAspec
     _aspectDao = new CassandraAspectDao(session);
     _aspectDao.setConnectionValidated(true);
     _mockProducer = mock(EventProducer.class);
-    _entityService = new EntityService(_aspectDao, _mockProducer, _testEntityRegistry, false);
+    _mockUpdateIndicesService = mock(UpdateIndicesService.class);
+    _entityService = new EntityService(_aspectDao, _mockProducer, _testEntityRegistry, false, _mockUpdateIndicesService);
     _retentionService = new CassandraRetentionService(_entityService, session, 1000);
     _entityService.setRetentionService(_retentionService);
   }

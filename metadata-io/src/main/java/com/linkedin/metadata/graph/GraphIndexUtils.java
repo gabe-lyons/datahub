@@ -1,4 +1,4 @@
-package com.linkedin.metadata.kafka.hook;
+package com.linkedin.metadata.graph;
 
 import com.datahub.util.RecordUtils;
 import com.linkedin.common.urn.Urn;

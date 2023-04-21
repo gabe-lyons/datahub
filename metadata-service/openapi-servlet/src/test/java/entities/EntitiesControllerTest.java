@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linkedin.metadata.entity.AspectDao;
 import com.linkedin.metadata.event.EventProducer;
 import com.linkedin.metadata.models.registry.EntityRegistry;
+import com.linkedin.metadata.service.UpdateIndicesService;
 import io.datahubproject.openapi.dto.UpsertAspectRequest;
 import io.datahubproject.openapi.entities.EntitiesController;
 import io.datahubproject.openapi.generated.AuditStamp;
@@ -41,7 +42,7 @@ import org.testng.annotations.Test;
 
 import static com.linkedin.metadata.Constants.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 public class EntitiesControllerTest {
@@ -59,7 +60,8 @@ public class EntitiesControllerTest {
     EntityRegistry mockEntityRegistry = new MockEntityRegistry();
     AspectDao aspectDao = Mockito.mock(AspectDao.class);
     EventProducer mockEntityEventProducer = Mockito.mock(EventProducer.class);
-    MockEntityService mockEntityService = new MockEntityService(aspectDao, mockEntityEventProducer, mockEntityRegistry);
+    UpdateIndicesService mockUpdateIndicesService = mock(UpdateIndicesService.class);
+    MockEntityService mockEntityService = new MockEntityService(aspectDao, mockEntityEventProducer, mockEntityRegistry, mockUpdateIndicesService);
     AuthorizerChain authorizerChain = Mockito.mock(AuthorizerChain.class);
     _entitiesController = new EntitiesController(mockEntityService, new ObjectMapper(), authorizerChain);
     Authentication authentication = Mockito.mock(Authentication.class);

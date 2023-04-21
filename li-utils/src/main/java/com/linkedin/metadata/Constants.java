@@ -22,6 +22,9 @@ public class Constants {
   public static final String DEFAULT_RUN_ID = "no-run-id-provided";
   // Forces indexing for no-ops, enabled for restore indices calls. Only considered in the no-op case
   public static final String FORCE_INDEXING_KEY = "forceIndexing";
+  // Indicates an event source from the UI with hooks that have already been processed and should not be reprocessed
+  // TODO: Naming?
+  public static final String UI_PRE_PROCESSED_KEY = "uiPreProcessed";
 
   /**
    * Entities

@@ -56,6 +56,7 @@ import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.models.registry.template.AspectTemplateEngine;
 import com.linkedin.metadata.query.ListUrnsResult;
 import com.linkedin.metadata.run.AspectRowSummary;
+import com.linkedin.metadata.service.UpdateIndicesService;
 import com.linkedin.metadata.snapshot.Snapshot;
 import com.linkedin.metadata.utils.DataPlatformInstanceUtils;
 import com.linkedin.metadata.utils.EntityKeyUtils;
@@ -165,6 +166,7 @@ public class EntityService {
   private final Map<String, Set<String>> _entityToValidAspects;
   private RetentionService _retentionService;
   private final Boolean _alwaysEmitChangeLog;
+  private final UpdateIndicesService _updateIndicesService;
   public static final String DEFAULT_RUN_ID = "no-run-id-provided";
   public static final String BROWSE_PATHS = "browsePaths";
   public static final String DATA_PLATFORM_INSTANCE = "dataPlatformInstance";
@@ -179,13 +181,15 @@ public class EntityService {
       @Nonnull final AspectDao aspectDao,
       @Nonnull final EventProducer producer,
       @Nonnull final EntityRegistry entityRegistry,
-      final boolean alwaysEmitChangeLog) {
+      final boolean alwaysEmitChangeLog,
+      final UpdateIndicesService updateIndicesService) {
 
     _aspectDao = aspectDao;
     _producer = producer;
     _entityRegistry = entityRegistry;
     _entityToValidAspects = buildEntityToValidAspects(entityRegistry);
     _alwaysEmitChangeLog = alwaysEmitChangeLog;
+    _updateIndicesService = updateIndicesService;
   }
 
   /**
@@ -1049,28 +1053,21 @@ public class EntityService {
     if (!isNoOp || _alwaysEmitChangeLog || shouldAspectEmitChangeLog(aspectSpec)) {
       log.debug("Producing MetadataChangeLog for ingested aspect {}, urn {}", mcp.getAspectName(), entityUrn);
 
-      // Uses new data map to prevent side effects on original
-      final MetadataChangeLog metadataChangeLog = new MetadataChangeLog(new DataMap(mcp.data()));
-      metadataChangeLog.setEntityUrn(entityUrn);
-      metadataChangeLog.setCreated(auditStamp);
-      metadataChangeLog.setChangeType(isNoOp ? ChangeType.RESTATE : ChangeType.UPSERT);
-
-      if (oldAspect != null) {
-        metadataChangeLog.setPreviousAspectValue(GenericRecordUtils.serializeAspect(oldAspect));
-      }
-      if (oldSystemMetadata != null) {
-        metadataChangeLog.setPreviousSystemMetadata(oldSystemMetadata);
-      }
-      if (newAspect != null) {
-        metadataChangeLog.setAspect(GenericRecordUtils.serializeAspect(newAspect));
-      }
-      if (newSystemMetadata != null) {
-        metadataChangeLog.setSystemMetadata(newSystemMetadata);
-      }
+      final MetadataChangeLog metadataChangeLog = constructMCL(mcp, urnToEntityName(entityUrn), entityUrn,
+          isNoOp ? ChangeType.RESTATE : ChangeType.UPSERT, aspectSpec.getName(), auditStamp, newAspect, newSystemMetadata,
+          oldAspect, oldSystemMetadata);
 
       log.debug("Serialized MCL event: {}", metadataChangeLog);
 
       produceMetadataChangeLog(entityUrn, aspectSpec, metadataChangeLog);
+      if (metadataChangeLog.getSystemMetadata() != null) {
+        if (metadataChangeLog.getSystemMetadata().getProperties() != null) {
+          if (Boolean.parseBoolean(metadataChangeLog.getSystemMetadata().getProperties().get(UI_PRE_PROCESSED_KEY))) {
+            // Pre-process the update indices hook for UI updates to avoid perceived lag from Kafka
+            _updateIndicesService.handleChangeEvent(metadataChangeLog);
+          }
+        }
+      }
 
       return true;
     } else {
@@ -1322,24 +1319,8 @@ public class EntityService {
       @Nonnull final AspectSpec aspectSpec, @Nullable final RecordTemplate oldAspectValue,
       @Nullable final RecordTemplate newAspectValue, @Nullable final SystemMetadata oldSystemMetadata,
       @Nullable final SystemMetadata newSystemMetadata, @Nonnull AuditStamp auditStamp, @Nonnull final ChangeType changeType) {
-    final MetadataChangeLog metadataChangeLog = new MetadataChangeLog();
-    metadataChangeLog.setEntityType(entityName);
-    metadataChangeLog.setEntityUrn(urn);
-    metadataChangeLog.setChangeType(changeType);
-    metadataChangeLog.setAspectName(aspectName);
-    metadataChangeLog.setCreated(auditStamp);
-    if (newAspectValue != null) {
-      metadataChangeLog.setAspect(GenericRecordUtils.serializeAspect(newAspectValue));
-    }
-    if (newSystemMetadata != null) {
-      metadataChangeLog.setSystemMetadata(newSystemMetadata);
-    }
-    if (oldAspectValue != null) {
-      metadataChangeLog.setPreviousAspectValue(GenericRecordUtils.serializeAspect(oldAspectValue));
-    }
-    if (oldSystemMetadata != null) {
-      metadataChangeLog.setPreviousSystemMetadata(oldSystemMetadata);
-    }
+    final MetadataChangeLog metadataChangeLog = constructMCL(null, entityName, urn, changeType, aspectName, auditStamp,
+        newAspectValue, newSystemMetadata, oldAspectValue, oldSystemMetadata);
     produceMetadataChangeLog(urn, aspectSpec, metadataChangeLog);
   }
 
