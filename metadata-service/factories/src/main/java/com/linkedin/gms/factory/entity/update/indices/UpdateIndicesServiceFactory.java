@@ -1,4 +1,4 @@
-package com.linkedin.gms.factory.entity;
+package com.linkedin.gms.factory.entity.update.indices;
 
 import com.linkedin.metadata.graph.GraphService;
 import com.linkedin.metadata.models.registry.EntityRegistry;
