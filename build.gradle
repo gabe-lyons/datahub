@@ -104,15 +104,11 @@ project.ext.externalDependency = [
     'h2': 'com.h2database:h2:2.1.214',
     'hadoopCommon':'org.apache.hadoop:hadoop-common:2.7.2',
     'hadoopMapreduceClient':'org.apache.hadoop:hadoop-mapreduce-client-core:2.7.2',
-<<<<<<< HEAD
     'hazelcast':'com.hazelcast:hazelcast:5.2.1',
     'hazelcastSpring':'com.hazelcast:hazelcast-spring:5.2.1',
     'hazelcastTest':'com.hazelcast:hazelcast:5.2.1:tests',
-    'hadoopCommon3':'org.apache.hadoop:hadoop-common:3.3.4',
-=======
     "hadoopClient": "org.apache.hadoop:hadoop-client:$hadoop3Version",
     "hadoopCommon3":"org.apache.hadoop:hadoop-common:$hadoop3Version",
->>>>>>> oss_master
     'hazelcast':'com.hazelcast:hazelcast:5.2.1',
     'hazelcastSpring':'com.hazelcast:hazelcast-spring:5.2.1',
     'hazelcastTest':'com.hazelcast:hazelcast:5.2.1:tests',
