@@ -18,10 +18,22 @@
           operator: greater_than
           values:
             - '25'
-        - property: storageFeatures.rowCountPercentile
-          operator: greater_than
-          values:
-            - '25'
+        -
+            property: ownership.owners.owner
+            operator: exists
+        -
+            or:
+                -
+                    property: datasetProperties.description
+                    operator: exists
+                -
+                    property: editableDatasetProperties.description
+                    operator: exists
+        -
+            property: usageFeatures.writeCountLast30Days
+            operator: greater_than
+            values:
+                - '0'
     actions:
       passing:
         - type: add_tags
