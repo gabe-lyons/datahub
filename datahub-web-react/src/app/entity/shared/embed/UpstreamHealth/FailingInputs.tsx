@@ -3,14 +3,17 @@ import { DownOutlined, WarningFilled } from '@ant-design/icons';
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { Dataset } from '../../../../../types.generated';
+import { useEntityRegistry } from '../../../../useEntityRegistry';
 import { ANTD_GRAY } from '../../constants';
+import { getDisplayedEntityType } from '../../containers/profile/header/utils';
+import { useEntityData } from '../../EntityContext';
 import ActiveIncidents from './ActiveIncidents';
 import FailingAssertions from './FailingAssertions';
 
 const TextWrapper = styled.span`
     font-size: 16px;
     line-height: 24px;
-    margin-left: 8px;
+    margin-left: 6px;
 `;
 
 const StyledWarning = styled(WarningFilled)`
@@ -21,10 +24,10 @@ const StyledWarning = styled(WarningFilled)`
 const FailingDetailsWrapper = styled.span`
     font-size: 14px;
     color: ${ANTD_GRAY[8]};
-    margin-left: 8px;
+    margin-left: 6px;
     &:hover {
         cursor: pointer;
-        color: $ ${(props) => props.theme.styles['primary-color']};
+        color: ${(props) => props.theme.styles['primary-color']};
     }
 `;
 
@@ -61,13 +64,16 @@ export default function FailingInputs({
     isLoadingAssertions,
 }: Props) {
     const [areFailingDetailsVisible, setAreFailingDetailsVisible] = useState(false);
+    const entityRegistry = useEntityRegistry();
+    const { entityData, entityType } = useEntityData();
+    const displayedEntityType = getDisplayedEntityType(entityData, entityRegistry, entityType);
 
     return (
         <div>
             <StyledWarning />
-            <TextWrapper>Some data inputs are not healthy</TextWrapper>
+            <TextWrapper>Data quality issues impacting this {displayedEntityType}</TextWrapper>
             <FailingDetailsWrapper onClick={() => setAreFailingDetailsVisible(!areFailingDetailsVisible)}>
-                view details <StyledArrow isOpen={areFailingDetailsVisible} />
+                details <StyledArrow isOpen={areFailingDetailsVisible} />
             </FailingDetailsWrapper>
             {areFailingDetailsVisible && (
                 <>
