@@ -157,7 +157,7 @@ public class AssertionsSummaryStepTest {
         Mockito.eq(null),
         Mockito.eq(null),
         Mockito.eq(1),
-        Mockito.eq(true),
+        Mockito.eq(null),
         Mockito.eq(null)
     )).thenReturn(envelopedAspects);
   }

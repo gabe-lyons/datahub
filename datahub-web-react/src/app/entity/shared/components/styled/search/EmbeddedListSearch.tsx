@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { ApolloError } from '@apollo/client';
-import { EntityType, FacetFilterInput, FacetMetadata } from '../../../../../../types.generated';
+import {
+    EntityType,
+    FacetFilterInput,
+    FacetMetadata,
+    SearchAcrossEntitiesInput,
+} from '../../../../../../types.generated';
 import { ENTITY_FILTER_NAME, UnionType } from '../../../../../search/utils/constants';
 import { SearchCfg } from '../../../../../../conf';
 import { EmbeddedListSearchResults } from './EmbeddedListSearchResults';
@@ -75,6 +80,7 @@ type Props = {
     searchBarStyle?: any;
     searchBarInputStyle?: any;
     entityAction?: React.FC<EntityActionProps>;
+    skipCache?: boolean;
     useGetSearchResults?: (params: GetSearchResultsParams) => {
         data: SearchResultsInterface | undefined | null;
         loading: boolean;
@@ -103,6 +109,7 @@ export const EmbeddedListSearch = ({
     searchBarStyle,
     searchBarInputStyle,
     entityAction,
+    skipCache,
     useGetSearchResults = useWrappedSearchResults,
     shouldRefetch,
     resetShouldRefetch,
@@ -149,13 +156,16 @@ export const EmbeddedListSearch = ({
         return refetchForDownload(variables).then((res) => res.data.scrollAcrossEntities);
     };
 
-    const searchInput = {
+    let searchInput: SearchAcrossEntitiesInput = {
         types: entityFilters,
         query: finalQuery,
         start: (page - 1) * numResultsPerPage,
         count: numResultsPerPage,
         orFilters: finalFilters,
     };
+    if (skipCache) {
+        searchInput = { ...searchInput, searchFlags: { skipCache: true } };
+    }
 
     const { data, loading, error, refetch } = useGetSearchResults({
         variables: {

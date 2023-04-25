@@ -16,6 +16,7 @@ import { shouldShowGlossary } from '../identity/user/UserUtils';
 const ContentWrapper = styled.div`
     display: flex;
     flex: 1;
+    overflow: hidden;
 `;
 
 export default function GlossaryRoutes() {
