@@ -338,6 +338,34 @@ public class SearchRequestHandler {
   }
 
   /**
+   * Returns a {@link SearchRequest} given filters to be applied to search query and sort criterion to be applied to
+   * search results with scrolling capabilities, uses new SearchAfter instead of legacy scroll
+   *
+   * @param filters {@link Filter} list of conditions with fields and values
+   * @param sortCriterion {@link SortCriterion} to be applied to the search results
+   * @param size the number of search hits to return
+   * @param keepAliveDuration duration the search context should be kept alive i.e. 10s, 1m
+   * @return {@link SearchRequest} that contains the filtered query
+   */
+  @Nonnull
+  public SearchRequest getSearchAfterRequest(@Nullable Filter filters, @Nullable SortCriterion sortCriterion, int size,
+      String keepAliveDuration, @Nullable String pitId, @Nullable Object[] sort) {
+    SearchRequest searchRequest = new SearchRequest();
+
+    BoolQueryBuilder filterQuery = getFilterQuery(filters);
+    final SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+    searchSourceBuilder.query(filterQuery);
+    searchSourceBuilder.size(size);
+    searchSourceBuilder.fetchSource(URN_FIELD, null);
+    ESUtils.buildSortOrder(searchSourceBuilder, sortCriterion);
+    searchRequest.source(searchSourceBuilder);
+    ESUtils.setSearchAfter(searchSourceBuilder, sort, pitId, keepAliveDuration);
+
+    return searchRequest;
+  }
+
+
+  /**
    * Get search request to aggregate and get document counts per field value
    *
    * @param field Field to aggregate by

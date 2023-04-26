@@ -93,7 +93,7 @@ public interface EntitySearchService {
    * unlimited number of documents that match the input filters. HOWEVER, this is very resource intensive and is not
    * meant for real-time queries
    *
-   * @param entityName name of the entity
+   * @param entities name of the entities
    * @param filters the request map with fields and values to be applied as filters to the search query
    * @param sortCriterion {@link SortCriterion} to be applied to search results
    * @param size number of search hits to return
@@ -103,7 +103,7 @@ public interface EntitySearchService {
    * @return a {@link ScrollResult} that contains a list of filtered documents and related search result metadata
    */
   @Nonnull
-  ScrollResult scroll(@Nonnull String entityName, @Nullable Filter filters, @Nullable SortCriterion sortCriterion,
+  ScrollResult scroll(@Nonnull List<String> entities, @Nullable Filter filters, @Nullable SortCriterion sortCriterion,
       int size, @Nullable String scrollId, @Nonnull String keepAliveDuration);
 
   /**

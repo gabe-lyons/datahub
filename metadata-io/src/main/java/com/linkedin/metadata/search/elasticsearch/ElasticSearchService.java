@@ -125,11 +125,11 @@ public class ElasticSearchService implements EntitySearchService, ElasticSearchI
 
   @Nonnull
   @Override
-  public ScrollResult scroll(@Nonnull String entityName, @Nullable Filter filters,
+  public ScrollResult scroll(@Nonnull List<String> entities, @Nullable Filter filters,
       @Nullable SortCriterion sortCriterion, int size, @Nullable String scrollId, @Nonnull String keepAliveDuration) {
     log.debug("Filtering Search documents entityName: {}, filters: {}, sortCriterion: {}, size: {}, scrollId: {}",
-            entityName, filters, sortCriterion, size, scrollId);
-    return esSearchDAO.scroll(entityName, filters, sortCriterion, size, scrollId, keepAliveDuration);
+            entities, filters, sortCriterion, size, scrollId);
+    return esSearchDAO.scroll(entities, filters, sortCriterion, size, scrollId, keepAliveDuration);
   }
 
   @Nonnull

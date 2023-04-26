@@ -100,13 +100,13 @@ public class ESSearchDAO {
 
   @Nonnull
   @WithSpan
-  private ScrollResult executeSearchScrollRequestAndExtract(@Nonnull EntitySpec entitySpec,
+  private ScrollResult executeSearchScrollRequestAndExtract(@Nonnull List<EntitySpec> entitySpecs,
       @Nullable Filter filters,
       @Nonnull SearchRequest searchRequest, int size) {
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "esSearch").time()) {
       final SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
       // extract results, validated against document model as well
-      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpec, searchConfiguration)
+      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpecs, searchConfiguration)
               .extractResult(searchResponse, filters, 0, size);
       return buildScrollResult(searchResult, searchResponse.getScrollId());
     } catch (Exception e) {
@@ -181,7 +181,7 @@ public class ESSearchDAO {
    * @param from index to start the search from
    * @param size the number of search hits to return
    * @param searchFlags Structured or full text search modes, plus other misc options
-   * @return a {@link com.linkedin.metadata.dao.SearchResult} that contains a list of matched documents and related search result metadata
+   * @return a {@link SearchResult} that contains a list of matched documents and related search result metadata
    */
   @Nonnull
   public SearchResult search(@Nonnull String entityName, @Nonnull String input, @Nullable Filter postFilters,
@@ -222,7 +222,7 @@ public class ESSearchDAO {
    * unlimited number of documents that match the input filters. HOWEVER, this is very resource intensive and is not
    * meant for real-time queries
    *
-   * @param entityName name of the entity
+   * @param entities name of the entity
    * @param filters the request map with fields and values to be applied as filters to the search query
    * @param sortCriterion {@link SortCriterion} to be applied to search results
    * @param size number of search hits to return
@@ -232,19 +232,40 @@ public class ESSearchDAO {
    * @return a {@link ScrollResult} that contains a list of filtered documents and related search result metadata
    */
   @Nonnull
-  public ScrollResult scroll(@Nonnull String entityName, @Nullable Filter filters,
+  public ScrollResult scroll(@Nonnull List<String> entities, @Nullable Filter filters,
       @Nullable SortCriterion sortCriterion, int size, @Nullable String scrollId, @Nonnull String keepAliveDuration) {
-    EntitySpec entitySpec = entityRegistry.getEntitySpec(entityName);
+    List<EntitySpec> entitySpecs = entities.stream()
+        .map(entityRegistry::getEntitySpec)
+        .collect(Collectors.toList());
+    String[] indexArray = entities.stream()
+        .map(indexConvention::getEntityIndexName)
+        .toArray(String[]::new);
+    Timer.Context scrollRequestTimer = MetricUtils.timer(this.getClass(), "scrollFilterRequest").time();
     // If scrollID is null, it is the initial scroll request -> execute search request with the scroll setting
-    if (scrollId == null) {
-      final SearchRequest searchRequest =
-          SearchRequestHandler.getBuilder(entitySpec, searchConfiguration).getScrollRequest(filters, sortCriterion, size, keepAliveDuration);
-      searchRequest.indices(indexConvention.getIndexName(entitySpec));
-      return executeSearchScrollRequestAndExtract(entitySpec, filters, searchRequest, size);
+    String pitId = null;
+    Object[] sort = null;
+    if (scrollId != null) {
+      SearchAfterWrapper searchAfterWrapper = SearchAfterWrapper.fromScrollId(scrollId);
+      sort = searchAfterWrapper.getSort();
+      if (supportsPointInTime()) {
+        if (System.currentTimeMillis() + 10000 <= searchAfterWrapper.getExpirationTime()) {
+          pitId = searchAfterWrapper.getPitId();
+        } else {
+          pitId = createPointInTime(indexArray, keepAliveDuration);
+        }
+      }
+    } else if (supportsPointInTime()) {
+      pitId = createPointInTime(indexArray, keepAliveDuration);
     }
-    // Otherwise, use the scroll id to execute scroll request
-    final SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId).scroll(keepAliveDuration);
-    return executeScrollRequestAndExtract(entitySpec, filters, scrollRequest, size);
+    final SearchRequest searchRequest = SearchRequestHandler.getBuilder(entitySpecs, searchConfiguration)
+        .getSearchAfterRequest(filters, sortCriterion, size, keepAliveDuration, pitId, sort);
+
+    // PIT specifies indices in creation so it doesn't support specifying indices on the request, so we only specify if not using PIT
+    if (!supportsPointInTime()) {
+      searchRequest.indices(indexArray);
+    }
+    scrollRequestTimer.stop();
+    return executeSearchScrollRequestAndExtract(entitySpecs, filters, searchRequest, size);
   }
 
   /**

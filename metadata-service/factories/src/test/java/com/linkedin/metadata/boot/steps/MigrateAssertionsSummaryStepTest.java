@@ -28,6 +28,7 @@ import com.linkedin.metadata.service.AssertionService;
 import com.linkedin.metadata.timeseries.TimeseriesAspectService;
 import com.linkedin.metadata.utils.GenericRecordUtils;
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
@@ -115,7 +116,7 @@ public class MigrateAssertionsSummaryStepTest {
     scrollResult.setScrollId(SCROLL_ID);
 
     Mockito.when(mockSearchService.scroll(
-        Mockito.eq(Constants.ASSERTION_ENTITY_NAME),
+        Mockito.eq(Collections.singletonList(Constants.ASSERTION_ENTITY_NAME)),
         Mockito.eq(null),
         Mockito.eq(null),
         Mockito.eq(1000),
@@ -127,7 +128,7 @@ public class MigrateAssertionsSummaryStepTest {
     newScrollResult.setEntities(new SearchEntityArray());
 
     Mockito.when(mockSearchService.scroll(
-        Mockito.eq(Constants.ASSERTION_ENTITY_NAME),
+        Mockito.eq(Collections.singletonList(Constants.ASSERTION_ENTITY_NAME)),
         Mockito.eq(null),
         Mockito.eq(null),
         Mockito.eq(1000),

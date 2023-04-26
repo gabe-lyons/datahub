@@ -10,6 +10,7 @@ import com.linkedin.metadata.search.ScrollResult;
 import com.linkedin.metadata.search.SearchEntity;
 import com.linkedin.metadata.test.TestEngine;
 import com.linkedin.test.TestResults;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +58,8 @@ public class EvaluateTestsStep implements UpgradeStep {
       for (String entityType : entityTypesToEvaluate) {
         int batch = 1;
         context.report().addLine(String.format("Fetching batch %d of %s entities", batch, entityType));
-        ScrollResult scrollResult = _entitySearchService.scroll(entityType, null, null, batchSize, null, ELASTIC_TIMEOUT);
+        ScrollResult scrollResult = _entitySearchService.scroll(
+            Collections.singletonList(entityType), null, null, batchSize, null, ELASTIC_TIMEOUT);
         while (scrollResult.getEntities().size() > 0) {
           context.report().addLine(String.format("Processing batch %d of %s entities", batch, entityType));
           List<Urn> entitiesInBatch =
@@ -75,7 +77,8 @@ public class EvaluateTestsStep implements UpgradeStep {
           batch++;
           context.report().addLine(String.format("Fetching batch %d of %s entities", batch, entityType));
           scrollResult =
-              _entitySearchService.scroll(entityType, null, null, batchSize, scrollResult.getScrollId(), ELASTIC_TIMEOUT);
+              _entitySearchService.scroll(Collections.singletonList(entityType), null, null,
+                  batchSize, scrollResult.getScrollId(), ELASTIC_TIMEOUT);
         }
         context.report().addLine(String.format("Finished evaluating tests for %s entities", entityType));
       }
