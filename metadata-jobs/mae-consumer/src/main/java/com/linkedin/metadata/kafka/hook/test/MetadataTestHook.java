@@ -86,6 +86,7 @@ public class MetadataTestHook implements MetadataChangeLogHook {
     _testClient = testClient;
     _systemAuthentication = systemAuthentication;
     _isEnabled = isEnabled;
+    // Inserts tests to run into an in-memory cache that evaluates tests when the cache entry expires
     _urnObserverCache = CacheBuilder.newBuilder()
         .expireAfterWrite(cacheExpirationTime, cacheExpirationUnit)
         .removalListener(RemovalListeners.asynchronous((RemovalListener<Urn, Long>) removalNotification -> {
@@ -109,6 +110,7 @@ public class MetadataTestHook implements MetadataChangeLogHook {
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "evaluateTestOnChange").time()) {
       log.debug("Evaluating tests for urn {}", entity);
       _testClient.evaluate(entity, null, true, _systemAuthentication);
+      MetricUtils.counter(this.getClass(), "evaluateTestOnChangeSucceeded").inc();
     } catch (RemoteInvocationException e) {
       MetricUtils.counter(this.getClass(), "evaluateTestOnChangeFailed").inc();
       log.error("Error while evaluating test for entity {}", entity, e);
