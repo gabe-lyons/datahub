@@ -17,9 +17,9 @@ public class MutationsUtilsTest {
   public void testBuildMetadataChangeProposal() {
     MetadataChangeProposal metadataChangeProposal = MutationUtils.buildMetadataChangeProposalWithUrn(
         UrnUtils.getUrn("urn:li:corpuser:datahub"), CORP_USER_INFO_ASPECT_NAME, new CorpUserInfo().setActive(true));
-    assertTrue(Boolean.parseBoolean(metadataChangeProposal.getSystemMetadata().getProperties().get(UI_PRE_PROCESSED_KEY)));
+    assertEquals(UI_SOURCE, metadataChangeProposal.getSystemMetadata().getProperties().get(APP_SOURCE));
     metadataChangeProposal = MutationUtils.buildMetadataChangeProposalWithKey(new CorpUserKey().setUsername("datahub"),
         CORP_USER_ENTITY_NAME, CORP_USER_INFO_ASPECT_NAME, new CorpUserInfo().setActive(true));
-    assertTrue(Boolean.parseBoolean(metadataChangeProposal.getSystemMetadata().getProperties().get(UI_PRE_PROCESSED_KEY)));
+    assertEquals(UI_SOURCE, metadataChangeProposal.getSystemMetadata().getProperties().get(APP_SOURCE));
   }
 }

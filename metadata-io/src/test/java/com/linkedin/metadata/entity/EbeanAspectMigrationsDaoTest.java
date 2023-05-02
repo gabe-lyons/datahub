@@ -1,6 +1,7 @@
 package com.linkedin.metadata.entity;
 
 import com.linkedin.metadata.EbeanTestUtils;
+import com.linkedin.metadata.config.PreProcessHooks;
 import com.linkedin.metadata.entity.ebean.EbeanAspectDao;
 import com.linkedin.metadata.entity.ebean.EbeanRetentionService;
 import com.linkedin.metadata.event.EventProducer;
@@ -26,7 +27,10 @@ public class EbeanAspectMigrationsDaoTest extends AspectMigrationsDaoTest<EbeanA
     EbeanAspectDao dao = new EbeanAspectDao(server);
     dao.setConnectionValidated(true);
     _mockUpdateIndicesService = mock(UpdateIndicesService.class);
-    _entityService = new EntityService(dao, _mockProducer, _testEntityRegistry, true, _mockUpdateIndicesService);
+    PreProcessHooks preProcessHooks = new PreProcessHooks();
+    preProcessHooks.setUiEnabled(true);
+    _entityService = new EntityService(dao, _mockProducer, _testEntityRegistry, true,
+        _mockUpdateIndicesService, preProcessHooks);
     _retentionService = new EbeanRetentionService(_entityService, server, 1000);
     _entityService.setRetentionService(_retentionService);
 

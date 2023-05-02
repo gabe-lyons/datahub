@@ -1,5 +1,6 @@
 package com.linkedin.gms.factory.entity;
 
+import com.linkedin.datahub.graphql.featureflags.FeatureFlags;
 import com.linkedin.gms.factory.common.TopicConventionFactory;
 import com.linkedin.gms.factory.config.ConfigurationProvider;
 import com.linkedin.metadata.dao.producer.KafkaEventProducer;
@@ -36,7 +37,8 @@ public class EntityServiceFactory {
       UpdateIndicesService updateIndicesService) {
 
     final KafkaEventProducer eventProducer = new KafkaEventProducer(producer, convention, kafkaHealthChecker);
+    FeatureFlags featureFlags = configurationProvider.getFeatureFlags();
     return new EntityService(aspectDao, eventProducer, entityRegistry,
-        configurationProvider.getFeatureFlags().isAlwaysEmitChangeLog(), updateIndicesService);
+        featureFlags.isAlwaysEmitChangeLog(), updateIndicesService, featureFlags.getPreProcessHooks());
   }
 }

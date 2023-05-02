@@ -40,6 +40,7 @@ import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.aspect.Aspect;
 import com.linkedin.metadata.aspect.VersionedAspect;
+import com.linkedin.metadata.config.PreProcessHooks;
 import com.linkedin.metadata.entity.ebean.EbeanAspectV2;
 import com.linkedin.metadata.entity.restoreindices.RestoreIndicesArgs;
 import com.linkedin.metadata.entity.restoreindices.RestoreIndicesResult;
@@ -167,6 +168,7 @@ public class EntityService {
   private RetentionService _retentionService;
   private final Boolean _alwaysEmitChangeLog;
   private final UpdateIndicesService _updateIndicesService;
+  private final PreProcessHooks _preProcessHooks;
   public static final String DEFAULT_RUN_ID = "no-run-id-provided";
   public static final String BROWSE_PATHS = "browsePaths";
   public static final String DATA_PLATFORM_INSTANCE = "dataPlatformInstance";
@@ -182,7 +184,8 @@ public class EntityService {
       @Nonnull final EventProducer producer,
       @Nonnull final EntityRegistry entityRegistry,
       final boolean alwaysEmitChangeLog,
-      final UpdateIndicesService updateIndicesService) {
+      final UpdateIndicesService updateIndicesService,
+      final PreProcessHooks preProcessHooks) {
 
     _aspectDao = aspectDao;
     _producer = producer;
@@ -190,6 +193,7 @@ public class EntityService {
     _entityToValidAspects = buildEntityToValidAspects(entityRegistry);
     _alwaysEmitChangeLog = alwaysEmitChangeLog;
     _updateIndicesService = updateIndicesService;
+    _preProcessHooks = preProcessHooks;
   }
 
   /**
@@ -1060,14 +1064,7 @@ public class EntityService {
       log.debug("Serialized MCL event: {}", metadataChangeLog);
 
       produceMetadataChangeLog(entityUrn, aspectSpec, metadataChangeLog);
-      if (metadataChangeLog.getSystemMetadata() != null) {
-        if (metadataChangeLog.getSystemMetadata().getProperties() != null) {
-          if (Boolean.parseBoolean(metadataChangeLog.getSystemMetadata().getProperties().get(UI_PRE_PROCESSED_KEY))) {
-            // Pre-process the update indices hook for UI updates to avoid perceived lag from Kafka
-            _updateIndicesService.handleChangeEvent(metadataChangeLog);
-          }
-        }
-      }
+      preprocessEvent(metadataChangeLog);
 
       return true;
     } else {
@@ -1075,6 +1072,19 @@ public class EntityService {
           "Skipped producing MetadataChangeLog for ingested aspect {}, urn {}. Aspect has not changed.",
           mcp.getAspectName(), entityUrn);
       return false;
+    }
+  }
+
+  private void preprocessEvent(MetadataChangeLog metadataChangeLog) {
+    if (_preProcessHooks.isUiEnabled()) {
+      if (metadataChangeLog.getSystemMetadata() != null) {
+        if (metadataChangeLog.getSystemMetadata().getProperties() != null) {
+          if (UI_SOURCE.equals(metadataChangeLog.getSystemMetadata().getProperties().get(APP_SOURCE))) {
+            // Pre-process the update indices hook for UI updates to avoid perceived lag from Kafka
+            _updateIndicesService.handleChangeEvent(metadataChangeLog);
+          }
+        }
+      }
     }
   }
 

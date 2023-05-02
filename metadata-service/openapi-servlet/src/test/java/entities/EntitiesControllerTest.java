@@ -7,6 +7,7 @@ import com.datahub.authentication.AuthenticationContext;
 import com.datahub.authorization.AuthorizationResult;
 import com.datahub.authorization.AuthorizerChain;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.linkedin.metadata.config.PreProcessHooks;
 import com.linkedin.metadata.entity.AspectDao;
 import com.linkedin.metadata.event.EventProducer;
 import com.linkedin.metadata.models.registry.EntityRegistry;
@@ -61,7 +62,10 @@ public class EntitiesControllerTest {
     AspectDao aspectDao = Mockito.mock(AspectDao.class);
     EventProducer mockEntityEventProducer = Mockito.mock(EventProducer.class);
     UpdateIndicesService mockUpdateIndicesService = mock(UpdateIndicesService.class);
-    MockEntityService mockEntityService = new MockEntityService(aspectDao, mockEntityEventProducer, mockEntityRegistry, mockUpdateIndicesService);
+    PreProcessHooks preProcessHooks = new PreProcessHooks();
+    preProcessHooks.setUiEnabled(true);
+    MockEntityService mockEntityService = new MockEntityService(aspectDao, mockEntityEventProducer, mockEntityRegistry,
+        mockUpdateIndicesService, preProcessHooks);
     AuthorizerChain authorizerChain = Mockito.mock(AuthorizerChain.class);
     _entitiesController = new EntitiesController(mockEntityService, new ObjectMapper(), authorizerChain);
     Authentication authentication = Mockito.mock(Authentication.class);

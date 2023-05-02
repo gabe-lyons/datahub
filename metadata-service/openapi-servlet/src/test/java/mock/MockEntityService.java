@@ -19,6 +19,7 @@ import com.linkedin.entity.Aspect;
 import com.linkedin.entity.AspectType;
 import com.linkedin.entity.EnvelopedAspect;
 import com.linkedin.metadata.aspect.VersionedAspect;
+import com.linkedin.metadata.config.PreProcessHooks;
 import com.linkedin.metadata.entity.AspectDao;
 import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.entity.ListResult;
@@ -57,8 +58,8 @@ import static entities.EntitiesControllerTest.*;
 
 public class MockEntityService extends EntityService {
   public MockEntityService(@Nonnull AspectDao aspectDao, @Nonnull EventProducer producer, @Nonnull EntityRegistry entityRegistry, @Nonnull
-      UpdateIndicesService updateIndicesService) {
-    super(aspectDao, producer, entityRegistry, true, updateIndicesService);
+      UpdateIndicesService updateIndicesService, PreProcessHooks preProcessHooks) {
+    super(aspectDao, producer, entityRegistry, true, updateIndicesService, preProcessHooks);
   }
 
   @Override

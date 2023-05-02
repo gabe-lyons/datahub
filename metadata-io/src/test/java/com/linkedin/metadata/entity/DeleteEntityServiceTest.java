@@ -9,6 +9,7 @@ import com.linkedin.container.Container;
 import com.linkedin.entity.EntityResponse;
 import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.metadata.Constants;
+import com.linkedin.metadata.config.PreProcessHooks;
 import com.linkedin.metadata.entity.ebean.EbeanAspectDao;
 import com.linkedin.metadata.event.EventProducer;
 import com.linkedin.metadata.graph.GraphService;
@@ -49,7 +50,10 @@ public class DeleteEntityServiceTest {
         .getResourceAsStream("entity-registry.yml"));
     _aspectDao = mock(EbeanAspectDao.class);
     _mockUpdateIndicesService = mock(UpdateIndicesService.class);
-    _entityService = new EntityService(_aspectDao, mock(EventProducer.class), _entityRegistry, true, _mockUpdateIndicesService);
+    PreProcessHooks preProcessHooks = new PreProcessHooks();
+    preProcessHooks.setUiEnabled(true);
+    _entityService = new EntityService(_aspectDao, mock(EventProducer.class), _entityRegistry, true,
+        _mockUpdateIndicesService, preProcessHooks);
     _deleteEntityService = new DeleteEntityService(_entityService, _graphService);
   }
 

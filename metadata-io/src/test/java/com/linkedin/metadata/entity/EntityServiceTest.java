@@ -1256,7 +1256,7 @@ abstract public class EntityServiceTest<T_AD extends AspectDao, T_RS extends Ret
         gmce.setAspectName("editableDatasetProperties");
         SystemMetadata systemMetadata = new SystemMetadata();
         StringMap properties = new StringMap();
-        properties.put(UI_PRE_PROCESSED_KEY, "true");
+        properties.put(APP_SOURCE, UI_SOURCE);
         systemMetadata.setProperties(properties);
         gmce.setSystemMetadata(systemMetadata);
         JacksonDataTemplateCodec dataTemplateCodec = new JacksonDataTemplateCodec();
@@ -1269,8 +1269,7 @@ abstract public class EntityServiceTest<T_AD extends AspectDao, T_RS extends Ret
         ArgumentCaptor<MetadataChangeLog> captor = ArgumentCaptor.forClass(MetadataChangeLog.class);
         verify(_mockProducer, times(1)).produceMetadataChangeLog(Mockito.eq(entityUrn),
             Mockito.any(), captor.capture());
-        assertTrue(
-            Boolean.parseBoolean(captor.getValue().getSystemMetadata().getProperties().get(UI_PRE_PROCESSED_KEY)));
+        assertEquals(UI_SOURCE, captor.getValue().getSystemMetadata().getProperties().get(APP_SOURCE));
     }
 
     @Nonnull

@@ -432,7 +432,7 @@ public class UpdateIndicesHookTest {
   private MetadataChangeLog createUpstreamLineageMCLUIPreProcessed(Urn upstreamUrn, Urn downstreamUrn, ChangeType changeType) throws Exception {
     final MetadataChangeLog metadataChangeLog = createUpstreamLineageMCL(upstreamUrn, downstreamUrn, changeType);
     final StringMap properties = new StringMap();
-    properties.put(UI_PRE_PROCESSED_KEY, "true");
+    properties.put(APP_SOURCE, UI_SOURCE);
     final SystemMetadata systemMetadata = new SystemMetadata().setProperties(properties);
     metadataChangeLog.setSystemMetadata(systemMetadata);
     return metadataChangeLog;

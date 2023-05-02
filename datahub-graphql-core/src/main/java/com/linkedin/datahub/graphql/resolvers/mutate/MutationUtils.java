@@ -70,7 +70,7 @@ public class MutationUtils {
     // Assumes proposal is generated first from the builder methods above so SystemMetadata is empty
     SystemMetadata systemMetadata = new SystemMetadata();
     StringMap properties = new StringMap();
-    properties.put(UI_PRE_PROCESSED_KEY, "true");
+    properties.put(APP_SOURCE, UI_SOURCE);
     systemMetadata.setProperties(properties);
     proposal.setSystemMetadata(systemMetadata);
     return proposal;

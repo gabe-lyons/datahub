@@ -2,6 +2,7 @@ package com.linkedin.metadata.entity;
 
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.linkedin.metadata.CassandraTestUtils;
+import com.linkedin.metadata.config.PreProcessHooks;
 import com.linkedin.metadata.entity.cassandra.CassandraAspectDao;
 import com.linkedin.metadata.entity.cassandra.CassandraRetentionService;
 import com.linkedin.metadata.event.EventProducer;
@@ -46,7 +47,10 @@ public class CassandraAspectMigrationsDaoTest extends AspectMigrationsDaoTest<Ca
     dao.setConnectionValidated(true);
     _mockProducer = mock(EventProducer.class);
     _mockUpdateIndicesService = mock(UpdateIndicesService.class);
-    _entityService = new EntityService(dao, _mockProducer, _testEntityRegistry, true, _mockUpdateIndicesService);
+    PreProcessHooks preProcessHooks = new PreProcessHooks();
+    preProcessHooks.setUiEnabled(true);
+    _entityService = new EntityService(dao, _mockProducer, _testEntityRegistry, true, _mockUpdateIndicesService,
+        preProcessHooks);
     _retentionService = new CassandraRetentionService(_entityService, session, 1000);
     _entityService.setRetentionService(_retentionService);
 
