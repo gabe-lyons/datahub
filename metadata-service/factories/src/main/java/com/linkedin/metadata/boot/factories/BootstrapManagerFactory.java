@@ -131,7 +131,8 @@ public class BootstrapManagerFactory {
         _configurationProvider);
 
     final MigrateAssertionsSummaryStep assertionsSummaryStep =
-        new MigrateAssertionsSummaryStep(_entityService, _entitySearchService, _assertionService, _timeseriesAspectService);
+        new MigrateAssertionsSummaryStep(_entityService, _entitySearchService, _assertionService, _timeseriesAspectService,
+            _configurationProvider);
     final MigrateIncidentsSummaryStep incidentsSummaryStep =
         new MigrateIncidentsSummaryStep(_entityService, _entitySearchService, _incidentService);
 

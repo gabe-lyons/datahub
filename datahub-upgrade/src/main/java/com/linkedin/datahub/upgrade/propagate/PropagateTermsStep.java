@@ -140,7 +140,7 @@ public class PropagateTermsStep implements UpgradeStep {
       context.report().addLine(String.format("Fetching batch %d", batch));
       ScrollResult scrollResult =
           _entitySearchService.scroll(Collections.singletonList(Constants.DATASET_ENTITY_NAME),
-              destinationFilter, null, 1000, null, "1m");
+              destinationFilter, null, 1000, null, PropagateTerms.ELASTIC_TIMEOUT);
       while (scrollResult.getEntities().size() > 0) {
         context.report().addLine(String.format("Processing batch %d", batch));
         int numAspectsProducedInBatch = processBatch(scrollResult, sourceEntityDetails, runId, threshold, allowedTerms);
@@ -148,7 +148,7 @@ public class PropagateTermsStep implements UpgradeStep {
         batch++;
         context.report().addLine(String.format("Fetching batch %d", batch));
         scrollResult = _entitySearchService.scroll(Collections.singletonList(Constants.DATASET_ENTITY_NAME),
-            destinationFilter, null, 1000, scrollResult.getScrollId(), "1m");
+            destinationFilter, null, 1000, scrollResult.getScrollId(), PropagateTerms.ELASTIC_TIMEOUT);
       }
       context.report().addLine(String.format("Batch %d is empty. Finishing job.", batch));
 

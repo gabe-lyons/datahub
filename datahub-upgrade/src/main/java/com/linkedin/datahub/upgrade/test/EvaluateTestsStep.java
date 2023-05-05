@@ -28,7 +28,7 @@ public class EvaluateTestsStep implements UpgradeStep {
 
   private static final String ELASTIC_TIMEOUT = System.getenv()
       .getOrDefault(EvaluateTests.ELASTIC_TIMEOUT_ENV_NAME,
-          "1m");
+          "5m");
 
   private final EntitySearchService _entitySearchService;
   private final TestEngine _testEngine;

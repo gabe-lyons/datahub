@@ -33,7 +33,7 @@ class TermFetcher {
     int batch = 1;
     ScrollResult scrollResult =
         _entitySearchService.scroll(Collections.singletonList(Constants.GLOSSARY_TERM_ENTITY_NAME),
-            null, null, 1000, null, "1m");
+            null, null, 1000, null, PropagateTerms.ELASTIC_TIMEOUT);
     while (scrollResult.getEntities().size() > 0) {
       log.info("Processing term batch {}", batch);
       Set<Urn> allowedTermsInBatch = filterAllowedTerms(
@@ -42,7 +42,7 @@ class TermFetcher {
       allowedTerms.addAll(allowedTermsInBatch);
       scrollResult =
           _entitySearchService.scroll(Collections.singletonList(Constants.GLOSSARY_TERM_ENTITY_NAME),
-              null, null, 1000, scrollResult.getScrollId(), "1m");
+              null, null, 1000, scrollResult.getScrollId(), PropagateTerms.ELASTIC_TIMEOUT);
     }
     log.info("Successfully fetched all terms. There are {} allowed terms", allowedTerms.size());
     return allowedTerms;

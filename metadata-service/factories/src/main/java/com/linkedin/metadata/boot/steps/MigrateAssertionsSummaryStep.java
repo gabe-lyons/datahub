@@ -7,6 +7,7 @@ import com.linkedin.assertion.AssertionRunEvent;
 import com.linkedin.common.AssertionSummaryDetails;
 import com.linkedin.common.AssertionsSummary;
 import com.linkedin.common.urn.Urn;
+import com.linkedin.gms.factory.config.ConfigurationProvider;
 import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.aspect.EnvelopedAspect;
 import com.linkedin.metadata.boot.BootstrapStep;
@@ -42,17 +43,20 @@ public class MigrateAssertionsSummaryStep extends UpgradeStep {
   private final EntitySearchService _entitySearchService;
   private final AssertionService _assertionService;
   private final TimeseriesAspectService _timeseriesAspectService;
+  private final ConfigurationProvider _configurationProvider;
 
   public MigrateAssertionsSummaryStep(
       EntityService entityService,
       EntitySearchService entitySearchService,
       AssertionService assertionService,
-      TimeseriesAspectService timeseriesAspectService
+      TimeseriesAspectService timeseriesAspectService,
+      ConfigurationProvider configurationProvider
   ) {
     super(entityService, VERSION, UPGRADE_ID);
     _entitySearchService = entitySearchService;
     _assertionService = assertionService;
     _timeseriesAspectService = timeseriesAspectService;
+    _configurationProvider = configurationProvider;
   }
 
   @Nonnull
@@ -66,7 +70,7 @@ public class MigrateAssertionsSummaryStep extends UpgradeStep {
 
     int batch = 1;
     ScrollResult scrollResult = _entitySearchService.scroll(Collections.singletonList(Constants.ASSERTION_ENTITY_NAME),
-        null, null, BATCH_SIZE, null, "1m");
+        null, null, BATCH_SIZE, null, _configurationProvider.getElasticSearch().getScroll().getTimeout());
 
     while (scrollResult.getEntities().size() > 0) {
       List<Urn> assertionsInBatch =  scrollResult.getEntities().stream().map(SearchEntity::getEntity).collect(Collectors.toList());
@@ -79,7 +83,7 @@ public class MigrateAssertionsSummaryStep extends UpgradeStep {
       batch++;
       scrollResult =
           _entitySearchService.scroll(Collections.singletonList(Constants.ASSERTION_ENTITY_NAME),
-              null, null, BATCH_SIZE, scrollResult.getScrollId(), "1m");
+              null, null, BATCH_SIZE, scrollResult.getScrollId(), _configurationProvider.getElasticSearch().getScroll().getTimeout());
     }
   }
 
