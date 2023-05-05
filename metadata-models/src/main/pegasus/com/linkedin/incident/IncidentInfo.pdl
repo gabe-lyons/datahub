@@ -5,7 +5,7 @@ import com.linkedin.common.EntityReference
 import com.linkedin.common.Urn
 
 /**
- * Information about an incident raised on an asset
+ * Information about an incident raised on an asset.
  */
 @Aspect = {
   "name": "incidentInfo"
@@ -14,11 +14,19 @@ record IncidentInfo {
   /**
   * The type of incident
   */
+  @Searchable = {
+    "addToFilters": true,
+    "filterNameOverride": "Type"
+  }
   type: IncidentType
 
   /**
   * An optional custom incident type. Present only if type is 'CUSTOM'.
   */
+  @Searchable = {
+    "addToFilters": true,
+    "filterNameOverride": "Other Type"
+  }
   customType: optional string
 
   /**
@@ -37,7 +45,7 @@ record IncidentInfo {
   @Relationship = {
     "/*": {
       "name": "IncidentOn",
-      "entityTypes": [ "dataset", "chart", "dashboard", "dataFlow", "dataJob" ]
+      "entityTypes": [ "dataset", "chart", "dashboard", "dataFlow", "dataJob", "schemaField" ]
     }
   }
   @Searchable = {
@@ -46,6 +54,15 @@ record IncidentInfo {
     }
   }
   entities: array[Urn]
+
+  /**
+  * A numeric severity or priority for the incident. On the UI we will translate this into something easy to understand.
+  */
+  @Searchable = {
+    "addToFilters": true,
+    "filterNameOverride": "Priority"
+  }
+  priority: optional int = 0
 
   /**
    * The current status of an incident, i.e. active or inactive.

@@ -5,6 +5,7 @@ import com.linkedin.gms.factory.assertions.AssertionServiceFactory;
 import com.linkedin.gms.factory.config.ConfigurationProvider;
 import com.linkedin.gms.factory.entity.EntityServiceFactory;
 import com.linkedin.gms.factory.entityregistry.EntityRegistryFactory;
+import com.linkedin.gms.factory.incident.IncidentServiceFactory;
 import com.linkedin.gms.factory.search.EntitySearchServiceFactory;
 import com.linkedin.gms.factory.search.SearchDocumentTransformerFactory;
 import com.linkedin.metadata.boot.BootstrapManager;
@@ -21,6 +22,7 @@ import com.linkedin.metadata.boot.steps.IngestPoliciesStep;
 import com.linkedin.metadata.boot.steps.IngestRetentionPoliciesStep;
 import com.linkedin.metadata.boot.steps.IngestRolesStep;
 import com.linkedin.metadata.boot.steps.IngestRootUserStep;
+import com.linkedin.metadata.boot.steps.MigrateIncidentsSummaryStep;
 import com.linkedin.metadata.boot.steps.RemoveClientIdAspectStep;
 import com.linkedin.metadata.boot.steps.RestoreColumnLineageIndices;
 import com.linkedin.metadata.boot.steps.RestoreDbtSiblingsIndices;
@@ -32,6 +34,7 @@ import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.search.transformer.SearchDocumentTransformer;
+import com.linkedin.metadata.service.IncidentService;
 import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -49,7 +52,7 @@ import org.springframework.context.annotation.Scope;
 
 @Configuration
 @Import({EntityServiceFactory.class, EntityRegistryFactory.class, EntitySearchServiceFactory.class,
-    SearchDocumentTransformerFactory.class, AssertionServiceFactory.class})
+    SearchDocumentTransformerFactory.class, AssertionServiceFactory.class, IncidentServiceFactory.class})
 public class BootstrapManagerFactory {
 
   @Autowired
@@ -71,6 +74,10 @@ public class BootstrapManagerFactory {
   @Autowired
   @Qualifier("assertionService")
   private AssertionService _assertionService;
+
+  @Autowired
+  @Qualifier("incidentService")
+  private IncidentService _incidentService;
 
   @Autowired
   @Qualifier("timeseriesAspectService")
@@ -124,6 +131,8 @@ public class BootstrapManagerFactory {
         _configurationProvider);
     final AssertionsSummaryStep assertionsSummaryStep =
         new AssertionsSummaryStep(_entityService, _entitySearchService, _assertionService, _timeseriesAspectService);
+    final MigrateIncidentsSummaryStep incidentsSummaryStep =
+        new MigrateIncidentsSummaryStep(_entityService, _entitySearchService, _incidentService);
 
     final List<BootstrapStep> finalSteps = new ArrayList<>(ImmutableList.of(
             waitForSystemUpdateStep,
@@ -140,6 +149,7 @@ public class BootstrapManagerFactory {
             indexDataPlatformsStep,
             restoreColumnLineageIndices,
             assertionsSummaryStep,
+            incidentsSummaryStep,
             // Saas-only
             _ingestMetadataTestsStep,
             ingestDefaultTagsStep

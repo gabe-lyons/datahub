@@ -1,6 +1,8 @@
 package com.linkedin.metadata.kafka.hook.incident;
 
 import com.google.common.collect.ImmutableSet;
+import com.linkedin.common.IncidentSummaryDetails;
+import com.linkedin.common.IncidentSummaryDetailsArray;
 import com.linkedin.common.IncidentsSummary;
 import com.linkedin.common.Status;
 import com.linkedin.common.urn.Urn;
@@ -11,6 +13,7 @@ import com.linkedin.gms.factory.incident.IncidentServiceFactory;
 import com.linkedin.incident.IncidentInfo;
 import com.linkedin.incident.IncidentState;
 import com.linkedin.incident.IncidentStatus;
+import com.linkedin.incident.IncidentType;
 import com.linkedin.metadata.kafka.hook.HookUtils;
 import com.linkedin.metadata.kafka.hook.MetadataChangeLogHook;
 import com.linkedin.metadata.models.registry.EntityRegistry;
@@ -114,7 +117,7 @@ public class IncidentsSummaryHook implements MetadataChangeLogHook {
    * Handle an incident update by adding to either resolved or active incidents for an entity.
    */
   private void handleIncidentUpdated(@Nonnull final Urn incidentUrn) {
-    // 1. Fetch incident info.
+    // 1. Fetch incident info + status
     IncidentInfo incidentInfo = _incidentService.getIncidentInfo(incidentUrn);
 
     // 2. Retrieve associated urns.
@@ -123,7 +126,7 @@ public class IncidentsSummaryHook implements MetadataChangeLogHook {
 
       // 3. For each urn, resolve the entity incidents aspect and add to active or resolved incidents.
       for (Urn entityUrn : incidentEntities) {
-        addIncidentToSummary(incidentUrn, entityUrn, incidentInfo.getStatus());
+        addIncidentToSummary(incidentUrn, entityUrn, incidentInfo);
       }
     } else {
       log.warn(
@@ -144,7 +147,6 @@ public class IncidentsSummaryHook implements MetadataChangeLogHook {
     IncidentsSummaryUtils.removeIncidentFromResolvedSummary(incidentUrn, summary);
     IncidentsSummaryUtils.removeIncidentFromActiveSummary(incidentUrn, summary);
 
-
     // 3. Emit the change back!
     updateIncidentSummary(entityUrn, summary);
   }
@@ -153,22 +155,26 @@ public class IncidentsSummaryHook implements MetadataChangeLogHook {
    * Adds an incident to the IncidentSummary aspect for a related entity.
    * This is used to search for entity by active and resolved incidents.
    */
-  private void addIncidentToSummary(@Nonnull final Urn incidentUrn, @Nonnull final Urn entityUrn, @Nonnull final IncidentStatus status) {
+  private void addIncidentToSummary(@Nonnull final Urn incidentUrn, @Nonnull final Urn entityUrn, @Nonnull final IncidentInfo info) {
     // 1. Fetch the latest incident summary for the entity
     IncidentsSummary summary = getIncidentsSummary(entityUrn);
+    IncidentStatus status = info.getStatus();
+    IncidentSummaryDetails details = buildIncidentSummaryDetails(incidentUrn, info);
 
     // 2. Add the incident to active or resolved incidents
     if (IncidentState.ACTIVE.equals(status.getState())) {
-      // First, ensure this isn't in resolved anymore.
+      // First, ensure this isn't in any summaries anymore.
       IncidentsSummaryUtils.removeIncidentFromResolvedSummary(incidentUrn, summary);
+
       // Then, add to active.
-      IncidentsSummaryUtils.addIncidentToActiveSummary(incidentUrn, summary);
+      IncidentsSummaryUtils.addIncidentToActiveSummary(details, summary);
 
     } else if (IncidentState.RESOLVED.equals(status.getState())) {
-      // First, ensure this isn't in active anymore.
+      // First, ensure this isn't in any summaries anymore.
       IncidentsSummaryUtils.removeIncidentFromActiveSummary(incidentUrn, summary);
+
       // Then, add to resolved.
-      IncidentsSummaryUtils.addIncidentToResolvedSummary(incidentUrn, summary);
+      IncidentsSummaryUtils.addIncidentToResolvedSummary(details, summary);
     }
 
     // 3. Emit the change back!
@@ -178,7 +184,32 @@ public class IncidentsSummaryHook implements MetadataChangeLogHook {
   @Nonnull
   private IncidentsSummary getIncidentsSummary(@Nonnull final Urn entityUrn) {
     IncidentsSummary maybeIncidentsSummary = _incidentService.getIncidentsSummary(entityUrn);
-    return maybeIncidentsSummary == null ? new IncidentsSummary() : maybeIncidentsSummary;
+    return maybeIncidentsSummary == null
+        ? new IncidentsSummary()
+          .setResolvedIncidentDetails(new IncidentSummaryDetailsArray())
+          .setActiveIncidentDetails(new IncidentSummaryDetailsArray())
+        : maybeIncidentsSummary;
+  }
+
+  @Nonnull
+  private IncidentSummaryDetails buildIncidentSummaryDetails(
+      @Nonnull final Urn urn,
+      @Nonnull final IncidentInfo info) {
+    IncidentSummaryDetails incidentSummaryDetails = new IncidentSummaryDetails();
+    incidentSummaryDetails.setUrn(urn);
+    incidentSummaryDetails.setCreatedAt(info.getCreated().getTime());
+    if (IncidentType.CUSTOM.equals(info.getType())) {
+      incidentSummaryDetails.setType(info.getCustomType());
+    } else {
+      incidentSummaryDetails.setType(info.getType().toString());
+    }
+    if (info.hasPriority()) {
+      incidentSummaryDetails.setPriority(info.getPriority());
+    }
+    if (IncidentState.RESOLVED.equals(info.getStatus().getState())) {
+      incidentSummaryDetails.setResolvedAt(info.getStatus().getLastUpdated().getTime());
+    }
+    return incidentSummaryDetails;
   }
 
   /**
