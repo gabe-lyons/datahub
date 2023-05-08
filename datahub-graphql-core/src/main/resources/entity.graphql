@@ -869,6 +869,11 @@ enum EntityType {
     A dataset query
     """
     QUERY
+
+    """
+    A connection to an external source.
+    """
+    DATAHUB_CONNECTION
 }
 
 """

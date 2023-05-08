@@ -8,6 +8,7 @@ import com.linkedin.datahub.graphql.generated.CorpGroup;
 import com.linkedin.datahub.graphql.generated.CorpUser;
 import com.linkedin.datahub.graphql.generated.Dashboard;
 import com.linkedin.datahub.graphql.generated.DataFlow;
+import com.linkedin.datahub.graphql.generated.DataHubConnection;
 import com.linkedin.datahub.graphql.generated.DataHubPolicy;
 import com.linkedin.datahub.graphql.generated.DataHubRole;
 import com.linkedin.datahub.graphql.generated.DataHubView;
@@ -174,6 +175,11 @@ public class UrnToEntityMapper implements ModelMapper<com.linkedin.common.urn.Ur
       partialEntity = new DataHubView();
       ((DataHubView) partialEntity).setUrn(input.toString());
       ((DataHubView) partialEntity).setType(EntityType.DATAHUB_VIEW);
+    }
+    if (input.getEntityType().equals(DATAHUB_CONNECTION_ENTITY_NAME)) {
+      partialEntity = new DataHubConnection();
+      ((DataHubConnection) partialEntity).setUrn(input.toString());
+      ((DataHubConnection) partialEntity).setType(EntityType.DATAHUB_CONNECTION);
     }
     return partialEntity;
   }

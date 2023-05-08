@@ -117,6 +117,11 @@ public class PoliciesConfig {
       "Manage Public Views",
       "Create, update, and delete any Public (shared) Views.");
 
+  public static final Privilege MANAGE_CONNECTIONS_PRIVILEGE = Privilege.of(
+      "MANAGE_CONNECTIONS",
+      "Manage Connections",
+      "Manage connections to external platforms.");
+
   public static final List<Privilege> PLATFORM_PRIVILEGES = ImmutableList.of(
       MANAGE_POLICIES_PRIVILEGE,
       MANAGE_USERS_AND_GROUPS_PRIVILEGE,
@@ -136,7 +141,8 @@ public class PoliciesConfig {
       CREATE_DOMAINS_PRIVILEGE,
       CREATE_GLOBAL_ANNOUNCEMENTS_PRIVILEGE,
       MANAGE_GLOBAL_SETTINGS,
-      MANAGE_GLOBAL_VIEWS
+      MANAGE_GLOBAL_VIEWS,
+      MANAGE_CONNECTIONS_PRIVILEGE
   );
 
   // Resource Privileges //

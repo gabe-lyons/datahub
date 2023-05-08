@@ -305,6 +305,10 @@ public class Constants {
   public static final String ACTION_REQUEST_INFO_ASPECT_NAME = "actionRequestInfo";
   public static final String ACTION_REQUEST_STATUS_ASPECT_NAME = "actionRequestStatus";
 
+  // Connection
+  public static final String DATAHUB_CONNECTION_ENTITY_NAME = "dataHubConnection";
+  public static final String DATAHUB_CONNECTION_DETAILS_ASPECT_NAME = "dataHubConnectionDetails";
+
   /**
    * Relationships
    */

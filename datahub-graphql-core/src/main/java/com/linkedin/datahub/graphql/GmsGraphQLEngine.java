@@ -44,6 +44,7 @@ import com.linkedin.datahub.graphql.generated.DashboardInfo;
 import com.linkedin.datahub.graphql.generated.DashboardStatsSummary;
 import com.linkedin.datahub.graphql.generated.DashboardUserUsageCounts;
 import com.linkedin.datahub.graphql.generated.DataFlow;
+import com.linkedin.datahub.graphql.generated.DataHubConnection;
 import com.linkedin.datahub.graphql.generated.DataHubView;
 import com.linkedin.datahub.graphql.generated.DataJob;
 import com.linkedin.datahub.graphql.generated.DataJobInputOutput;
@@ -111,6 +112,7 @@ import com.linkedin.datahub.graphql.resolvers.browse.BrowseResolver;
 import com.linkedin.datahub.graphql.resolvers.browse.EntityBrowsePathsResolver;
 import com.linkedin.datahub.graphql.resolvers.chart.ChartStatsSummaryResolver;
 import com.linkedin.datahub.graphql.resolvers.config.AppConfigResolver;
+import com.linkedin.datahub.graphql.resolvers.connection.UpsertConnectionResolver;
 import com.linkedin.datahub.graphql.resolvers.constraint.ConstraintsResolver;
 import com.linkedin.datahub.graphql.resolvers.constraint.CreateTermConstraintResolver;
 import com.linkedin.datahub.graphql.resolvers.container.ContainerEntitiesResolver;
@@ -280,6 +282,7 @@ import com.linkedin.datahub.graphql.types.auth.AccessTokenMetadataType;
 import com.linkedin.datahub.graphql.types.chart.ChartType;
 import com.linkedin.datahub.graphql.types.common.mappers.OperationMapper;
 import com.linkedin.datahub.graphql.types.common.mappers.UrnToEntityMapper;
+import com.linkedin.datahub.graphql.types.connection.DataHubConnectionType;
 import com.linkedin.datahub.graphql.types.container.ContainerType;
 import com.linkedin.datahub.graphql.types.corpgroup.CorpGroupType;
 import com.linkedin.datahub.graphql.types.corpuser.CorpUserType;
@@ -357,6 +360,7 @@ import org.dataloader.BatchLoaderContextProvider;
 import org.dataloader.DataLoader;
 import org.dataloader.DataLoaderOptions;
 
+import static com.linkedin.datahub.graphql.AcrylConstants.*;
 import static com.linkedin.datahub.graphql.Constants.*;
 import static com.linkedin.metadata.Constants.*;
 import static graphql.scalars.ExtendedScalars.*;
@@ -437,6 +441,7 @@ public class GmsGraphQLEngine {
     private final SchemaFieldType schemaFieldType;
     private final DataHubViewType dataHubViewType;
     private final QueryType queryType;
+    private final DataHubConnectionType connectionType; // Saas-ONLY
 
     // SaaS only
     private final ProposalService proposalService;
@@ -534,6 +539,7 @@ public class GmsGraphQLEngine {
         this.schemaFieldType = new SchemaFieldType();
         this.dataHubViewType = new DataHubViewType(entityClient);
         this.queryType = new QueryType(entityClient);
+        this.connectionType = new DataHubConnectionType(entityClient, secretService); // SaaS only
 
         // Init Lists
         this.entityTypes = ImmutableList.of(
@@ -565,7 +571,8 @@ public class GmsGraphQLEngine {
             dataHubRoleType,
             schemaFieldType,
             dataHubViewType,
-            queryType
+            queryType,
+            connectionType // Saas only
         );
         this.loadableTypes = new ArrayList<>(entityTypes);
         this.ownerTypes = ImmutableList.of(corpUserType, corpGroupType);
@@ -639,6 +646,7 @@ public class GmsGraphQLEngine {
         configureTestResolvers(builder);
         configureViewResolvers(builder);
         configureQueryEntityResolvers(builder);
+        configureConnectionResolvers(builder); // Not in OSS
     }
 
     public GraphQLEngine.Builder builder() {
@@ -658,6 +666,8 @@ public class GmsGraphQLEngine {
             .addSchema(fileBasedSchema(CONSTRAINTS_SCHEMA_FILE))
             .addSchema(fileBasedSchema(STEPS_SCHEMA_FILE))
             .addSchema(fileBasedSchema(LINEAGE_SCHEMA_FILE))
+            // Connections not in OSS
+            .addSchema(fileBasedSchema(CONNECTIONS_SCHEMA_FILE))
             .addDataLoaders(loaderSuppliers(loadableTypes))
             .addDataLoader("Aspect", context -> createDataLoader(aspectType, context))
             .configureRuntimeWiring(this::configureRuntimeWiring);
@@ -1903,5 +1913,22 @@ public class GmsGraphQLEngine {
         builder.type("Test", typeWiring -> typeWiring
             .dataFetcher("results", new TestResultsSummaryResolver(this.entitySearchService))
         );
+    }
+
+    private void configureConnectionResolvers(final RuntimeWiring.Builder builder) {
+        builder.type("Mutation", typeWiring -> typeWiring
+            .dataFetcher("upsertConnection", new UpsertConnectionResolver(entityClient, secretService))
+        );
+        builder.type("Query", typeWiring -> typeWiring
+            .dataFetcher("connection", getResolver(connectionType))
+        );
+        builder.type("DataHubConnection", typeWiring -> typeWiring
+            .dataFetcher("platform",
+                new LoadableTypeResolver<>(dataPlatformType,
+                    (env) -> {
+                        final DataHubConnection connection = env.getSource();
+                        return connection.getPlatform() != null ? connection.getPlatform().getUrn() : null;
+                    })
+            ));
     }
 }
