@@ -45,6 +45,7 @@ entities:
       - browsePaths
       - dataPlatformInstance
       - containerPath
+      - anomaliesSummary
   - name: dataHubPolicy
     doc: DataHub Policies represent access policies granted to users or groups on metadata operations like edit, view etc.
     category: internal
@@ -72,6 +73,7 @@ entities:
       - institutionalMemory
       - dataPlatformInstance
       - containerPath
+      - anomaliesSummary
   - name: dataFlow
     category: core
     keyAspect: dataFlowKey
@@ -446,6 +448,12 @@ entities:
     keyAspect: incidentKey
     aspects:
       - incidentInfo
+  - name: anomaly
+    doc: Anomalies represent issues that were detected based on inferred or auto-generated assertions.
+    category: core
+    keyAspect: anomalyKey
+    aspects:
+      - anomalyInfo
   - name: globalSettings
     doc: Global settings for an the platform
     category: internal

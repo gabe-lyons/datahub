@@ -1,0 +1,69 @@
+namespace com.linkedin.common
+
+/**
+ * Summary related to entity anomalies
+ */
+@Aspect = {
+    "name": "anomaliesSummary"
+}
+record AnomaliesSummary {
+    /**
+    * Summary details about the set of active anomalies
+    */
+    @Searchable = {
+      "/*/urn" : {
+        "fieldType": "URN",
+        "fieldName": "activeAnomalies",
+        "hasValuesFieldName": "hasActiveAnomalies",
+        "numValuesFieldName": "numActiveAnomalies"
+      },
+      "/*/type" : {
+        "fieldType": "KEYWORD",
+        "fieldName": "activeAnomalyTypes"
+      },
+      "/*/lastResultAt" : {
+        "fieldType": "DATETIME",
+        "fieldName": "activeAnomalyResultTimes"
+      },
+      "/*/source" : {
+        "fieldName": "activeAnomalySources"
+      }
+    }
+    @Relationship = {
+     "/*/urn" : {
+       "name": "ActiveAnomalies",
+       "entityTypes": [ "anomaly" ]
+     }
+    }
+    activeAnomalyDetails: array[AnomalySummaryDetails] = []
+
+    /**
+    * Summary details about the set of resolved anomalies
+    */
+    @Searchable = {
+      "/*/urn" : {
+        "fieldType": "URN",
+        "fieldName": "resolvedAnomalies",
+        "hasValuesFieldName": "hasResolvedAnomalies",
+        "numValuesFieldName": "numResolvedAnomalies"
+      },
+      "/*/type" : {
+        "fieldType": "KEYWORD",
+        "fieldName": "resolvedAnomalyTypes"
+      },
+      "/*/lastResultAt" : {
+       "fieldType": "DATETIME",
+       "fieldName": "resolvedAnomalyResultTimes"
+      },
+      "/*/source" : {
+        "fieldName": "resolvedAnomalySources"
+      }
+    }
+    @Relationship = {
+      "/*/urn" : {
+        "name": "ResolvedAnomalies",
+        "entityTypes": [ "anomaly" ]
+      }
+    }
+    resolvedAnomalyDetails: array[AnomalySummaryDetails] = []
+}
