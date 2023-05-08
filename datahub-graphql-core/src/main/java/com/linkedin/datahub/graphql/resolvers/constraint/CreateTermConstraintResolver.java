@@ -11,10 +11,7 @@ import com.linkedin.datahub.graphql.exception.DataHubGraphQLException;
 import com.linkedin.datahub.graphql.generated.ConstraintType;
 import com.linkedin.datahub.graphql.generated.CreateTermConstraintInput;
 import com.linkedin.entity.client.EntityClient;
-import com.linkedin.events.metadata.ChangeType;
-import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.key.ConstraintKey;
-import com.linkedin.metadata.utils.GenericRecordUtils;
 import com.linkedin.mxe.MetadataChangeProposal;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
@@ -22,6 +19,8 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import static com.linkedin.datahub.graphql.resolvers.ResolverUtils.*;
+import static com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils.*;
+import static com.linkedin.metadata.Constants.*;
 
 
 public class CreateTermConstraintResolver implements DataFetcher<CompletableFuture<String>> {
@@ -68,13 +67,9 @@ public class CreateTermConstraintResolver implements DataFetcher<CompletableFutu
           info.setParams(params);
 
           // Finally, create the MetadataChangeProposal.
-          final MetadataChangeProposal proposal = new MetadataChangeProposal();
-          proposal.setEntityKeyAspect(GenericRecordUtils.serializeAspect(key));
-          proposal.setEntityType(Constants.CONSTRAINT_ENTITY_NAME);
-          proposal.setAspectName(Constants.CONSTRAINT_INFO_ASPECT_NAME);
-          proposal.setAspect(GenericRecordUtils.serializeAspect(info));
-          proposal.setChangeType(ChangeType.UPSERT);
-          return _aspectClient.ingestProposal(proposal, context.getAuthentication());
+          final MetadataChangeProposal proposal = buildMetadataChangeProposalWithKey(key, CONSTRAINT_ENTITY_NAME,
+              CONSTRAINT_INFO_ASPECT_NAME, info);
+          return _aspectClient.ingestProposal(proposal, context.getAuthentication(), false);
         } catch (Exception e) {
           throw new RuntimeException("Failed to create constraint", e);
         }

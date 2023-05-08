@@ -351,6 +351,7 @@ public class ProposalUtils {
       }
     }
 
+    // TODO: ActionRequest is using old snapshot model, this should get updated to use ingestProposal
     ActionRequestSnapshot snapshot = createTermProposalRequest(
         creator,
         assignedUsers,
@@ -374,12 +375,7 @@ public class ProposalUtils {
 
   private static void ingestEntityProposalsUpdate(Urn creator, Urn targetUrn, EntityService entityService,
       Proposals proposals) {
-    final MetadataChangeProposal metadataChangeProposal = new MetadataChangeProposal();
-    metadataChangeProposal.setAspect(GenericRecordUtils.serializeAspect(proposals));
-    metadataChangeProposal.setEntityUrn(targetUrn);
-    metadataChangeProposal.setEntityType(targetUrn.getEntityType());
-    metadataChangeProposal.setAspectName(PROPOSALS_ASPECT_NAME);
-    metadataChangeProposal.setChangeType(ChangeType.UPSERT);
+    final MetadataChangeProposal metadataChangeProposal = buildMetadataChangeProposalWithUrn(targetUrn, PROPOSALS_ASPECT_NAME, proposals);
 
     ingestMetadataChangeProposal(creator, entityService, metadataChangeProposal);
   }

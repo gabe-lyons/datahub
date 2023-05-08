@@ -9,13 +9,10 @@ import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.exception.AuthorizationException;
 import com.linkedin.datahub.graphql.generated.CreateTestInput;
 import com.linkedin.entity.client.EntityClient;
-import com.linkedin.events.metadata.ChangeType;
-import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.key.TestKey;
 import com.linkedin.metadata.test.TestEngine;
 import com.linkedin.metadata.test.definition.ValidationResult;
 import com.linkedin.metadata.utils.EntityKeyUtils;
-import com.linkedin.metadata.utils.GenericRecordUtils;
 import com.linkedin.mxe.MetadataChangeProposal;
 import com.linkedin.test.TestInfo;
 import graphql.schema.DataFetcher;
@@ -25,7 +22,9 @@ import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
 
 import static com.linkedin.datahub.graphql.resolvers.ResolverUtils.*;
+import static com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils.*;
 import static com.linkedin.datahub.graphql.resolvers.test.TestUtils.*;
+import static com.linkedin.metadata.Constants.*;
 
 
 /**
@@ -50,8 +49,6 @@ public class CreateTestResolver implements DataFetcher<CompletableFuture<String>
 
         try {
 
-          final MetadataChangeProposal proposal = new MetadataChangeProposal();
-
           // Create new test
           // Since we are creating a new Test, we need to generate a unique UUID.
           final UUID uuid = UUID.randomUUID();
@@ -60,9 +57,8 @@ public class CreateTestResolver implements DataFetcher<CompletableFuture<String>
           // Create the Ingestion source key
           final TestKey key = new TestKey();
           key.setId(uuidStr);
-          proposal.setEntityKeyAspect(GenericRecordUtils.serializeAspect(key));
 
-          if (_entityClient.exists(EntityKeyUtils.convertEntityKeyToUrn(key, Constants.TEST_ENTITY_NAME),
+          if (_entityClient.exists(EntityKeyUtils.convertEntityKeyToUrn(key, TEST_ENTITY_NAME),
               authentication)) {
             throw new IllegalArgumentException("This Test already exists!");
           }
@@ -77,23 +73,19 @@ public class CreateTestResolver implements DataFetcher<CompletableFuture<String>
                 "Failed to validate test definition: \n" + String.join("\n", validationResult.getMessages()));
           }
 
-          proposal.setEntityType(Constants.TEST_ENTITY_NAME);
-          proposal.setAspectName(Constants.TEST_INFO_ASPECT_NAME);
-          proposal.setAspect(GenericRecordUtils.serializeAspect(info));
-          proposal.setChangeType(ChangeType.UPSERT);
-
+          final MetadataChangeProposal proposal = buildMetadataChangeProposalWithKey(key, TEST_ENTITY_NAME, TEST_INFO_ASPECT_NAME, info);
           String ingestResult;
           try {
-            ingestResult = _entityClient.ingestProposal(proposal, context.getAuthentication());
+            ingestResult = _entityClient.ingestProposal(proposal, context.getAuthentication(), false);
           } catch (Exception e) {
-            throw new RuntimeException(String.format("Failed to create test with urn %s", input.toString()), e);
+            throw new RuntimeException(String.format("Failed to create test with urn %s", input), e);
           }
 
           _testEngine.invalidateCache();
           return ingestResult;
 
         } catch (Exception e) {
-          throw new RuntimeException(String.format("Failed to create test with urn %s", input.toString()), e);
+          throw new RuntimeException(String.format("Failed to create test with urn %s", input), e);
         }
       }
       throw new AuthorizationException(

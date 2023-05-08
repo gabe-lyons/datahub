@@ -68,7 +68,7 @@ public class CreateTestResolverTest {
     // Not ideal to match against "any", but we don't know the auto-generated execution request id
     ArgumentCaptor<MetadataChangeProposal> proposalCaptor = ArgumentCaptor.forClass(MetadataChangeProposal.class);
     Mockito.verify(mockClient, Mockito.times(1))
-        .ingestProposal(proposalCaptor.capture(), Mockito.any(Authentication.class));
+        .ingestProposal(proposalCaptor.capture(), Mockito.any(Authentication.class), Mockito.eq(false));
     MetadataChangeProposal resultProposal = proposalCaptor.getValue();
     assertEquals(resultProposal.getEntityType(), Constants.TEST_ENTITY_NAME);
     assertEquals(resultProposal.getAspectName(), Constants.TEST_INFO_ASPECT_NAME);

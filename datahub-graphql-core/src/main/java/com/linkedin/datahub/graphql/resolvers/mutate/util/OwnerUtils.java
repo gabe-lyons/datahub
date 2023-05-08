@@ -80,7 +80,7 @@ public class OwnerUtils {
           ? OwnershipType.valueOf(input.getType().toString()) : OwnershipType.NONE;
       addOwner(ownershipAspect, UrnUtils.getUrn(input.getOwnerUrn()), ownershipType);
     }
-    return buildMetadataChangeProposal(resourceUrn, Constants.OWNERSHIP_ASPECT_NAME, ownershipAspect, actor, entityService);
+    return buildMetadataChangeProposalWithUrn(resourceUrn, Constants.OWNERSHIP_ASPECT_NAME, ownershipAspect);
   }
 
   public static MetadataChangeProposal buildRemoveOwnersProposal(
@@ -96,7 +96,7 @@ public class OwnerUtils {
         new Ownership());
     ownershipAspect.setLastModified(getAuditStamp(actor));
     removeOwnersIfExists(ownershipAspect, ownerUrns);
-    return buildMetadataChangeProposal(resourceUrn, Constants.OWNERSHIP_ASPECT_NAME, ownershipAspect, actor, entityService);
+    return buildMetadataChangeProposalWithUrn(resourceUrn, Constants.OWNERSHIP_ASPECT_NAME, ownershipAspect);
   }
 
   private static void addOwner(Ownership ownershipAspect, Urn ownerUrn, OwnershipType type) {

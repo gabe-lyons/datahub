@@ -17,6 +17,7 @@ import com.linkedin.datahub.graphql.generated.UpdateGlobalSettingsInput;
 import com.linkedin.datahub.graphql.generated.UpdateOidcSettingsInput;
 import com.linkedin.datahub.graphql.generated.UpdateSlackIntegrationSettingsInput;
 import com.linkedin.datahub.graphql.generated.UpdateSsoSettingsInput;
+import com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils;
 import com.linkedin.entity.Aspect;
 import com.linkedin.entity.EntityResponse;
 import com.linkedin.entity.EnvelopedAspect;
@@ -39,6 +40,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static com.linkedin.datahub.graphql.resolvers.ingest.IngestTestUtils.*;
+import static com.linkedin.metadata.Constants.*;
 import static org.testng.Assert.*;
 
 
@@ -107,7 +109,8 @@ public class UpdateGlobalSettingsResolverTest {
 
     resolver.get(mockEnv).get();
 
-    MetadataChangeProposal expectedProposal = new MetadataChangeProposal();
+    MetadataChangeProposal expectedProposal = MutationUtils.buildMetadataChangeProposalWithUrn(GLOBAL_SETTINGS_URN,
+        GLOBAL_SETTINGS_INFO_ASPECT_NAME, returnedInfo);
     expectedProposal.setEntityUrn(Constants.GLOBAL_SETTINGS_URN);
     expectedProposal.setChangeType(ChangeType.UPSERT);
     expectedProposal.setAspectName(Constants.GLOBAL_SETTINGS_INFO_ASPECT_NAME);
@@ -116,7 +119,8 @@ public class UpdateGlobalSettingsResolverTest {
 
     Mockito.verify(mockClient, Mockito.times(1)).ingestProposal(
         Mockito.eq(expectedProposal),
-        Mockito.any(Authentication.class)
+        Mockito.any(Authentication.class),
+        Mockito.eq(false)
     );
   }
 

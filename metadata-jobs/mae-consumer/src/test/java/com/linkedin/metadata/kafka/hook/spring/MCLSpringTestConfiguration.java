@@ -17,7 +17,8 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @ComponentScan(basePackages = {
-    "com.linkedin.metadata.kafka"
+    "com.linkedin.metadata.kafka",
+    "com.linkedin.gms.factory.entity.update.indices"
 })
 public class MCLSpringTestConfiguration {
 

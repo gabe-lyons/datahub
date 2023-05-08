@@ -22,7 +22,8 @@ import org.springframework.context.annotation.FilterType;
         "com.linkedin.gms.factory.notifications",
         "com.linkedin.gms.factory.incident",
         "com.linkedin.gms.factory.assertion",
-        "com.linkedin.gms.factory.config"
+        "com.linkedin.gms.factory.config",
+        "com.linkedin.gms.factory.entity.update.indices"
 }, excludeFilters = {
     @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ScheduledAnalyticsFactory.class)})
 public class MaeConsumerApplication {
