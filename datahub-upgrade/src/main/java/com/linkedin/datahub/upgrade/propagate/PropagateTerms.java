@@ -16,6 +16,11 @@ import java.util.List;
  */
 public class PropagateTerms implements Upgrade {
 
+  public static final String ELASTIC_TIMEOUT_ENV_NAME = "PROPAGATE_TERMS_ELASTIC_TIMEOUT";
+  public static final String ELASTIC_TIMEOUT = System.getenv()
+      .getOrDefault(ELASTIC_TIMEOUT_ENV_NAME,
+          "5m");
+
   private final List<UpgradeStep> _steps;
 
   public PropagateTerms(final EntityService entityService, final EntitySearchService entitySearchService) {

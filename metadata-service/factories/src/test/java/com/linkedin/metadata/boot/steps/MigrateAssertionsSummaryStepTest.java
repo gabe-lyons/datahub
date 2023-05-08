@@ -17,8 +17,11 @@ import com.linkedin.common.AssertionsSummary;
 import com.linkedin.common.UrnArray;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.common.urn.UrnUtils;
+import com.linkedin.gms.factory.config.ConfigurationProvider;
 import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.aspect.EnvelopedAspect;
+import com.linkedin.metadata.config.search.ElasticSearchConfiguration;
+import com.linkedin.metadata.config.search.ScrollConfiguration;
 import com.linkedin.metadata.entity.EntityService;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.search.ScrollResult;
@@ -28,6 +31,7 @@ import com.linkedin.metadata.service.AssertionService;
 import com.linkedin.metadata.timeseries.TimeseriesAspectService;
 import com.linkedin.metadata.utils.GenericRecordUtils;
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
@@ -49,6 +53,7 @@ public class MigrateAssertionsSummaryStepTest {
     final EntitySearchService entitySearchService = mock(EntitySearchService.class);
     final AssertionService assertionService = mock(AssertionService.class);
     final TimeseriesAspectService timeseriesAspectService = mock(TimeseriesAspectService.class);
+    final ConfigurationProvider configurationProvider = createConfigurationProvider();
     configureEntitySearchServiceMock(entitySearchService);
     configureAssertionServiceMock(assertionService);
     configureTimeSeriesAspectServiceMock(timeseriesAspectService, AssertionResultType.FAILURE);
@@ -57,7 +62,8 @@ public class MigrateAssertionsSummaryStepTest {
         entityService,
         entitySearchService,
         assertionService,
-        timeseriesAspectService);
+        timeseriesAspectService,
+        configurationProvider);
 
     step.execute();
 
@@ -74,12 +80,24 @@ public class MigrateAssertionsSummaryStepTest {
     );
   }
 
+  private ConfigurationProvider createConfigurationProvider() {
+    ConfigurationProvider configurationProvider = new ConfigurationProvider();
+    final ElasticSearchConfiguration elasticSearchConfiguration = new ElasticSearchConfiguration();
+    final ScrollConfiguration scrollConfiguration = new ScrollConfiguration();
+    scrollConfiguration.setTimeout("5m");
+    elasticSearchConfiguration.setScroll(scrollConfiguration);
+    configurationProvider.setElasticSearch(elasticSearchConfiguration);
+
+    return configurationProvider;
+  }
+
   @Test
   public void testExecuteAssertionsSummaryStepWithPassingAssertion() throws Exception {
     final EntityService entityService = mock(EntityService.class);
     final EntitySearchService entitySearchService = mock(EntitySearchService.class);
     final AssertionService assertionService = mock(AssertionService.class);
     final TimeseriesAspectService timeseriesAspectService = mock(TimeseriesAspectService.class);
+    final ConfigurationProvider configurationProvider = createConfigurationProvider();
     configureEntitySearchServiceMock(entitySearchService);
     configureAssertionServiceMock(assertionService);
     configureTimeSeriesAspectServiceMock(timeseriesAspectService, AssertionResultType.SUCCESS);
@@ -88,7 +106,8 @@ public class MigrateAssertionsSummaryStepTest {
         entityService,
         entitySearchService,
         assertionService,
-        timeseriesAspectService);
+        timeseriesAspectService,
+        configurationProvider);
 
     step.execute();
 
@@ -115,24 +134,24 @@ public class MigrateAssertionsSummaryStepTest {
     scrollResult.setScrollId(SCROLL_ID);
 
     Mockito.when(mockSearchService.scroll(
-        Mockito.eq(Constants.ASSERTION_ENTITY_NAME),
+        Mockito.eq(Collections.singletonList(Constants.ASSERTION_ENTITY_NAME)),
         Mockito.eq(null),
         Mockito.eq(null),
         Mockito.eq(1000),
         Mockito.eq(null),
-        Mockito.eq("1m")
+        Mockito.eq("5m")
     )).thenReturn(scrollResult);
 
     ScrollResult newScrollResult = new ScrollResult();
     newScrollResult.setEntities(new SearchEntityArray());
 
     Mockito.when(mockSearchService.scroll(
-        Mockito.eq(Constants.ASSERTION_ENTITY_NAME),
+        Mockito.eq(Collections.singletonList(Constants.ASSERTION_ENTITY_NAME)),
         Mockito.eq(null),
         Mockito.eq(null),
         Mockito.eq(1000),
         Mockito.eq(SCROLL_ID),
-        Mockito.eq("1m")
+        Mockito.eq("5m")
     )).thenReturn(newScrollResult);
   }
 

@@ -216,6 +216,8 @@ elasticsearch:
       timeoutSeconds: ${ELASTICSEARCH_SEARCH_GRAPH_TIMEOUT_SECONDS:50} # graph dao timeout seconds
       batchSize: ${ELASTICSEARCH_SEARCH_GRAPH_BATCH_SIZE:1000} # graph dao batch size
       maxResult: ${ELASTICSEARCH_SEARCH_GRAPH_MAX_RESULT:10000} # graph dao max result size
+  scroll:
+    timeout: ${ELASTICSEARCH_SCROLL_TIMEOUT:5m} # Default timeout of the scroll reference for legacy scroll and PIT for searchAfter
 
 # TODO: Kafka topic convention
 kafka:

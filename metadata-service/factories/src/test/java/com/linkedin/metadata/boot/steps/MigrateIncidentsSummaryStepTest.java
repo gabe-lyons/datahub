@@ -21,6 +21,7 @@ import com.linkedin.metadata.search.ScrollResult;
 import com.linkedin.metadata.search.SearchEntity;
 import com.linkedin.metadata.search.SearchEntityArray;
 import com.linkedin.metadata.service.IncidentService;
+import java.util.Collections;
 import org.mockito.Mockito;
 import org.testng.annotations.Test;
 
@@ -100,24 +101,24 @@ public class MigrateIncidentsSummaryStepTest {
     scrollResult.setScrollId(SCROLL_ID);
 
     Mockito.when(mockSearchService.scroll(
-        Mockito.eq(Constants.INCIDENT_ENTITY_NAME),
+        Mockito.eq(Collections.singletonList(Constants.INCIDENT_ENTITY_NAME)),
         Mockito.eq(null),
         Mockito.eq(null),
         Mockito.eq(1000),
         Mockito.eq(null),
-        Mockito.eq("1m")
+        Mockito.eq("5m")
     )).thenReturn(scrollResult);
 
     ScrollResult newScrollResult = new ScrollResult();
     newScrollResult.setEntities(new SearchEntityArray());
 
     Mockito.when(mockSearchService.scroll(
-        Mockito.eq(Constants.INCIDENT_ENTITY_NAME),
+        Mockito.eq(Collections.singletonList(Constants.INCIDENT_ENTITY_NAME)),
         Mockito.eq(null),
         Mockito.eq(null),
         Mockito.eq(1000),
         Mockito.eq(SCROLL_ID),
-        Mockito.eq("1m")
+        Mockito.eq("5m")
     )).thenReturn(newScrollResult);
   }
 

@@ -17,6 +17,7 @@ import com.linkedin.metadata.search.ScrollResult;
 import com.linkedin.metadata.search.SearchEntity;
 import com.linkedin.metadata.service.IncidentService;
 import com.linkedin.metadata.service.IncidentsSummaryUtils;
+import java.util.Collections;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.annotation.Nonnull;
@@ -56,7 +57,8 @@ public class MigrateIncidentsSummaryStep extends UpgradeStep {
   public void upgrade() throws Exception {
 
     int batch = 1;
-    ScrollResult scrollResult = _entitySearchService.scroll(Constants.INCIDENT_ENTITY_NAME, null, null, BATCH_SIZE, null, "1m");
+    ScrollResult scrollResult = _entitySearchService.scroll(Collections.singletonList(Constants.INCIDENT_ENTITY_NAME),
+        null, null, BATCH_SIZE, null, "5m");
 
     while (scrollResult.getEntities().size() > 0) {
       List<Urn> incidentsInBatch =  scrollResult.getEntities().stream().map(SearchEntity::getEntity).collect(Collectors.toList());
@@ -68,7 +70,8 @@ public class MigrateIncidentsSummaryStep extends UpgradeStep {
       }
       batch++;
       scrollResult =
-          _entitySearchService.scroll(Constants.INCIDENT_ENTITY_NAME, null, null, BATCH_SIZE, scrollResult.getScrollId(), "1m");
+          _entitySearchService.scroll(Collections.singletonList(Constants.INCIDENT_ENTITY_NAME), null,
+              null, BATCH_SIZE, scrollResult.getScrollId(), "5m");
     }
   }
 
