@@ -2,6 +2,7 @@ namespace com.linkedin.assertion
 
 import com.linkedin.common.CustomProperties
 import com.linkedin.common.ExternalReference
+import com.linkedin.common.OriginType
 
 /**
  * Information about an assertion
@@ -13,13 +14,59 @@ record AssertionInfo includes CustomProperties, ExternalReference {
     /**
     * Type of assertion. Assertion types can evolve to span Datasets, Flows (Pipelines), Models, Features etc.
     */
+    @Searchable = { }
     type: enum AssertionType {
-      // A single-dataset assertion. When this is the value, the datasetAssertion field will be populated.
+      /**
+       * A single-dataset assertion. When this is the value, the datasetAssertion field will be populated.
+       */
       DATASET
+
+      /**
+       * A Dataset SLA Assertion.
+       */
+      DATASET_SLA
+
+      /**
+       * A Data Job SLA Assertion.
+       */
+      DATA_JOB_SLA
     }
 
     /**
-    * Dataset Assertion information when type is DATASET
+    * A Dataset Assertion definition. This field is populated when the type is DATASET.
     */
     datasetAssertion: optional DatasetAssertionInfo
+
+    /**
+    * An SLA Assertion definition. This field is populated when the type is DATASET_SLA or DATA_JOB_SLA.
+    */
+    slaAssertion: optional SlaAssertionInfo
+
+    /**
+    * The source or origin of the Assertion definition.
+    *
+    * If the Assertion is EXTERNAL, it is expected to have a corresponding dataPlatformInstance aspect detailing
+    * the platform where it was ingested from.
+    */
+    @Searchable = { }
+    source: optional enum AssertionSource {
+      /**
+       * The assertion was defined natively on DataHub by a user.
+       */
+      NATIVE
+      /**
+       * The assertion was defined and managed externally of DataHub.
+       */
+      EXTERNAL
+      /**
+       * The assertion was inferred, e.g. from offline AI / ML models.
+       */
+      INFERRED
+    }
+
+    /**
+    * The evaluation schedule for the Assertion. If the type is INFERRED or NATIVE, it is expected
+    * that this field is provided.
+    */
+    schedule: optional CronSchedule
 }

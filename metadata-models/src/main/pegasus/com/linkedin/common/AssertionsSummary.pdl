@@ -9,23 +9,75 @@ namespace com.linkedin.common
 record AssertionsSummary {
     /**
     * Failing assertions for an asset
+    * Deprecated! Use failingAssertionDetails.
     */
-    @Searchable = {
-        "/*" : {
-            "fieldType": "URN",
-            "hasValuesFieldName": "hasFailingAssertions"
-        }
-    }
+    @deprecated
     failingAssertions: array[Urn] = []
 
     /**
     * Passing assertions for an asset
+    * Deprecated! Use passingAssertionDetails.
+    */
+    @deprecated
+    passingAssertions: array[Urn] = []
+
+    /**
+    * Summary details about the set of passing assertions
     */
     @Searchable = {
-        "/*" : {
-            "fieldType": "URN",
-            "hasValuesFieldName": "hasPassingAssertions"
-        }
+      "/*/urn" : {
+        "fieldType": "URN",
+        "fieldName": "passingAssertions",
+        "hasValuesFieldName": "hasPassingAssertions",
+        "numValuesFieldName": "numPassingAssertions"
+      },
+      "/*/type" : {
+        "fieldType": "KEYWORD",
+        "fieldName": "passingAssertionTypes"
+      },
+      "/*/lastResultAt" : {
+        "fieldType": "DATETIME",
+        "fieldName": "passingAssertionResultTimes"
+      },
+      "/*/source" : {
+        "fieldName": "passingAssertionSources"
+      }
     }
-    passingAssertions: array[Urn] = []
+    @Relationship = {
+     "/*/urn" : {
+       "name": "PassingAssertions",
+       "entityTypes": [ "assertion" ]
+     }
+    }
+    passingAssertionDetails: array[AssertionSummaryDetails] = []
+
+    /**
+    * Summary details about the set of failing assertions
+    */
+    @Searchable = {
+      "/*/urn" : {
+        "fieldType": "URN",
+        "fieldName": "failingAssertions",
+        "hasValuesFieldName": "hasFailingAssertions",
+        "numValuesFieldName": "numFailingAssertions"
+      },
+      "/*/type" : {
+        "fieldType": "KEYWORD",
+        "fieldName": "failingAssertionType"
+      },
+      "/*/lastResultAt" : {
+       "fieldType": "DATETIME",
+       "fieldName": "failingAssertionResultTimes"
+      },
+      "/*/source" : {
+        "fieldName": "failingAssertionSources"
+      }
+    }
+    @Relationship = {
+      "/*/urn" : {
+        "name": "FailingAssertions",
+        "entityTypes": [ "assertion" ]
+      }
+    }
+    failingAssertionDetails: array[AssertionSummaryDetails] = []
 }

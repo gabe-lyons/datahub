@@ -8,6 +8,7 @@ record AssertionResult {
   *  The final result, e.g. either SUCCESS or FAILURE.
   */
   @TimeseriesField = {}
+  @Searchable = {}
   type: enum AssertionResultType {
     /**
     *  The Assertion Succeeded
@@ -45,7 +46,7 @@ record AssertionResult {
   nativeResults: optional map[string, string]
 
   /**
-   * URL where full results are available
+   * External URL where full results are available. Only present when assertion source is not native.
    */
   externalUrl: optional string
 

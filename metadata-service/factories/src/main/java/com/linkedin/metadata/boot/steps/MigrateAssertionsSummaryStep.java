@@ -4,6 +4,7 @@ import com.linkedin.assertion.AssertionInfo;
 import com.linkedin.assertion.AssertionResult;
 import com.linkedin.assertion.AssertionResultType;
 import com.linkedin.assertion.AssertionRunEvent;
+import com.linkedin.common.AssertionSummaryDetails;
 import com.linkedin.common.AssertionsSummary;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.metadata.Constants;
@@ -15,7 +16,6 @@ import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.search.ScrollResult;
 import com.linkedin.metadata.search.SearchEntity;
 import com.linkedin.metadata.service.AssertionService;
-import com.linkedin.metadata.service.AssertionsSummaryUtils;
 import com.linkedin.metadata.timeseries.TimeseriesAspectService;
 import com.linkedin.metadata.utils.GenericRecordUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -25,21 +25,24 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.linkedin.metadata.service.AssertionsSummaryUtils.*;
+
+
 /**
  * Upgrade step that creates and/or updates AssertionsSummary aspects for datasets that the assertions are on.
  * This allows us to search and query for datasets by passing/failing assertions.
  */
 @Slf4j
-public class AssertionsSummaryStep extends UpgradeStep {
+public class MigrateAssertionsSummaryStep extends UpgradeStep {
   private static final String VERSION = "1";
-  private static final String UPGRADE_ID = "assertions-summary";
+  private static final String UPGRADE_ID = "migrate-assertions-summary";
   private static final Integer BATCH_SIZE = 1000;
 
   private final EntitySearchService _entitySearchService;
   private final AssertionService _assertionService;
   private final TimeseriesAspectService _timeseriesAspectService;
 
-  public AssertionsSummaryStep(
+  public MigrateAssertionsSummaryStep(
       EntityService entityService,
       EntitySearchService entitySearchService,
       AssertionService assertionService,
@@ -121,7 +124,7 @@ public class AssertionsSummaryStep extends UpgradeStep {
       AssertionRunEvent assertionRunEvent = GenericRecordUtils.deserializeAspect(runEvent.get().getAspect().getValue(),
           runEvent.get().getAspect().getContentType(), AssertionRunEvent.class);
       if (assertionRunEvent.hasResult()) {
-        addAssertionToSummary(assertionUrn, datasetUrn, assertionRunEvent.getResult());
+        addAssertionToSummary(datasetUrn, assertionUrn, assertionInfo, assertionRunEvent);
       }
     }
   }
@@ -130,22 +133,32 @@ public class AssertionsSummaryStep extends UpgradeStep {
    * Adds an assertion to the AssertionSummary aspect for a related entity.
    * This is used to search for entity by active and resolved assertions.
    */
-  private void addAssertionToSummary(@Nonnull final Urn assertionUrn, @Nonnull final Urn entityUrn, @Nonnull final AssertionResult result) {
+  private void addAssertionToSummary(
+      @Nonnull final Urn entityUrn,
+      @Nonnull final Urn assertionUrn,
+      @Nonnull final AssertionInfo info,
+      @Nonnull final AssertionRunEvent event) {
     // 1. Fetch the latest assertion summary for the entity
     AssertionsSummary summary = getAssertionsSummary(entityUrn);
+    AssertionResult result = event.getResult();
+    AssertionSummaryDetails details = buildAssertionSummaryDetails(assertionUrn, info, event);
 
     // 2. Add the assertion to passing or failing assertions
     if (AssertionResultType.SUCCESS.equals(result.getType())) {
-      // First, ensure this isn't in failing anymore.
-      AssertionsSummaryUtils.removeAssertionFromFailingSummary(assertionUrn, summary);
+      // First, ensure this isn't in either summary anymore.
+      removeAssertionFromFailingSummary(assertionUrn, summary);
+      removeAssertionFromPassingSummary(assertionUrn, summary);
+
       // Then, add to passing.
-      AssertionsSummaryUtils.addAssertionToPassingSummary(assertionUrn, summary);
+      addAssertionToPassingSummary(details, summary);
 
     } else if (AssertionResultType.FAILURE.equals(result.getType())) {
-      // First, ensure this isn't in passing anymore.
-      AssertionsSummaryUtils.removeAssertionFromPassingSummary(assertionUrn, summary);
+      // First, ensure this isn't in either summary anymore.
+      removeAssertionFromPassingSummary(assertionUrn, summary);
+      removeAssertionFromFailingSummary(assertionUrn, summary);
+
       // Then, add to failing.
-      AssertionsSummaryUtils.addAssertionToFailingSummary(assertionUrn, summary);
+      addAssertionToFailingSummary(details, summary);
     }
 
     // 3. Emit the change back!
@@ -156,6 +169,21 @@ public class AssertionsSummaryStep extends UpgradeStep {
   private AssertionsSummary getAssertionsSummary(@Nonnull final Urn entityUrn) {
     AssertionsSummary maybeAssertionsSummary = _assertionService.getAssertionsSummary(entityUrn);
     return maybeAssertionsSummary == null ? new AssertionsSummary() : maybeAssertionsSummary;
+  }
+
+  @Nonnull
+  private AssertionSummaryDetails buildAssertionSummaryDetails(
+      @Nonnull final Urn urn,
+      @Nonnull final AssertionInfo info,
+      @Nonnull final AssertionRunEvent event) {
+    AssertionSummaryDetails assertionSummaryDetails = new AssertionSummaryDetails();
+    assertionSummaryDetails.setUrn(urn);
+    assertionSummaryDetails.setType(info.getType().toString());
+    assertionSummaryDetails.setLastResultAt(event.getTimestampMillis());
+    if (info.hasSource()) {
+      assertionSummaryDetails.setSource(info.getSource().toString());
+    }
+    return assertionSummaryDetails;
   }
 
   /**

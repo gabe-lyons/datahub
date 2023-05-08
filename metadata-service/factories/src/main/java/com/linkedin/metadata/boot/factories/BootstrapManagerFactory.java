@@ -11,7 +11,7 @@ import com.linkedin.gms.factory.search.SearchDocumentTransformerFactory;
 import com.linkedin.metadata.boot.BootstrapManager;
 import com.linkedin.metadata.boot.BootstrapStep;
 import com.linkedin.metadata.boot.dependencies.BootstrapDependency;
-import com.linkedin.metadata.boot.steps.AssertionsSummaryStep;
+import com.linkedin.metadata.boot.steps.MigrateAssertionsSummaryStep;
 import com.linkedin.metadata.boot.steps.IndexDataPlatformsStep;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformInstancesStep;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformsStep;
@@ -129,8 +129,9 @@ public class BootstrapManagerFactory {
     final IngestDefaultTagsStep ingestDefaultTagsStep = new IngestDefaultTagsStep(_entityService);
     final WaitForSystemUpdateStep waitForSystemUpdateStep = new WaitForSystemUpdateStep(_dataHubUpgradeKafkaListener,
         _configurationProvider);
-    final AssertionsSummaryStep assertionsSummaryStep =
-        new AssertionsSummaryStep(_entityService, _entitySearchService, _assertionService, _timeseriesAspectService);
+
+    final MigrateAssertionsSummaryStep assertionsSummaryStep =
+        new MigrateAssertionsSummaryStep(_entityService, _entitySearchService, _assertionService, _timeseriesAspectService);
     final MigrateIncidentsSummaryStep incidentsSummaryStep =
         new MigrateIncidentsSummaryStep(_entityService, _entitySearchService, _incidentService);
 

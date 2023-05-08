@@ -275,6 +275,7 @@ entities:
       - assertionInfo
       - dataPlatformInstance
       - assertionRunEvent
+      - assertionActions
       - status
   - name: dataHubRetention
     category: internal

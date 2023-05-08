@@ -7,9 +7,10 @@ import com.linkedin.assertion.AssertionResultType;
 import com.linkedin.assertion.AssertionRunEvent;
 import com.linkedin.assertion.AssertionRunStatus;
 import com.linkedin.assertion.DatasetAssertionInfo;
+import com.linkedin.common.AssertionSummaryDetails;
+import com.linkedin.common.AssertionSummaryDetailsArray;
 import com.linkedin.common.AssertionsSummary;
 import com.linkedin.common.Status;
-import com.linkedin.common.UrnArray;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.events.metadata.ChangeType;
 import com.linkedin.gms.factory.assertions.AssertionServiceFactory;
@@ -144,7 +145,7 @@ public class AssertionsSummaryHook implements MetadataChangeLogHook {
 
       // 3. For each urn, resolve the entity assertions aspect and add to failing or passing assertions.
       for (Urn entityUrn : assertionEntities) {
-        addAssertionToSummary(assertionUrn, entityUrn, runEvent.getResult());
+        addAssertionToSummary(entityUrn, assertionUrn, assertionInfo, runEvent);
       }
     } else {
       log.warn(
@@ -173,22 +174,28 @@ public class AssertionsSummaryHook implements MetadataChangeLogHook {
    * Adds an assertion to the AssertionSummary aspect for a related entity.
    * This is used to search for entity by active and resolved assertions.
    */
-  private void addAssertionToSummary(@Nonnull final Urn assertionUrn, @Nonnull final Urn entityUrn, @Nonnull final AssertionResult result) {
+  private void addAssertionToSummary(
+      @Nonnull final Urn entityUrn,
+      @Nonnull final Urn assertionUrn,
+      @Nonnull final AssertionInfo info,
+      @Nonnull final AssertionRunEvent event) {
     // 1. Fetch the latest assertion summary for the entity
     AssertionsSummary summary = getAssertionsSummary(entityUrn);
+    AssertionResult result = event.getResult();
+    AssertionSummaryDetails details = buildAssertionSummaryDetails(assertionUrn, info, event);
 
     // 2. Add the assertion to passing or failing assertions
     if (AssertionResultType.SUCCESS.equals(result.getType())) {
       // First, ensure this isn't in failing anymore.
       removeAssertionFromFailingSummary(assertionUrn, summary);
       // Then, add to passing.
-      addAssertionToPassingSummary(assertionUrn, summary);
+      addAssertionToPassingSummary(details, summary);
 
     } else if (AssertionResultType.FAILURE.equals(result.getType())) {
       // First, ensure this isn't in passing anymore.
       removeAssertionFromPassingSummary(assertionUrn, summary);
       // Then, add to failing.
-      addAssertionToFailingSummary(assertionUrn, summary);
+      addAssertionToFailingSummary(details, summary);
     }
 
     // 3. Emit the change back!
@@ -199,8 +206,23 @@ public class AssertionsSummaryHook implements MetadataChangeLogHook {
   private AssertionsSummary getAssertionsSummary(@Nonnull final Urn entityUrn) {
     AssertionsSummary maybeAssertionsSummary = _assertionService.getAssertionsSummary(entityUrn);
     return maybeAssertionsSummary == null
-        ? new AssertionsSummary().setFailingAssertions(new UrnArray()).setPassingAssertions(new UrnArray())
+        ? new AssertionsSummary().setFailingAssertionDetails(new AssertionSummaryDetailsArray()).setPassingAssertionDetails(new AssertionSummaryDetailsArray())
         : maybeAssertionsSummary;
+  }
+
+  @Nonnull
+  private AssertionSummaryDetails buildAssertionSummaryDetails(
+      @Nonnull final Urn urn,
+      @Nonnull final AssertionInfo info,
+      @Nonnull final AssertionRunEvent event) {
+    AssertionSummaryDetails assertionSummaryDetails = new AssertionSummaryDetails();
+    assertionSummaryDetails.setUrn(urn);
+    assertionSummaryDetails.setType(info.getType().toString());
+    assertionSummaryDetails.setLastResultAt(event.getTimestampMillis());
+    if (info.hasSource()) {
+      assertionSummaryDetails.setSource(info.getSource().toString());
+    }
+    return assertionSummaryDetails;
   }
 
   /**
