@@ -172,12 +172,12 @@ signing {
   sign publishing.publications.shadow
 }
 
-nexusStaging {
-  serverUrl = "https://s01.oss.sonatype.org/service/local/"
-  //required only for projects registered in Sonatype after 2021-02-24
-  username = System.getenv("NEXUS_USERNAME")
-  password = System.getenv("NEXUS_PASSWORD")
-}
+// nexusStaging {
+//   serverUrl = "https://s01.oss.sonatype.org/service/local/"
+//   //required only for projects registered in Sonatype after 2021-02-24
+//   username = System.getenv("NEXUS_USERNAME")
+//   password = System.getenv("NEXUS_PASSWORD")
+// }
 
 tasks.register('generateOpenApiPojos', GenerateSwaggerCode) {
   it.setInputFile(file("${project(':metadata-models').projectDir}/src/generatedJsonSchema/combined/open-api.yaml"))
