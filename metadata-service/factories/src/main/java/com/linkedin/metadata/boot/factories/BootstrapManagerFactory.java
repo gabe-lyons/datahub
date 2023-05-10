@@ -1,6 +1,5 @@
 package com.linkedin.metadata.boot.factories;
 
-import com.google.common.collect.ImmutableList;
 import com.linkedin.gms.factory.assertions.AssertionServiceFactory;
 import com.linkedin.gms.factory.config.ConfigurationProvider;
 import com.linkedin.gms.factory.entity.EntityServiceFactory;
@@ -35,7 +34,6 @@ import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.search.transformer.SearchDocumentTransformer;
 import com.linkedin.metadata.service.IncidentService;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
