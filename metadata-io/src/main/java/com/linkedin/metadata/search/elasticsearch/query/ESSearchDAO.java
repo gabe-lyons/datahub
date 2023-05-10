@@ -116,7 +116,7 @@ public class ESSearchDAO {
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "esSearch").time()) {
       final SearchResponse searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
       // extract results, validated against document model as well
-      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpecs, searchConfiguration)
+      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpecs, searchConfiguration, customSearchConfiguration)
               .extractResult(searchResponse, filters, 0, size);
       return buildScrollResult(searchResult, searchResponse.getScrollId());
     } catch (Exception e) {
@@ -141,7 +141,7 @@ public class ESSearchDAO {
     try (Timer.Context ignored = MetricUtils.timer(this.getClass(), "esSearch").time()) {
       final SearchResponse searchResponse = client.scroll(searchScrollRequest, RequestOptions.DEFAULT);
       // extract results, validated against document model as well
-      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpec, searchConfiguration)
+      SearchResult searchResult = SearchRequestHandler.getBuilder(entitySpec, searchConfiguration, customSearchConfiguration)
               .extractResult(searchResponse, filters, 0, size);
       return buildScrollResult(searchResult, searchResponse.getScrollId());
     } catch (Exception e) {
@@ -275,7 +275,7 @@ public class ESSearchDAO {
     } else if (supportsPointInTime()) {
       pitId = createPointInTime(indexArray, keepAliveDuration);
     }
-    final SearchRequest searchRequest = SearchRequestHandler.getBuilder(entitySpecs, searchConfiguration)
+    final SearchRequest searchRequest = SearchRequestHandler.getBuilder(entitySpecs, searchConfiguration, customSearchConfiguration)
         .getSearchAfterRequest(filters, sortCriterion, size, keepAliveDuration, pitId, sort);
 
     // PIT specifies indices in creation so it doesn't support specifying indices on the request, so we only specify if not using PIT
