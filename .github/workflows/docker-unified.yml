@@ -31,7 +31,7 @@ env:
   DATAHUB_ELASTIC_SETUP_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-elasticsearch-setup'
   DATAHUB_MYSQL_SETUP_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-mysql-setup'
   DATAHUB_UPGRADE_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-upgrade'
-
+  DATAHUB_INTEGRATIONS_IMAGE: '795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-integrations-service'
 
 jobs:
   setup:
