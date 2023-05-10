@@ -43,6 +43,7 @@ services:
     - KAFKA_PROPERTIES_SECURITY_PROTOCOL=PLAINTEXT
     - METADATA_AUDIT_EVENT_NAME=MetadataAuditEvent_v4
     - METADATA_CHANGE_LOG_VERSIONED_TOPIC_NAME=MetadataChangeLog_Versioned_v1
+    - SCHEMA_REGISTRY_URL=http://schema-registry:8081
     hostname: actions
     image: acryldata/datahub-actions:${ACTIONS_VERSION:-head}
   datahub-frontend-react:
