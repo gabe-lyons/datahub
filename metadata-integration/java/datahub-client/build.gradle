@@ -25,37 +25,20 @@ tasks.withType(Test).configureEach {
 }
 
 dependencies {
-<<<<<<< HEAD
   // DO NOT DELETE. Required for SaaS version
   implementation project(':entity-registry')
   implementation project(':metadata-events:mxe-utils-avro-1.7')
 
   implementation project(':metadata-models')
-=======
-
-  implementation project(':metadata-models')
   implementation(externalDependency.kafkaAvroSerializer) {
     exclude group: "org.apache.avro"
   }
->>>>>>> public/master
   compile externalDependency.avro_1_7
   constraints {
     implementation('commons-collections:commons-collections:3.2.2') {
       because 'Vulnerability Issue'
     }
   }
-<<<<<<< HEAD
-  compileOnly externalDependency.httpAsyncClient
-  implementation externalDependency.jacksonDataBind
-  implementation externalDependency.javaxValidation
-  runtimeOnly externalDependency.jna
-  implementation externalDependency.springContext
-  implementation externalDependency.swaggerAnnotations
-  implementation(externalDependency.kafkaAvroSerializer) {
-    exclude group: "org.apache.avro"
-  }
-=======
->>>>>>> public/master
 
   compileOnly externalDependency.httpAsyncClient
   implementation externalDependency.jacksonDataBind
@@ -64,24 +47,15 @@ dependencies {
   implementation externalDependency.springContext
   implementation externalDependency.swaggerAnnotations
 
-<<<<<<< HEAD
   compileOnly externalDependency.lombok
   annotationProcessor externalDependency.lombok
-  testCompile externalDependency.httpAsyncClient // needed as shadow excludes it
-=======
   implementation externalDependency.slf4jApi
-  compileOnly externalDependency.lombok
-  annotationProcessor externalDependency.lombok
->>>>>>> public/master
   testCompile externalDependency.mockito
   testCompile externalDependency.mockServer
   testCompile externalDependency.mockServerClient
   testCompile externalDependency.testContainers
-<<<<<<< HEAD
-=======
   testCompile externalDependency.httpAsyncClient
   testRuntime externalDependency.logbackClassic
->>>>>>> public/master
 
   swaggerCodegen 'io.swagger.codegen.v3:swagger-codegen-cli:3.0.33'
 }
@@ -125,51 +99,7 @@ shadowJar {
   mergeServiceFiles()
   // we relocate namespaces manually, because we want to know exactly which libs we are exposing and why
   // we can move to automatic relocation using ConfigureShadowRelocation after we get to a good place on these first
-<<<<<<< HEAD
   // acryl-main doesn't perform any re-locations. I don't exactly know why, but keeping this comment here for future readers
-=======
-  relocate 'org.springframework', 'datahub.shaded.org.springframework'
-  relocate 'com.fasterxml.jackson', 'datahub.shaded.jackson'
-  relocate 'net.jcip.annotations', 'datahub.shaded.annotations'
-  relocate 'javassist', 'datahub.shaded.javassist'
-  relocate 'edu.umd.cs.findbugs', 'datahub.shaded.findbugs'
-  relocate 'org.antlr', 'datahub.shaded.org.antlr'
-  relocate 'antlr', 'datahub.shaded.antlr'
-  relocate 'com.google.common', 'datahub.shaded.com.google.common'
-  relocate 'org.apache.commons', 'datahub.shaded.org.apache.commons'
-  relocate 'org.reflections', 'datahub.shaded.org.reflections'
-  relocate 'st4hidden', 'datahub.shaded.st4hidden'
-  relocate 'org.stringtemplate', 'datahub.shaded.org.stringtemplate'
-  relocate 'org.abego.treelayout', 'datahub.shaded.treelayout'
-  relocate 'org.slf4j', 'datahub.shaded.slf4j'
-  relocate 'javax.annotation', 'datahub.shaded.javax.annotation'
-  relocate 'com.github.benmanes.caffeine', 'datahub.shaded.com.github.benmanes.caffeine'
-  relocate 'org.checkerframework', 'datahub.shaded.org.checkerframework'
-  relocate 'com.google.errorprone', 'datahub.shaded.com.google.errorprone'
-  relocate 'com.sun.jna', 'datahub.shaded.com.sun.jna'
-  // Below jars added for kafka emitter only
-  relocate 'org.apache.avro', 'datahub.shaded.org.apache.avro'
-  relocate 'com.thoughtworks.paranamer', 'datahub.shaded.com.thoughtworks.paranamer'
-  relocate 'org.xerial.snappy', 'datahub.shaded.org.xerial.snappy'
-  relocate 'org.apache.kafka', 'datahub.shaded.org.apache.kafka'
-  relocate 'io.confluent', 'datahub.shaded.io.confluent'
-  relocate 'org.apache.zookeeper', 'datahub.shaded.org.apache.zookeeper'
-  relocate 'org.apache.yetus', 'datahub.shaded.org.apache.yetus'
-  relocate 'jline', 'datahub.shaded.jline'
-  relocate 'org.apache.jute', 'datahub.shaded.org.apache.jute'
-  relocate 'org.I0Itec.zkclient', 'datahub.shaded.org.I0Itec.zkclient'
-  relocate 'net.jpountz', 'datahub.shaded.net.jpountz'
-  relocate 'com.github.luben', 'datahub.shaded.com.github.luben'
-  relocate 'common.message', 'datahub.shaded.common.message'
-  relocate 'org.glassfish', 'datahub.shaded.org.glassfish'
-  relocate 'ch.randelshofer', 'datahub.shaded.ch.randelshofer'
-
-  finalizedBy checkShadowJar
-}
-
-checkShadowJar {
-  dependsOn shadowJar
->>>>>>> public/master
 }
 
 assemble {
@@ -188,23 +118,6 @@ task javadocJar(type: Jar) {
 
 publishing {
   publications {
-<<<<<<< HEAD
-    shadow(MavenPublication) {
-      publication -> project.shadow.component(publication)
-        pom {
-          name = 'Datahub Client'
-          group = 'io.acryl'
-          artifactId = 'datahub-client'
-          description = 'DataHub Java client for metadata integration'
-          url = 'https://datahubproject.io'
-          artifacts = [ shadowJar, javadocJar, sourcesJar ]
-
-          scm {
-            connection = 'scm:git:git://github.com/datahub-project/datahub.git'
-            developerConnection = 'scm:git:ssh://github.com:datahub-project/datahub.git'
-            url = 'https://github.com/datahub-project/datahub.git'
-          }
-=======
     shadow(MavenPublication) { publication ->
       project.shadow.component(publication)
       pom {
@@ -220,7 +133,6 @@ publishing {
           developerConnection = 'scm:git:ssh://github.com:datahub-project/datahub.git'
           url = 'https://github.com/datahub-project/datahub.git'
         }
->>>>>>> public/master
 
           licenses {
             license {
@@ -258,8 +170,6 @@ signing {
   def signingPassword = System.getenv("SIGNING_PASSWORD")
   useInMemoryPgpKeys(signingKey, signingPassword)
   sign publishing.publications.shadow
-<<<<<<< HEAD
-=======
 }
 
 nexusStaging {
@@ -267,7 +177,6 @@ nexusStaging {
   //required only for projects registered in Sonatype after 2021-02-24
   username = System.getenv("NEXUS_USERNAME")
   password = System.getenv("NEXUS_PASSWORD")
->>>>>>> public/master
 }
 
 tasks.register('generateOpenApiPojos', GenerateSwaggerCode) {
