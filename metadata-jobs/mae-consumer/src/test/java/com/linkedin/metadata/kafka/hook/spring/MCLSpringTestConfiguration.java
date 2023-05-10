@@ -4,9 +4,10 @@ import com.datahub.authentication.Authentication;
 import com.datahub.metadata.ingestion.IngestionScheduler;
 import com.linkedin.entity.client.RestliEntityClient;
 import com.linkedin.metadata.boot.kafka.DataHubUpgradeKafkaListener;
-import com.linkedin.metadata.graph.GraphService;
+import com.linkedin.metadata.graph.elastic.ElasticSearchGraphService;
 import com.linkedin.metadata.models.registry.EntityRegistry;
-import com.linkedin.metadata.search.EntitySearchService;
+import com.linkedin.metadata.schema.registry.SchemaRegistryService;
+import com.linkedin.metadata.search.elasticsearch.ElasticSearchService;
 import com.linkedin.metadata.search.transformer.SearchDocumentTransformer;
 import com.linkedin.metadata.systemmetadata.SystemMetadataService;
 import com.linkedin.metadata.timeseries.TimeseriesAspectService;
@@ -26,7 +27,7 @@ public class MCLSpringTestConfiguration {
   public EntityRegistry entityRegistry;
 
   @MockBean
-  public GraphService graphService;
+  public ElasticSearchGraphService graphService;
 
   @MockBean
   public TimeseriesAspectService timeseriesAspectService;
@@ -44,11 +45,14 @@ public class MCLSpringTestConfiguration {
   public RestliEntityClient entityClient;
 
   @MockBean
-  public EntitySearchService searchService;
+  public ElasticSearchService searchService;
 
   @MockBean
   public Authentication systemAuthentication;
 
   @MockBean(name = "dataHubUpgradeKafkaListener")
   public DataHubUpgradeKafkaListener dataHubUpgradeKafkaListener;
+
+  @MockBean
+  public SchemaRegistryService schemaRegistryService;
 }
