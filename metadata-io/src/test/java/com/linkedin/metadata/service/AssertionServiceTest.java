@@ -48,7 +48,7 @@ public class AssertionServiceTest {
     Mockito.verify(mockClient, Mockito.times(1)).getV2(
         Mockito.eq(Constants.ASSERTION_ENTITY_NAME),
         Mockito.eq(TEST_ASSERTION_URN),
-        Mockito.eq(ImmutableSet.of(Constants.ASSERTION_INFO_ASPECT_NAME)),
+        Mockito.eq(ImmutableSet.of(Constants.ASSERTION_INFO_ASPECT_NAME, Constants.ASSERTION_ACTIONS_ASPECT_NAME)),
         Mockito.any(Authentication.class)
     );
 
@@ -58,7 +58,7 @@ public class AssertionServiceTest {
     Mockito.verify(mockClient, Mockito.times(1)).getV2(
         Mockito.eq(Constants.ASSERTION_ENTITY_NAME),
         Mockito.eq(TEST_NON_EXISTENT_ASSERTION_URN),
-        Mockito.eq(ImmutableSet.of(Constants.ASSERTION_INFO_ASPECT_NAME)),
+        Mockito.eq(ImmutableSet.of(Constants.ASSERTION_INFO_ASPECT_NAME, Constants.ASSERTION_ACTIONS_ASPECT_NAME)),
         Mockito.any(Authentication.class)
     );
   }
@@ -112,7 +112,7 @@ public class AssertionServiceTest {
     Mockito.when(mockClient.getV2(
         Mockito.eq(Constants.ASSERTION_ENTITY_NAME),
         Mockito.eq(TEST_ASSERTION_URN),
-        Mockito.eq(ImmutableSet.of(Constants.ASSERTION_INFO_ASPECT_NAME)),
+        Mockito.eq(ImmutableSet.of(Constants.ASSERTION_INFO_ASPECT_NAME, ASSERTION_ACTIONS_ASPECT_NAME)),
         Mockito.any(Authentication.class))
     ).thenReturn(
             new EntityResponse()
@@ -125,7 +125,7 @@ public class AssertionServiceTest {
     Mockito.when(mockClient.getV2(
         Mockito.eq(Constants.ASSERTION_ENTITY_NAME),
         Mockito.eq(TEST_NON_EXISTENT_ASSERTION_URN),
-        Mockito.eq(ImmutableSet.of(Constants.ASSERTION_INFO_ASPECT_NAME)),
+        Mockito.eq(ImmutableSet.of(Constants.ASSERTION_INFO_ASPECT_NAME, ASSERTION_ACTIONS_ASPECT_NAME)),
         Mockito.any(Authentication.class))
     ).thenReturn(
         new EntityResponse()

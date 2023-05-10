@@ -367,3 +367,7 @@ cache:
 chromeExtension:
   enabled: ${CHROME_EXTENSION_ENABLED:true}
   lineageEnabled: ${CHROME_EXTENSION_LINEAGE_ENABLED:true}
+
+assertionActions:
+  hook:
+    enabled: ${ASSERTION_ACTIONS_HOOK_ENABLED:true}

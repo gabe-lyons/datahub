@@ -1,6 +1,7 @@
 package com.linkedin.metadata.service;
 
 import com.google.common.collect.ImmutableSet;
+import com.linkedin.assertion.AssertionActions;
 import com.linkedin.assertion.AssertionInfo;
 import com.linkedin.common.AssertionsSummary;
 import com.linkedin.common.urn.Urn;
@@ -62,6 +63,25 @@ public class AssertionService extends BaseService {
   }
 
   /**
+   * Returns an instance of AssertionActions for the specified Entity urn,
+   * or null if one cannot be found.
+   *
+   * @param entityUrn the urn of the entity to retrieve the actions for
+   *
+   * @return an instance of AssertionActions for the Entity, null if it does not exist.
+   */
+  @Nullable
+  public AssertionActions getAssertionActions(@Nonnull final Urn entityUrn) {
+    Objects.requireNonNull(entityUrn, "entityUrn must not be null");
+    final EntityResponse response = getAssertionEntityResponse(entityUrn, this.systemAuthentication);
+    if (response != null && response.getAspects().containsKey(Constants.ASSERTION_ACTIONS_ASPECT_NAME)) {
+      return new AssertionActions(response.getAspects().get(Constants.ASSERTION_ACTIONS_ASPECT_NAME).getValue().data());
+    }
+    // No aspect found
+    return null;
+  }
+
+  /**
    * Produces a Metadata Change Proposal to update the AssertionsSummary aspect for a given entity.
    */
   public void updateAssertionsSummary(@Nonnull final Urn entityUrn, @Nonnull final AssertionsSummary newSummary) throws Exception {
@@ -90,7 +110,7 @@ public class AssertionService extends BaseService {
       return this.entityClient.getV2(
           Constants.ASSERTION_ENTITY_NAME,
           assertionUrn,
-          ImmutableSet.of(Constants.ASSERTION_INFO_ASPECT_NAME),
+          ImmutableSet.of(Constants.ASSERTION_INFO_ASPECT_NAME, Constants.ASSERTION_ACTIONS_ASPECT_NAME),
           authentication
       );
     } catch (Exception e) {

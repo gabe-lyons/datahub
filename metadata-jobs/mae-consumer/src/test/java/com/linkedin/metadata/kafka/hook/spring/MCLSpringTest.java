@@ -3,6 +3,7 @@ package com.linkedin.metadata.kafka.hook.spring;
 import com.linkedin.gms.factory.config.ConfigurationProvider;
 import com.linkedin.metadata.kafka.MetadataChangeLogProcessor;
 import com.linkedin.metadata.kafka.hook.UpdateIndicesHook;
+import com.linkedin.metadata.kafka.hook.assertion.AssertionActionsHook;
 import com.linkedin.metadata.kafka.hook.assertion.AssertionsSummaryHook;
 import com.linkedin.metadata.kafka.hook.event.EntityChangeEventGeneratorHook;
 import com.linkedin.metadata.kafka.hook.incident.IncidentsSummaryHook;
@@ -43,5 +44,7 @@ public class MCLSpringTest extends AbstractTestNGSpringContextTests {
     assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof IncidentsSummaryHook));
     assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof MetadataTestHook));
     assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof AssertionsSummaryHook));
+    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof AssertionActionsHook));
+
   }
 }

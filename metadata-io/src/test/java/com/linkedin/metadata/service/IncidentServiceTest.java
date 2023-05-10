@@ -3,6 +3,7 @@ package com.linkedin.metadata.service;
 import com.datahub.authentication.Authentication;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.linkedin.common.AuditStamp;
 import com.linkedin.incident.IncidentInfo;
 import com.linkedin.common.IncidentsSummary;
 import com.linkedin.common.UrnArray;
@@ -14,7 +15,13 @@ import com.linkedin.entity.EnvelopedAspect;
 import com.linkedin.entity.EnvelopedAspectMap;
 import com.linkedin.entity.client.EntityClient;
 import com.linkedin.events.metadata.ChangeType;
+import com.linkedin.incident.IncidentSource;
+import com.linkedin.incident.IncidentSourceType;
+import com.linkedin.incident.IncidentState;
+import com.linkedin.incident.IncidentStatus;
+import com.linkedin.incident.IncidentType;
 import com.linkedin.metadata.Constants;
+import com.linkedin.metadata.entity.AspectUtils;
 import com.linkedin.metadata.utils.GenericRecordUtils;
 import com.linkedin.mxe.MetadataChangeProposal;
 import java.util.Collections;
@@ -32,6 +39,7 @@ public class IncidentServiceTest {
   private static final Urn TEST_NON_EXISTENT_INCIDENT_URN = UrnUtils.getUrn("urn:li:incident:test-non-existant");
   private static final Urn TEST_DATASET_URN = UrnUtils.getUrn("urn:li:dataset:(urn:li:dataPlatform:hive,name,PROD)");
   private static final Urn TEST_NON_EXISTENT_DATASET_URN = UrnUtils.getUrn("urn:li:dataset:(urn:li:dataPlatform:hive,non-existant,PROD)");
+  private static final Urn TEST_USER_URN = UrnUtils.getUrn(SYSTEM_ACTOR);
 
   @Test
   private void testGetIncidentInfo() throws Exception {
@@ -103,6 +111,139 @@ public class IncidentServiceTest {
     );
   }
 
+  @Test
+  private void testRaiseIncidentRequiredFields() throws Exception {
+    final EntityClient mockClient = Mockito.mock(EntityClient.class);
+    final IncidentService service = new IncidentService(
+        mockClient,
+        Mockito.mock(Authentication.class));
+    service.raiseIncident(
+        IncidentType.DATA_JOB_SLA,
+        null,
+        null,
+        null,
+        null,
+        ImmutableList.of(TEST_DATASET_URN),
+        null,
+        UrnUtils.getUrn(SYSTEM_ACTOR),
+        null
+    );
+
+    final IncidentInfo expectedInfo = new IncidentInfo()
+        .setType(IncidentType.DATA_JOB_SLA)
+        .setEntities(new UrnArray(ImmutableList.of(TEST_DATASET_URN)))
+        .setStatus(new IncidentStatus()
+            .setState(IncidentState.ACTIVE)
+            .setLastUpdated(new AuditStamp().setTime(0L).setActor(TEST_USER_URN))
+        )
+        .setCreated(new AuditStamp().setTime(0L).setActor(TEST_USER_URN));
+
+    Mockito.verify(mockClient, Mockito.times(1)).ingestProposal(
+        Mockito.argThat(new IncidentInfoArgumentMatcher(
+            AspectUtils.buildMetadataChangeProposal(
+                TEST_INCIDENT_URN,
+                INCIDENT_INFO_ASPECT_NAME,
+                expectedInfo
+            )
+        )),
+        Mockito.any(Authentication.class),
+        Mockito.eq(false)
+    );
+  }
+
+  @Test
+  private void testRaiseIncidentAllFields() throws Exception {
+    final EntityClient mockClient = Mockito.mock(EntityClient.class);
+    final IncidentService service = new IncidentService(
+        mockClient,
+        Mockito.mock(Authentication.class));
+    service.raiseIncident(
+        IncidentType.DATA_JOB_SLA,
+        "custom type",
+        2,
+        "title",
+        "description",
+        ImmutableList.of(TEST_DATASET_URN),
+        new IncidentSource().setType(IncidentSourceType.ASSERTION_FAILURE),
+        UrnUtils.getUrn(SYSTEM_ACTOR),
+        "message"
+    );
+
+    final IncidentInfo expectedInfo = new IncidentInfo()
+        .setType(IncidentType.DATA_JOB_SLA)
+        .setCustomType("custom type")
+        .setPriority(2)
+        .setTitle("title")
+        .setDescription("description")
+        .setEntities(new UrnArray(ImmutableList.of(TEST_DATASET_URN)))
+        .setStatus(new IncidentStatus()
+            .setState(IncidentState.ACTIVE)
+            .setLastUpdated(new AuditStamp().setTime(0L).setActor(TEST_USER_URN))
+            .setMessage("message")
+        )
+        .setSource(new IncidentSource().setType(IncidentSourceType.ASSERTION_FAILURE))
+        .setCreated(new AuditStamp().setTime(0L).setActor(TEST_USER_URN));
+
+    Mockito.verify(mockClient, Mockito.times(1)).ingestProposal(
+        Mockito.argThat(new IncidentInfoArgumentMatcher(
+            AspectUtils.buildMetadataChangeProposal(
+                TEST_INCIDENT_URN,
+                INCIDENT_INFO_ASPECT_NAME,
+                expectedInfo
+            )
+        )),
+        Mockito.any(Authentication.class),
+        Mockito.eq(false)
+    );
+  }
+
+  @Test
+  private void testUpdateIncidentStatus() throws Exception {
+    final EntityClient mockClient = createMockEntityClient();
+    final IncidentService service = new IncidentService(
+        mockClient,
+        Mockito.mock(Authentication.class));
+    service.updateIncidentStatus(
+        TEST_INCIDENT_URN,
+        IncidentState.RESOLVED,
+        TEST_USER_URN,
+        "message");
+
+    IncidentInfo expectedInfo = new IncidentInfo(mockIncidentInfo().data());
+    expectedInfo.setStatus(new IncidentStatus()
+      .setState(IncidentState.RESOLVED)
+      .setMessage("message")
+      .setLastUpdated(new AuditStamp().setActor(TEST_USER_URN).setTime(0L))
+    );
+
+    Mockito.verify(mockClient, Mockito.times(1)).ingestProposal(
+        Mockito.argThat(new IncidentInfoArgumentMatcher(AspectUtils.buildMetadataChangeProposal(
+            TEST_INCIDENT_URN,
+            INCIDENT_INFO_ASPECT_NAME,
+            expectedInfo
+        ))),
+        Mockito.any(Authentication.class),
+        Mockito.eq(false)
+    );
+  }
+
+  @Test
+  private void testDeleteIncident() throws Exception {
+    final EntityClient mockClient = Mockito.mock(EntityClient.class);
+    final IncidentService service = new IncidentService(
+        mockClient,
+        Mockito.mock(Authentication.class));
+    service.deleteIncident(TEST_INCIDENT_URN);
+    Mockito.verify(mockClient, Mockito.times(1)).deleteEntity(
+        Mockito.eq(TEST_INCIDENT_URN),
+        Mockito.any(Authentication.class)
+    );
+    Mockito.verify(mockClient, Mockito.times(1)).deleteEntityReferences(
+        Mockito.eq(TEST_INCIDENT_URN),
+        Mockito.any(Authentication.class)
+    );
+  }
+
   private static EntityClient createMockEntityClient() throws Exception {
     EntityClient mockClient = Mockito.mock(EntityClient.class);
 
@@ -166,9 +307,14 @@ public class IncidentServiceTest {
   }
 
   private static IncidentInfo mockIncidentInfo() throws Exception {
-    final IncidentInfo info = new IncidentInfo();
-    info.setEntities(new UrnArray(ImmutableList.of(TEST_DATASET_URN)));
-    return info;
+    return new IncidentInfo()
+        .setType(IncidentType.DATA_JOB_SLA)
+        .setEntities(new UrnArray(ImmutableList.of(TEST_DATASET_URN)))
+        .setStatus(new IncidentStatus()
+            .setState(IncidentState.ACTIVE)
+            .setLastUpdated(new AuditStamp().setTime(0L).setActor(TEST_USER_URN))
+        )
+        .setCreated(new AuditStamp().setTime(0L).setActor(TEST_USER_URN));
   }
 
   private static IncidentsSummary mockIncidentSummary() throws Exception {

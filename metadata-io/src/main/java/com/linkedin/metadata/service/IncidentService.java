@@ -1,15 +1,26 @@
 package com.linkedin.metadata.service;
 
 import com.google.common.collect.ImmutableSet;
+import com.linkedin.common.AuditStamp;
 import com.linkedin.common.IncidentsSummary;
+import com.linkedin.common.UrnArray;
 import com.linkedin.common.urn.Urn;
+import com.linkedin.data.template.SetMode;
 import com.linkedin.entity.EntityResponse;
 import com.linkedin.entity.client.EntityClient;
 import com.datahub.authentication.Authentication;
 import com.linkedin.incident.IncidentInfo;
+import com.linkedin.incident.IncidentSource;
+import com.linkedin.incident.IncidentState;
+import com.linkedin.incident.IncidentStatus;
+import com.linkedin.incident.IncidentType;
 import com.linkedin.metadata.Constants;
 import com.linkedin.metadata.entity.AspectUtils;
+import com.linkedin.metadata.key.IncidentKey;
+import com.linkedin.metadata.utils.EntityKeyUtils;
+import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
@@ -72,6 +83,86 @@ public class IncidentService extends BaseService {
         this.systemAuthentication,
         false);
   }
+
+  /**
+   * Deletes an incident with a given URN
+   */
+  public void deleteIncident(@Nonnull final Urn incidentUrn) throws Exception {
+    Objects.requireNonNull(incidentUrn, "incidentUrn must not be null");
+    this.entityClient.deleteEntity(incidentUrn, this.systemAuthentication);
+    this.entityClient.deleteEntityReferences(incidentUrn, this.systemAuthentication);
+  }
+
+  /**
+   * Updates an existing incident's status.
+   */
+  public Urn raiseIncident(
+      @Nonnull final IncidentType type,
+      @Nullable final String customType,
+      @Nullable final Integer priority,
+      @Nullable final String title,
+      @Nullable final String description,
+      @Nonnull final List<Urn> entityUrns,
+      @Nullable final IncidentSource source,
+      @Nonnull final Urn actor,
+      @Nullable final String message) throws Exception {
+    Objects.requireNonNull(type, "type must not be null");
+    Objects.requireNonNull(entityUrns, "entityUrns must not be null");
+    Objects.requireNonNull(actor, "actor must not be null");
+
+    final IncidentKey key = new IncidentKey();
+    final String id = UUID.randomUUID().toString();
+    key.setId(id);
+    final Urn urn = EntityKeyUtils.convertEntityKeyToUrn(key, Constants.INCIDENT_ENTITY_NAME);
+
+    final IncidentInfo newInfo = new IncidentInfo();
+    newInfo.setType(type);
+    newInfo.setCustomType(customType, SetMode.IGNORE_NULL);
+    newInfo.setPriority(priority, SetMode.IGNORE_NULL);
+    newInfo.setTitle(title, SetMode.IGNORE_NULL);
+    newInfo.setDescription(description, SetMode.IGNORE_NULL);
+    newInfo.setEntities(new UrnArray(entityUrns));
+    newInfo.setSource(source, SetMode.IGNORE_NULL);
+    newInfo.setStatus(new IncidentStatus()
+      .setState(IncidentState.ACTIVE)
+      .setMessage(message, SetMode.IGNORE_NULL)
+      .setLastUpdated(new AuditStamp().setActor(actor).setTime(System.currentTimeMillis()))
+    );
+    newInfo.setCreated(new AuditStamp().setActor(actor).setTime(System.currentTimeMillis()));
+    this.entityClient.ingestProposal(
+        AspectUtils.buildMetadataChangeProposal(urn, Constants.INCIDENT_INFO_ASPECT_NAME, newInfo),
+        this.systemAuthentication,
+        false);
+    return urn;
+  }
+
+  /**
+   * Updates an existing incident's status.
+   */
+  public void updateIncidentStatus(
+      @Nonnull final Urn urn,
+      @Nonnull final IncidentState state,
+      @Nonnull final Urn actor,
+      @Nullable final String message) throws Exception {
+    Objects.requireNonNull(urn, "urn must not be null");
+    Objects.requireNonNull(state, "state must not be null");
+    Objects.requireNonNull(actor, "actor must not be null");
+    final IncidentInfo existingInfo = getIncidentInfo(urn);
+    if (existingInfo != null) {
+      final IncidentStatus newStatus = new IncidentStatus()
+          .setState(state)
+          .setLastUpdated(new AuditStamp().setActor(actor).setTime(System.currentTimeMillis()))
+          .setMessage(message, SetMode.IGNORE_NULL);
+      existingInfo.setStatus(newStatus);
+      this.entityClient.ingestProposal(
+          AspectUtils.buildMetadataChangeProposal(urn, Constants.INCIDENT_INFO_ASPECT_NAME, existingInfo),
+          this.systemAuthentication,
+          false);
+    } else {
+      throw new IllegalArgumentException(String.format("Failed to find incident with urn %s. Incident may not exist!", urn));
+    }
+  }
+
 
   /**
    * Returns an instance of {@link EntityResponse} for the specified View urn,
