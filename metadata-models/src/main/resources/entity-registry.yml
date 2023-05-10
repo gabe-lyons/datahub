@@ -44,9 +44,8 @@ entities:
       - glossaryTerms
       - browsePaths
       - dataPlatformInstance
-      - containerPath
-      - anomaliesSummary
       - browsePathsV2
+      - anomaliesSummary
   - name: dataHubPolicy
     doc: DataHub Policies represent access policies granted to users or groups on metadata operations like edit, view etc.
     category: internal
@@ -73,9 +72,8 @@ entities:
       - glossaryTerms
       - institutionalMemory
       - dataPlatformInstance
-      - containerPath
-      - anomaliesSummary
       - browsePathsV2
+      - anomaliesSummary
   - name: dataFlow
     category: core
     keyAspect: dataFlowKey
@@ -173,7 +171,6 @@ entities:
       - subTypes
       - dataPlatformInstance
       - proposals
-      - containerPath
       - browsePathsV2
   - name: corpuser
     doc: CorpUser represents an identity of a person (or an account) in the enterprise.
@@ -225,7 +222,6 @@ entities:
       - domains
       - testResults
       - proposals
-      - containerPath
       - browsePathsV2
   - name: tag
     keyAspect: tagKey

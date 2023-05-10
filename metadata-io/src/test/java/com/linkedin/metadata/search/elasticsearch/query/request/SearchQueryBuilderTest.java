@@ -117,7 +117,7 @@ public class SearchQueryBuilderTest {
       }
     }).collect(Collectors.toList());
 
-    assertEquals(prefixFieldWeights.size(), 22);
+    assertEquals(prefixFieldWeights.size(), 23);
 
     List.of(
             Pair.of("urn", 100.0f),
