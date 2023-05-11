@@ -13,7 +13,6 @@ import com.linkedin.metadata.kafka.hook.assertion.AssertionsSummaryHook;
 import com.linkedin.metadata.kafka.hook.event.EntityChangeEventGeneratorHook;
 import com.linkedin.metadata.kafka.hook.incident.IncidentsSummaryHook;
 import com.linkedin.metadata.kafka.hook.ingestion.IngestionSchedulerHook;
-import com.linkedin.metadata.kafka.hook.notification.NotificationGeneratorHook;
 import com.linkedin.metadata.kafka.hook.siblings.SiblingAssociationHook;
 import com.linkedin.metadata.kafka.hook.test.MetadataTestHook;
 import com.linkedin.metadata.utils.metrics.MetricUtils;
@@ -43,7 +42,6 @@ import org.springframework.stereotype.Component;
     KafkaEventConsumerFactory.class,
     SiblingAssociationHook.class,
     MetadataTestHook.class,
-    NotificationGeneratorHook.class,
     AssertionsSummaryHook.class,
     IncidentsSummaryHook.class,
     AssertionActionsHook.class

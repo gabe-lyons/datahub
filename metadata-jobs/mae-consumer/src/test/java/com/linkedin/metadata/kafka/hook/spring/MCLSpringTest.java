@@ -38,15 +38,25 @@ public class MCLSpringTest extends AbstractTestNGSpringContextTests {
   @Test
   public void testHooks() {
     MetadataChangeLogProcessor metadataChangeLogProcessor = applicationContext.getBean(MetadataChangeLogProcessor.class);
-    assertTrue(metadataChangeLogProcessor.getHooks().stream().noneMatch(hook -> hook instanceof IngestionSchedulerHook));
-    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof UpdateIndicesHook));
-    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof SiblingAssociationHook));
-    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof EntityChangeEventGeneratorHook));
-    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof NotificationGeneratorHook));
-    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof IncidentsSummaryHook));
-    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof MetadataTestHook));
-    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof AssertionsSummaryHook));
-    assertTrue(metadataChangeLogProcessor.getHooks().stream().anyMatch(hook -> hook instanceof AssertionActionsHook));
+
+    assertEquals(0,
+        metadataChangeLogProcessor.getHooks().stream().filter(hook -> hook instanceof IngestionSchedulerHook).count());
+    assertEquals(1,
+        metadataChangeLogProcessor.getHooks().stream().filter(hook -> hook instanceof UpdateIndicesHook).count());
+    assertEquals(1,
+        metadataChangeLogProcessor.getHooks().stream().filter(hook -> hook instanceof SiblingAssociationHook).count());
+    assertEquals(1, metadataChangeLogProcessor.getHooks()
+        .stream().filter(hook -> hook instanceof EntityChangeEventGeneratorHook).count());
+    assertEquals(1, metadataChangeLogProcessor.getHooks()
+        .stream().filter(hook -> hook instanceof NotificationGeneratorHook).count());
+    assertEquals(1,
+        metadataChangeLogProcessor.getHooks().stream().filter(hook -> hook instanceof IncidentsSummaryHook).count());
+    assertEquals(1,
+        metadataChangeLogProcessor.getHooks().stream().filter(hook -> hook instanceof MetadataTestHook).count());
+    assertEquals(1,
+        metadataChangeLogProcessor.getHooks().stream().filter(hook -> hook instanceof AssertionsSummaryHook).count());
+    assertEquals(1,
+        metadataChangeLogProcessor.getHooks().stream().filter(hook -> hook instanceof AssertionActionsHook).count());
 
   }
 }
