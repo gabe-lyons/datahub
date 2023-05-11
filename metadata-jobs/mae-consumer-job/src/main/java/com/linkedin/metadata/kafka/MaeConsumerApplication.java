@@ -1,5 +1,6 @@
 package com.linkedin.metadata.kafka;
 
+import com.linkedin.gms.factory.common.SiblingGraphServiceFactory;
 import com.linkedin.gms.factory.telemetry.ScheduledAnalyticsFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.actuate.autoconfigure.solr.SolrHealthContributorAutoConfiguration;
@@ -25,9 +26,9 @@ import org.springframework.context.annotation.FilterType;
         "com.linkedin.gms.factory.config",
         "com.linkedin.gms.factory.entity.update.indices"
 }, excludeFilters = {
-    @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ScheduledAnalyticsFactory.class)})
+    @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = ScheduledAnalyticsFactory.class),
+    @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SiblingGraphServiceFactory.class)})
 public class MaeConsumerApplication {
-
   public static void main(String[] args) {
     Class<?>[] primarySources = {MaeConsumerApplication.class, MclConsumerConfig.class};
     SpringApplication.run(primarySources, args);

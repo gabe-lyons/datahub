@@ -1,6 +1,5 @@
 package com.linkedin.metadata.boot.factories;
 
-import com.google.common.collect.ImmutableList;
 import com.linkedin.gms.factory.assertions.AssertionServiceFactory;
 import com.linkedin.gms.factory.config.ConfigurationProvider;
 import com.linkedin.gms.factory.entity.EntityServiceFactory;
@@ -35,8 +34,10 @@ import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.search.transformer.SearchDocumentTransformer;
 import com.linkedin.metadata.service.IncidentService;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 import com.linkedin.metadata.service.AssertionService;
@@ -127,8 +128,8 @@ public class BootstrapManagerFactory {
     final RestoreColumnLineageIndices restoreColumnLineageIndices = new RestoreColumnLineageIndices(_entityService, _entityRegistry);
     final IngestDefaultGlobalSettingsStep ingestSettingsStep = new IngestDefaultGlobalSettingsStep(_entityService);
     final IngestDefaultTagsStep ingestDefaultTagsStep = new IngestDefaultTagsStep(_entityService);
-    final WaitForSystemUpdateStep waitForSystemUpdateStep = new WaitForSystemUpdateStep(_dataHubUpgradeKafkaListener,
-        _configurationProvider);
+    final WaitForSystemUpdateStep waitForSystemUpdateStep = _configurationProvider.getSystemUpdate().isWaitForSystemUpdate()
+        ? new WaitForSystemUpdateStep(_dataHubUpgradeKafkaListener, _configurationProvider) : null;
 
     final MigrateAssertionsSummaryStep assertionsSummaryStep =
         new MigrateAssertionsSummaryStep(_entityService, _entitySearchService, _assertionService, _timeseriesAspectService,
@@ -136,7 +137,7 @@ public class BootstrapManagerFactory {
     final MigrateIncidentsSummaryStep incidentsSummaryStep =
         new MigrateIncidentsSummaryStep(_entityService, _entitySearchService, _incidentService);
 
-    final List<BootstrapStep> finalSteps = new ArrayList<>(ImmutableList.of(
+    final List<BootstrapStep> finalSteps = Stream.of(
             waitForSystemUpdateStep,
             ingestRootUserStep,
             ingestPoliciesStep,
@@ -155,7 +156,8 @@ public class BootstrapManagerFactory {
             // Saas-only
             _ingestMetadataTestsStep,
             ingestDefaultTagsStep
-        ));
+        ).filter(Objects::nonNull)
+        .collect(Collectors.toList());
 
     if (_upgradeDefaultBrowsePathsEnabled) {
       finalSteps.add(new UpgradeDefaultBrowsePathsStep(_entityService));
