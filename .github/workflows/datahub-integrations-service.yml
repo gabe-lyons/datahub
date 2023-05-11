@@ -34,19 +34,19 @@ jobs:
         id: tag
         run: |
           source .github/scripts/docker_helpers.sh
-          echo "tag=$(get_tag)" >> $GITHUB_OUTPUT
+          echo "tag=$(get_tag)" >> "$GITHUB_OUTPUT"
       - name: Compute Python Release Version
         id: python_release_version
         run: |
           source .github/scripts/docker_helpers.sh
-          echo "release_version=$(get_python_docker_release_v)" >> $GITHUB_OUTPUT
+          echo "release_version=$(get_python_docker_release_v)" >> "$GITHUB_OUTPUT"
       - name: Check whether publishing enabled
         id: publish
         env:
           ENABLE_PUBLISH: true
         run: |
           echo "Enable publish: ${{ env.ENABLE_PUBLISH != '' }}"
-          echo "publish=${{ env.ENABLE_PUBLISH != '' }}" >> $GITHUB_OUTPUT
+          echo "publish=${{ env.ENABLE_PUBLISH != '' }}" >> "$GITHUB_OUTPUT"
   push_to_registries:
     name: Build and Push Docker Image to Docker Hub
     runs-on: ubuntu-latest
