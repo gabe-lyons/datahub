@@ -153,6 +153,10 @@ query listActionRequests($input: ListActionRequestsInput!) {
                         urn
                         type
                         name
+                        properties {
+                            name
+                            colorHex
+                        }
                     }
                 }
                 createGlossaryTermProposal {

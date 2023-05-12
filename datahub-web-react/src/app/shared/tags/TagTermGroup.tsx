@@ -253,14 +253,14 @@ export default function TagTermGroup({
             {proposedTags?.map((actionRequest) => (
                 <Tooltip overlay="Pending approval from owners">
                     <StyledTag
-                        data-testid={`proposed-tag-${actionRequest?.params?.tagProposal?.tag?.name}`}
+                        data-testid={`proposed-tag-${actionRequest?.params?.tagProposal?.tag?.properties?.name}`}
                         $colorHash={actionRequest?.params?.tagProposal?.tag?.urn}
                         $color={actionRequest?.params?.tagProposal?.tag?.properties?.colorHex}
                         onClick={() => {
                             setShowProposalDecisionModal(true);
                         }}
                     >
-                        {actionRequest?.params?.tagProposal?.tag?.name}
+                        {entityRegistry.getDisplayName(EntityType.Tag, actionRequest?.params?.tagProposal?.tag)}
                         <ProposalModal
                             actionRequest={actionRequest}
                             showProposalDecisionModal={showProposalDecisionModal}
@@ -268,7 +268,7 @@ export default function TagTermGroup({
                             onProposalAcceptance={onProposalAcceptance}
                             onProposalRejection={onProposalRejection}
                             onActionRequestUpdate={onActionRequestUpdate}
-                            elementName={actionRequest?.params?.tagProposal?.tag?.name}
+                            elementName={actionRequest?.params?.tagProposal?.tag?.properties?.name}
                         />
                         <ClockCircleOutlined style={{ color: 'orange', marginLeft: '3%' }} />
                     </StyledTag>

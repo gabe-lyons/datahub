@@ -28,7 +28,7 @@ export default function TagAssociationRequestItem({ actionRequest, onUpdate, sho
                 $colorHash={tag.urn}
                 style={{ marginRight: 2, marginLeft: 2 }}
             >
-                {tag?.name}
+                {entityRegistry.getDisplayName(EntityType.Tag, tag)}
             </StyledTag>
         </Link>
     );

@@ -963,6 +963,7 @@ fragment proposalsFragment on ActionRequest {
                 name
                 description
                 properties {
+                    name
                     colorHex
                 }
             }
