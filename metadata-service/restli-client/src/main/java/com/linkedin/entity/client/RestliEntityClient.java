@@ -344,10 +344,12 @@ public class RestliEntityClient extends BaseClient implements EntityClient {
         .inputParam(input)
         .filterParam(newFilter(requestFilters))
         .startParam(start)
-        .fulltextParam(searchFlags != null ? searchFlags.isFulltext() : null)
         .countParam(count);
     if (searchFlags != null) {
       requestBuilder.searchFlagsParam(searchFlags);
+      if (searchFlags.hasFulltext()) {
+        requestBuilder.fulltextParam(searchFlags.isFulltext());
+      }
     }
 
     return sendClientRequest(requestBuilder, authentication).getEntity();

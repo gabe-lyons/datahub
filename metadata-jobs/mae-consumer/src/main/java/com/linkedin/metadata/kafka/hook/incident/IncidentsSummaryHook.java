@@ -223,7 +223,8 @@ public class IncidentsSummaryHook implements MetadataChangeLogHook {
    * Returns true if an incident is being soft-deleted.
    */
   private boolean isIncidentSoftDeleted(@Nonnull final MetadataChangeLog event) {
-    return SUPPORTED_UPDATE_TYPES.contains(event.getChangeType()) && isSoftDeletionEvent(event);
+    return INCIDENT_ENTITY_NAME.equals(event.getEntityType())
+        && SUPPORTED_UPDATE_TYPES.contains(event.getChangeType()) && isSoftDeletionEvent(event);
   }
 
   private boolean isSoftDeletionEvent(@Nonnull final MetadataChangeLog event) {
