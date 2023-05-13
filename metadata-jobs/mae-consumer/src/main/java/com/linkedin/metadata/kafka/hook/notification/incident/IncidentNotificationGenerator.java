@@ -3,6 +3,7 @@ package com.linkedin.metadata.kafka.hook.notification.incident;
 import com.datahub.authentication.Authentication;
 import com.datahub.notification.NotificationTemplateType;
 import com.datahub.notification.provider.SettingsProvider;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.linkedin.common.Owner;
 import com.linkedin.common.Ownership;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.linkedin.metadata.Constants.*;
 import static com.linkedin.metadata.kafka.hook.notification.NotificationUtils.*;
 
 
@@ -227,6 +229,9 @@ public class IncidentNotificationGenerator extends BaseMclNotificationGenerator 
 
   private String listToJSON(final List<?> list) {
     ObjectMapper objectMapper = new ObjectMapper();
+    int maxSize = Integer.parseInt(System.getenv().getOrDefault(INGESTION_MAX_SERIALIZED_STRING_LENGTH, MAX_JACKSON_STRING_SIZE));
+    objectMapper.getFactory().setStreamReadConstraints(StreamReadConstraints.builder()
+        .maxStringLength(maxSize).build());
     try {
       return objectMapper.writeValueAsString(list.stream().map(Object::toString).collect(Collectors.toList()));
     } catch (Exception e) {
