@@ -9,7 +9,7 @@
         - dataset
       conditions: []
     rules:
-      or:
+      and:
         - property: usageFeatures.queryCountPercentileLast30Days
           operator: greater_than
           values:
