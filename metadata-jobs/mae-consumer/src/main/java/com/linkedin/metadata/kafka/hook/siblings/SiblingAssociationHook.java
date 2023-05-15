@@ -43,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
+
 import com.linkedin.metadata.query.filter.Condition;
 import com.linkedin.metadata.query.filter.ConjunctiveCriterion;
 import com.linkedin.metadata.query.filter.ConjunctiveCriterionArray;
@@ -64,7 +65,12 @@ public class SiblingAssociationHook implements MetadataChangeLogHook {
 
   public static final String SIBLING_ASSOCIATION_SYSTEM_ACTOR = "urn:li:corpuser:__datahub_system_sibling_hook";
   public static final String DBT_PLATFORM_NAME = "dbt";
-  public static final String SOURCE_SUBTYPE = "source";
+
+  // Older dbt sources produced lowercase subtypes, whereas we now
+  // produce titlecase subtypes. We need to handle both cases to
+  // maintain backwards compatibility.
+  public static final String SOURCE_SUBTYPE_V1 = "source";
+  public static final String SOURCE_SUBTYPE_V2 = "Source";
 
   private final EntityRegistry _entityRegistry;
   private final RestliEntityClient _entityClient;
@@ -176,7 +182,8 @@ public class SiblingAssociationHook implements MetadataChangeLogHook {
             && subTypesAspectOfEntity != null
             && upstreamLineage.hasUpstreams()
             && subTypesAspectOfEntity.hasTypeNames()
-            && subTypesAspectOfEntity.getTypeNames().contains(SOURCE_SUBTYPE)
+            && (subTypesAspectOfEntity.getTypeNames().contains(SOURCE_SUBTYPE_V1)
+            || subTypesAspectOfEntity.getTypeNames().contains(SOURCE_SUBTYPE_V2))
     ) {
       UpstreamArray upstreams = upstreamLineage.getUpstreams();
       if (
@@ -284,6 +291,7 @@ public class SiblingAssociationHook implements MetadataChangeLogHook {
       throw new RuntimeException("Error ingesting sibling proposal. Skipping processing.", e);
     }
   }
+
 
   /**
    * Returns true if the event should be processed, which is only true if the event represents a dataset for now
@@ -446,4 +454,5 @@ public class SiblingAssociationHook implements MetadataChangeLogHook {
       throw new RuntimeException("Failed to retrieve UpstreamLineage", e);
     }
   }
+
 }
