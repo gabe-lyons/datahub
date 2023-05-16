@@ -62,6 +62,7 @@ public class AutoCompleteForMultipleResolver implements DataFetcher<CompletableF
             : null;
 
         List<EntityType> types = getEntityTypes(input.getTypes(), maybeResolvedView);
+        types = types != null ? types.stream().filter(AUTO_COMPLETE_ENTITY_TYPES::contains).collect(Collectors.toList()) : null;
         if (types != null && types.size() > 0) {
             return AutocompleteUtils.batchGetAutocompleteResults(
                 types.stream().map(_typeToEntity::get).collect(Collectors.toList()),
