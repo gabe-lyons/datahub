@@ -104,7 +104,7 @@ function BusinessGlossaryPage() {
                         <div>
                             <Button
                                 id={BUSINESS_GLOSSARY_CREATE_TERM_ID}
-                                disabled={!canManageGlossaries}
+                                // can not be disabled on acryl-main due to ability to propose
                                 type="text"
                                 onClick={() => setIsCreateTermModalVisible(true)}
                             >
@@ -112,7 +112,7 @@ function BusinessGlossaryPage() {
                             </Button>
                             <Button
                                 id={BUSINESS_GLOSSARY_CREATE_TERM_GROUP_ID}
-                                disabled={!canManageGlossaries}
+                                // can not be disabled on acryl-main due to ability to propose
                                 type="text"
                                 onClick={() => setIsCreateNodeModalVisible(true)}
                             >
@@ -134,6 +134,7 @@ function BusinessGlossaryPage() {
             {isCreateTermModalVisible && (
                 <CreateGlossaryEntityModal
                     entityType={EntityType.GlossaryTerm}
+                    canCreateGlossaryEntity={!!canManageGlossaries}
                     onClose={() => setIsCreateTermModalVisible(false)}
                     refetchData={refetchForTerms}
                 />
@@ -141,6 +142,7 @@ function BusinessGlossaryPage() {
             {isCreateNodeModalVisible && (
                 <CreateGlossaryEntityModal
                     entityType={EntityType.GlossaryNode}
+                    canCreateGlossaryEntity={!!canManageGlossaries}
                     onClose={() => setIsCreateNodeModalVisible(false)}
                     refetchData={refetchForNodes}
                 />

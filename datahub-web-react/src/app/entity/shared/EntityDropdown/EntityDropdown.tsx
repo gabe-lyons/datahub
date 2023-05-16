@@ -184,7 +184,7 @@ function EntityDropdown(props: Props) {
                         {menuItems.has(EntityMenuItems.ADD_TERM) && (
                             <StyledMenuItem
                                 key="2"
-                                disabled={!canCreateGlossaryEntity}
+                                // can not be disabled on acryl-main due to ability to propose
                                 onClick={() => setIsCreateTermModalVisible(true)}
                             >
                                 <MenuItem>
@@ -195,7 +195,7 @@ function EntityDropdown(props: Props) {
                         {menuItems.has(EntityMenuItems.ADD_TERM_GROUP) && (
                             <StyledMenuItem
                                 key="3"
-                                disabled={!canCreateGlossaryEntity}
+                                // can not be disabled on acryl-main due to ability to propose
                                 onClick={() => setIsCreateNodeModalVisible(true)}
                             >
                                 <MenuItem>
@@ -251,6 +251,7 @@ function EntityDropdown(props: Props) {
             {isCreateTermModalVisible && (
                 <CreateGlossaryEntityModal
                     entityType={EntityType.GlossaryTerm}
+                    canCreateGlossaryEntity={canCreateGlossaryEntity}
                     onClose={() => setIsCreateTermModalVisible(false)}
                     refetchData={refetchForTerms}
                 />
@@ -258,6 +259,7 @@ function EntityDropdown(props: Props) {
             {isCreateNodeModalVisible && (
                 <CreateGlossaryEntityModal
                     entityType={EntityType.GlossaryNode}
+                    canCreateGlossaryEntity={canCreateGlossaryEntity}
                     onClose={() => setIsCreateNodeModalVisible(false)}
                     refetchData={refetchForNodes}
                 />

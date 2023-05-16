@@ -37,10 +37,12 @@ interface Props {
     entityType: EntityType;
     onClose: () => void;
     refetchData?: () => void;
+    // acryl-main only prop
+    canCreateGlossaryEntity: boolean;
 }
 
 function CreateGlossaryEntityModal(props: Props) {
-    const { entityType, onClose, refetchData } = props;
+    const { entityType, onClose, refetchData, canCreateGlossaryEntity } = props;
     const entityData = useEntityData();
     const { isInGlossaryContext, urnsToUpdate, setUrnsToUpdate } = useGlossaryEntityData();
     const [form] = Form.useForm();
@@ -147,7 +149,11 @@ function CreateGlossaryEntityModal(props: Props) {
                     <Button onClick={proposeGlossaryEntity} disabled={createButtonDisabled}>
                         Propose
                     </Button>
-                    <Button data-testid="add" onClick={createGlossaryEntity} disabled={createButtonDisabled}>
+                    <Button
+                        data-testid="add"
+                        onClick={createGlossaryEntity}
+                        disabled={createButtonDisabled || !canCreateGlossaryEntity}
+                    >
                         Create
                     </Button>
                 </>
