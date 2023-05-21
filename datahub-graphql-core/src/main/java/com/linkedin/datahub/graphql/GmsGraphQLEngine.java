@@ -664,6 +664,8 @@ public class GmsGraphQLEngine {
             .addSchema(fileBasedSchema(ACTIONS_SCHEMA_FILE))
             // Constraints not in OSS
             .addSchema(fileBasedSchema(CONSTRAINTS_SCHEMA_FILE))
+            // Assertion extensions not in OSS
+            .addSchema(fileBasedSchema(ASSERTIONS_SCHEMA_FILE))
             .addSchema(fileBasedSchema(STEPS_SCHEMA_FILE))
             .addSchema(fileBasedSchema(LINEAGE_SCHEMA_FILE))
             // Connections not in OSS
@@ -1547,6 +1549,7 @@ public class GmsGraphQLEngine {
                         })
                 )
                 .dataFetcher("runs", new DataJobRunsResolver(entityClient))
+                .dataFetcher("assertions", new EntityAssertionsResolver(entityClient, graphClient))
                 .dataFetcher("incidents", new EntityIncidentsResolver(entityClient))
                 .dataFetcher("privileges", new EntityPrivilegesResolver(entityClient))
                 .dataFetcher("exists", new EntityExistsResolver(entityService))

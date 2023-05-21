@@ -7,6 +7,7 @@ import com.linkedin.assertion.AssertionResultType;
 import com.linkedin.assertion.AssertionRunEvent;
 import com.linkedin.assertion.AssertionRunStatus;
 import com.linkedin.assertion.AssertionSource;
+import com.linkedin.assertion.AssertionSourceType;
 import com.linkedin.assertion.AssertionType;
 import com.linkedin.assertion.DatasetAssertionInfo;
 import com.linkedin.common.AssertionSummaryDetails;
@@ -94,7 +95,7 @@ public class AssertionsSummaryHookTest {
                         .setUrn(TEST_EXISTING_ASSERTION_URN)
                         .setType(TEST_ASSERTION_TYPE)
                         .setLastResultAt(0L)
-                        .setSource(AssertionSource.EXTERNAL.toString())
+                        .setSource(AssertionSourceType.EXTERNAL.toString())
                 )))
                 .setFailingAssertionDetails(new AssertionSummaryDetailsArray())
         },
@@ -106,7 +107,7 @@ public class AssertionsSummaryHookTest {
                       .setUrn(TEST_EXISTING_ASSERTION_URN)
                       .setType(TEST_ASSERTION_TYPE)
                       .setLastResultAt(0L)
-                      .setSource(AssertionSource.EXTERNAL.toString())
+                      .setSource(AssertionSourceType.EXTERNAL.toString())
             )))
         },
         new Object[] {
@@ -116,14 +117,14 @@ public class AssertionsSummaryHookTest {
                         .setUrn(TEST_EXISTING_ASSERTION_URN)
                         .setType(TEST_ASSERTION_TYPE)
                         .setLastResultAt(0L)
-                        .setSource(AssertionSource.EXTERNAL.toString())
+                        .setSource(AssertionSourceType.EXTERNAL.toString())
                 )))
                 .setFailingAssertionDetails(new AssertionSummaryDetailsArray(ImmutableList.of(
                   new AssertionSummaryDetails()
                       .setUrn(TEST_EXISTING_ASSERTION_URN)
                       .setType(TEST_ASSERTION_TYPE)
                       .setLastResultAt(0L)
-                      .setSource(AssertionSource.EXTERNAL.toString())
+                      .setSource(AssertionSourceType.EXTERNAL.toString())
             )))
         }
     };
@@ -133,7 +134,7 @@ public class AssertionsSummaryHookTest {
   public void testInvokeAssertionRunEventSuccess(AssertionsSummary summary) throws Exception {
     AssertionService service = mockAssertionService(summary);
     AssertionsSummaryHook hook = new AssertionsSummaryHook(ENTITY_REGISTRY, service, true);
-    final AssertionInfo info = new AssertionInfo().setType(AssertionType.DATASET).setSource(AssertionSource.EXTERNAL);
+    final AssertionInfo info = new AssertionInfo().setType(AssertionType.DATASET).setSource(new AssertionSource().setType(AssertionSourceType.EXTERNAL));
     final AssertionRunEvent runEvent = mockAssertionRunEvent(TEST_ASSERTION_URN, AssertionRunStatus.COMPLETE, AssertionResultType.SUCCESS);
     final MetadataChangeLog event = buildMetadataChangeLog(
         TEST_ASSERTION_URN,
@@ -171,7 +172,7 @@ public class AssertionsSummaryHookTest {
   public void testInvokeAssertionRunEventFailure(AssertionsSummary summary) throws Exception {
     AssertionService service = mockAssertionService(summary);
     AssertionsSummaryHook hook = new AssertionsSummaryHook(ENTITY_REGISTRY, service, true);
-    final AssertionInfo info = new AssertionInfo().setType(AssertionType.DATASET).setSource(AssertionSource.EXTERNAL);
+    final AssertionInfo info = new AssertionInfo().setType(AssertionType.DATASET).setSource(new AssertionSource().setType(AssertionSourceType.EXTERNAL));
     final AssertionRunEvent runEvent = mockAssertionRunEvent(TEST_ASSERTION_URN, AssertionRunStatus.COMPLETE, AssertionResultType.FAILURE);
     final MetadataChangeLog event = buildMetadataChangeLog(
         TEST_ASSERTION_URN,
@@ -263,7 +264,7 @@ public class AssertionsSummaryHookTest {
     Mockito.when(mockService.getAssertionInfo(TEST_ASSERTION_URN))
         .thenReturn(new AssertionInfo()
             .setType(AssertionType.DATASET)
-            .setSource(AssertionSource.EXTERNAL)
+            .setSource(new AssertionSource().setType(AssertionSourceType.EXTERNAL))
             .setDatasetAssertion(new DatasetAssertionInfo()
                 .setDataset(TEST_DATASET_URN)
         )
@@ -284,7 +285,7 @@ public class AssertionsSummaryHookTest {
     assertionSummaryDetails.setType(info.getType().toString());
     assertionSummaryDetails.setLastResultAt(event.getTimestampMillis());
     if (info.hasSource()) {
-      assertionSummaryDetails.setSource(info.getSource().toString());
+      assertionSummaryDetails.setSource(info.getSource().getType().toString());
     }
     return assertionSummaryDetails;
   }

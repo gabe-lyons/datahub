@@ -24,4 +24,6 @@ public class Constants {
     public static final String LINEAGE_SCHEMA_FILE = "lineage.graphql";
     public static final String BROWSE_PATH_DELIMITER = "/";
     public static final String VERSION_STAMP_FIELD_NAME = "versionStamp";
+    // Assertion extensions not in OSS
+    public static final String ASSERTIONS_SCHEMA_FILE = "assertions.graphql";
 }

@@ -220,7 +220,7 @@ public class AssertionsSummaryHook implements MetadataChangeLogHook {
     assertionSummaryDetails.setType(info.getType().toString());
     assertionSummaryDetails.setLastResultAt(event.getTimestampMillis());
     if (info.hasSource()) {
-      assertionSummaryDetails.setSource(info.getSource().toString());
+      assertionSummaryDetails.setSource(info.getSource().getType().toString());
     }
     return assertionSummaryDetails;
   }

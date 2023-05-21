@@ -40,6 +40,8 @@ graphqlCodegen {
         "$projectDir/src/main/resources/actions.graphql".toString(),
         // Constraints not in OSS
         "$projectDir/src/main/resources/constraints.graphql".toString(),
+        // Assertion extensions not in OSS
+        "$projectDir/src/main/resources/assertions.graphql".toString(),
         "$projectDir/src/main/resources/step.graphql".toString(),
         "$projectDir/src/main/resources/lineage.graphql".toString(),
         // Connections not in OSS

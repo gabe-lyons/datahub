@@ -45,24 +45,10 @@ record AssertionInfo includes CustomProperties, ExternalReference {
     /**
     * The source or origin of the Assertion definition.
     *
-    * If the Assertion is EXTERNAL, it is expected to have a corresponding dataPlatformInstance aspect detailing
+    * If the source type of the Assertion is EXTERNAL, it is expected to have a corresponding dataPlatformInstance aspect detailing
     * the platform where it was ingested from.
     */
-    @Searchable = { }
-    source: optional enum AssertionSource {
-      /**
-       * The assertion was defined natively on DataHub by a user.
-       */
-      NATIVE
-      /**
-       * The assertion was defined and managed externally of DataHub.
-       */
-      EXTERNAL
-      /**
-       * The assertion was inferred, e.g. from offline AI / ML models.
-       */
-      INFERRED
-    }
+    source: optional AssertionSource
 
     /**
     * The evaluation schedule for the Assertion. If the type is INFERRED or NATIVE, it is expected

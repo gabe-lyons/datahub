@@ -5627,6 +5627,11 @@ type DataJob implements EntityWithRelationships & Entity & BrowsableEntity {
     domain: DomainAssociation
 
     """
+    Assertions associated with the Data Job
+    """
+    assertions(start: Int, count: Int): EntityAssertionsResult
+
+    """
     Incidents associated with the Data Job
     """
     incidents(
@@ -7027,6 +7032,14 @@ The top-level assertion type. Currently single Dataset assertions are the only t
 """
 enum AssertionType {
     DATASET
+    """
+    A Dataset SLA assertion - Not in OSS
+    """
+    DATASET_SLA
+    """
+    A Data Job SLA Assertion - Not in OSS
+    """
+    DATA_JOB_SLA
 }
 
 """
