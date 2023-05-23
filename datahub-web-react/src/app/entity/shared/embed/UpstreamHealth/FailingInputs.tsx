@@ -2,6 +2,7 @@ import { orange } from '@ant-design/colors';
 import { DownOutlined, WarningFilled } from '@ant-design/icons';
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { Typography } from 'antd';
 import { Dataset } from '../../../../../types.generated';
 import { useEntityRegistry } from '../../../../useEntityRegistry';
 import { ANTD_GRAY } from '../../constants';
@@ -10,7 +11,7 @@ import { useEntityData } from '../../EntityContext';
 import ActiveIncidents from './ActiveIncidents';
 import FailingAssertions from './FailingAssertions';
 
-const TextWrapper = styled.span`
+const FailingEntityTitle = styled(Typography.Text)`
     font-size: 16px;
     line-height: 24px;
     margin-left: 6px;
@@ -25,10 +26,16 @@ const FailingDetailsWrapper = styled.span`
     font-size: 14px;
     color: ${ANTD_GRAY[8]};
     margin-left: 6px;
+    white-space: nowrap;
     &:hover {
         cursor: pointer;
         color: ${(props) => props.theme.styles['primary-color']};
     }
+`;
+
+const FailingInputsHeader = styled.div`
+    display: flex;
+    align-items: center;
 `;
 
 const StyledArrow = styled(DownOutlined)<{ isOpen: boolean }>`
@@ -70,11 +77,15 @@ export default function FailingInputs({
 
     return (
         <div>
-            <StyledWarning />
-            <TextWrapper>Data quality issues impacting this {displayedEntityType}</TextWrapper>
-            <FailingDetailsWrapper onClick={() => setAreFailingDetailsVisible(!areFailingDetailsVisible)}>
-                details <StyledArrow isOpen={areFailingDetailsVisible} />
-            </FailingDetailsWrapper>
+            <FailingInputsHeader>
+                <StyledWarning />
+                <FailingEntityTitle ellipsis={{ tooltip: true }}>
+                    Data quality issues impacting this {displayedEntityType}
+                </FailingEntityTitle>
+                <FailingDetailsWrapper onClick={() => setAreFailingDetailsVisible(!areFailingDetailsVisible)}>
+                    details <StyledArrow isOpen={areFailingDetailsVisible} />
+                </FailingDetailsWrapper>
+            </FailingInputsHeader>
             {areFailingDetailsVisible && (
                 <>
                     {datasetsWithActiveIncidents.length > 0 && (

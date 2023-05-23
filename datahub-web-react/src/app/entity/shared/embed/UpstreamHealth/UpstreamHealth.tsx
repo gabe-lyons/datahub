@@ -19,7 +19,8 @@ export const StyledDivider = styled(Divider)`
 export default function UpstreamHealth() {
     const { entityData } = useEntityData();
     const [datasetsWithActiveIncidents, setDatasetsWithActiveIncidents] = useState<Dataset[]>([]);
-    const [datasetsWithFailingAssertions, setDatasetsWithFailingAssertions] = useState<Dataset[]>([]);
+    const [datasetsWithFailingAssertion2, setDatasetsWithFailingAssertions] = useState<Dataset[]>([]);
+    const datasetsWithFailingAssertions = [...datasetsWithFailingAssertion2, ...datasetsWithFailingAssertion2];
     const [incidentsDataStart, setIncidentsDataStart] = useState(0);
     const [assertionsDataStart, setAssertionsDataStart] = useState(0);
     const appConfig = useAppConfig();

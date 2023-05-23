@@ -8,7 +8,7 @@ import FailingEntity from './FailingEntity';
 import { getNumAssertionsFailing } from './utils';
 
 export const FailingSectionWrapper = styled.div`
-    margin: 5px 0 0 34px;
+    margin: 8px 0 0 34px;
     font-size: 14px;
     color: black;
 `;

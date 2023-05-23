@@ -8,8 +8,9 @@ import { ReactComponent as ExternalLink } from '../../../../../images/link-out.s
 const DatasetWrapper = styled.div`
     display: flex;
     align-items: center;
-    margin-top: 3px;
+    margin-top: 8px;
     overflow: hidden;
+    justify-content: space-between;
 `;
 
 const AssertionsSummaryWrapper = styled.span`
@@ -17,10 +18,10 @@ const AssertionsSummaryWrapper = styled.span`
     font-weight: 700;
     line-height: 13px;
     color: ${red[7]};
-    border: 1px solid ${red[7]};
+    background-color: ${red[0]};
     border-radius: 8px;
     margin-left: 5px;
-    padding: 0 3px;
+    padding: 2px 4px;
     letter-spacing: 0.2px;
     white-space: nowrap;
 `;
