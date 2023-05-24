@@ -8,6 +8,7 @@ from datahub.configuration.common import ConnectionModel
 from loguru import logger
 
 from datahub_integrations.app import graph
+from datahub_integrations.graphql.connection import get_connection, save_connection
 
 _SLACK_CONFIG_ID = "__system_slack-0"
 _SLACK_CONFIG_URN = f"urn:li:dataHubConnection:{_SLACK_CONFIG_ID}"
@@ -54,31 +55,13 @@ class SlackConnection(_FrozenConnectionModel):
 def _get_current_slack_config() -> SlackConnection:
     """Gets the current slack config from DataHub."""
 
-    res = graph.execute_graphql(
-        query="""
-query GetSlackConnection($urn: String!) {
-  connection(urn: $urn) {
-    urn
-    details {
-      type
-      json {
-        blob
-      }
-    }
-  }
-}
-""".strip(),
-        variables={
-            "urn": _SLACK_CONFIG_URN,
-        },
-    )
+    obj = get_connection(graph=graph, urn=_SLACK_CONFIG_URN)
 
-    if not res["connection"]:
+    if not obj:
         logger.debug("No slack config found, returning an empty config")
         return SlackConnection()
 
-    blob = res["connection"]["details"]["json"]["blob"]
-    config = SlackConnection.parse_obj(json.loads(blob))
+    config = SlackConnection.parse_obj(obj)
 
     return config
 
@@ -88,28 +71,7 @@ def _set_current_slack_config(config: SlackConnection) -> None:
 
     blob = config.json()
 
-    res = graph.execute_graphql(
-        query="""
-mutation SetSlackConnection($id: String!, $blob: String!) {
-  upsertConnection(
-    input: {
-      id: $id,
-      type: JSON,
-      platformUrn: "urn:li:dataPlatform:slack",
-      json: {blob: $blob}
-    }
-  ) {
-    urn
-  }
-}
-""".strip(),
-        variables={
-            "id": _SLACK_CONFIG_ID,
-            "blob": blob,
-        },
-    )
-
-    assert res["upsertConnection"]["urn"] == _SLACK_CONFIG_URN
+    save_connection(graph=graph, urn=_SLACK_CONFIG_URN, blob=blob)
 
 
 @dataclass

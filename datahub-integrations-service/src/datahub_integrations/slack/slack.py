@@ -18,13 +18,13 @@ from slack_sdk.oauth import AuthorizeUrlGenerator
 from slack_sdk.oauth.state_store import FileOAuthStateStore
 
 from datahub_integrations.app import DATAHUB_FRONTEND_URL, graph
+from datahub_integrations.graphql.social_query import get_entity
 from datahub_integrations.slack.app_manifest import (
     get_slack_app_manifest,
     slack_bot_scopes,
     upsert_app_with_manifest,
 )
 from datahub_integrations.slack.config import SlackConnection, slack_config
-from datahub_integrations.social_query import get_entity
 
 external_router = fastapi.APIRouter()
 internal_router = fastapi.APIRouter(
