@@ -1,6 +1,7 @@
 package com.linkedin.metadata.test.definition;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -29,6 +30,8 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 import javax.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
+
+import static com.linkedin.metadata.Constants.*;
 
 
 /**
@@ -119,6 +122,11 @@ public class TestDefinitionParser {
 
   private static final TestActions EMPTY_ACTIONS = new TestActions(Collections.emptyList(), Collections.emptyList());
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+  static {
+    int maxSize = Integer.parseInt(System.getenv().getOrDefault(INGESTION_MAX_SERIALIZED_STRING_LENGTH, MAX_JACKSON_STRING_SIZE));
+    OBJECT_MAPPER.getFactory().setStreamReadConstraints(StreamReadConstraints.builder()
+        .maxStringLength(maxSize).build());
+  }
 
   private final PredicateEvaluator predicateEvaluator;
 

@@ -487,6 +487,12 @@ entities:
       - queryProperties
       - querySubjects
       - status
+  - name: actionRequest
+    category: internal
+    keyAspect: actionRequestKey
+    aspects:
+      - actionRequestStatus
+      - actionRequestInfo
   - name: dataHubConnection
     category: internal
     keyAspect: dataHubConnectionKey

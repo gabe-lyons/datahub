@@ -68,6 +68,9 @@ dependencies {
   testCompile externalDependency.mockito
   testCompile externalDependency.testng
   testRuntime externalDependency.logbackClassic
+
+  implementation externalDependency.sentry
+  implementation externalDependency.sentryLogback
 }
 
 bootJar {

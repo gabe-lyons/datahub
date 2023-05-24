@@ -249,7 +249,7 @@ public class AssertionActionsHook implements MetadataChangeLogHook {
             0,
             INCIDENT_SEARCH_BATCH_SIZE, // This SHOULD NOT exceed 1 in reality.
             _authentication,
-            new SearchFlags().setSkipCache(true));
+            new SearchFlags().setFulltext(false).setSkipCache(true));
 
         // 2. If there are active incidents, resolve them.
         if (searchResult.hasEntities() && searchResult.getEntities().size() > 0) {
@@ -330,7 +330,7 @@ public class AssertionActionsHook implements MetadataChangeLogHook {
           0,
           INCIDENT_SEARCH_BATCH_SIZE, // This SHOULD NOT exceed 1 in reality.
           _authentication,
-          new SearchFlags().setSkipCache(true));
+          new SearchFlags().setFulltext(false).setSkipCache(true));
 
       return searchResult.hasEntities() && searchResult.getEntities().size() > 0;
     } catch (Exception e) {
@@ -362,7 +362,7 @@ public class AssertionActionsHook implements MetadataChangeLogHook {
         null,
         0, INCIDENT_SEARCH_BATCH_SIZE, // This SHOULD NOT exceed 1 in reality.
         _authentication,
-        new SearchFlags().setSkipCache(true));
+        new SearchFlags().setFulltext(false).setSkipCache(true));
 
     if (searchResult.hasEntities() && searchResult.getEntities().size() > 0) {
       log.info(String.format(

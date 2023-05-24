@@ -19,7 +19,7 @@ buildscript {
   ext.logbackClassic = '1.2.12'
   ext.hadoop3Version = '3.3.5'
 
-  ext.sentry = '6.13.0'
+  ext.sentry = '6.18.1'
 
   ext.docker_registry = '795586375822.dkr.ecr.us-west-2.amazonaws.com'
 

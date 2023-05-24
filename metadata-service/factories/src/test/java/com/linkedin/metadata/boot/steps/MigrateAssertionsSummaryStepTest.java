@@ -6,6 +6,7 @@ import com.linkedin.assertion.AssertionResult;
 import com.linkedin.assertion.AssertionResultType;
 import com.linkedin.assertion.AssertionRunEvent;
 import com.linkedin.assertion.AssertionSource;
+import com.linkedin.assertion.AssertionSourceType;
 import com.linkedin.assertion.AssertionStdAggregation;
 import com.linkedin.assertion.AssertionStdOperator;
 import com.linkedin.assertion.AssertionType;
@@ -165,7 +166,7 @@ public class MigrateAssertionsSummaryStepTest {
             .setScope(DatasetAssertionScope.DATASET_COLUMN)
             .setAggregation(AssertionStdAggregation.MAX)
     );
-    assertionInfo.setSource(AssertionSource.EXTERNAL);
+    assertionInfo.setSource(new AssertionSource().setType(AssertionSourceType.EXTERNAL));
 
     Mockito.when(mockAssertionService.getAssertionInfo(
         Mockito.eq(ASSERTION_URN)
@@ -208,7 +209,7 @@ public class MigrateAssertionsSummaryStepTest {
     assertionSummaryDetails.setUrn(urn);
     assertionSummaryDetails.setType(AssertionType.DATASET.toString());
     assertionSummaryDetails.setLastResultAt(1L);
-    assertionSummaryDetails.setSource(AssertionSource.EXTERNAL.toString());
+    assertionSummaryDetails.setSource(AssertionSourceType.EXTERNAL.toString());
     return assertionSummaryDetails;
   }
 }

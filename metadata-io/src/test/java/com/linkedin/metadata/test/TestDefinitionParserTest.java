@@ -1,5 +1,6 @@
 package com.linkedin.metadata.test;
 
+import com.fasterxml.jackson.core.StreamReadConstraints;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.io.Resources;
@@ -14,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static com.linkedin.metadata.Constants.*;
 
 
 /**
@@ -250,6 +252,9 @@ public class TestDefinitionParserTest {
 
   String convertYamlToJson(String yaml) throws Exception {
     ObjectMapper yamlReader = new ObjectMapper(new YAMLFactory());
+    int maxSize = Integer.parseInt(System.getenv().getOrDefault(INGESTION_MAX_SERIALIZED_STRING_LENGTH, MAX_JACKSON_STRING_SIZE));
+    yamlReader.getFactory().setStreamReadConstraints(StreamReadConstraints.builder()
+        .maxStringLength(maxSize).build());
     Object obj = yamlReader.readValue(yaml, Object.class);
 
     ObjectMapper jsonWriter = new ObjectMapper();

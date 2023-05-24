@@ -1,6 +1,6 @@
 import json
 import urllib
-
+import time
 import pytest
 import requests_wrapper as requests
 import tenacity
@@ -23,7 +23,14 @@ from datahub.metadata.schema_classes import (
     PartitionSpecClass,
     PartitionTypeClass,
 )
-from tests.utils import delete_urns_from_file, get_gms_url, ingest_file_via_rest, wait_for_healthcheck_util, get_sleep_info
+from tests.utils import (
+    delete_urns_from_file,
+    get_frontend_url,
+    get_gms_url,
+    ingest_file_via_rest,
+    wait_for_healthcheck_util,
+    get_sleep_info,
+)
 
 restli_default_headers = {
     "X-RestLi-Protocol-Version": "2.0.0",
@@ -31,9 +38,20 @@ restli_default_headers = {
 sleep_sec, sleep_times = get_sleep_info()
 
 
+TEST_ASSERTION_URN = "urn:li:assertion:2d3b06a6e77e1f24adc9860a05ea089b"
+TEST_DATASET_URN = make_dataset_urn(platform="postgres", name="foo")
+RUN_EVENT_TIMESTAMPS = [
+   1643794280350,
+   1643794280352,
+   1643794280354,
+   1643880726872,
+   1643880726874,
+   1643880726875,
+]
+
 def create_test_data(test_file):
-    assertion_urn = "urn:li:assertion:2d3b06a6e77e1f24adc9860a05ea089b"
-    dataset_urn = make_dataset_urn(platform="postgres", name="foo")
+    assertion_urn = TEST_ASSERTION_URN
+    dataset_urn = TEST_DATASET_URN
     assertion_info = AssertionInfoClass(
         type=AssertionTypeClass.DATASET,
         customProperties={"suite_name": "demo_suite"},
@@ -55,14 +73,7 @@ def create_test_data(test_file):
         aspectName="assertionInfo",
         aspect=assertion_info,
     )
-    timestamps = [
-        1643794280350,
-        1643794280352,
-        1643794280354,
-        1643880726872,
-        1643880726874,
-        1643880726875,
-    ]
+    timestamps = RUN_EVENT_TIMESTAMPS
     # The assertion run event attached to the dataset
     mcp2 = MetadataChangeProposalWrapper(
         entityType="assertion",
@@ -363,3 +374,214 @@ def test_gms_get_assertion_info():
     assert data["aspect"]["com.linkedin.assertion.AssertionInfo"]["datasetAssertion"][
         "scope"
     ]
+
+
+@pytest.mark.dependency(depends=["test_healthchecks", "test_run_ingestion"])
+def test_list_dataset_assertions(frontend_session):
+
+    # Sleep for eventual consistency (not ideal)
+    time.sleep(2)
+
+    list_dataset_assertions_json = {
+        "query": """query dataset($urn: String!) {\n
+            dataset(urn: $urn) {\n
+              assertions(start: 0, count: 10) {\n
+                start\n
+                count\n
+                total\n
+                assertions {\n
+                  urn\n
+                  type\n
+                  info {\n
+                    type\n
+                    datasetAssertion {\n
+                      datasetUrn\n
+                      scope\n
+                      aggregation\n
+                      operator\n
+                    }\n
+                  }\n
+                  runEvents(limit: 3) {\n
+                    total\n
+                    failed\n
+                    succeeded\n
+                    runEvents {\n
+                      timestampMillis\n
+                      status\n
+                      result {\n
+                        type\n
+                      }\n
+                    }\n
+                  }\n
+                }\n
+              }\n
+            }\n
+        }""",
+        "variables": {
+          "urn": TEST_DATASET_URN
+        }
+    }
+
+    response = frontend_session.post(
+        f"{get_frontend_url()}/api/v2/graphql", json=list_dataset_assertions_json
+    )
+    response.raise_for_status()
+    res_data = response.json()
+
+    assert res_data
+    assert "errors" not in res_data
+    assert res_data["data"]
+    assert res_data["data"]["dataset"]["assertions"] == {
+     'start': 0,
+     'count': 1,
+     'total': 1,
+     'assertions': [
+        {
+          "urn": TEST_ASSERTION_URN,
+          "type": "ASSERTION",
+          "info": {
+           "type": "DATASET",
+           "datasetAssertion": {
+             "datasetUrn": TEST_DATASET_URN,
+             "scope": "DATASET_COLUMN",
+             "aggregation": "IDENTITY",
+             "operator": "LESS_THAN"
+           }
+          },
+          "runEvents": {
+           "total": 3,
+           "failed": 1,
+           "succeeded": 2,
+           "runEvents": [
+            {
+               "timestampMillis": RUN_EVENT_TIMESTAMPS[5],
+               "status": "COMPLETE",
+               "result": {
+                 "type": "SUCCESS"
+               }
+             },
+            {
+               "timestampMillis": RUN_EVENT_TIMESTAMPS[4],
+               "status": "COMPLETE",
+               "result": {
+                 "type": "FAILURE"
+               }
+             },
+             {
+                "timestampMillis": RUN_EVENT_TIMESTAMPS[3],
+                "status": "COMPLETE",
+                "result": {
+                  "type": "SUCCESS"
+                }
+              }
+           ]
+          }
+        }
+     ]
+    }
+
+
+@pytest.mark.dependency(depends=["test_healthchecks", "test_run_ingestion"])
+def test_search_all_assertions(frontend_session):
+
+    # Sleep for eventual consistency (not ideal)
+    time.sleep(2)
+
+    min_expected_results = 1
+
+    json = {
+        "query": """query searchAcrossEntities($input: SearchAcrossEntitiesInput!) {\n
+            searchAcrossEntities(input: $input) {\n
+                start\n
+                count\n
+                total\n
+                searchResults {\n
+                    entity {\n
+                        ... on Assertion {\n
+                          urn\n
+                          type\n
+                          info {\n
+                            type\n
+                            datasetAssertion {\n
+                              datasetUrn\n
+                              scope\n
+                              aggregation\n
+                              operator\n
+                            }\n
+                          }\n
+                          runEvents(limit: 3) {\n
+                            total\n
+                            failed\n
+                            succeeded\n
+                            runEvents {\n
+                              timestampMillis\n
+                              status\n
+                              result {\n
+                                type\n
+                              }\n
+                            }\n
+                          }\n
+                        }\n
+                    }\n
+                }\n
+            }\n
+        }""",
+        "variables": {
+            "input": {"types": ["ASSERTION"], "query": "*", "start": 0, "count": 10}
+        },
+    }
+
+    response = frontend_session.post(f"{get_frontend_url()}/api/v2/graphql", json=json)
+    response.raise_for_status()
+    res_data = response.json()
+
+    assert res_data
+    assert res_data["data"]
+    assert res_data["data"]["searchAcrossEntities"]
+    assert res_data["data"]["searchAcrossEntities"]["total"] >= min_expected_results
+    assert (
+        len(res_data["data"]["searchAcrossEntities"]["searchResults"])
+        >= min_expected_results
+    )
+
+    assert res_data["data"]["searchAcrossEntities"]["searchResults"][0]["entity"] == {
+      "urn": TEST_ASSERTION_URN,
+      "type": "ASSERTION",
+      "info": {
+       "type": "DATASET",
+       "datasetAssertion": {
+         "datasetUrn": TEST_DATASET_URN,
+         "scope": "DATASET_COLUMN",
+         "aggregation": "IDENTITY",
+         "operator": "LESS_THAN"
+       }
+      },
+      "runEvents": {
+       "total": 3,
+       "failed": 1,
+       "succeeded": 2,
+       "runEvents": [
+        {
+           "timestampMillis": RUN_EVENT_TIMESTAMPS[5],
+           "status": "COMPLETE",
+           "result": {
+             "type": "SUCCESS"
+           }
+         },
+        {
+           "timestampMillis": RUN_EVENT_TIMESTAMPS[4],
+           "status": "COMPLETE",
+           "result": {
+             "type": "FAILURE"
+           }
+         },
+         {
+            "timestampMillis": RUN_EVENT_TIMESTAMPS[3],
+            "status": "COMPLETE",
+            "result": {
+              "type": "SUCCESS"
+            }
+          }
+       ]
+      }
+    }
