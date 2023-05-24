@@ -12,6 +12,14 @@ from datahub_integrations.slack.config import (
     slack_config,
 )
 
+# When in local development, routes to localhost won't work. Instead, we will enable Slack's
+# socket mode so that our application can receive events from Slack via a websocket.
+USE_SOCKET_MODE = DATAHUB_FRONTEND_URL.startswith("http://localhost:9002")
+if USE_SOCKET_MODE:
+    logger.info(
+        "Slack socket mode is enabled. To receive events from Slack, you must also run `python scripts/slack_socket_mode.py`"
+    )
+
 slack_bot_scopes = [
     # Required for slash commands / shortcuts.
     "commands",
@@ -82,6 +90,7 @@ def get_slack_app_manifest() -> str:
                 set(
                     [
                         f"{DATAHUB_FRONTEND_URL}/integrations/slack/oauth_callback",
+                        # For testing only: allows using a local frontend server or integrations service.
                         "http://localhost:9002/integrations/slack/oauth_callback",
                         "http://localhost:9003/public/slack/oauth_callback",
                     ]
@@ -108,7 +117,7 @@ def get_slack_app_manifest() -> str:
                 "request_url": f"{DATAHUB_FRONTEND_URL}/integrations/slack/interactivity",
             },
             "org_deploy_enabled": False,
-            "socket_mode_enabled": True,
+            "socket_mode_enabled": USE_SOCKET_MODE,
             "token_rotation_enabled": False,
         },
     }

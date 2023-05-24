@@ -27,4 +27,10 @@ graph = DataHubGraph(
         token=None,
     )
 )
-DATAHUB_FRONTEND_URL = graph.frontend_base_url
+
+# For local development, we can enable an env-based override for the frontend URL.
+_DEV_MODE_FRONTEND_URL = os.environ.get("DEV_MODE_OVERRIDE_DATAHUB_FRONTEND_URL")
+if _DEV_MODE_FRONTEND_URL:
+    DATAHUB_FRONTEND_URL = _DEV_MODE_FRONTEND_URL
+else:
+    DATAHUB_FRONTEND_URL = graph.frontend_base_url

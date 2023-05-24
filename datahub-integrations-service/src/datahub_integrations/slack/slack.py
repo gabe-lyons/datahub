@@ -448,15 +448,3 @@ def get_slack_link_preview(url: str) -> SlackLinkPreview:
             status.HTTP_400_BAD_REQUEST,
             f"You do not have permission to view conversation {converation_id} message {message_id}: {e.response['error']}",
         ) from e
-
-
-if __name__ == "__main__":
-    # For development - using the slack websocket API.
-    import os
-
-    from slack_bolt.adapter.socket_mode import SocketModeHandler
-
-    APP_LEVEL_TOKEN = os.environ.get("APP_LEVEL_TOKEN")
-    config = slack_config.get_config()
-    app = get_slack_app(config)
-    SocketModeHandler(app, APP_LEVEL_TOKEN).start()
