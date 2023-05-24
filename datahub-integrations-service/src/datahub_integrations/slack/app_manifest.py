@@ -76,6 +76,7 @@ def get_slack_app_manifest() -> str:
             "slash_commands": [
                 {
                     "command": "/acryl",
+                    "url": f"{DATAHUB_FRONTEND_URL}/integrations/slack/events",
                     "description": "Search across your Acryl instance",
                     "usage_hint": "keywords",
                     "should_escape": False,
@@ -114,7 +115,7 @@ def get_slack_app_manifest() -> str:
             },
             "interactivity": {
                 "is_enabled": True,
-                "request_url": f"{DATAHUB_FRONTEND_URL}/integrations/slack/interactivity",
+                "request_url": f"{DATAHUB_FRONTEND_URL}/integrations/slack/events",
             },
             "org_deploy_enabled": False,
             "socket_mode_enabled": USE_SOCKET_MODE,
