@@ -48,7 +48,7 @@ public class MigrateIncidentsSummaryStepTest {
         entitySearchService,
         incidentService);
 
-    step.execute();
+    step.upgrade();
 
     IncidentsSummary expectedSummary = new IncidentsSummary();
     IncidentSummaryDetailsArray activeIncidentDetails = new IncidentSummaryDetailsArray();
@@ -76,7 +76,7 @@ public class MigrateIncidentsSummaryStepTest {
         entitySearchService,
         incidentService);
 
-    step.execute();
+    step.upgrade();
 
     IncidentsSummary expectedSummary = new IncidentsSummary();
     IncidentSummaryDetailsArray resolvedIncidentDetails = new IncidentSummaryDetailsArray();

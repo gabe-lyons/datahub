@@ -65,7 +65,7 @@ public class MigrateAssertionsSummaryStepTest {
         timeseriesAspectService,
         configurationProvider);
 
-    step.execute();
+    step.upgrade();
 
     AssertionsSummary expectedSummary = new AssertionsSummary();
     AssertionSummaryDetailsArray failingSummaryDetails = new AssertionSummaryDetailsArray();
@@ -109,7 +109,7 @@ public class MigrateAssertionsSummaryStepTest {
         timeseriesAspectService,
         configurationProvider);
 
-    step.execute();
+    step.upgrade();
 
     AssertionsSummary expectedSummary = new AssertionsSummary();
     AssertionSummaryDetailsArray passingAssertionSummary = new AssertionSummaryDetailsArray();

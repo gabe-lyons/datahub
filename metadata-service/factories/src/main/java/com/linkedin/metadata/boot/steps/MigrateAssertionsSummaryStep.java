@@ -69,10 +69,15 @@ public class MigrateAssertionsSummaryStep extends UpgradeStep {
   public void upgrade() throws Exception {
 
     int batch = 1;
-    ScrollResult scrollResult = _entitySearchService.scroll(Collections.singletonList(Constants.ASSERTION_ENTITY_NAME),
-        null, null, BATCH_SIZE, null, _configurationProvider.getElasticSearch().getScroll().getTimeout());
 
-    while (scrollResult.getEntities().size() > 0) {
+    ScrollResult scrollResult = null;
+    String nextScrollId = null;
+
+    do {
+      scrollResult = _entitySearchService.scroll(Collections.singletonList(Constants.ASSERTION_ENTITY_NAME),
+          null, null, BATCH_SIZE, nextScrollId, _configurationProvider.getElasticSearch().getScroll().getTimeout());
+      nextScrollId = scrollResult.getScrollId();
+
       List<Urn> assertionsInBatch =  scrollResult.getEntities().stream().map(SearchEntity::getEntity).collect(Collectors.toList());
 
       try {
@@ -81,10 +86,7 @@ public class MigrateAssertionsSummaryStep extends UpgradeStep {
         log.error("Error while processing batch {} of assertions", batch, e);
       }
       batch++;
-      scrollResult =
-          _entitySearchService.scroll(Collections.singletonList(Constants.ASSERTION_ENTITY_NAME),
-              null, null, BATCH_SIZE, scrollResult.getScrollId(), _configurationProvider.getElasticSearch().getScroll().getTimeout());
-    }
+    } while (nextScrollId != null);
   }
 
   private void batchAddAssertionsSummary(@Nonnull final List<Urn> assertionUrns) {
