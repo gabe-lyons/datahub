@@ -19,10 +19,10 @@ if __name__ == "__main__":
     # preview = get_slack_link_preview(
     #     "https://datahub-test.slack.com/archives/C048RD1240Y/p1683591420041569?thread_ts=1683591366.051289&cid=C048RD1240Y"
     # )
-    preview = get_slack_link_preview(
-        "https://datahub-test.slack.com/archives/C048RD1240Y/p1683591366051289"
-    )
     # preview = get_slack_link_preview(
-    #     "https://datahub-test.slack.com/archives/C055AD0F98E/p1682727160293169"
+    #     "https://datahub-test.slack.com/archives/C048RD1240Y/p1683591366051289"
     # )
+    preview = get_slack_link_preview(
+        "https://datahub-test.slack.com/archives/C055AD0F98E/p1682727160293169"
+    )
     logger.info(preview.json(indent=2))

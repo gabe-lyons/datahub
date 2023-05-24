@@ -1,6 +1,11 @@
+import pytest
+
 import datahub_integrations as package_metadata
 
 
+@pytest.mark.filterwarnings(
+    "ignore:pkg_resources is deprecated as an API:DeprecationWarning"
+)
 def test_package_version() -> None:
     # Simply importing pkg_resources checks for unsatisfied dependencies.
     import pkg_resources

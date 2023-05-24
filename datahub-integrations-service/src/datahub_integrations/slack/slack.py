@@ -8,7 +8,6 @@ import fastapi
 import slack_bolt
 import slack_sdk.errors
 import slack_sdk.web
-from datahub.utilities.urns.urn import Urn, guess_entity_type
 from fastapi import HTTPException, status
 from fastapi.responses import RedirectResponse
 from loguru import logger
@@ -206,20 +205,6 @@ async def slack_event_endpoint(req: fastapi.Request) -> fastapi.Response:
     return await app_handler.handle(req)
 
 
-def datahub_url_from_urn(urn: str, suffix: Optional[str] = None) -> str:
-    # TODO: copied from the dbt action
-    entity_type = guess_entity_type(urn)
-    if entity_type == "dataJob":
-        entity_type = "tasks"
-    elif entity_type == "dataFlow":
-        entity_type = "pipelines"
-
-    url = f"{DATAHUB_FRONTEND_URL}/{entity_type}/{Urn.url_encode(urn)}"
-    if suffix:
-        url += f"/{suffix}"
-    return url
-
-
 def make_slack_preview(urn: str) -> Optional[dict]:
     entity = get_entity(graph, urn)
     logger.debug(f"entity: {entity}")
@@ -343,7 +328,7 @@ def make_slack_preview(urn: str) -> Optional[dict]:
     }
 
 
-def parse_slack_message_url(url: str) -> Optional[Tuple[str, str, Optional[str]]]:
+def parse_slack_message_url(url: str) -> Optional[Tuple[str, str, str, Optional[str]]]:
     # Parse the url using regex.
     # https://regex101.com/r/QxS5d3/2
 
@@ -353,9 +338,9 @@ def parse_slack_message_url(url: str) -> Optional[Tuple[str, str, Optional[str]]
     if not matches:
         return None
 
-    _workspace_name, conversation_id, message_id, thread_ts = matches.groups()
+    workspace_name, conversation_id, message_id, thread_ts = matches.groups()
 
-    return conversation_id, message_id, thread_ts
+    return workspace_name, conversation_id, message_id, thread_ts
 
 
 class SlackLinkPreview(BaseModel):
@@ -367,6 +352,7 @@ class SlackLinkPreview(BaseModel):
     authorName: str
     authorImageUrl: Optional[str]
 
+    workspaceName: str
     channelName: str
 
     # Only present if the message is in a thread.
@@ -383,7 +369,7 @@ def get_slack_link_preview(url: str) -> SlackLinkPreview:
     if not parsed_url:
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid slack message url")
 
-    converation_id, message_id, thread_ts = parsed_url
+    workspace_name, converation_id, message_id, thread_ts = parsed_url
 
     try:
         # First, get the conversation (channel/DM/MPIM) info.
@@ -408,6 +394,8 @@ def get_slack_link_preview(url: str) -> SlackLinkPreview:
 
         if thread_ts and len(messages) == 2:
             thread_base_message, message = messages
+        elif messages[0].get("thread_ts"):
+            thread_base_message = message = messages[0]
         else:
             thread_base_message = None
             message = messages[0]
@@ -435,6 +423,7 @@ def get_slack_link_preview(url: str) -> SlackLinkPreview:
             text=message["text"],
             authorName=author_name,
             authorImageUrl=author_image_url,
+            workspaceName=workspace_name,
             channelName=conversation_name,
         )
         if thread_base_message:

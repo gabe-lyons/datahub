@@ -55,6 +55,12 @@ class SlackConnection(_FrozenConnectionModel):
 def _get_current_slack_config() -> SlackConnection:
     """Gets the current slack config from DataHub."""
 
+    # For local testing, you can use this instead:
+    # import pathlib
+    # return SlackConnection.parse_obj(
+    #     json.loads(pathlib.Path("slack_details.json").read_text())
+    # )
+
     obj = get_connection(graph=graph, urn=_SLACK_CONFIG_URN)
 
     if not obj:
