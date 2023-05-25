@@ -1,3 +1,8 @@
+
+# Extra rules.
+.git/
+
+# Copied from the root .dockerignore.
 **/node_modules/
 datahub-frontend/build/
 metadata-ingestion/venv/

@@ -1,0 +1,14 @@
+# Dockerfiles specific to Acryl
+version: '3.8'
+services:
+  datahub-integrations-service:
+    build:
+      context: ../
+      dockerfile: docker/datahub-integrations-service/Dockerfile
+      args:
+        APP_ENV: dev
+    image: 795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-integrations-service:debug
+    volumes:
+      - ./datahub-integrations-service/start.sh:/start_datahub_integrations_service.sh
+      - ../metadata-ingestion:/datahub-src/metadata-ingestion
+      - ../datahub-integrations-service:/datahub-src/datahub-integrations-service
