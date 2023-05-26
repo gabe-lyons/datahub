@@ -7,6 +7,7 @@ import com.linkedin.assertion.AssertionStdOperator;
 import com.linkedin.assertion.AssertionStdParameter;
 import com.linkedin.assertion.AssertionStdParameterType;
 import com.linkedin.assertion.AssertionStdParameters;
+import com.linkedin.assertion.AssertionType;
 import com.linkedin.assertion.CronSchedule;
 import com.linkedin.assertion.DatasetAssertionInfo;
 import com.linkedin.assertion.DatasetAssertionScope;
@@ -76,10 +77,6 @@ public class AssertionMapperTest {
       verifySlaAssertion(input.getSlaAssertion(), output.getInfo().getSlaAssertion());
     }
 
-    if (input.hasSchedule()) {
-      verifyCronSchedule(input.getSchedule(), output.getInfo().getSchedule());
-    }
-
     if (input.hasSource()) {
       verifySource(input.getSource(), output.getInfo().getSource());
     }
@@ -108,22 +105,16 @@ public class AssertionMapperTest {
   private void verifySlaAssertion(SlaAssertionInfo input, com.linkedin.datahub.graphql.generated.SlaAssertionInfo output) {
     Assert.assertEquals(output.getType().toString(), input.getType().toString());
     Assert.assertEquals(output.getEntityUrn(), input.getEntity().toString());
-    if (input.hasWarnSchedule()) {
-      verifySlaSchedule(input.getWarnSchedule(), output.getWarnSchedule());
-    }
-    if (input.hasFailSchedule()) {
-      verifySlaSchedule(input.getFailSchedule(), output.getFailSchedule());
+    if (input.hasSchedule()) {
+      verifySlaSchedule(input.getSchedule(), output.getSchedule());
     }
   }
 
-  private void verifyCronSchedule(CronSchedule input, com.linkedin.datahub.graphql.generated.CronSchedule output) {
+  private void verifyCronSchedule(CronSchedule input, com.linkedin.datahub.graphql.generated.SlaCronSchedule output) {
     Assert.assertEquals(output.getCron(), input.getCron());
     Assert.assertEquals(output.getTimezone(), input.getTimezone());
     if (input.hasWindowStartOffsetMs()) {
       Assert.assertEquals(output.getWindowStartOffsetMs(), input.getWindowStartOffsetMs());
-    }
-    if (input.hasWindowEndOffsetMs()) {
-      Assert.assertEquals(output.getWindowEndOffsetMs(), input.getWindowEndOffsetMs());
     }
   }
 
@@ -188,21 +179,15 @@ public class AssertionMapperTest {
     infoWithoutNullables.setSource(new AssertionSource()
         .setType(com.linkedin.assertion.AssertionSourceType.INFERRED)
     );
-    infoWithoutNullables.setSchedule(new CronSchedule()
-      .setTimezone("America/Los Angeles")
-      .setCron("* * * * *")
-      .setWindowEndOffsetMs(0L)
-      .setWindowStartOffsetMs(1L)
-    );
     return infoWithoutNullables;
   }
 
   private AssertionInfo createSlaAssertionInfoWithoutNullableFields() {
     AssertionInfo info = new AssertionInfo();
-    info.setType(com.linkedin.assertion.AssertionType.DATASET_SLA);
+    info.setType(AssertionType.SLA);
     SlaAssertionInfo slaAssertionInfo = new SlaAssertionInfo();
     slaAssertionInfo.setEntity(UrnUtils.getUrn("urn:li:dataset:(urn:li:dataPlatform:hive,name,PROD)"));
-    slaAssertionInfo.setType(SlaAssertionType.DATASET_CHANGE_OPERATION);
+    slaAssertionInfo.setType(SlaAssertionType.DATASET_CHANGE);
     info.setSlaAssertion(slaAssertionInfo);
     return info;
   }
@@ -210,16 +195,9 @@ public class AssertionMapperTest {
   private AssertionInfo createSlaAssertionInfoWithNullableFields() {
     AssertionInfo infoWithoutNullables = createSlaAssertionInfoWithoutNullableFields();
     SlaAssertionInfo baseInfo = infoWithoutNullables.getSlaAssertion();
-    baseInfo.setWarnSchedule(createSlaAssertionSchedule());
-    baseInfo.setFailSchedule(createSlaAssertionSchedule());
+    baseInfo.setSchedule(createSlaAssertionSchedule());
     infoWithoutNullables.setSource(new AssertionSource()
       .setType(com.linkedin.assertion.AssertionSourceType.INFERRED)
-    );
-    infoWithoutNullables.setSchedule(new CronSchedule()
-        .setTimezone("America/Los Angeles")
-        .setCron("* * * * *")
-        .setWindowEndOffsetMs(0L)
-        .setWindowStartOffsetMs(1L)
     );
     return infoWithoutNullables;
   }

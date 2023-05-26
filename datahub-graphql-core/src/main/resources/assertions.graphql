@@ -1,53 +1,246 @@
 extend type Mutation {
   """
-  Create a new Dataset SLA Assertion
+  Create an existing Dataset Assertion
   """
-  createDatasetSlaAssertion(input: CreateDatasetAssertionInput!): Assertion!
+  createDatasetAssertion(input: CreateDatasetAssertionInput!): Assertion!
 
   """
-  Create a new Data Job (Data Pipeline Task) SLA Assertion
+  Create an new SLA Assertion
   """
-  createDataJobSlaAssertion(input: CreateDataJobAssertionInput!): Assertion!
+  createSlaAssertion(input: CreateSlaAssertionInput!): Assertion!
 
   """
-  Update an existing Data Job (Data Pipeline Task) SLA Assertion
+  Update an existing Dataset Assertion
   """
-  updateDatasetSlaAssertion(urn: String!, input: UpdateDatasetSlaAssertionInput!): Assertion!
+  updateDatasetAssertion(urn: String!, input: UpdateDatasetAssertionInput!): Assertion!
 
   """
-  Update an existing Data Job (Data Pipeline Task) SLA Assertion
+  Update an existing SLA Assertion
   """
-  updateDataJobSlaAssertion(urn: String!, input: UpdateDataJobSlaAssertionInput!): Assertion!
-
-  """
-  Updates the action settings associated with a particular Assertion
-  """
-  updateAssertionActions(urn: String!, input: UpdateAssertionActionsInput!): Assertion!
+  updateSlaAssertion(urn: String!, input: UpdateSlaAssertionInput!): Assertion!
 }
 
-# TODO
+"""
+Input for updating a Dataset Assertion
+"""
 input CreateDatasetAssertionInput {
-  exampleField: String!
+  """
+  The urn of the dataset that the assertion is related to
+  """
+  datasetUrn: String!
+
+  """
+  The scope of the Dataset assertion.
+  """
+  scope: DatasetAssertionScope!
+
+  """
+  The urns of schema fields associated with the columns being tested.
+  """
+  fieldUrns: [String!]
+
+  """
+  Standardized assertion operator
+  """
+  aggregation: AssertionStdAggregation
+
+  """
+  Standardized assertion operator
+  """
+  operator: AssertionStdOperator!
+
+  """
+  Standard parameters required for the assertion. e.g. min_value, max_value, value, columns
+  """
+  parameters: AssertionStdParametersInput
+
+  """
+  Optional actions to apply on success or failure of the assertion
+  """
+  actions: AssertionActionsInput
 }
 
-# TODO
-input CreateDataJobAssertionInput {
-  exampleField: String!
+"""
+Input for updating an SLA Assertion
+"""
+input CreateSlaAssertionInput {
+  """
+  The type of SLA assertion to create.
+  """
+  type: SlaAssertionType!
+
+  """
+  The urn of the dataset that the assertion is related to
+  """
+  entityUrn: String!
+
+  """
+  The SLA assertion's schedule
+  """
+  schedule: SlaAssertionScheduleInput!
+
+  """
+  Optional actions to apply on success or failure of the assertion
+  """
+  actions: AssertionActionsInput
 }
 
-# TODO
-input UpdateDatasetSlaAssertionInput {
-  exampleField: String!
+"""
+Input for updating a Dataset Assertion
+"""
+input UpdateDatasetAssertionInput {
+  """
+  The scope of the Dataset assertion.
+  """
+  scope: DatasetAssertionScope!
+
+  """
+  The urns of schema fields associated with the columns being tested.
+  """
+  fieldUrns: [String!]
+
+  """
+  Standardized assertion operator
+  """
+  aggregation: AssertionStdAggregation
+
+  """
+  Standardized assertion operator
+  """
+  operator: AssertionStdOperator!
+
+  """
+  Standard parameters required for the assertion. e.g. min_value, max_value, value, columns
+  """
+  parameters: AssertionStdParametersInput
+
+  """
+  Optional actions to apply on success or failure of the assertion
+  """
+  actions: AssertionActionsInput
 }
 
-# TODO
-input UpdateDataJobSlaAssertionInput {
-  exampleField: String!
+"""
+Input for updating an SLA Assertion
+"""
+input UpdateSlaAssertionInput {
+  """
+  The SLA assertion's schedule
+  """
+  schedule: SlaAssertionScheduleInput!
+
+  """
+  Optional actions to apply on success or failure of the assertion
+  """
+  actions: AssertionActionsInput
 }
 
-# TODO
-input UpdateAssertionActionsInput {
-  exampleField: String!
+"""
+Parameters for AssertionStdOperators
+"""
+input AssertionStdParametersInput {
+  """
+  The value parameter of an assertion
+  """
+  value: AssertionStdParameterInput
+
+  """
+  The maxValue parameter of an assertion
+  """
+  maxValue: AssertionStdParameterInput
+
+  """
+  The minValue parameter of an assertion
+  """
+  minValue: AssertionStdParameterInput
+}
+
+"""
+Parameter for AssertionStdOperator.
+"""
+input AssertionStdParameterInput {
+  """
+  The parameter value
+  """
+  value: String!
+
+  """
+  The type of the parameter
+  """
+  type: AssertionStdParameterType!
+}
+
+"""
+Input for updating the action settings associated with a particular Assertion
+"""
+input AssertionActionsInput {
+  """
+  Actions to be executed on successful assertion run.
+  """
+  onSuccess: [AssertionActionInput!]!
+
+  """
+  Actions to be executed on failed assertion run.
+  """
+  onFailure: [AssertionActionInput!]!
+}
+
+"""
+Input for an SLA assertion schedule
+"""
+input SlaAssertionScheduleInput {
+  """
+  The type of schedule.
+  """
+  type: SlaAssertionScheduleType!
+
+  """
+  A cron schedule. This is populated if the type is CRON.
+  """
+  cron: SlaCronScheduleInput
+
+  """
+  A fixed interval schedule. This is populated if the type is FIXED_INTERVAL.
+  """
+  fixedInterval: FixedIntervalScheduleInput
+}
+
+"""
+Input for a cron-formatted schedule
+"""
+input SlaCronScheduleInput {
+  """
+  A cron-formatted execution interval, as a cron string, e.g. 1 * * * *
+  """
+  cron: String!
+
+  """
+  Timezone in which the cron interval applies, e.g. America/Los_Angeles
+  """
+  timezone: String!
+
+  """
+  An optional offset in milliseconds to SUBTRACT from the timestamp generated by the cron schedule
+  to generate the lower bounds of the "SLA window", or the window of time in which an event must have occurred in order for the SLA
+  to be considering passing.
+  If left empty, the start of the SLA window will be the end of the previously evaluated SLA window.
+  """
+  windowStartOffsetMs: Long
+}
+
+"""
+Input required to created a fixed interval schedule.
+"""
+input FixedIntervalScheduleInput {
+  """
+  Interval unit such as minute/hour/day etc.
+  """
+  unit: DateInterval!
+
+  """
+  How many units. Defaults to 1.
+  """
+  multiple: Int!
 }
 
 """
@@ -75,11 +268,11 @@ enum SlaAssertionType {
   """
   An assertion defined against a Dataset Change Operation - insert, update, delete, etc
   """
-  DATASET_CHANGE_OPERATION
+  DATASET_CHANGE
   """
-  An assertion defined against a Data Job run success
+  An assertion defined against a Data Job run
   """
-  DATA_JOB_RUN_SUCCESS
+  DATA_JOB_RUN
 }
 
 extend type AssertionInfo {
@@ -92,11 +285,62 @@ extend type AssertionInfo {
   The source or origin of the Assertion definition.
   """
   source: AssertionSource
+}
+
+extend type Assertion {
+  """
+  The actions associated with the Assertion
+  """
+  actions: AssertionActions
+}
+
+"""
+Some actions associated with an assertion
+"""
+type AssertionActions {
+  """
+  Actions to be executed on successful assertion run.
+  """
+  onSuccess: [AssertionAction!]!
 
   """
-  The evaluation schedule for the Assertion. If the type is INFERRED or NATIVE, this field will be populated
+  Actions to be executed on failed assertion run.
   """
-  schedule: CronSchedule
+  onFailure: [AssertionAction!]!
+}
+
+"""
+An action associated with an assertion
+"""
+type AssertionAction {
+  """
+  The type of the actions
+  """
+  type: AssertionActionType!
+}
+
+"""
+Input required to create an assertion action
+"""
+input AssertionActionInput {
+  """
+  The type of the actions
+  """
+  type: AssertionActionType!
+}
+
+"""
+The type of the Action
+"""
+enum AssertionActionType {
+  """
+  Raise an incident.
+  """
+  RAISE_INCIDENT
+  """
+  Resolve open incidents related to the assertion.
+  """
+  RESOLVE_INCIDENT
 }
 
 """
@@ -114,14 +358,9 @@ type SlaAssertionInfo {
   type: SlaAssertionType!
 
   """
-  Produce WARN Assertion Result if the asset is not updated on the cadence and within the time range described by the schedule.
-  """
-  warnSchedule: SlaAssertionSchedule
-
-  """
   Produce FAIL Assertion Result if the asset is not updated on the cadence and within the time range described by the schedule.
   """
-  failSchedule: SlaAssertionSchedule
+  schedule: SlaAssertionSchedule
 }
 
 """
@@ -136,7 +375,7 @@ type SlaAssertionSchedule {
   """
   A cron schedule. This is populated if the type is CRON.
   """
-  cron: CronSchedule
+  cron: SlaCronSchedule
 
   """
   A fixed interval schedule. This is populated if the type is FIXED_INTERVAL.
@@ -152,6 +391,7 @@ enum SlaAssertionScheduleType {
   An schedule based on a CRON schedule representing the expected event times.
   """
   CRON
+
   """
   A scheduled based on a recurring fixed schedule which is used to compute the expected operation window. E.g. "every 24 hours".
   """
@@ -161,7 +401,7 @@ enum SlaAssertionScheduleType {
 """
 A cron-formatted schedule
 """
-type CronSchedule {
+type SlaCronSchedule {
   """
   A cron-formatted execution interval, as a cron string, e.g. 1 * * * *
   """
@@ -179,14 +419,6 @@ type CronSchedule {
   If left empty, the start of the SLA window will be the _end_ of the previously evaluated SLA window.
   """
   windowStartOffsetMs: Long
-
-  """
-  An optional offset in milliseconds to ADD to the timestamp generated by the cron schedule
-  to generate the upper bounds of the "SLA window", or the window of time in which an event must have occurred in order for the SLA
-  to be considering passing.
-  If left empty, the end of the SLA window will be the time corresponding to the provided cron schedule.
-  """
-  windowEndOffsetMs: Long
 }
 
 """

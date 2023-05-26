@@ -22,14 +22,10 @@ record AssertionInfo includes CustomProperties, ExternalReference {
       DATASET
 
       /**
-       * A Dataset SLA Assertion.
+       * An SLA assertion, or an assertion which indicates when a particular operation should occur
+       * to an asset.
        */
-      DATASET_SLA
-
-      /**
-       * A Data Job SLA Assertion.
-       */
-      DATA_JOB_SLA
+       SLA
     }
 
     /**
@@ -38,7 +34,7 @@ record AssertionInfo includes CustomProperties, ExternalReference {
     datasetAssertion: optional DatasetAssertionInfo
 
     /**
-    * An SLA Assertion definition. This field is populated when the type is DATASET_SLA or DATA_JOB_SLA.
+    * An SLA Assertion definition. This field is populated when the type is SLA.
     */
     slaAssertion: optional SlaAssertionInfo
 
@@ -49,10 +45,4 @@ record AssertionInfo includes CustomProperties, ExternalReference {
     * the platform where it was ingested from.
     */
     source: optional AssertionSource
-
-    /**
-    * The evaluation schedule for the Assertion. If the type is INFERRED or NATIVE, it is expected
-    * that this field is provided.
-    */
-    schedule: optional CronSchedule
 }

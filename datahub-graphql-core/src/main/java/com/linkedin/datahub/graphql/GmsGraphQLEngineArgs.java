@@ -25,6 +25,7 @@ import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.recommendation.RecommendationsService;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.secret.SecretService;
+import com.linkedin.metadata.service.AssertionService;
 import com.linkedin.metadata.service.LineageService;
 import com.linkedin.metadata.service.QueryService;
 import com.linkedin.metadata.service.SettingsService;
@@ -72,6 +73,7 @@ public class GmsGraphQLEngineArgs {
   QueryService queryService;
   FeatureFlags featureFlags;
   ChromeExtensionConfiguration chromeExtensionConfiguration;
+  AssertionService assertionService;
 
   //any fork specific args should go below this line
   EntitySearchService entitySearchService;

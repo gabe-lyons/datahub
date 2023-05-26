@@ -63,7 +63,9 @@ public class EntityAssertionsResolver implements DataFetcher<CompletableFuture<E
             context.getActorUrn()
         );
 
-        final List<Urn> assertionUrns = relationships.getRelationships().stream().map(EntityRelationship::getEntity).collect(Collectors.toList());
+        final List<Urn> assertionUrns = relationships.getRelationships().stream()
+            .map(EntityRelationship::getEntity)
+            .collect(Collectors.toList());
 
         // Step 2: Hydrate the assertion entities based on the urns from step 1
         final Map<Urn, EntityResponse> entities = _entityClient.batchGetV2(

@@ -7033,13 +7033,9 @@ The top-level assertion type. Currently single Dataset assertions are the only t
 enum AssertionType {
     DATASET
     """
-    A Dataset SLA assertion - Not in OSS
+    An SLA assertion
     """
-    DATASET_SLA
-    """
-    A Data Job SLA Assertion - Not in OSS
-    """
-    DATA_JOB_SLA
+    SLA
 }
 
 """
@@ -9904,6 +9900,10 @@ enum IncidentType {
   An operational incident, e.g. failure to materialize a dataset, or failure to execute a task / pipeline.
   """
   OPERATIONAL
+  """
+  An incident raised when an SLA assertion has failed.
+  """
+  SLA
   """
   A custom type of incident
   """

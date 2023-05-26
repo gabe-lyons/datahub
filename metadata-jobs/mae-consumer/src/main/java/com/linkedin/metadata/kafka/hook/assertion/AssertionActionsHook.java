@@ -451,8 +451,7 @@ public class AssertionActionsHook implements MetadataChangeLogHook {
     switch (info.getType()) {
       case DATASET:
         return info.getDatasetAssertion().getDataset();
-      case DATASET_SLA:
-      case DATA_JOB_SLA:
+      case SLA:
         return info.getSlaAssertion().getEntity();
       default:
         throw new IllegalArgumentException("Failed to extract assertee urn from assertionInfo aspect! Unrecognized assertion type provided.");
@@ -466,10 +465,8 @@ public class AssertionActionsHook implements MetadataChangeLogHook {
         return DatasetAssertionScope.DATASET_COLUMN.equals(info.getDatasetAssertion().getScope())
             ? IncidentType.DATASET_COLUMN
             : IncidentType.DATASET_ROWS;
-      case DATASET_SLA:
-        return IncidentType.DATASET_SLA;
-      case DATA_JOB_SLA:
-        return IncidentType.DATA_JOB_SLA;
+      case SLA:
+        return IncidentType.SLA;
       default:
         throw new IllegalArgumentException("Failed to map to an incident type! Unsupported Assertion type provided.");
     }

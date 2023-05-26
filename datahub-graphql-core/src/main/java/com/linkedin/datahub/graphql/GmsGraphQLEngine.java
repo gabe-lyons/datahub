@@ -101,8 +101,12 @@ import com.linkedin.datahub.graphql.resolvers.MeResolver;
 import com.linkedin.datahub.graphql.resolvers.actionrequest.ListActionRequestsResolver;
 import com.linkedin.datahub.graphql.resolvers.actionrequest.ListRejectedActionRequestsResolver;
 import com.linkedin.datahub.graphql.resolvers.assertion.AssertionRunEventResolver;
+import com.linkedin.datahub.graphql.resolvers.assertion.CreateDatasetAssertionResolver;
+import com.linkedin.datahub.graphql.resolvers.assertion.CreateSlaAssertionResolver;
 import com.linkedin.datahub.graphql.resolvers.assertion.DeleteAssertionResolver;
 import com.linkedin.datahub.graphql.resolvers.assertion.EntityAssertionsResolver;
+import com.linkedin.datahub.graphql.resolvers.assertion.UpdateDatasetAssertionResolver;
+import com.linkedin.datahub.graphql.resolvers.assertion.UpdateSlaAssertionResolver;
 import com.linkedin.datahub.graphql.resolvers.auth.CreateAccessTokenResolver;
 import com.linkedin.datahub.graphql.resolvers.auth.GetAccessTokenResolver;
 import com.linkedin.datahub.graphql.resolvers.auth.ListAccessTokensResolver;
@@ -327,6 +331,7 @@ import com.linkedin.metadata.query.filter.SortOrder;
 import com.linkedin.metadata.recommendation.RecommendationsService;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.secret.SecretService;
+import com.linkedin.metadata.service.AssertionService;
 import com.linkedin.metadata.service.QueryService;
 import com.linkedin.metadata.service.SettingsService;
 import com.linkedin.metadata.service.ViewService;
@@ -398,6 +403,7 @@ public class GmsGraphQLEngine {
     private final ViewService viewService;
     private final LineageService lineageService;
     private final QueryService queryService;
+    private final AssertionService assertionService;
 
     private final FeatureFlags featureFlags;
 
@@ -497,6 +503,7 @@ public class GmsGraphQLEngine {
         this.settingsService = args.settingsService;
         this.lineageService = args.lineageService;
         this.queryService = args.queryService;
+        this.assertionService = args.assertionService;
 
         this.ingestionConfiguration = Objects.requireNonNull(args.ingestionConfiguration);
         this.authenticationConfiguration = Objects.requireNonNull(args.authenticationConfiguration);
@@ -1800,6 +1807,11 @@ public class GmsGraphQLEngine {
                     })
             )
             .dataFetcher("runEvents", new AssertionRunEventResolver(entityClient)));
+        builder.type("Mutation", typeWiring -> typeWiring
+            .dataFetcher("createDatasetAssertion", new CreateDatasetAssertionResolver(assertionService))
+            .dataFetcher("createSlaAssertion", new CreateSlaAssertionResolver(assertionService))
+            .dataFetcher("updateDatasetAssertion", new UpdateDatasetAssertionResolver(assertionService))
+            .dataFetcher("updateSlaAssertion", new UpdateSlaAssertionResolver(assertionService)));
     }
 
     private void configurePolicyResolvers(final RuntimeWiring.Builder builder) {

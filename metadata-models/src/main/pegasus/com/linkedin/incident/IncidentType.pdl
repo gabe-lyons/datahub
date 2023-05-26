@@ -6,9 +6,9 @@ namespace com.linkedin.incident
 enum IncidentType {
   /**
   * An SLA Assertion has failed, triggering the incident.
-  * Raised on Datasets where assertions are configured to generate incidents.
+  * Raised on entities where assertions are configured to generate incidents.
   */
-  DATASET_SLA
+  SLA
 
   /**
   * An assertion on a particular column(s) of a Dataset has triggered the incident.
@@ -21,12 +21,6 @@ enum IncidentType {
   * Raised on datasets where assertions are configured to generate incidents.
   */
   DATASET_ROWS
-
-  /**
-  * An SLA Assertion has failed, triggering the incident.
-  * Raised on Data Jobs (Tasks) where assertions are configured to generate incidents.
-  */
-  DATA_JOB_SLA
 
   /**
   * A misc. operational incident, e.g. failure to materialize a dataset.

@@ -1,11 +1,14 @@
 package com.linkedin.datahub.graphql.types.assertion;
 
+import com.linkedin.assertion.AssertionAction;
+import com.linkedin.assertion.AssertionActions;
 import com.linkedin.assertion.AssertionInfo;
 import com.linkedin.common.DataPlatformInstance;
 import com.linkedin.common.urn.Urn;
 import com.linkedin.data.DataMap;
 import com.linkedin.data.template.GetMode;
 import com.linkedin.datahub.graphql.generated.Assertion;
+import com.linkedin.datahub.graphql.generated.AssertionActionType;
 import com.linkedin.datahub.graphql.generated.AssertionSource;
 import com.linkedin.datahub.graphql.generated.AssertionStdAggregation;
 import com.linkedin.datahub.graphql.generated.AssertionStdOperator;
@@ -17,7 +20,6 @@ import com.linkedin.datahub.graphql.generated.AssertionSourceType;
 import com.linkedin.datahub.graphql.generated.SlaAssertionInfo;
 import com.linkedin.datahub.graphql.generated.SlaAssertionSchedule;
 import com.linkedin.datahub.graphql.generated.SlaAssertionScheduleType;
-import com.linkedin.datahub.graphql.generated.CronSchedule;
 import com.linkedin.datahub.graphql.generated.FixedIntervalSchedule;
 import com.linkedin.datahub.graphql.generated.DateInterval;
 import com.linkedin.datahub.graphql.generated.DataPlatform;
@@ -26,6 +28,7 @@ import com.linkedin.datahub.graphql.generated.DatasetAssertionScope;
 import com.linkedin.datahub.graphql.generated.EntityType;
 import com.linkedin.datahub.graphql.generated.SchemaFieldRef;
 import com.linkedin.datahub.graphql.generated.SlaAssertionType;
+import com.linkedin.datahub.graphql.generated.SlaCronSchedule;
 import com.linkedin.datahub.graphql.types.common.mappers.DataPlatformInstanceAspectMapper;
 import com.linkedin.datahub.graphql.types.common.mappers.StringMapMapper;
 import com.linkedin.entity.EntityResponse;
@@ -50,6 +53,12 @@ public class AssertionMapper {
     if (envelopedAssertionInfo != null) {
       result.setInfo(mapAssertionInfo(new AssertionInfo(envelopedAssertionInfo.getValue().data())));
     }
+
+    final EnvelopedAspect envelopedAssertionActions = aspects.get(Constants.ASSERTION_ACTIONS_ASPECT_NAME);
+    if (envelopedAssertionActions != null) {
+      result.setActions(mapAssertionActions(new AssertionActions(envelopedAssertionActions.getValue().data())));
+    }
+
     final EnvelopedAspect envelopedPlatformInstance = aspects.get(Constants.DATA_PLATFORM_INSTANCE_ASPECT_NAME);
     if (envelopedPlatformInstance != null) {
       final DataMap data = envelopedPlatformInstance.getValue().data();
@@ -78,15 +87,36 @@ public class AssertionMapper {
       SlaAssertionInfo slaAssertionInfo = mapSlaAssertionInfo(gmsAssertionInfo.getSlaAssertion());
       assertionInfo.setSlaAssertion(slaAssertionInfo);
     }
+    // Source Type
     if (gmsAssertionInfo.hasSource()) {
-      // Source Type
       assertionInfo.setSource(mapSource(gmsAssertionInfo.getSource()));
     }
-    // Schedule
-    if (gmsAssertionInfo.hasSchedule()) {
-      assertionInfo.setSchedule(mapCronSchedule(gmsAssertionInfo.getSchedule()));
-    }
     return assertionInfo;
+  }
+
+  private static com.linkedin.datahub.graphql.generated.AssertionActions mapAssertionActions(final AssertionActions gmsAssertionActions) {
+    final com.linkedin.datahub.graphql.generated.AssertionActions result =
+        new com.linkedin.datahub.graphql.generated.AssertionActions();
+    if (gmsAssertionActions.hasOnFailure()) {
+      result.setOnFailure(
+          gmsAssertionActions.getOnFailure().stream()
+              .map(AssertionMapper::mapAssertionAction)
+              .collect(Collectors.toList()));
+    }
+    if (gmsAssertionActions.hasOnSuccess()) {
+      result.setOnSuccess(
+          gmsAssertionActions.getOnSuccess().stream()
+              .map(AssertionMapper::mapAssertionAction)
+              .collect(Collectors.toList()));
+    }
+    return result;
+  }
+
+  private static com.linkedin.datahub.graphql.generated.AssertionAction mapAssertionAction(final AssertionAction gmsAssertionAction) {
+    final com.linkedin.datahub.graphql.generated.AssertionAction result =
+        new com.linkedin.datahub.graphql.generated.AssertionAction();
+    result.setType(AssertionActionType.valueOf(gmsAssertionAction.getType().toString()));
+    return result;
   }
 
   private static DatasetAssertionInfo mapDatasetAssertionInfo(
@@ -168,11 +198,8 @@ public class AssertionMapper {
     SlaAssertionInfo slaAssertionInfo = new SlaAssertionInfo();
     slaAssertionInfo.setEntityUrn(gmsSlaAssertionInfo.getEntity().toString());
     slaAssertionInfo.setType(SlaAssertionType.valueOf(gmsSlaAssertionInfo.getType().name()));
-    if (gmsSlaAssertionInfo.hasWarnSchedule()) {
-      slaAssertionInfo.setWarnSchedule(mapSlaAssertionSchedule(gmsSlaAssertionInfo.getWarnSchedule()));
-    }
-    if (gmsSlaAssertionInfo.hasFailSchedule()) {
-      slaAssertionInfo.setFailSchedule(mapSlaAssertionSchedule(gmsSlaAssertionInfo.getFailSchedule()));
+    if (gmsSlaAssertionInfo.hasSchedule()) {
+      slaAssertionInfo.setSchedule(mapSlaAssertionSchedule(gmsSlaAssertionInfo.getSchedule()));
     }
     return slaAssertionInfo;
   }
@@ -197,13 +224,12 @@ public class AssertionMapper {
     return fixedIntervalSchedule;
   }
 
-  private static CronSchedule mapCronSchedule(
+  private static SlaCronSchedule mapCronSchedule(
       final com.linkedin.assertion.CronSchedule gmsCronSchedule) {
-    CronSchedule cronSchedule = new CronSchedule();
+    SlaCronSchedule cronSchedule = new SlaCronSchedule();
     cronSchedule.setCron(gmsCronSchedule.getCron());
     cronSchedule.setTimezone(gmsCronSchedule.getTimezone());
     cronSchedule.setWindowStartOffsetMs(gmsCronSchedule.getWindowStartOffsetMs(GetMode.NULL));
-    cronSchedule.setWindowEndOffsetMs(gmsCronSchedule.getWindowEndOffsetMs(GetMode.NULL));
     return cronSchedule;
   }
 
