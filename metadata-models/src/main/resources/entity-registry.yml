@@ -499,5 +499,10 @@ entities:
     aspects:
       - dataHubConnectionDetails
       - dataPlatformInstance
+  - name: dataContract
+    category: core
+    keyAspect: dataContractKey
+    aspects:
+      - dataContractProperties
 events:
   - name: notificationRequest

@@ -2,7 +2,6 @@ namespace com.linkedin.assertion
 
 import com.linkedin.common.CustomProperties
 import com.linkedin.common.ExternalReference
-import com.linkedin.common.OriginType
 
 /**
  * Information about an assertion
@@ -26,6 +25,13 @@ record AssertionInfo includes CustomProperties, ExternalReference {
        * to an asset.
        */
        SLA
+
+      /**
+       * A schema or structural assertion.
+       *
+       * Would have named this SCHEMA but the codegen for PDL does not allow this (reserved word).
+       */
+      DATA_SCHEMA
     }
 
     /**
@@ -37,6 +43,11 @@ record AssertionInfo includes CustomProperties, ExternalReference {
     * An SLA Assertion definition. This field is populated when the type is SLA.
     */
     slaAssertion: optional SlaAssertionInfo
+
+    /**
+    * An schema Assertion definition. This field is populated when the type is DATASET_SCHEMA
+    */
+    schemaAssertion: optional SchemaAssertionInfo
 
     /**
     * The source or origin of the Assertion definition.
