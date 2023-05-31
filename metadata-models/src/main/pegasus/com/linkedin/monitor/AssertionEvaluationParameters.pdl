@@ -1,0 +1,21 @@
+namespace com.linkedin.monitor
+
+/**
+ * Information about the parameters required to evaluate an assertion
+ */
+record AssertionEvaluationParameters {
+    /**
+     * The type of parameters
+     */
+    type: enum AssertionEvaluationParametersType {
+        /**
+         * Parameters required to evaluate a Dataset SLA Assertion
+         */
+        DATASET_SLA
+    }
+
+    /**
+     * Parameters required to evaluate a Dataset SLA Assertion. Present if type is DATASET_SLA.
+     */
+     datasetSlaParameters: optional DatasetSlaAssertionParameters
+}

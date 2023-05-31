@@ -874,6 +874,11 @@ enum EntityType {
     A connection to an external source.
     """
     DATAHUB_CONNECTION
+
+    """
+    An asset monitor
+    """
+    MONITOR
 }
 
 """

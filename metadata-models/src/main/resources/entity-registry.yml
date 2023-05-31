@@ -504,5 +504,10 @@ entities:
     keyAspect: dataContractKey
     aspects:
       - dataContractProperties
+  - name: monitor
+    category: core
+    keyAspect: monitorKey
+    aspects:
+      - monitorInfo
 events:
   - name: notificationRequest

@@ -1,0 +1,330 @@
+extend type Mutation {
+  """
+  Create a monitor that evaluates assertions
+  """
+  createAssertionMonitor(input: CreateAssertionMonitorInput!): Monitor!
+
+  """
+  Removes a monitor
+  """
+  deleteMonitor(urn: String!): boolean
+}
+
+
+"""
+A monitor represents a process that monitors a Data Asset
+"""
+type Monitor implements Entity {
+    """
+    The primary key of the Monitor
+    """
+    urn: String!
+
+    """
+    The standard Entity Type
+    """
+    type: EntityType!
+
+    """
+    Key information about the monitor
+    """
+    info: MonitorInfo
+
+    """
+    Edges extending from this entity
+    """
+    relationships(input: RelationshipsInput!): EntityRelationshipsResult
+}
+
+
+"""
+Information about the monitor.
+"""
+type MonitorInfo {
+    """
+    The type of Monitor
+    """
+    type: MonitorType!
+
+    """
+    Information about an assertion evaluator monitor. Present if type is ASSERTION.
+    """
+    assertion: AssertionMonitor
+}
+
+
+"""
+A type of monitor
+"""
+enum MonitorType {
+  """
+  A monitor that evaluates assertions
+  """
+  ASSERTION
+}
+
+
+"""
+Information about an assertion evaluator monitor.
+"""
+type AssertionMonitor {
+    """
+    The set of assertions to be evaluated by the monitor
+    """
+    assertions: [AssertionEvaluationSpec!]!
+}
+
+"""
+Information required to evaluate an assertion
+"""
+type AssertionEvaluationSpec {
+    """
+    The assertion being evaluated
+    """
+    assertion: Assertion!
+
+    """
+    A cron schedule dictating when the assertion is evaluated.
+    """
+    schedule: CronSchedule!
+
+    """
+    Parameters required to evaluate the assertion
+    """
+    parameters: AssertionEvaluationParameters!
+}
+
+"""
+The type of assertion evaluation parameters
+"""
+enum AssertionEvaluationParametersType {
+  """
+  Parameters required to evaluate a Dataset SLA
+  """
+  DATASET_SLA
+}
+
+"""
+The parameters required to evaluate an assertion
+"""
+type AssertionEvaluationParameters {
+  """
+  The type of assertion evaluation parameters
+  """
+  type: AssertionEvaluationParametersType!
+
+  """
+  The parameters required to evaluate a dataset SLA assertion. Present if type is DATASET_SLA.
+  """
+  datasetSlaParameters: optional DatasetSlaAssertionParameters
+}
+
+"""
+The parameters required to evaluate a dataset SLA assertion. Present if type is DATASET_SLA.
+"""
+type DatasetSlaAssertionParameters {
+    """
+    The source of the change operation.
+    """
+    sourceType: DatasetSlaSourceType!
+
+    """
+    Information about the field to use. Present when sourceType is FIELD_VALUE
+    """
+    field: SchemaFieldSpec
+
+    """
+    Determine that a change has occurred by inspecting an audit log API
+    """
+    auditLog: AuditLogSpec
+}
+
+"""
+The source of the change operation.
+"""
+enum DatasetSlaSourceType {
+  """
+  Determine that a change has occurred by inspecting a particular field, e.g. a timestamp column.
+  """
+  FIELD_VALUE
+
+  """
+  Determine that a change has occurred by inspecting an information schema table, or other system metadata table.
+  """
+  INFORMATION_SCHEMA
+
+  """
+  Determine that a change has occurred by inspecting an audit log API
+  """
+  AUDIT_LOG
+}
+
+"""
+Information about the field to use in an assertion
+"""
+type SchemaFieldSpec {
+  """
+  The field path
+  """
+  path: String!
+
+  """
+  The DataHub standard schema field type.
+  """
+  type: String!
+
+  """
+  The native field type
+  """
+  nativeType: String!
+}
+
+"""
+Information about the audit log operations to use in an assertion
+"""
+type AuditLogSpec {
+  """
+  The list of operation types that should be monitored. If not provided, a default set will be used.
+  """
+  operationTypes: [String!]
+
+  """
+  Optional: The user name associated with the operation.
+  """
+  userName: String
+}
+
+"""
+A cron schedule
+"""
+type CronSchedule {
+  """
+  A cron-formatted execution interval, as a cron string, e.g. 1 * * * *
+  """
+  cron: String!
+
+  """
+  Timezone in which the cron interval applies, e.g. America/Los_Angeles
+  """
+  timezone: String!
+}
+
+"""
+The parameters for creating an Assertion Monitor
+"""
+input AssertionEvaluationSpecInput {
+    """
+    The assertion being evaluated
+    """
+    assertion: String!
+
+    """
+    A cron schedule dictating when the assertion is evaluated.
+    """
+    schedule: CronScheduleInput!
+
+    """
+    Parameters required to evaluate the assertion
+    """
+    parameters: AssertionEvaluationParametersInput!
+}
+
+"""
+Input for a cron schedule
+"""
+input CronScheduleInput {
+    """
+    A cron-formatted execution interval, as a cron string, e.g. 1 * * * *
+    """
+    cron: String!
+
+    """
+    Timezone in which the cron interval applies, e.g. America/Los_Angeles
+    """
+    timezone: String!
+}
+
+"""
+The parameters required to evaluate an assertion
+"""
+input AssertionEvaluationParametersInput {
+    """
+    The type of assertion evaluation parameters
+    """
+    type: AssertionEvaluationParametersType!
+
+    """
+    The parameters required to evaluate a dataset SLA assertion. Present if type is DATASET_SLA.
+    """
+    datasetSlaParameters: DatasetSlaAssertionParametersInput
+}
+
+"""
+Input for the parameters required to evaluate a dataset SLA assertion. Present if type is DATASET_SLA.
+"""
+input DatasetSlaAssertionParametersInput {
+    """
+    The source of the change operation.
+    """
+    sourceType: DatasetSlaSourceType!
+
+    """
+    Information about the field to use. Present when sourceType is FIELD_VALUE
+    """
+    field: SchemaFieldSpecInput
+
+    """
+    Determine that a change has occurred by inspecting an audit log API
+    """
+    auditLog: AuditLogSpecInput
+}
+
+"""
+Input for information about the field to use in an assertion
+"""
+input SchemaFieldSpecInput {
+    """
+    The field path
+    """
+    path: String!
+
+    """
+    The DataHub standard schema field type.
+    """
+    type: String!
+
+    """
+    The native field type
+    """
+    nativeType: String!
+}
+
+"""
+Input for information about the audit log operations to use in an assertion
+"""
+input AuditLogSpecInput {
+    """
+    The list of operation types that should be monitored. If not provided, a default set will be used.
+    """
+    operationTypes: [String!]
+
+    """
+    Optional: The user name associated with the operation.
+    """
+    userName: String
+}
+
+"""
+Input for creating an Assertion Monitor. Assumes that the assertion under monitor has already been created.
+"""
+input CreateAssertionMonitorInput {
+    """
+    The urn of the assertion that monitor should evaluate.
+    """
+    assertionUrn: String!
+
+    """
+    The specifications for evaluating the assertion.
+    """
+    evaluationSpec: AssertionEvaluationSpecInput!
+}

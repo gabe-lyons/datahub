@@ -1,0 +1,14 @@
+namespace com.linkedin.metadata.key
+
+/**
+ * Key for a Monitor
+ */
+@Aspect = {
+  "name": "monitorKey",
+}
+record MonitorKey {
+  /**
+  * Unique id for the monitor.
+  */
+  id: string
+}
