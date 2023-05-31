@@ -17,6 +17,9 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static com.linkedin.metadata.Constants.*;
+
+
 public class AddTagsActionTest {
 
   private static final List<Urn> TEST_TAGS = ImmutableList.of(
@@ -62,12 +65,14 @@ public class AddTagsActionTest {
 
     Mockito.verify(service, Mockito.atLeastOnce()).batchAddTags(
         Mockito.eq(TEST_TAGS),
-        Mockito.eq(DASHBOARD_REFERENCES)
+        Mockito.eq(DASHBOARD_REFERENCES),
+        Mockito.eq(METADATA_TESTS_SOURCE)
     );
 
     Mockito.verify(service, Mockito.atLeastOnce()).batchAddTags(
         Mockito.eq(TEST_TAGS),
-        Mockito.eq(DATASET_REFERENCES)
+        Mockito.eq(DATASET_REFERENCES),
+        Mockito.eq(METADATA_TESTS_SOURCE)
     );
 
     Mockito.verifyNoMoreInteractions(service);

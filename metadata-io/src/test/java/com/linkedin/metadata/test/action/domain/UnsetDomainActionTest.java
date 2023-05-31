@@ -13,6 +13,9 @@ import org.mockito.Mockito;
 import org.testcontainers.shaded.com.google.common.collect.ImmutableList;
 import org.testng.annotations.Test;
 
+import static com.linkedin.metadata.Constants.*;
+
+
 public class UnsetDomainActionTest {
 
   private static final List<Urn> DATASET_URNS = ImmutableList.of(
@@ -49,10 +52,12 @@ public class UnsetDomainActionTest {
     action.apply(ALL_URNS, params);
 
     Mockito.verify(service, Mockito.atLeastOnce()).batchUnsetDomain(
-        Mockito.eq(DASHBOARD_REFERENCES)
+        Mockito.eq(DASHBOARD_REFERENCES),
+        Mockito.eq(METADATA_TESTS_SOURCE)
     );
     Mockito.verify(service, Mockito.atLeastOnce()).batchUnsetDomain(
-        Mockito.eq(DATASET_REFERENCES)
+        Mockito.eq(DATASET_REFERENCES),
+        Mockito.eq(METADATA_TESTS_SOURCE)
     );
 
     Mockito.verifyNoMoreInteractions(service);

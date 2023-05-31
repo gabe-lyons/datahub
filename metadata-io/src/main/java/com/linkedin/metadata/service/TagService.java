@@ -23,9 +23,12 @@ import java.util.stream.Collectors;
 import  com.linkedin.entity.client.EntityClient;
 import com.datahub.authentication.Authentication;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import static com.linkedin.metadata.entity.AspectUtils.*;
+import static com.linkedin.metadata.service.util.MetadataTestServiceUtils.*;
 
 
 @Slf4j
@@ -40,9 +43,10 @@ public class TagService extends BaseService {
    *
    * @param tagUrns the urns of the tags to add
    * @param resources references to the resources to change
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    */
-  public void batchAddTags(@Nonnull List<Urn> tagUrns, @Nonnull List<ResourceReference> resources) {
-    batchAddTags(tagUrns, resources, this.systemAuthentication);
+  public void batchAddTags(@Nonnull List<Urn> tagUrns, @Nonnull List<ResourceReference> resources, String appSource) {
+    batchAddTags(tagUrns, resources, this.systemAuthentication, appSource);
   }
 
 
@@ -52,12 +56,14 @@ public class TagService extends BaseService {
    * @param tagUrns the urns of the tags to add
    * @param resources references to the resources to change
    * @param authentication authentication to use when making the change
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    *
    */
-  public void batchAddTags(@Nonnull List<Urn> tagUrns, @Nonnull List<ResourceReference> resources, @Nonnull Authentication authentication) {
+  public void batchAddTags(@Nonnull List<Urn> tagUrns, @Nonnull List<ResourceReference> resources, @Nonnull Authentication authentication,
+      @Nullable String appSource) {
     log.debug("Batch adding Tags to entities. tags: {}, resources: {}", resources, tagUrns);
     try {
-      addTagsToResources(tagUrns, resources, authentication);
+      addTagsToResources(tagUrns, resources, authentication, appSource);
     } catch (Exception e) {
       throw new RuntimeException(String.format("Failed to batch add Tags %s to resources with urns %s!",
           tagUrns,
@@ -71,10 +77,11 @@ public class TagService extends BaseService {
    *
    * @param tagUrns the urns of the tags to remove
    * @param resources references to the resources to change
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    *
    */
-  public void batchRemoveTags(@Nonnull List<Urn> tagUrns, @Nonnull List<ResourceReference> resources) {
-    batchRemoveTags(tagUrns, resources, this.systemAuthentication);
+  public void batchRemoveTags(@Nonnull List<Urn> tagUrns, @Nonnull List<ResourceReference> resources, @Nullable String appSource) {
+    batchRemoveTags(tagUrns, resources, this.systemAuthentication, appSource);
   }
 
   /**
@@ -83,12 +90,14 @@ public class TagService extends BaseService {
    * @param tagUrns the urns of the tags to remove
    * @param resources references to the resources to change
    * @param authentication authentication to use when making the change
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    *
    */
-  public void batchRemoveTags(@Nonnull List<Urn> tagUrns, @Nonnull List<ResourceReference> resources, @Nonnull Authentication authentication) {
+  public void batchRemoveTags(@Nonnull List<Urn> tagUrns, @Nonnull List<ResourceReference> resources, @Nonnull Authentication authentication,
+      @Nullable String appSource) {
     log.debug("Batch adding Tags to entities. tags: {}, resources: {}", resources, tagUrns);
     try {
-      removeTagsFromResources(tagUrns, resources, authentication);
+      removeTagsFromResources(tagUrns, resources, authentication, appSource);
     } catch (Exception e) {
       throw new RuntimeException(String.format("Failed to batch add Tags %s to resources with urns %s!",
           tagUrns,
@@ -100,18 +109,26 @@ public class TagService extends BaseService {
   private void addTagsToResources(
       List<com.linkedin.common.urn.Urn> tagUrns,
       List<ResourceReference> resources,
-      @Nonnull Authentication authentication
+      @Nonnull Authentication authentication,
+      @Nullable String appSource
   ) throws Exception {
     final List<MetadataChangeProposal> changes = buildAddTagsProposals(tagUrns, resources, authentication);
+    if (StringUtils.isNotBlank(appSource)) {
+      applyAppSource(changes, appSource);
+    }
     ingestChangeProposals(changes, authentication);
   }
 
   private void removeTagsFromResources(
       List<Urn> tags,
       List<ResourceReference> resources,
-      @Nonnull Authentication authentication
+      @Nonnull Authentication authentication,
+      @Nullable String appSource
   ) throws Exception {
     final List<MetadataChangeProposal> changes = buildRemoveTagsProposals(tags, resources, authentication);
+    if (StringUtils.isNotBlank(appSource)) {
+      applyAppSource(changes, appSource);
+    }
     ingestChangeProposals(changes, authentication);
   }
 

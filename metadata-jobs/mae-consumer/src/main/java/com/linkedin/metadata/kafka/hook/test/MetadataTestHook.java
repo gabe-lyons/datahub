@@ -133,6 +133,16 @@ public class MetadataTestHook implements MetadataChangeLogHook {
       return;
     }
 
+    // Do not trigger if event originated from a Test execution
+    if (event.getSystemMetadata() != null) {
+      if (event.getSystemMetadata().getProperties() != null) {
+        if (METADATA_TESTS_SOURCE.equals(event.getSystemMetadata().getProperties().get(APP_SOURCE))) {
+          // If coming from the UI, we pre-process the Update Indices hook as a fast path to avoid Kafka lag
+          return;
+        }
+      }
+    }
+
     EntitySpec entitySpec;
     try {
       entitySpec = _entityRegistry.getEntitySpec(event.getEntityType());

@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.linkedin.metadata.Constants.*;
 import static com.linkedin.metadata.test.action.ActionUtils.*;
 
 
@@ -68,7 +69,7 @@ public class AddOwnersAction implements Action {
       this.ownerService.batchAddOwners(ownerUrns, urns.stream()
           .map(urn -> new ResourceReference(urn, null, null))
           .collect(Collectors.toList()),
-          ownershipType);
+          ownershipType, METADATA_TESTS_SOURCE);
     }
   }
 }
