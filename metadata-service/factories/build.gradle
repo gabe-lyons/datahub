@@ -12,6 +12,9 @@ dependencies {
   compile project(':metadata-dao-impl:kafka-producer')
   compile project(':ingestion-scheduler')
 
+  compile (externalDependency.awsGlueSchemaRegistrySerde) {
+    exclude group: 'org.json', module: 'json'
+  }
   // acryl-main only
   compile project(':notifications')
 

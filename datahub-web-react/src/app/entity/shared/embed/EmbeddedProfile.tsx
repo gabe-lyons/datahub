@@ -2,17 +2,19 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { QueryHookOptions, QueryResult } from '@apollo/client';
 import React from 'react';
 import styled from 'styled-components';
+import { Divider } from 'antd';
 import { EntityType, Exact } from '../../../../types.generated';
 import useGetDataForProfile from '../containers/profile/useGetDataForProfile';
 import EntityContext from '../EntityContext';
 import { GenericEntityProperties } from '../types';
 import EmbeddedHeader from './EmbeddedHeader';
 import { SidebarAboutSection } from '../containers/profile/sidebar/AboutSection/SidebarAboutSection';
-import { SidebarOwnerSection } from '../containers/profile/sidebar/Ownership/SidebarOwnerSection';
+import { SidebarOwnerSection } from '../containers/profile/sidebar/Ownership/sidebar/SidebarOwnerSection';
 import { SidebarTagsSection } from '../containers/profile/sidebar/SidebarTagsSection';
 import { SidebarDomainSection } from '../containers/profile/sidebar/Domain/SidebarDomainSection';
-import UpstreamHealth, { StyledDivider } from './UpstreamHealth/UpstreamHealth';
+import UpstreamHealth from './UpstreamHealth/UpstreamHealth';
 import NonExistentEntityPage from '../entity/NonExistentEntityPage';
+import DataProductSection from '../containers/profile/sidebar/DataProduct/DataProductSection';
 
 const LoadingWrapper = styled.div`
     display: flex;
@@ -20,6 +22,10 @@ const LoadingWrapper = styled.div`
     justify-content: center;
     height: 85vh;
     font-size: 50px;
+`;
+
+const StyledDivider = styled(Divider)`
+    margin: 12px 0;
 `;
 
 interface Props<T> {
@@ -80,6 +86,8 @@ export default function EmbeddedProfile<T>({ urn, entityType, getOverridePropert
                     <SidebarTagsSection readOnly properties={{ hasTags: true, hasTerms: true }} />
                     <StyledDivider />
                     <SidebarDomainSection readOnly />
+                    <StyledDivider />
+                    <DataProductSection readOnly />
                 </>
             )}
         </EntityContext.Provider>

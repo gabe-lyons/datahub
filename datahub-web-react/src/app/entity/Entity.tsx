@@ -80,6 +80,10 @@ export enum EntityCapabilityType {
      * Add roles to the entity
      */
     ROLES,
+    /**
+     * Assigning the entity to a data product
+     */
+    DATA_PRODUCTS,
 }
 
 /**

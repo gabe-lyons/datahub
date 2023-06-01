@@ -8,6 +8,7 @@ import EmbeddedPage from './embed/EmbeddedPage';
 import { useEntityRegistry } from './useEntityRegistry';
 import EmbeddedHealthIcon from './entity/shared/embed/EmbeddedHealthIcon';
 import AppProviders from './AppProviders';
+import EmbedLookup from './embed/lookup';
 
 /**
  * Container for all views behind an authentication wall.
@@ -22,6 +23,7 @@ export const ProtectedRoutes = (): JSX.Element => {
                     <Switch>
                         <Route exact path="/" render={() => <HomePage />} />
                         <Route path={`${PageRoutes.EMBED_HEALTH}/:urn`} render={() => <EmbeddedHealthIcon />} />
+                        <Route exact path={PageRoutes.EMBED_LOOKUP} render={() => <EmbedLookup />} />
                         {entityRegistry.getEntities().map((entity) => (
                             <Route
                                 key={`${entity.getPathName()}/${PageRoutes.EMBED}`}

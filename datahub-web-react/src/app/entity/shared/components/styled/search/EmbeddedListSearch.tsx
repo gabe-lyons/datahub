@@ -25,6 +25,7 @@ import {
     DownloadSearchResultsInput,
     DownloadSearchResults,
 } from '../../../../../search/utils/types';
+import { useEntityContext } from '../../../EntityContext';
 
 const Container = styled.div`
     display: flex;
@@ -126,6 +127,7 @@ export const EmbeddedListSearch = ({
     shouldRefetch,
     resetShouldRefetch,
 }: Props) => {
+    const { shouldRefetchEmbeddedListSearch, setShouldRefetchEmbeddedListSearch } = useEntityContext();
     // Adjust query based on props
     const finalQuery: string = addFixedQuery(query as string, fixedQuery as string, emptySearchQuery as string);
 
@@ -194,6 +196,16 @@ export const EmbeddedListSearch = ({
             resetShouldRefetch();
         }
     });
+
+    useEffect(() => {
+        if (shouldRefetchEmbeddedListSearch) {
+            refetch({
+                input: searchInput,
+            });
+            setShouldRefetchEmbeddedListSearch?.(false);
+        }
+    });
+
     const searchResultEntities =
         data?.searchResults?.map((result) => ({ urn: result.entity.urn, type: result.entity.type })) || [];
     const searchResultUrns = searchResultEntities.map((entity) => entity.urn);
@@ -263,7 +275,7 @@ export const EmbeddedListSearch = ({
                 setIsSelectMode={setIsSelectMode}
                 selectedEntities={selectedEntities}
                 onChangeSelectAll={onChangeSelectAll}
-                refetch={refetch as any}
+                refetch={() => refetch({ input: searchInput })}
                 searchBarStyle={searchBarStyle}
                 searchBarInputStyle={searchBarInputStyle}
             />

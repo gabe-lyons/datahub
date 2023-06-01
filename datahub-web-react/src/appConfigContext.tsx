@@ -40,6 +40,9 @@ export const DEFAULT_APP_CONFIG = {
     viewsConfig: {
         enabled: false,
     },
+    featureFlags: {
+        readOnlyModeEnabled: false,
+    },
     chromeExtensionConfig: {
         enabled: false,
         lineageEnabled: false,
