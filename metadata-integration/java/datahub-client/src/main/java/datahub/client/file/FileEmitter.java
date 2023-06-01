@@ -49,12 +49,12 @@ public class FileEmitter implements Emitter {
    * @param config
    */
   public FileEmitter(FileEmitterConfig config) {
-
     objectMapper = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
     int maxSize = Integer.parseInt(System.getenv().getOrDefault(INGESTION_MAX_SERIALIZED_STRING_LENGTH, MAX_JACKSON_STRING_SIZE));
     objectMapper.getFactory().setStreamReadConstraints(StreamReadConstraints.builder()
         .maxStringLength(maxSize).build());
     dataTemplateCodec = new JacksonDataTemplateCodec(objectMapper.getFactory());
+
     this.config = config;
     this.eventFormatter = this.config.getEventFormatter();
 

@@ -11,6 +11,10 @@ const PROPAGATOR_URN = 'urn:li:corpuser:__datahub_propagator';
 
 const highlightMatchStyle = { background: '#ffe58f', padding: '0' };
 
+const StyledTag = styled(Tag)<{ fontSize?: number }>`
+    ${(props) => props.fontSize && `font-size: ${props.fontSize}px;`}
+`;
+
 const PropagateThunderbolt = styled(ThunderboltOutlined)`
     color: rgba(0, 143, 100, 0.95);
     margin-right: -4px;
@@ -24,6 +28,7 @@ interface Props {
     canRemove?: boolean;
     readOnly?: boolean;
     highlightText?: string;
+    fontSize?: number;
     onOpenModal?: () => void;
     refetch?: () => Promise<any>;
 }
@@ -35,6 +40,7 @@ export default function TermContent({
     canRemove,
     readOnly,
     highlightText,
+    fontSize,
     onOpenModal,
     refetch,
 }: Props) {
@@ -79,19 +85,20 @@ export default function TermContent({
     };
 
     return (
-        <Tag
+        <StyledTag
             style={{ cursor: 'pointer' }}
             closable={canRemove && !readOnly}
             onClose={(e) => {
                 e.preventDefault();
                 removeTerm(term);
             }}
+            fontSize={fontSize}
         >
-            <BookOutlined style={{ marginRight: '3%' }} />
+            <BookOutlined style={{ marginRight: '4px' }} />
             <Highlight style={{ marginLeft: 0 }} matchStyle={highlightMatchStyle} search={highlightText}>
                 {entityRegistry.getDisplayName(EntityType.GlossaryTerm, term.term)}
             </Highlight>
             {term.actor?.urn === PROPAGATOR_URN && <PropagateThunderbolt />}
-        </Tag>
+        </StyledTag>
     );
 }

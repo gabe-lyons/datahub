@@ -23,6 +23,7 @@ import { AddIncidentModal } from '../tabs/Incident/components/AddIncidentModal';
 import { getEntityPath } from '../containers/profile/utils';
 import useDeleteEntity from './useDeleteEntity';
 import { getEntityProfileDeleteRedirectPath } from '../../../shared/deleteUtils';
+import { isDeleteDisabled } from './utils';
 import { useIsSeparateSiblingsMode } from '../siblingUtils';
 
 export enum EntityMenuItems {
@@ -144,12 +145,11 @@ function EntityDropdown(props: Props) {
     const entityHasChildren = !!entityData?.children?.total;
     const canManageGlossaryEntity = !!entityData?.privileges?.canManageEntity;
     const canCreateGlossaryEntity = !!entityData?.privileges?.canManageChildren;
-    const canDeleteGlossaryEntity = !entityHasChildren && canManageGlossaryEntity;
 
     /**
      * A default path to redirect to if the entity is deleted.
      */
-    const deleteRedirectPath = getEntityProfileDeleteRedirectPath(entityType);
+    const deleteRedirectPath = getEntityProfileDeleteRedirectPath(entityType, entityData);
 
     return (
         <>
@@ -217,7 +217,7 @@ function EntityDropdown(props: Props) {
                         {menuItems.has(EntityMenuItems.DELETE) && (
                             <StyledMenuItem
                                 key="5"
-                                disabled={isGlossaryEntity && !canDeleteGlossaryEntity}
+                                disabled={isDeleteDisabled(entityType, entityData)}
                                 onClick={onDeleteEntity}
                             >
                                 <Tooltip
@@ -225,7 +225,9 @@ function EntityDropdown(props: Props) {
                                         entityType,
                                     )} with child entities.`}
                                     overlayStyle={
-                                        canManageGlossaryEntity && entityHasChildren ? {} : { display: 'none' }
+                                        isGlossaryEntity && canManageGlossaryEntity && entityHasChildren
+                                            ? {}
+                                            : { display: 'none' }
                                     }
                                 >
                                     <MenuItem>

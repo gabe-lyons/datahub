@@ -29,6 +29,8 @@
         "RESTORE_INDICES_PRIVILEGE",
         "SET_WRITEABLE_PRIVILEGE",
         "APPLY_RETENTION_PRIVILEGE",
+        "MANAGE_GLOBAL_OWNERSHIP_TYPES",
+        "APPLY_RETENTION_PRIVILEGE",
         "CREATE_CONSTRAINTS",
         "MANAGE_CONNECTIONS"
       ],
@@ -65,7 +67,9 @@
         "GET_TIMESERIES_ASPECT_PRIVILEGE",
         "GET_ENTITY_PRIVILEGE",
         "GET_TIMELINE_PRIVILEGE",
-        "PRODUCE_PLATFORM_EVENT_PRIVILEGE"
+        "PRODUCE_PLATFORM_EVENT_PRIVILEGE",
+        "MANAGE_DATA_PRODUCTS",
+        "MANAGE_GLOBAL_OWNERSHIP_TYPES"
       ],
       "displayName":"Root User - Edit and View All Resources",
       "description":"Grants full edit and view privileges for all resources to root 'datahub' root user.",
@@ -111,6 +115,8 @@
         "MANAGE_TESTS",
         "MANAGE_GLOSSARIES",
         "MANAGE_TAGS",
+        "MANAGE_GLOBAL_VIEWS",
+        "MANAGE_GLOBAL_OWNERSHIP_TYPES",
         "VIEW_METADATA_PROPOSALS",
         "MANAGE_DOMAINS",
         "MANAGE_GLOBAL_VIEWS",
@@ -240,6 +246,8 @@
         "RESTORE_INDICES_PRIVILEGE",
         "SET_WRITEABLE_PRIVILEGE",
         "APPLY_RETENTION_PRIVILEGE",
+        "MANAGE_GLOBAL_OWNERSHIP_TYPES",
+        "APPLY_RETENTION_PRIVILEGE",
         "MANAGE_CONNECTIONS"
       ],
       "displayName":"Admins - Platform Policy",
@@ -271,6 +279,7 @@
         "EDIT_ENTITY_DOC_LINKS",
         "EDIT_ENTITY_STATUS",
         "EDIT_DOMAINS_PRIVILEGE",
+        "EDIT_ENTITY_DATA_PRODUCTS",
         "EDIT_DEPRECATION_PRIVILEGE",
         "EDIT_ENTITY_ASSERTIONS",
         "EDIT_ENTITY",
@@ -296,7 +305,8 @@
         "GET_TIMESERIES_ASPECT_PRIVILEGE",
         "GET_ENTITY_PRIVILEGE",
         "GET_TIMELINE_PRIVILEGE",
-        "PRODUCE_PLATFORM_EVENT_PRIVILEGE"
+        "PRODUCE_PLATFORM_EVENT_PRIVILEGE",
+        "MANAGE_DATA_PRODUCTS"
       ],
       "displayName":"Admins - Metadata Policy",
       "description":"Admins have all metadata privileges.",
@@ -356,6 +366,7 @@
         "EDIT_ENTITY_DOC_LINKS",
         "EDIT_ENTITY_STATUS",
         "EDIT_DOMAINS_PRIVILEGE",
+        "EDIT_ENTITY_DATA_PRODUCTS",
         "EDIT_DEPRECATION_PRIVILEGE",
         "EDIT_ENTITY_ASSERTIONS",
         "EDIT_ENTITY",
@@ -381,7 +392,8 @@
         "GET_TIMESERIES_ASPECT_PRIVILEGE",
         "GET_ENTITY_PRIVILEGE",
         "GET_TIMELINE_PRIVILEGE",
-        "PRODUCE_PLATFORM_EVENT_PRIVILEGE"
+        "PRODUCE_PLATFORM_EVENT_PRIVILEGE",
+        "MANAGE_DATA_PRODUCTS"
       ],
       "displayName":"Editors - Metadata Policy",
       "description":"Editors have all metadata privileges.",
@@ -465,6 +477,7 @@
         "EDIT_ENTITY_DOC_LINKS",
         "EDIT_ENTITY_STATUS",
         "EDIT_DOMAINS_PRIVILEGE",
+        "EDIT_ENTITY_DATA_PRODUCTS",
         "EDIT_DEPRECATION_PRIVILEGE",
         "EDIT_ENTITY_ASSERTIONS",
         "EDIT_ENTITY",
@@ -488,7 +501,8 @@
         "GET_TIMELINE_PRIVILEGE",
         "GET_ENTITY_PRIVILEGE",
         "GET_TIMESERIES_ASPECT_PRIVILEGE",
-        "GET_COUNTS_PRIVILEGE"
+        "GET_COUNTS_PRIVILEGE",
+        "MANAGE_DATA_PRODUCTS"
       ],
       "displayName":"Asset Owners - Metadata Policy",
       "description":"Asset Owners have all metadata privileges ONLY for assets they own.",

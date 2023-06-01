@@ -142,7 +142,7 @@ public class RestoreStorageStep implements UpgradeStep {
       } catch (Exception e) {
         context.report()
             .addLine(
-                String.format("Failed to bind Urn with value %s into Urn object: %s", aspect.getKey().getUrn(), e));
+                String.format("Failed to bind Urn with value %s into Urn object", aspect.getKey().getUrn()), e);
         continue;
       }
 
@@ -153,7 +153,7 @@ public class RestoreStorageStep implements UpgradeStep {
         entitySpec = _entityRegistry.getEntitySpec(entityName);
       } catch (Exception e) {
         context.report()
-            .addLine(String.format("Failed to find Entity with name %s in Entity Registry: %s", entityName, e));
+            .addLine(String.format("Failed to find Entity with name %s in Entity Registry", entityName), e);
         continue;
       }
       final String aspectName = aspect.getKey().getAspect();
@@ -165,8 +165,8 @@ public class RestoreStorageStep implements UpgradeStep {
             EntityUtils.toAspectRecord(entityName, aspectName, aspect.getMetadata(), _entityRegistry);
       } catch (Exception e) {
         context.report()
-            .addLine(String.format("Failed to create aspect record with name %s associated with entity named %s: %s",
-                aspectName, entityName, e));
+            .addLine(String.format("Failed to create aspect record with name %s associated with entity named %s",
+                aspectName, entityName), e);
         continue;
       }
 
@@ -176,8 +176,8 @@ public class RestoreStorageStep implements UpgradeStep {
         aspectSpec = entitySpec.getAspectSpec(aspectName);
       } catch (Exception e) {
         context.report()
-            .addLine(String.format("Failed to find aspect spec with name %s associated with entity named %s: %s",
-                aspectName, entityName, e));
+            .addLine(String.format("Failed to find aspect spec with name %s associated with entity named %s",
+                aspectName, entityName), e);
         continue;
       }
 

@@ -5,7 +5,7 @@ import { EntityType, GlossaryNode, SearchResult } from '../../../types.generated
 import { FetchedEntity } from '../../lineage/types';
 import { Entity, EntityCapabilityType, IconStyleType, PreviewType } from '../Entity';
 import { EntityProfile } from '../shared/containers/profile/EntityProfile';
-import { SidebarOwnerSection } from '../shared/containers/profile/sidebar/Ownership/SidebarOwnerSection';
+import { SidebarOwnerSection } from '../shared/containers/profile/sidebar/Ownership/sidebar/SidebarOwnerSection';
 import { SidebarAboutSection } from '../shared/containers/profile/sidebar/AboutSection/SidebarAboutSection';
 import { getDataForEntityType } from '../shared/containers/profile/utils';
 import { EntityMenuItems } from '../shared/EntityDropdown/EntityDropdown';

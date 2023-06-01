@@ -54,6 +54,9 @@ query appConfig {
         viewsConfig {
             enabled
         }
+        featureFlags {
+            readOnlyModeEnabled
+        }
         chromeExtensionConfig {
             enabled
             lineageEnabled

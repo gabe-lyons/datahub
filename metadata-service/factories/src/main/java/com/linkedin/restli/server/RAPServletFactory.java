@@ -57,6 +57,13 @@ public class RAPServletFactory {
                 .setTimerScheduler(Executors.newSingleThreadScheduledExecutor())
                 .build();
 
+        // !!!!!!! IMPORTANT !!!!!!!
+        // This effectively sets the max aspect size to 16 MB. Used in deserialization of messages. Without this the limit is
+        // whatever Jackson is defaulting to (5 MB currently).
+        AbstractJacksonDataCodec.JSON_FACTORY.setStreamReadConstraints(StreamReadConstraints.builder()
+            .maxStringLength(maxSerializedStringLength).build());
+        // !!!!!!! IMPORTANT !!!!!!!
+
         RestLiConfig config = new RestLiConfig();
         config.setDocumentationRequestHandler(new DefaultDocumentationRequestHandler());
         config.setResourcePackageNames("com.linkedin.metadata.resources");

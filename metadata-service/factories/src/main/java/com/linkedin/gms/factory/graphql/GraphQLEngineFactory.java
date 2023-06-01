@@ -32,6 +32,8 @@ import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.recommendation.RecommendationsService;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.secret.SecretService;
+import com.linkedin.metadata.service.DataProductService;
+import com.linkedin.metadata.service.OwnershipTypeService;
 import com.linkedin.metadata.service.AssertionService;
 import com.linkedin.metadata.test.TestEngine;
 import com.linkedin.metadata.service.QueryService;
@@ -161,6 +163,10 @@ public class GraphQLEngineFactory {
   private ViewService _viewService;
 
   @Autowired
+  @Qualifier("ownerShipTypeService")
+  private OwnershipTypeService _ownershipTypeService;
+
+  @Autowired
   @Qualifier("settingsService")
   private SettingsService _settingsService;
 
@@ -171,6 +177,10 @@ public class GraphQLEngineFactory {
   @Autowired
   @Qualifier("queryService")
   private QueryService _queryService;
+
+  @Autowired
+  @Qualifier("dataProductService")
+  private DataProductService _dataProductService;
 
   // SaaS only
   @Autowired
@@ -214,10 +224,12 @@ public class GraphQLEngineFactory {
     args.setInviteTokenService(_inviteTokenService);
     args.setPostService(_postService);
     args.setViewService(_viewService);
+    args.setOwnershipTypeService(_ownershipTypeService);
     args.setSettingsService(_settingsService);
     args.setLineageService(_lineageService);
     args.setQueryService(_queryService);
     args.setFeatureFlags(_configProvider.getFeatureFlags());
+    args.setDataProductService(_dataProductService);
     args.setChromeExtensionConfiguration(_configProvider.getChromeExtension());
 
     // Saas Only

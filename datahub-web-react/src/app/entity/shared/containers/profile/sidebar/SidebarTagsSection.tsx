@@ -46,6 +46,7 @@ export const SidebarTagsSection = ({ properties, readOnly }: Props) => {
                     entityType={entityType}
                     refetch={refetch}
                     readOnly={readOnly}
+                    fontSize={12}
                     proposedTags={findTopLevelProposals(entityData?.tagProposals || [])}
                 />
             </span>
@@ -62,6 +63,7 @@ export const SidebarTagsSection = ({ properties, readOnly }: Props) => {
                     entityType={entityType}
                     refetch={refetch}
                     readOnly={readOnly}
+                    fontSize={12}
                     proposedGlossaryTerms={findTopLevelProposals(entityData?.termProposals || [])}
                 />
             </span>
