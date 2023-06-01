@@ -186,4 +186,8 @@ export class DataProductEntity implements Entity<DataProduct> {
             EntityCapabilityType.DOMAINS,
         ]);
     };
+
+    getGraphName = () => {
+        return 'dataProduct';
+    };
 }
