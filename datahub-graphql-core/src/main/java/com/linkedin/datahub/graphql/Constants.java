@@ -26,4 +26,7 @@ public class Constants {
     public static final String VERSION_STAMP_FIELD_NAME = "versionStamp";
     // Assertion extensions not in OSS
     public static final String ASSERTIONS_SCHEMA_FILE = "assertions.graphql";
+
+    public static final String ENTITY_FILTER_NAME = "_entityType";
+
 }
