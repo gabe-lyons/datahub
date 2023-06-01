@@ -26,7 +26,8 @@ public class AssertionType implements com.linkedin.datahub.graphql.types.EntityT
     static final Set<String> ASPECTS_TO_FETCH = ImmutableSet.of(
         Constants.ASSERTION_KEY_ASPECT_NAME,
         Constants.ASSERTION_INFO_ASPECT_NAME,
-        Constants.DATA_PLATFORM_INSTANCE_ASPECT_NAME
+        Constants.DATA_PLATFORM_INSTANCE_ASPECT_NAME,
+        Constants.ASSERTION_ACTIONS_ASPECT_NAME
     );
     private final EntityClient _entityClient;
 

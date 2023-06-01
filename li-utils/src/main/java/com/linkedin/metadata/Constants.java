@@ -33,6 +33,7 @@ public class Constants {
 
   // App sources
   public static final String UI_SOURCE = "ui";
+  public static final String METADATA_TESTS_SOURCE = "metadataTests";
 
   /**
    * Entities
@@ -76,6 +77,8 @@ public class Constants {
   public static final String DATAHUB_VIEW_ENTITY_NAME = "dataHubView";
   public static final String QUERY_ENTITY_NAME = "query";
   public static final String TELEMETRY_ENTITY_NAME = "telemetry";
+  public static final String DATA_PRODUCT_ENTITY_NAME = "dataProduct";
+  public static final String OWNERSHIP_TYPE_ENTITY_NAME = "ownershipType";
 
   /**
    * Aspects
@@ -295,6 +298,14 @@ public class Constants {
   // Query
   public static final String QUERY_PROPERTIES_ASPECT_NAME = "queryProperties";
   public static final String QUERY_SUBJECTS_ASPECT_NAME = "querySubjects";
+
+  // DataProduct
+  public static final String DATA_PRODUCT_PROPERTIES_ASPECT_NAME = "dataProductProperties";
+  public static final String DATA_PRODUCTS_ASPECT_NAME = "dataProducts";
+
+  // Ownership Types
+  public static final String OWNERSHIP_TYPE_KEY_ASPECT_NAME = "ownershipTypeKey";
+  public static final String OWNERSHIP_TYPE_INFO_ASPECT_NAME = "ownershipTypeInfo";
 
   // Settings
   public static final String GLOBAL_SETTINGS_ENTITY_NAME = "globalSettings";

@@ -24,9 +24,11 @@ import java.util.stream.Collectors;
 import  com.linkedin.entity.client.EntityClient;
 import com.datahub.authentication.Authentication;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.linkedin.metadata.entity.AspectUtils.*;
+import static com.linkedin.metadata.service.util.MetadataTestServiceUtils.*;
 
 
 @Slf4j
@@ -41,12 +43,14 @@ public class GlossaryTermService extends BaseService {
    *
    * @param glossaryTermUrns the urns of the terms to add
    * @param resources references to the resources to change
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    *
    */
   public void batchAddGlossaryTerms(
       @Nonnull List<Urn> glossaryTermUrns,
-      @Nonnull List<ResourceReference> resources) {
-    batchAddGlossaryTerms(glossaryTermUrns, resources, this.systemAuthentication);
+      @Nonnull List<ResourceReference> resources,
+      @Nullable String appSource) {
+    batchAddGlossaryTerms(glossaryTermUrns, resources, this.systemAuthentication, appSource);
   }
 
   /**
@@ -55,15 +59,17 @@ public class GlossaryTermService extends BaseService {
    * @param glossaryTermUrns the urns of the terms to add
    * @param resources references to the resources to change
    * @param authentication authentication to use when making the change
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    *
    */
   public void batchAddGlossaryTerms(
       @Nonnull List<Urn> glossaryTermUrns,
       @Nonnull List<ResourceReference> resources,
-      @Nonnull Authentication authentication) {
+      @Nonnull Authentication authentication,
+      @Nullable String appSource) {
     log.debug("Batch adding GlossaryTerms to entities. glossaryTerms: {}, resources: {}", resources, glossaryTermUrns);
     try {
-      addGlossaryTermsToResources(glossaryTermUrns, resources, authentication);
+      addGlossaryTermsToResources(glossaryTermUrns, resources, authentication, appSource);
     } catch (Exception e) {
       throw new RuntimeException(String.format("Failed to batch add GlossaryTerms %s to resources with urns %s!",
           glossaryTermUrns,
@@ -77,12 +83,14 @@ public class GlossaryTermService extends BaseService {
    *
    * @param glossaryTermUrns the urns of the terms to remove
    * @param resources references to the resources to change
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    *
    */
   public void batchRemoveGlossaryTerms(
       @Nonnull List<Urn> glossaryTermUrns,
-      @Nonnull List<ResourceReference> resources) {
-    batchRemoveGlossaryTerms(glossaryTermUrns, resources, this.systemAuthentication);
+      @Nonnull List<ResourceReference> resources,
+      @Nullable String appSource) {
+    batchRemoveGlossaryTerms(glossaryTermUrns, resources, this.systemAuthentication, appSource);
   }
 
   /**
@@ -91,15 +99,17 @@ public class GlossaryTermService extends BaseService {
    * @param glossaryTermUrns the urns of the terms to remove
    * @param resources references to the resources to change
    * @param authentication authentication to use when making the change
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    *
    */
   public void batchRemoveGlossaryTerms(
       @Nonnull List<Urn> glossaryTermUrns,
       @Nonnull List<ResourceReference> resources,
-      @Nonnull Authentication authentication) {
+      @Nonnull Authentication authentication,
+      @Nullable String appSource) {
     log.debug("Batch adding GlossaryTerms to entities. glossaryTerms: {}, resources: {}", resources, glossaryTermUrns);
     try {
-      removeGlossaryTermsFromResources(glossaryTermUrns, resources, authentication);
+      removeGlossaryTermsFromResources(glossaryTermUrns, resources, authentication, appSource);
     } catch (Exception e) {
       throw new RuntimeException(String.format("Failed to batch add GlossaryTerms %s to resources with urns %s!",
           glossaryTermUrns,
@@ -111,18 +121,26 @@ public class GlossaryTermService extends BaseService {
   private void addGlossaryTermsToResources(
       List<Urn> glossaryTerms,
       List<ResourceReference> resources,
-      Authentication authentication
+      Authentication authentication,
+      @Nullable String appSource
   ) throws Exception {
     List<MetadataChangeProposal> changes = buildAddGlossaryTermsProposals(glossaryTerms, resources, authentication);
+    if (appSource != null) {
+      applyAppSource(changes, appSource);
+    }
     ingestChangeProposals(changes, authentication);
   }
 
   private void removeGlossaryTermsFromResources(
       List<Urn> glossaryTerms,
       List<ResourceReference> resources,
-      Authentication authentication
+      Authentication authentication,
+      @Nullable String appSource
   ) throws Exception {
     List<MetadataChangeProposal> changes = buildRemoveGlossaryTermsProposals(glossaryTerms, resources, authentication);
+    if (appSource != null) {
+      applyAppSource(changes, appSource);
+    }
     ingestChangeProposals(changes, authentication);
   }
 

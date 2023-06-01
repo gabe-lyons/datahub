@@ -2023,7 +2023,7 @@ export const mocks = [
                             aggregations: [{ value: 'PROD', count: 3, entity: null }],
                         },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -2101,7 +2101,7 @@ export const mocks = [
                             ],
                         },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -2168,7 +2168,7 @@ export const mocks = [
                             ],
                         },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -2271,7 +2271,7 @@ export const mocks = [
                             ],
                         },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -2437,7 +2437,7 @@ export const mocks = [
                             ],
                         },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -2511,7 +2511,7 @@ export const mocks = [
                             ],
                         },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -2756,7 +2756,7 @@ export const mocks = [
             query: GetSearchResultsForMultipleDocument,
             variables: {
                 input: {
-                    types: ['DATASET'],
+                    types: [],
                     query: 'test',
                     start: 0,
                     count: 10,
@@ -2764,6 +2764,12 @@ export const mocks = [
                     orFilters: [
                         {
                             and: [
+                                {
+                                    field: '_entityType',
+                                    values: ['DATASET'],
+                                    negated: false,
+                                    condition: FilterOperator.Equal,
+                                },
                                 {
                                     field: 'platform',
                                     values: ['kafka'],
@@ -2822,7 +2828,7 @@ export const mocks = [
                         //     ],
                         // },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -2864,7 +2870,7 @@ export const mocks = [
             query: GetSearchResultsForMultipleDocument,
             variables: {
                 input: {
-                    types: ['DATASET'],
+                    types: [],
                     query: 'test',
                     start: 0,
                     count: 10,
@@ -2872,6 +2878,12 @@ export const mocks = [
                     orFilters: [
                         {
                             and: [
+                                {
+                                    field: '_entityType',
+                                    values: ['DATASET'],
+                                    negated: false,
+                                    condition: FilterOperator.Equal,
+                                },
                                 {
                                     field: 'platform',
                                     values: ['kafka'],
@@ -2912,12 +2924,23 @@ export const mocks = [
             query: GetSearchResultsForMultipleDocument,
             variables: {
                 input: {
-                    types: ['DATA_JOB'],
+                    types: [],
                     query: 'Sample',
                     start: 0,
                     count: 10,
                     filters: [],
-                    orFilters: [],
+                    orFilters: [
+                        {
+                            and: [
+                                {
+                                    field: '_entityType',
+                                    values: ['DATA_JOB'],
+                                    negated: false,
+                                    condition: FilterOperator.Equal,
+                                },
+                            ],
+                        },
+                    ],
                 },
             },
         },
@@ -2974,12 +2997,23 @@ export const mocks = [
             query: GetSearchResultsForMultipleDocument,
             variables: {
                 input: {
-                    types: ['DATASET'],
+                    types: [''],
                     query: 'tags:"abc-sample-tag" OR fieldTags:"abc-sample-tag" OR editedFieldTags:"abc-sample-tag"',
                     start: 0,
                     count: 1,
                     filters: [],
-                    orFilters: [],
+                    orFilters: [
+                        {
+                            and: [
+                                {
+                                    field: '_entityType',
+                                    values: ['DATASET'],
+                                    negated: false,
+                                    condition: FilterOperator.Equal,
+                                },
+                            ],
+                        },
+                    ],
                 },
             },
         },
@@ -3014,7 +3048,7 @@ export const mocks = [
                             ],
                         },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -3040,12 +3074,23 @@ export const mocks = [
             query: GetSearchResultsForMultipleDocument,
             variables: {
                 input: {
-                    types: ['DATASET'],
+                    types: [''],
                     query: '*',
                     start: 0,
                     count: 20,
                     filters: [],
-                    orFilters: [],
+                    orFilters: [
+                        {
+                            and: [
+                                {
+                                    field: '_entityType',
+                                    values: ['DATASET'],
+                                    negated: false,
+                                    condition: FilterOperator.Equal,
+                                },
+                            ],
+                        },
+                    ],
                 },
             },
         },
@@ -3088,7 +3133,7 @@ export const mocks = [
                             ],
                         },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -3114,7 +3159,7 @@ export const mocks = [
             query: GetSearchResultsForMultipleDocument,
             variables: {
                 input: {
-                    types: ['DATASET'],
+                    types: [],
                     query: 'test',
                     start: 0,
                     count: 10,
@@ -3122,6 +3167,12 @@ export const mocks = [
                     orFilters: [
                         {
                             and: [
+                                {
+                                    field: '_entityType',
+                                    values: ['DATASET'],
+                                    negated: false,
+                                    condition: FilterOperator.Equal,
+                                },
                                 {
                                     field: 'platform',
                                     values: ['kafka', 'hdfs'],
@@ -3165,7 +3216,7 @@ export const mocks = [
                             ],
                         },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -3191,7 +3242,7 @@ export const mocks = [
             query: GetSearchResultsForMultipleDocument,
             variables: {
                 input: {
-                    types: ['DATASET'],
+                    types: [],
                     query: 'test',
                     start: 0,
                     count: 10,
@@ -3199,6 +3250,12 @@ export const mocks = [
                     orFilters: [
                         {
                             and: [
+                                {
+                                    field: '_entityType',
+                                    values: ['DATASET'],
+                                    negated: false,
+                                    condition: FilterOperator.Equal,
+                                },
                                 {
                                     field: 'platform',
                                     values: ['kafka', 'hdfs'],
@@ -3242,7 +3299,7 @@ export const mocks = [
                             ],
                         },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -3314,6 +3371,7 @@ export const mocks = [
                         generatePersonalAccessTokens: true,
                         manageGlobalSettings: true,
                         manageGlobalViews: true,
+                        manageOwnershipTypes: true,
                     },
                 },
             },
@@ -3500,7 +3558,7 @@ export const mocks = [
                             ],
                         },
                         {
-                            field: 'entity',
+                            field: '_entityType',
                             displayName: 'Type',
                             aggregations: [
                                 { count: 37, entity: null, value: 'DATASET', __typename: 'AggregationMetadata' },
@@ -3541,4 +3599,5 @@ export const platformPrivileges: PlatformPrivileges = {
     manageGlobalSettings: true,
     viewMetadataProposals: true,
     manageGlobalViews: true,
+    manageOwnershipTypes: true,
 };

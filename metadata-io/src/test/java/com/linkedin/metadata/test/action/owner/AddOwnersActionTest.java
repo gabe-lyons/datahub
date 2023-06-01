@@ -18,6 +18,9 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static com.linkedin.metadata.Constants.*;
+
+
 public class AddOwnersActionTest {
 
   private static final List<Urn> TEST_OWNERS = ImmutableList.of(
@@ -66,13 +69,15 @@ public class AddOwnersActionTest {
     Mockito.verify(service, Mockito.atLeastOnce()).batchAddOwners(
         Mockito.eq(TEST_OWNERS),
         Mockito.eq(DASHBOARD_REFERENCES),
-        Mockito.eq(OwnershipType.TECHNICAL_OWNER)
+        Mockito.eq(OwnershipType.TECHNICAL_OWNER),
+        Mockito.eq(METADATA_TESTS_SOURCE)
     );
 
     Mockito.verify(service, Mockito.atLeastOnce()).batchAddOwners(
         Mockito.eq(TEST_OWNERS),
         Mockito.eq(DATASET_REFERENCES),
-        Mockito.eq(OwnershipType.TECHNICAL_OWNER)
+        Mockito.eq(OwnershipType.TECHNICAL_OWNER),
+        Mockito.eq(METADATA_TESTS_SOURCE)
     );
 
     Mockito.verifyNoMoreInteractions(service);

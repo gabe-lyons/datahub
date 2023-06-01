@@ -68,6 +68,7 @@ public enum DataHubUsageEventType {
   DESELECT_QUICK_FILTER_EVENT("DeselectQuickFilterEvent"),
   EMBED_PROFILE_VIEW_EVENT("EmbedProfileViewEvent"),
   EMBED_PROFILE_VIEW_IN_DATAHUB_EVENT("EmbedProfileViewInDataHubEvent"),
+  EMBED_LOOKUP_NOT_FOUND_EVENT("EmbedLookupNotFoundEvent"),
   // SaaS only events
   CREATE_TEST_EVENT("CreateTestEvent"),
   UPDATE_TEST_EVENT("UpdateTestEvent"),

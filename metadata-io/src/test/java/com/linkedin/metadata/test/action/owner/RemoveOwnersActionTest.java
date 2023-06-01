@@ -18,6 +18,9 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static com.linkedin.metadata.Constants.*;
+
+
 public class RemoveOwnersActionTest {
 
   private static final List<Urn> TEST_OWNERS = ImmutableList.of(
@@ -65,12 +68,14 @@ public class RemoveOwnersActionTest {
 
     Mockito.verify(service, Mockito.atLeastOnce()).batchRemoveOwners(
         Mockito.eq(TEST_OWNERS),
-        Mockito.eq(DASHBOARD_REFERENCES)
+        Mockito.eq(DASHBOARD_REFERENCES),
+        Mockito.eq(METADATA_TESTS_SOURCE)
     );
 
     Mockito.verify(service, Mockito.atLeastOnce()).batchRemoveOwners(
         Mockito.eq(TEST_OWNERS),
-        Mockito.eq(DATASET_REFERENCES)
+        Mockito.eq(DATASET_REFERENCES),
+        Mockito.eq(METADATA_TESTS_SOURCE)
     );
 
     Mockito.verifyNoMoreInteractions(service);

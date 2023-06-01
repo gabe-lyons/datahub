@@ -11,6 +11,7 @@ import com.linkedin.datahub.graphql.GmsGraphQLEngine;
 import com.linkedin.datahub.graphql.GmsGraphQLEngineArgs;
 import com.linkedin.datahub.graphql.GraphQLEngine;
 import com.linkedin.datahub.graphql.analytics.service.AnalyticsService;
+import com.linkedin.gms.factory.assertions.AssertionServiceFactory;
 import com.linkedin.metadata.client.JavaEntityClient;
 import com.linkedin.gms.factory.auth.DataHubTokenServiceFactory;
 import com.linkedin.gms.factory.common.GitVersionFactory;
@@ -31,6 +32,9 @@ import com.linkedin.metadata.models.registry.EntityRegistry;
 import com.linkedin.metadata.recommendation.RecommendationsService;
 import com.linkedin.metadata.search.EntitySearchService;
 import com.linkedin.metadata.secret.SecretService;
+import com.linkedin.metadata.service.DataProductService;
+import com.linkedin.metadata.service.OwnershipTypeService;
+import com.linkedin.metadata.service.AssertionService;
 import com.linkedin.metadata.test.TestEngine;
 import com.linkedin.metadata.service.QueryService;
 import com.linkedin.metadata.service.SettingsService;
@@ -55,7 +59,7 @@ import org.springframework.context.annotation.Import;
 @Import({RestHighLevelClientFactory.class, IndexConventionFactory.class, RestliEntityClientFactory.class,
     RecommendationServiceFactory.class, EntityRegistryFactory.class, DataHubTokenServiceFactory.class,
     GitVersionFactory.class, SiblingGraphServiceFactory.class, TestEngineFactory.class,
-    EntitySearchServiceFactory.class})
+    EntitySearchServiceFactory.class, AssertionServiceFactory.class})
 public class GraphQLEngineFactory {
   @Autowired
   @Qualifier("elasticSearchRestHighLevelClient")
@@ -159,6 +163,10 @@ public class GraphQLEngineFactory {
   private ViewService _viewService;
 
   @Autowired
+  @Qualifier("ownerShipTypeService")
+  private OwnershipTypeService _ownershipTypeService;
+
+  @Autowired
   @Qualifier("settingsService")
   private SettingsService _settingsService;
 
@@ -169,6 +177,15 @@ public class GraphQLEngineFactory {
   @Autowired
   @Qualifier("queryService")
   private QueryService _queryService;
+
+  @Autowired
+  @Qualifier("dataProductService")
+  private DataProductService _dataProductService;
+
+  // SaaS only
+  @Autowired
+  @Qualifier("assertionService")
+  private AssertionService _assertionsService;
 
   @Value("${platformAnalytics.enabled}") // TODO: Migrate to DATAHUB_ANALYTICS_ENABLED
   private Boolean isAnalyticsEnabled;
@@ -207,16 +224,19 @@ public class GraphQLEngineFactory {
     args.setInviteTokenService(_inviteTokenService);
     args.setPostService(_postService);
     args.setViewService(_viewService);
+    args.setOwnershipTypeService(_ownershipTypeService);
     args.setSettingsService(_settingsService);
     args.setLineageService(_lineageService);
     args.setQueryService(_queryService);
     args.setFeatureFlags(_configProvider.getFeatureFlags());
+    args.setDataProductService(_dataProductService);
     args.setChromeExtensionConfiguration(_configProvider.getChromeExtension());
 
     // Saas Only
     args.setEntitySearchService(_entitySearchService);
     args.setTestEngine(_testEngine);
     args.setProposalService(_proposalService);
+    args.setAssertionService(_assertionsService);
 
     return new GmsGraphQLEngine(
         args

@@ -1,0 +1,36 @@
+namespace com.linkedin.datacontract
+
+import com.linkedin.common.Urn
+
+/**
+ * Information about a data contract
+ */
+@Aspect = {
+  "name": "dataContractProperties"
+}
+record DataContractProperties {
+  /**
+   * The entity that this contract is associated with. Currently, we only support Dataset contracts, but
+   * in the future we may also support Data Product level contracts.
+   */
+  @Relationship = {
+    "name": "ContractFor",
+    "entityTypes": [ "dataset" ]
+  }
+  entity: Urn
+
+  /**
+   * An optional set of schema contracts. If this is a dataset contract, there will only be one.
+   */
+  schema: optional array[SchemaContract]
+
+  /**
+   * An optional set of SLA contracts. If this is a dataset contract, there will only be one.
+   */
+  sla: optional array[SlaContract]
+
+  /**
+   * An optional set of Data Quality contracts, e.g. table and column level contract constraints.
+   */
+  dataQuality: optional array[DataQualityContract]
+}

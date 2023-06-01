@@ -64,6 +64,8 @@ services:
     - ELASTIC_CLIENT_HOST=elasticsearch
     - ELASTIC_CLIENT_PORT=9200
     - ADMIN_PASSWORD=mypass
+    - DATAHUB_INTEGRATIONS_HOST=datahub-integrations-service
+    - DATAHUB_INTEGRATIONS_PORT=9003
     hostname: datahub-frontend-react
     image: ${DATAHUB_FRONTEND_IMAGE:-795586375822.dkr.ecr.us-west-2.amazonaws.com/datahub-frontend-react}:${DATAHUB_VERSION:-head}
     ports:
@@ -105,6 +107,7 @@ services:
     - PE_CONSUMER_ENABLED=true
     - UI_INGESTION_ENABLED=true
     - METADATA_SERVICE_AUTH_ENABLED=false
+    - DATAHUB_INTEGRATIONS_HOST=datahub-integrations-service
     healthcheck:
       interval: 1s
       retries: 20

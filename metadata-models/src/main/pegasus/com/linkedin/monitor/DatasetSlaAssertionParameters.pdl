@@ -1,0 +1,38 @@
+namespace com.linkedin.monitor
+
+import com.linkedin.schema.SchemaFieldSpec
+
+/**
+ * Information about the parameters required to evaluate an assertion
+ */
+record DatasetSlaAssertionParameters {
+  /**
+  * The source of the change operation.
+  */
+  sourceType: enum DatasetSlaSourceType {
+    /**
+    * Determine that a change has occurred by inspecting a particular field, e.g. a timestamp column.
+    */
+    FIELD_VALUE
+
+    /**
+    * Determine that a change has occurred by inspecting an information schema table, or other system metadata table.
+    */
+    INFORMATION_SCHEMA
+
+    /**
+    * Determine that a change has occurred by inspecting an audit log API
+    */
+    AUDIT_LOG
+  }
+
+  /**
+  * Information about the field to use. Present when sourceType is FIELD_VALUE
+  */
+  field: optional SchemaFieldSpec
+
+  /**
+  * Information about the audit log operation to use. Present when sourceType is AUDIT_LOG
+  */
+  auditLog: optional AuditLogSpec
+}

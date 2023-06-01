@@ -1,7 +1,7 @@
 package com.linkedin.metadata.service;
 
 import com.google.common.collect.ImmutableList;
-import com.linkedin.assertion.AssertionSource;
+import com.linkedin.assertion.AssertionSourceType;
 import com.linkedin.common.AssertionSummaryDetails;
 import com.linkedin.common.AssertionSummaryDetailsArray;
 import com.linkedin.common.AssertionsSummary;
@@ -199,7 +199,7 @@ public class AssertionsSummaryUtilsTest {
     details.setUrn(assertionUrn);
     details.setType(assertionType);
     details.setLastResultAt(lastResultAt, SetMode.IGNORE_NULL);
-    details.setSource(AssertionSource.EXTERNAL.toString());
+    details.setSource(AssertionSourceType.EXTERNAL.toString());
     return details;
   }
 }

@@ -2,7 +2,6 @@ namespace com.linkedin.assertion
 
 import com.linkedin.common.CustomProperties
 import com.linkedin.common.ExternalReference
-import com.linkedin.common.OriginType
 
 /**
  * Information about an assertion
@@ -22,14 +21,17 @@ record AssertionInfo includes CustomProperties, ExternalReference {
       DATASET
 
       /**
-       * A Dataset SLA Assertion.
+       * An SLA assertion, or an assertion which indicates when a particular operation should occur
+       * to an asset.
        */
-      DATASET_SLA
+       SLA
 
       /**
-       * A Data Job SLA Assertion.
+       * A schema or structural assertion.
+       *
+       * Would have named this SCHEMA but the codegen for PDL does not allow this (reserved word).
        */
-      DATA_JOB_SLA
+      DATA_SCHEMA
     }
 
     /**
@@ -38,35 +40,20 @@ record AssertionInfo includes CustomProperties, ExternalReference {
     datasetAssertion: optional DatasetAssertionInfo
 
     /**
-    * An SLA Assertion definition. This field is populated when the type is DATASET_SLA or DATA_JOB_SLA.
+    * An SLA Assertion definition. This field is populated when the type is SLA.
     */
     slaAssertion: optional SlaAssertionInfo
 
     /**
-    * The source or origin of the Assertion definition.
-    *
-    * If the Assertion is EXTERNAL, it is expected to have a corresponding dataPlatformInstance aspect detailing
-    * the platform where it was ingested from.
+    * An schema Assertion definition. This field is populated when the type is DATASET_SCHEMA
     */
-    @Searchable = { }
-    source: optional enum AssertionSource {
-      /**
-       * The assertion was defined natively on DataHub by a user.
-       */
-      NATIVE
-      /**
-       * The assertion was defined and managed externally of DataHub.
-       */
-      EXTERNAL
-      /**
-       * The assertion was inferred, e.g. from offline AI / ML models.
-       */
-      INFERRED
-    }
+    schemaAssertion: optional SchemaAssertionInfo
 
     /**
-    * The evaluation schedule for the Assertion. If the type is INFERRED or NATIVE, it is expected
-    * that this field is provided.
+    * The source or origin of the Assertion definition.
+    *
+    * If the source type of the Assertion is EXTERNAL, it is expected to have a corresponding dataPlatformInstance aspect detailing
+    * the platform where it was ingested from.
     */
-    schedule: optional CronSchedule
+    source: optional AssertionSource
 }

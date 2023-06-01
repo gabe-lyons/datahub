@@ -1,0 +1,11 @@
+namespace com.linkedin.monitor
+
+/**
+ * Information about an Assertion monitor.
+ */
+record AssertionMonitor {
+    /**
+    * Specs for each assertion to evaluate
+    */
+    assertions: array[AssertionEvaluationSpec]
+}

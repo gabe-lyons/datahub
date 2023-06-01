@@ -95,6 +95,7 @@ public class RestEmitter implements Emitter {
     objectMapper.getFactory().setStreamReadConstraints(StreamReadConstraints.builder()
         .maxStringLength(maxSize).build());
     dataTemplateCodec = new JacksonDataTemplateCodec(objectMapper.getFactory());
+
     this.config = config;
     // Override httpClient settings with RestEmitter configs if present
     if (config.getTimeoutSec() != null) {

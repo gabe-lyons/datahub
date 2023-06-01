@@ -1,5 +1,6 @@
 package com.linkedin.datahub.graphql.resolvers.tag;
 
+import com.linkedin.common.urn.UrnUtils;
 import com.linkedin.data.template.SetMode;
 import com.linkedin.datahub.graphql.QueryContext;
 import com.linkedin.datahub.graphql.authorization.AuthorizationUtils;
@@ -22,6 +23,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.linkedin.datahub.graphql.resolvers.ResolverUtils.*;
+import static com.linkedin.datahub.graphql.resolvers.mutate.util.OwnerUtils.*;
+
 import static com.linkedin.datahub.graphql.resolvers.mutate.MutationUtils.*;
 import static com.linkedin.metadata.Constants.*;
 
@@ -60,11 +63,17 @@ public class CreateTagResolver implements DataFetcher<CompletableFuture<String>>
           throw new IllegalArgumentException("This Tag already exists!");
         }
 
-        // Create the MCP
         final MetadataChangeProposal proposal = buildMetadataChangeProposalWithKey(key, TAG_ENTITY_NAME,
             TAG_PROPERTIES_ASPECT_NAME, mapTagProperties(input));
         String tagUrn = _entityClient.ingestProposal(proposal, context.getAuthentication(), false);
-        OwnerUtils.addCreatorAsOwner(context, tagUrn, OwnerEntityType.CORP_USER, OwnershipType.TECHNICAL_OWNER, _entityService);
+
+        OwnershipType ownershipType = OwnershipType.TECHNICAL_OWNER;
+        if (!_entityService.exists(UrnUtils.getUrn(mapOwnershipTypeToEntity(ownershipType)))) {
+          log.warn("Technical owner does not exist, defaulting to None ownership.");
+          ownershipType = OwnershipType.NONE;
+        }
+
+        OwnerUtils.addCreatorAsOwner(context, tagUrn, OwnerEntityType.CORP_USER, ownershipType, _entityService);
         return tagUrn;
       } catch (Exception e) {
         log.error("Failed to create Tag with id: {}, name: {}: {}", input.getId(), input.getName(), e.getMessage());

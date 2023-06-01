@@ -17,6 +17,9 @@ import org.testcontainers.shaded.com.google.common.collect.ImmutableMap;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static com.linkedin.metadata.Constants.*;
+
+
 public class SetDomainActionTest {
 
   private static final Urn TEST_DOMAIN_URN = UrnUtils.getUrn("urn:li:domain:test");
@@ -61,11 +64,13 @@ public class SetDomainActionTest {
 
     Mockito.verify(service, Mockito.atLeastOnce()).batchSetDomain(
         Mockito.eq(TEST_DOMAIN_URN),
-        Mockito.eq(DASHBOARD_REFERENCES)
+        Mockito.eq(DASHBOARD_REFERENCES),
+        Mockito.eq(METADATA_TESTS_SOURCE)
     );
     Mockito.verify(service, Mockito.atLeastOnce()).batchSetDomain(
         Mockito.eq(TEST_DOMAIN_URN),
-        Mockito.eq(DATASET_REFERENCES)
+        Mockito.eq(DATASET_REFERENCES),
+        Mockito.eq(METADATA_TESTS_SOURCE)
     );
 
     Mockito.verifyNoMoreInteractions(service);

@@ -1,0 +1,19 @@
+namespace com.linkedin.assertion
+
+import com.linkedin.common.Urn
+import com.linkedin.schema.SchemaField
+
+/**
+* Attributes that are applicable to schema assertions
+**/
+record SchemaAssertionInfo {
+    /**
+    * The entity targeted by the assertion
+    */
+    entity: Urn
+
+    /**
+    * A definition of the expected structure for the asset
+    */
+    fields: array[SchemaField]
+}

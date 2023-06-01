@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import static com.linkedin.metadata.Constants.*;
 import static com.linkedin.metadata.test.action.ActionUtils.*;
 
 
@@ -55,7 +56,7 @@ public class AddGlossaryTermsAction implements Action {
     if (!urns.isEmpty()) {
       this.glossaryTermService.batchAddGlossaryTerms(tagUrns, urns.stream()
           .map(urn -> new ResourceReference(urn, null, null))
-          .collect(Collectors.toList()));
+          .collect(Collectors.toList()), METADATA_TESTS_SOURCE);
     }
   }
 }

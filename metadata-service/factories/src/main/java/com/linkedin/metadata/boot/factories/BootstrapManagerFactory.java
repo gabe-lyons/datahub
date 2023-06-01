@@ -15,6 +15,7 @@ import com.linkedin.metadata.boot.steps.IndexDataPlatformsStep;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformInstancesStep;
 import com.linkedin.metadata.boot.steps.IngestDataPlatformsStep;
 import com.linkedin.metadata.boot.steps.IngestDefaultGlobalSettingsStep;
+import com.linkedin.metadata.boot.steps.IngestOwnershipTypesStep;
 import com.linkedin.metadata.boot.steps.IngestDefaultTagsStep;
 import com.linkedin.metadata.boot.steps.IngestMetadataTestsStep;
 import com.linkedin.metadata.boot.steps.IngestPoliciesStep;
@@ -127,9 +128,10 @@ public class BootstrapManagerFactory {
     final RemoveClientIdAspectStep removeClientIdAspectStep = new RemoveClientIdAspectStep(_entityService);
     final RestoreColumnLineageIndices restoreColumnLineageIndices = new RestoreColumnLineageIndices(_entityService, _entityRegistry);
     final IngestDefaultGlobalSettingsStep ingestSettingsStep = new IngestDefaultGlobalSettingsStep(_entityService);
+    final WaitForSystemUpdateStep waitForSystemUpdateStep = new WaitForSystemUpdateStep(_dataHubUpgradeKafkaListener,
+        _configurationProvider);
+    final IngestOwnershipTypesStep ingestOwnershipTypesStep = new IngestOwnershipTypesStep(_entityService);
     final IngestDefaultTagsStep ingestDefaultTagsStep = new IngestDefaultTagsStep(_entityService);
-    final WaitForSystemUpdateStep waitForSystemUpdateStep = _configurationProvider.getSystemUpdate().isWaitForSystemUpdate()
-        ? new WaitForSystemUpdateStep(_dataHubUpgradeKafkaListener, _configurationProvider) : null;
 
     final MigrateAssertionsSummaryStep assertionsSummaryStep =
         new MigrateAssertionsSummaryStep(_entityService, _entitySearchService, _assertionService, _timeseriesAspectService,
@@ -145,6 +147,7 @@ public class BootstrapManagerFactory {
             ingestDataPlatformsStep,
             ingestDataPlatformInstancesStep,
             _ingestRetentionPoliciesStep,
+            ingestOwnershipTypesStep,
             ingestSettingsStep,
             restoreGlossaryIndicesStep,
             removeClientIdAspectStep,

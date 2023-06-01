@@ -13,6 +13,18 @@
         </filter>
     </appender>
 
+    <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        <encoder>
+            <pattern>%date{ISO8601} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+        <filter class="com.linkedin.metadata.utils.log.LogMessageFilter">
+            <excluded>scanned from multiple locations</excluded>
+        </filter>
+    </appender>
+
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_DIR}/upgrade.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
@@ -77,5 +89,6 @@
     <root level="INFO">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE"/>
+        <appender-ref ref="Sentry"/>
     </root>
 </configuration>

@@ -18,9 +18,11 @@ import java.util.stream.Collectors;
 import  com.linkedin.entity.client.EntityClient;
 import com.datahub.authentication.Authentication;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import lombok.extern.slf4j.Slf4j;
 
 import static com.linkedin.metadata.entity.AspectUtils.*;
+import static com.linkedin.metadata.service.util.MetadataTestServiceUtils.*;
 
 
 @Slf4j
@@ -36,9 +38,11 @@ public class OwnerService extends BaseService {
    * @param ownerUrns the urns of the owners to add
    * @param resources references to the resources to change
    * @param ownershipType the ownership type to add
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    */
-  public void batchAddOwners(@Nonnull List<Urn> ownerUrns, @Nonnull List<ResourceReference> resources, @Nonnull OwnershipType ownershipType) {
-    batchAddOwners(ownerUrns, resources, ownershipType, this.systemAuthentication);
+  public void batchAddOwners(@Nonnull List<Urn> ownerUrns, @Nonnull List<ResourceReference> resources, @Nonnull OwnershipType ownershipType,
+      @Nullable String appSource) {
+    batchAddOwners(ownerUrns, resources, ownershipType, this.systemAuthentication, appSource);
   }
 
   /**
@@ -48,15 +52,17 @@ public class OwnerService extends BaseService {
    * @param resources references to the resources to change
    * @param ownershipType the ownership type to add
    * @param authentication authentication to use when making the change
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    */
   public void batchAddOwners(
       @Nonnull List<Urn> ownerUrns,
       @Nonnull List<ResourceReference> resources,
       @Nonnull OwnershipType ownershipType,
-      @Nonnull Authentication authentication) {
+      @Nonnull Authentication authentication,
+      @Nullable String appSource) {
     log.debug("Batch adding Owners to entities. owners: {}, resources: {}", resources, ownerUrns);
     try {
-      addOwnersToResources(ownerUrns, resources, ownershipType, authentication);
+      addOwnersToResources(ownerUrns, resources, ownershipType, authentication, appSource);
     } catch (Exception e) {
       throw new RuntimeException(String.format("Failed to batch add Owners %s to resources with urns %s!",
           ownerUrns,
@@ -70,9 +76,10 @@ public class OwnerService extends BaseService {
    *
    * @param ownerUrns the urns of the owners to remove
    * @param resources references to the resources to change
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    */
-  public void batchRemoveOwners(@Nonnull List<Urn> ownerUrns, @Nonnull List<ResourceReference> resources) {
-    batchRemoveOwners(ownerUrns, resources, this.systemAuthentication);
+  public void batchRemoveOwners(@Nonnull List<Urn> ownerUrns, @Nonnull List<ResourceReference> resources, @Nullable String appSource) {
+    batchRemoveOwners(ownerUrns, resources, this.systemAuthentication, appSource);
   }
 
   /**
@@ -81,14 +88,16 @@ public class OwnerService extends BaseService {
    * @param ownerUrns the urns of the owners to remove
    * @param resources references to the resources to change
    * @param authentication authentication to use when making the change
+   * @param appSource optional indication of the origin for this request, used for additional processing logic when matching particular sources
    */
   public void batchRemoveOwners(
       @Nonnull List<Urn> ownerUrns,
       @Nonnull List<ResourceReference> resources,
-      @Nonnull Authentication authentication) {
+      @Nonnull Authentication authentication,
+      @Nullable String appSource) {
     log.debug("Batch adding Owners to entities. owners: {}, resources: {}", resources, ownerUrns);
     try {
-      removeOwnersFromResources(ownerUrns, resources, authentication);
+      removeOwnersFromResources(ownerUrns, resources, authentication, appSource);
     } catch (Exception e) {
       throw new RuntimeException(String.format("Failed to batch add Owners %s to resources with urns %s!",
           ownerUrns,
@@ -101,18 +110,26 @@ public class OwnerService extends BaseService {
       List<com.linkedin.common.urn.Urn> ownerUrns,
       List<ResourceReference> resources,
       OwnershipType ownershipType,
-      Authentication authentication
+      Authentication authentication,
+      @Nullable String appSource
   ) throws Exception {
     final List<MetadataChangeProposal> changes = buildAddOwnersProposals(ownerUrns, resources, ownershipType, authentication);
+    if (appSource != null) {
+      applyAppSource(changes, appSource);
+    }
     ingestChangeProposals(changes, authentication);
   }
 
   private void removeOwnersFromResources(
       List<Urn> owners,
       List<ResourceReference> resources,
-      Authentication authentication
+      Authentication authentication,
+      @Nullable String appSource
   ) throws Exception {
     final List<MetadataChangeProposal> changes = buildRemoveOwnersProposals(owners, resources, authentication);
+    if (appSource != null) {
+      applyAppSource(changes, appSource);
+    }
     ingestChangeProposals(changes, authentication);
   }
 

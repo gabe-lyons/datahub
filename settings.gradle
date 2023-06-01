@@ -67,3 +67,5 @@ include 'metadata-auth:auth-api'
 include 'metadata-service:schema-registry-api'
 include 'metadata-service:schema-registry-servlet'
 include 'metadata-integration:java:examples'
+include 'datahub-integrations-service'
+
