@@ -135,22 +135,23 @@ public class PropagateTermsStep implements UpgradeStep {
 
       context.report().addLine("Fetching all other entities");
 
-      int batch = 1;
+      int batch = 0;
       int numAspectsProduced = 0;
-      context.report().addLine(String.format("Fetching batch %d", batch));
+
+      String nextScrollId = null;
+      do {
+        batch++;
+        context.report().addLine(String.format("Fetching batch %d", batch));
       ScrollResult scrollResult =
           _entitySearchService.scroll(Collections.singletonList(Constants.DATASET_ENTITY_NAME),
-              destinationFilter, null, 1000, null, PropagateTerms.ELASTIC_TIMEOUT);
-      while (scrollResult.getEntities().size() > 0) {
+              destinationFilter, null, 1000, nextScrollId, PropagateTerms.ELASTIC_TIMEOUT);
+        nextScrollId = scrollResult.getScrollId();
         context.report().addLine(String.format("Processing batch %d", batch));
         int numAspectsProducedInBatch = processBatch(scrollResult, sourceEntityDetails, runId, threshold, allowedTerms);
         numAspectsProduced += numAspectsProducedInBatch;
-        batch++;
-        context.report().addLine(String.format("Fetching batch %d", batch));
-        scrollResult = _entitySearchService.scroll(Collections.singletonList(Constants.DATASET_ENTITY_NAME),
-            destinationFilter, null, 1000, scrollResult.getScrollId(), PropagateTerms.ELASTIC_TIMEOUT);
-      }
-      context.report().addLine(String.format("Batch %d is empty. Finishing job.", batch));
+      } while (nextScrollId != null);
+
+      context.report().addLine(String.format("Batch %d is the last. Finishing job.", batch));
 
       context.report()
           .addLine(

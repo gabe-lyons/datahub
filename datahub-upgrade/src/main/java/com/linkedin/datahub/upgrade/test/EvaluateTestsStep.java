@@ -72,21 +72,19 @@ public class EvaluateTestsStep implements UpgradeStep {
       List<Future<Map<Urn, TestResults>>> futures = new ArrayList<>();
       for (String entityType : entityTypesToEvaluate) {
         int batch = 1;
-        context.report().addLine(String.format("Fetching batch %d of %s entities", batch, entityType));
-        ScrollResult scrollResult = _entitySearchService.scroll(
-            Collections.singletonList(entityType), null, null, batchSize, null, ELASTIC_TIMEOUT);
-        while (scrollResult.getEntities().size() > 0) {
+        String nextScrollId = null;
+        do {
+          context.report().addLine(String.format("Fetching batch %d of %s entities", batch, entityType));
+          ScrollResult scrollResult = _entitySearchService.scroll(
+            Collections.singletonList(entityType), null, null, batchSize, nextScrollId, ELASTIC_TIMEOUT);
+          nextScrollId = scrollResult.getScrollId();
           context.report().addLine(String.format("Processing batch %d of %s entities", batch, entityType));
           List<Urn> entitiesInBatch =
               scrollResult.getEntities().stream().map(SearchEntity::getEntity).collect(Collectors.toList());
           final int batchNumber = batch;
           futures.add(_executorService.submit(() -> processBatch(entitiesInBatch, batchNumber, entityType, context)));
           batch++;
-          context.report().addLine(String.format("Fetching batch %d of %s entities", batch, entityType));
-          scrollResult =
-              _entitySearchService.scroll(Collections.singletonList(entityType), null, null,
-                  batchSize, scrollResult.getScrollId(), ELASTIC_TIMEOUT);
-        }
+        } while (nextScrollId != null);
 
         context.report().addLine(String.format("Finished submitting test evaluation for %s entities to worker pool.", entityType));
       }

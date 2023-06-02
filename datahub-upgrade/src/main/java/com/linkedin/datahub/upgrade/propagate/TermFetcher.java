@@ -30,20 +30,21 @@ class TermFetcher {
   public Set<Urn> fetchAllowedTerms() {
     log.info("Fetching all terms");
     Set<Urn> allowedTerms = new HashSet<>();
-    int batch = 1;
-    ScrollResult scrollResult =
-        _entitySearchService.scroll(Collections.singletonList(Constants.GLOSSARY_TERM_ENTITY_NAME),
-            null, null, 1000, null, PropagateTerms.ELASTIC_TIMEOUT);
-    while (scrollResult.getEntities().size() > 0) {
+    int batch = 0;
+    String nextScrollId = null;
+    do {
+      batch++;
+      ScrollResult scrollResult =
+          _entitySearchService.scroll(Collections.singletonList(Constants.GLOSSARY_TERM_ENTITY_NAME),
+              null, null, 1000, nextScrollId, PropagateTerms.ELASTIC_TIMEOUT);
+      nextScrollId = scrollResult.getScrollId();
       log.info("Processing term batch {}", batch);
       Set<Urn> allowedTermsInBatch = filterAllowedTerms(
           scrollResult.getEntities().stream().map(SearchEntity::getEntity).collect(Collectors.toSet()));
       log.info("Found {} allowed terms", allowedTermsInBatch.size());
       allowedTerms.addAll(allowedTermsInBatch);
-      scrollResult =
-          _entitySearchService.scroll(Collections.singletonList(Constants.GLOSSARY_TERM_ENTITY_NAME),
-              null, null, 1000, scrollResult.getScrollId(), PropagateTerms.ELASTIC_TIMEOUT);
-    }
+    } while (nextScrollId != null);
+
     log.info("Successfully fetched all terms. There are {} allowed terms", allowedTerms.size());
     return allowedTerms;
   }

@@ -57,10 +57,13 @@ public class MigrateIncidentsSummaryStep extends UpgradeStep {
   public void upgrade() throws Exception {
 
     int batch = 1;
-    ScrollResult scrollResult = _entitySearchService.scroll(Collections.singletonList(Constants.INCIDENT_ENTITY_NAME),
-        null, null, BATCH_SIZE, null, "5m");
+    String nextScrollId = null;
+    do {
 
-    while (scrollResult.getEntities().size() > 0) {
+      ScrollResult scrollResult = _entitySearchService.scroll(Collections.singletonList(Constants.INCIDENT_ENTITY_NAME),
+          null, null, BATCH_SIZE, nextScrollId, "5m");
+      nextScrollId = scrollResult.getScrollId();
+
       List<Urn> incidentsInBatch =  scrollResult.getEntities().stream().map(SearchEntity::getEntity).collect(Collectors.toList());
 
       try {
@@ -69,10 +72,8 @@ public class MigrateIncidentsSummaryStep extends UpgradeStep {
         log.error("Error while processing batch {} of incidents", batch, e);
       }
       batch++;
-      scrollResult =
-          _entitySearchService.scroll(Collections.singletonList(Constants.INCIDENT_ENTITY_NAME), null,
-              null, BATCH_SIZE, scrollResult.getScrollId(), "5m");
-    }
+
+    } while (nextScrollId != null);
   }
 
   private void batchMigrateIncidentsSummary(@Nonnull final List<Urn> incidentUrns) {
