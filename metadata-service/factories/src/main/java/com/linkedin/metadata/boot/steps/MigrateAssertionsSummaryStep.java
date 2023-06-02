@@ -70,11 +70,10 @@ public class MigrateAssertionsSummaryStep extends UpgradeStep {
 
     int batch = 1;
 
-    ScrollResult scrollResult = null;
     String nextScrollId = null;
 
     do {
-      scrollResult = _entitySearchService.scroll(Collections.singletonList(Constants.ASSERTION_ENTITY_NAME),
+      ScrollResult scrollResult = _entitySearchService.scroll(Collections.singletonList(Constants.ASSERTION_ENTITY_NAME),
           null, null, BATCH_SIZE, nextScrollId, _configurationProvider.getElasticSearch().getScroll().getTimeout());
       nextScrollId = scrollResult.getScrollId();
 
