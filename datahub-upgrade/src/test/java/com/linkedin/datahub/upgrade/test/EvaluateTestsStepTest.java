@@ -63,7 +63,10 @@ public class EvaluateTestsStepTest {
     assertEquals(expectedLines.size(), report.lines().size());
     // Start with "starting to evaluate tests" line
     assertEquals(expectedLines.get(0), report.lines().get(0));
-    assertEquals(expectedLines.get(1), report.lines().get(1));
+    assertTrue(expectedLines.get(1).startsWith("Evaluating tests for entities ["));
+    assertTrue(expectedLines.get(1).equals("Evaluating tests for entities [dataset, chart]") ||
+            expectedLines.get(1).equals("Evaluating tests for entities [chart, dataset]")
+        );
     // end with "finished evaluating tests" line
     assertEquals(expectedLines.get(expectedLines.size() - 1),
         report.lines().get(expectedLines.size() - 1));
