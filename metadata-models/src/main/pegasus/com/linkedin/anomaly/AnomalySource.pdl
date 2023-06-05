@@ -29,4 +29,10 @@ record AnomalySource {
     "fieldType": "URN"
   }
   sourceUrn: optional Urn
+
+  /**
+  * Additional properties about the source, for example which evaluation
+  * of an assertion generated an Anomaly.
+  */
+  properties: optional AnomalySourceProperties
 }

@@ -25,6 +25,12 @@ record AnomalyStatus {
   }
 
   /**
+  * Additional properties about the status, for example which evaluation
+  * of an assertion generated an Anomaly.
+  */
+  properties: optional AnomalyStatusProperties
+
+  /**
    * The time at which the anomaly state last changed
    */
   @Searchable = {

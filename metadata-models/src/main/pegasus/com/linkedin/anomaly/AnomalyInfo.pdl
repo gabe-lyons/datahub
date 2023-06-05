@@ -55,8 +55,9 @@ record AnomalyInfo {
 
   /**
    * The review of the anomaly, based on human-provided feedback.
+   * If this is not present, then the Anomaly has not yet been reviewed.
    */
-  review: AnomalyReview
+  review: optional AnomalyReview
 
   /**
    * The source of an anomaly, i.e. how it was generated.

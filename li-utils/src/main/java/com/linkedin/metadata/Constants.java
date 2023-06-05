@@ -332,6 +332,12 @@ public class Constants {
   public static final String DATAHUB_CONNECTION_ENTITY_NAME = "dataHubConnection";
   public static final String DATAHUB_CONNECTION_DETAILS_ASPECT_NAME = "dataHubConnectionDetails";
 
+  // Anomaly
+  public static final String ANOMALY_ENTITY_NAME = "anomaly";
+  public static final String ANOMALY_KEY_ASPECT_NAME = "anomalyKey";
+  public static final String ANOMALY_INFO_ASPECT_NAME = "anomalyInfo";
+  public static final String ANOMALIES_SUMMARY_ASPECT_NAME = "anomaliesSummary";
+
   /**
    * Relationships
    */
