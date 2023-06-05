@@ -21,6 +21,7 @@ type Props = {
     rowCount?: number | null;
     columnCount?: number | null;
     sizeInBytes?: number | null;
+    totalSqlQueries?: number | null;
     queryCountLast30Days?: number | null;
     queryCountPercentileLast30Days?: number | null;
     uniqueUserCountLast30Days?: number | null;
@@ -33,6 +34,7 @@ export const DatasetStatsSummary = ({
     rowCount,
     columnCount,
     sizeInBytes,
+    totalSqlQueries,
     queryCountLast30Days,
     queryCountPercentileLast30Days,
     uniqueUserCountLast30Days,
@@ -60,10 +62,11 @@ export const DatasetStatsSummary = ({
                 <FormattedBytesStat bytes={sizeInBytes} />
             </StatText>
         ),
-        !!queryCountLast30Days && (
+        (!!queryCountLast30Days || !!totalSqlQueries) && (
             <StatText color={displayedColor}>
                 <ConsoleSqlOutlined style={{ marginRight: 8, color: displayedColor }} />
-                <b>{formatNumberWithoutAbbreviation(queryCountLast30Days)}</b> queries last month
+                <b>{formatNumberWithoutAbbreviation(queryCountLast30Days || totalSqlQueries)}</b>{' '}
+                {queryCountLast30Days ? <>queries last month</> : <>monthly queries</>}
                 {!!queryCountPercentileLast30Days && (
                     <Typography.Text type="secondary">
                         -{' '}
